@@ -133,7 +133,14 @@ def main():
     if not os.path.exists(src):
         raise SystemExit('源文件不存在: %s' % src)
 
-    lines = io.open(src, encoding='utf-8', newline='').read().split('\n')
+    # 原文里 src/ 下有些文件是 CRLF（Windows 检出的），而新增的批注行没有 \r。
+    # 不剥掉就会生出「代码行 CRLF + 批注行 LF」的混合行尾文件：
+    # 校验不受影响（read_lines 会 rstrip），但编辑器滚动条和 git diff 都难看。
+    # 统一剥成 LF，写回时 newline='\n' 保证不再转义。
+    lines = [
+        ln[:-1] if ln.endswith('\r') else ln
+        for ln in io.open(src, encoding='utf-8', newline='').read().split('\n')
+    ]
     # 末行为空字符串时（文件以 \n 结尾）保留，写回时用 join 还原
 
     ann = load_annotations(rel)

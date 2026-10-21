@@ -37,14 +37,10 @@ ANN = os.path.join(ROOT, 'annotated')
 SKIP_NAMES = {'README.annotated.md', 'package.json.annotated.md'}
 
 # 已知的、有意省略的原文行：文件相对路径 → 说明
-KNOWN_OMIT = {
-    'src/entrypoints/cli.tsx':
-        '末尾 sourceMappingURL 单行 27,448 字符的 base64 sourcemap，批注版改为一句话说明',
-    'src/tools/BashTool/BashTool.tsx':
-        '末尾 sourceMappingURL 单行约 8 万字符的 base64 sourcemap，批注版改为一句话说明',
-    'src/ink/ink.tsx':
-        '末尾 sourceMappingURL 单行约 10 万字符的 base64 sourcemap，批注版改为一句话说明',
-}
+# 已知、且无法逐字对照的例外：路径 → 一句人类可读的解释。
+# 注意 sourceMappingURL 不需要登记在这里 —— 判据 2 会自动识别并跳过，
+# 结果标成 OK*。这个表只留给「真的没办法逐字对照」的情况。
+KNOWN_OMIT = {}
 
 ANN_PREFIXES = ('// 译：', '// 注：', '// ─', '// ═')
 
@@ -402,8 +398,15 @@ def check_one(rel):
         return 'FAIL', rel, '\n        '.join(detail)
 
     # ── 判据 2：原文注释按顺序全部保留 ──
+    # 例外：内联 sourceMappingURL（一行几万到十几万字符的 base64）。
+    # annotate.py 会把这类行换成一句中文说明，抄进去没有意义且会让文件膨胀。
+    # 自动跳过而不是逐个文件登记 —— 否则以后批注任何一个构建产物都要改脚本。
+    omitted = []
     i, missing = 0, []
     for c in src_comment:
+        if c.startswith('//# sourceMappingURL=') and len(c) > 4000:
+            omitted.append(c)
+            continue
         hit = -1
         for j in range(i, len(ann_comment)):
             if ann_comment[j] == c:
@@ -420,6 +423,8 @@ def check_one(rel):
             return 'WARN', rel, msg + '\n        （已知例外：%s）' % KNOWN_OMIT[rel]
         return 'FAIL', rel, msg
 
+    if omitted:
+        return 'OK*', rel, '（省略 %d 行 sourceMappingURL）' % len(omitted)
     return 'OK', rel, ''
 
 
@@ -439,11 +444,11 @@ def main():
     bad = 0
     for rel in targets:
         status, name, info = check_one(rel)
-        if status == 'OK':
+        if status in ('OK', 'OK*'):
             src_code, src_comment, _ = split(read_lines(os.path.join(SRC, rel)))
             ann_code, ann_comment, ann_note = split(read_lines(os.path.join(ANN, rel)), cjk_as_annotation=True)
-            print('  OK    %-44s 代码 %3d 行一致 · 注释 %3d 行全保留 · 中文批注 %3d 行'
-                  % (name, len(src_code), len(src_comment), len(ann_note)))
+            print('  %-5s %-44s 代码 %3d 行一致 · 注释 %3d 行全保留 · 中文批注 %3d 行%s'
+                  % (status, name, len(src_code), len(src_comment), len(ann_note), info))
         elif status == 'WARN':
             print('  WARN  %s\n        %s' % (name, info))
         else:
