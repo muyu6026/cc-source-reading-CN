@@ -1,0 +1,244 @@
+// ═══════════════════════════════════════════════════════════════
+//  SystemAPIErrorMessage：重试倒计时，以及一个被常量折叠掉的判断
+// ═══════════════════════════════════════════════════════════════
+//
+//  屏幕上是这样：
+//
+//      API Error: 529 overloaded
+//      Retrying in 4 seconds… (attempt 2/10)  ctrl+o to expand
+//
+//  三件事值得看：
+//    1. 第 27 行的 `true && retryAttempt < 4` —— 构建期折叠的残留
+//    2. 第 37 行的 useInterval(t2, null) —— 用一个 null 关掉定时器
+//    3. 第 138 行 `ms => ms + 1000` —— 倒计时是「累加」而不是「读时钟」
+//
+//  第三条是这一批里最反直觉的，值得单独说（见文件末尾）。
+import { c as _c } from "react/compiler-runtime";
+import * as React from 'react';
+import { useState } from 'react';
+import { Box, Text } from 'src/ink.js';
+import { formatAPIError } from 'src/services/api/errorUtils.js';
+import type { SystemAPIErrorMessage } from 'src/types/message.js';
+import { useInterval } from 'usehooks-ts';
+import { CtrlOToExpand } from '../CtrlOToExpand.js';
+import { MessageResponse } from '../MessageResponse.js';
+// 【1000 字符上限，超过就截断并显示展开提示】
+//
+//  这个数字和 AssistantTextMessage 里那个 MAX_API_ERROR_CHARS 是同一个值、
+//  同一个含义 —— 但**两处各定义了一份**，没有共享常量。
+//
+//  为什么？因为它们是两个独立的渲染路径（assistant 的文本块 / system 的 api_error），
+//  各自演化。共享常量会把两条无关的路径耦在一起。
+//
+//  读到这种重复，先判断是「同一个概念的两次实现」还是「两个概念的巧合」。
+//  这里是前者，但耦合成本大于收益，所以容忍。
+const MAX_API_ERROR_CHARS = 1000;
+type Props = {
+  message: SystemAPIErrorMessage;
+  verbose: boolean;
+};
+export function SystemAPIErrorMessage(t0) {
+  const $ = _c(33);
+  const {
+    message: t1,
+    verbose
+  } = t0;
+  const {
+    retryAttempt,
+    error,
+    retryInMs,
+    maxRetries
+  } = t1;
+// ⚠️ 【这一行是编译期常量折叠的残留，不是业务逻辑】
+//
+//      const hidden = true && retryAttempt < 4
+//
+//  `true &&` 恒真，等于 `hidden = retryAttempt < 4`。那为什么还留着 `true &&`？
+//
+//  因为它原本是 `"external" === 'external' && retryAttempt < 4` 之类的东西 ——
+//  也就是「只在外部构建里隐藏前几次重试」。
+//  打包时 USER_TYPE 被替换成字面量、比较被折叠成 true，但**没有把 true 消掉**。
+//
+//  同一批里还有几处同款指纹：
+//      AttachmentMessage    "external" === 'ant' && !isDemoEnv && firstId
+//      AssistantToolUse     false && isClassifierCheckingRaw && ...
+//      SystemTextMessage    false && totalDurationMs > 0 ? ...
+//
+//  读法：**看到 `true &&` / `false &&` / `'x' === 'y'`，先理解成「这是构建期开关」，
+//  而不是「写错了」。** 前者是正确的死代码，后者是 bug。
+  const hidden = true && retryAttempt < 4;
+// 【两行注释说清了顺序依赖：先算 hidden，再注册定时器】
+//
+//  原注释：`Compute before useInterval so we never register a timer that just
+//  drives a null render.`
+//
+//  如果不这样写（比如在 useInterval 的延迟参数里判断 hidden），
+//  前端第一次重试时会注册一个 1 秒定时器，而组件在 hidden 时返回 null ——
+//  每秒钟重渲染一次、什么都不画。终端里这意味着每秒钟一次全屏 diff。
+//
+//  **「不显示」的东西也不该有定时器在推它。** 这条原则在这里被明确写成了代码顺序。
+  const [countdownMs, setCountdownMs] = useState(0);
+  const done = countdownMs >= retryInMs;
+  let t2;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = () => setCountdownMs(_temp);
+    $[0] = t2;
+  } else {
+    t2 = $[0];
+  }
+// 【把 null 传给 useInterval 就是「关掉它」】
+//
+//  useInterval(callback, delay) 在 delay 为 null 时不注册定时器。
+//  这里的条件是 `hidden || done ? null : 1000` —— 两种情况下都停表：
+//
+//      hidden    前几次重试不显示，不需要倒计时
+//      done      倒计时已经跑完了，再跳也没意义
+//
+//  `done` 来自 `countdownMs >= retryInMs`，所以表会在刚好跑满时停下。
+//  如果不停，它会一直每秒钟 setState 一次，直到这个组件被卸载 ——
+//  而重试期间这个组件可能活很久。
+  useInterval(t2, hidden || done ? null : 1000);
+  if (hidden) {
+    return null;
+  }
+  let t3;
+  if ($[1] !== countdownMs || $[2] !== retryInMs) {
+    t3 = Math.round((retryInMs - countdownMs) / 1000);
+    $[1] = countdownMs;
+    $[2] = retryInMs;
+    $[3] = t3;
+  } else {
+    t3 = $[3];
+  }
+// 【`Math.max(0, t3)` —— 兜住「跑过头」】
+//
+//  countdownMs 是每 1000ms 加 1000，而 retryInMs 来自服务端的 Retry-After，
+//  可能不是 1000 的整数倍（比如 4500）。
+//
+//  第 7 秒时 countdownMs 已经 7000 > 4500，算出负数秒。
+//  所以这里钳到 0。
+//
+//  钳位而不是提前停表，是因为**停止条件用的是 >=**（见 done），
+//  而显示用的是减法。两者对「刚好相等」的理解差一格。
+  const retryInSecondsLive = Math.max(0, t3);
+  let T0;
+  let T1;
+  let T2;
+  let t4;
+  let t5;
+  let t6;
+  let truncated;
+  if ($[4] !== error || $[5] !== verbose) {
+    const formatted = formatAPIError(error);
+    truncated = !verbose && formatted.length > MAX_API_ERROR_CHARS;
+    T2 = MessageResponse;
+    T1 = Box;
+    t6 = "column";
+    T0 = Text;
+    t4 = "error";
+    t5 = truncated ? formatted.slice(0, MAX_API_ERROR_CHARS) + "\u2026" : formatted;
+    $[4] = error;
+    $[5] = verbose;
+    $[6] = T0;
+    $[7] = T1;
+    $[8] = T2;
+    $[9] = t4;
+    $[10] = t5;
+    $[11] = t6;
+    $[12] = truncated;
+  } else {
+    T0 = $[6];
+    T1 = $[7];
+    T2 = $[8];
+    t4 = $[9];
+    t5 = $[10];
+    t6 = $[11];
+    truncated = $[12];
+  }
+  let t7;
+  if ($[13] !== T0 || $[14] !== t4 || $[15] !== t5) {
+    t7 = <T0 color={t4}>{t5}</T0>;
+    $[13] = T0;
+    $[14] = t4;
+    $[15] = t5;
+    $[16] = t7;
+  } else {
+    t7 = $[16];
+  }
+  let t8;
+  if ($[17] !== truncated) {
+    t8 = truncated && <CtrlOToExpand />;
+    $[17] = truncated;
+    $[18] = t8;
+  } else {
+    t8 = $[18];
+  }
+  const t9 = retryInSecondsLive === 1 ? "second" : "seconds";
+  let t10;
+  if ($[19] !== maxRetries || $[20] !== retryAttempt || $[21] !== retryInSecondsLive || $[22] !== t9) {
+// 【这一行里藏了三件事】
+//
+//  1. 复数跟着秒数变：`retryInSecondsLive === 1 ? "second" : "seconds"`
+//  2. attempt 是「第几次 / 共几次」，用 `attempt 2/10`
+//  3. 如果环境里有 API_TIMEOUT_MS，追加一句「试试调大它」——
+//     直接把排障建议写在错误旁边，而不是写进文档
+//
+//  第三种做法值得单独记：**错误信息里带上「下一步该做什么」。**
+//  用户看到 529 的时候不知道是不是自己超时设置太小，
+//  这一句直接把那个猜测变成可执行的建议。
+    t10 = <Text dimColor={true}>Retrying in {retryInSecondsLive}{" "}{t9}… (attempt{" "}{retryAttempt}/{maxRetries}){process.env.API_TIMEOUT_MS ? ` · API_TIMEOUT_MS=${process.env.API_TIMEOUT_MS}ms, try increasing it` : ""}</Text>;
+    $[19] = maxRetries;
+    $[20] = retryAttempt;
+    $[21] = retryInSecondsLive;
+    $[22] = t9;
+    $[23] = t10;
+  } else {
+    t10 = $[23];
+  }
+  let t11;
+  if ($[24] !== T1 || $[25] !== t10 || $[26] !== t6 || $[27] !== t7 || $[28] !== t8) {
+    t11 = <T1 flexDirection={t6}>{t7}{t8}{t10}</T1>;
+    $[24] = T1;
+    $[25] = t10;
+    $[26] = t6;
+    $[27] = t7;
+    $[28] = t8;
+    $[29] = t11;
+  } else {
+    t11 = $[29];
+  }
+  let t12;
+  if ($[30] !== T2 || $[31] !== t11) {
+    t12 = <T2>{t11}</T2>;
+    $[30] = T2;
+    $[31] = t11;
+    $[32] = t12;
+  } else {
+    t12 = $[32];
+  }
+  return t12;
+}
+// ⚠️ 【倒计时是「每跳一次加 1000」，不是「用现在时间减开始时间」】
+//
+//      const _temp = ms => ms + 1000
+//      setCountdownMs(_temp)
+//
+//  这意味着：如果渲染卡住 3 秒，这 3 秒里定时器可能只跳了一次，
+//  倒计时就比真实时间慢 2 秒。屏幕上显示「还要 4 秒」，实际 2 秒后就好了。
+//
+//  为什么可以这样写？因为**这个倒计时的用途不是精确计时**，
+//  是让用户知道「在等，而且快好了」。慢一两秒不影响这个用途。
+//
+//  反过来说，如果这里改成读 Date.now()，就会踩上一批那个坑：
+//  在 useMemo 里读时钟 = 缓存一个不会走的时钟。
+//  而放在定时器回调里读时钟是**正确**的做法 —— 因为回调本来就该在「现在」执行。
+//
+//  结论不是「读时钟不好」，而是：**读时钟要在「会被重新执行的地方」读。**
+//  这里是定时器回调（每秒重跑一次），所以累加和读时钟都能工作 ——
+//  只是读时钟更准。上一批那个 bug 出在 useMemo 里：那里整个函数体
+//  一辈子只跑一次，读到的「现在」就被永久缓存了。
+function _temp(ms) {
+  return ms + 1000;
+}
+// 原文件此处有一行 8824 字符的 sourceMappingURL（base64 source map），
+// 它只用于把编译产物映射回源码，对理解逻辑没有帮助，这里省略不抄。

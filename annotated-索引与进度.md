@@ -104,7 +104,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
-| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行） | 🚧 消息主链 + 输入框（25/389） |
+| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行） | 🚧 消息主链 + 输入框 + 消息体（66/389） |
 
 ---
 
@@ -1858,6 +1858,221 @@ return (<Box …>Something off with Claude?</Box>)
 
 **订阅越细越好，前提是那个值变化得频繁；变化很少的值，粗粒度也无所谓。**
 
+## `messages/` 读完了吗？十道自测题
+
+`components/messages/` 是 `Message.tsx` 那两次 switch 的**落点** —— 上一步读的 `Messages/MessageRow/Message` 决定「哪条消息交给谁画」，这一批就是那些「谁」。**这个目录现在清零了**：41 个文件（33 个顶层 + `UserToolResultMessage/` 8 个）、6,055 行原文、批注版 9,595 行、**274 处锚点**。
+
+| 文件 | 行数 | 它回答的问题 |
+| --- | --- | --- |
+| `SystemTextMessage.tsx` | 827 | 十几种系统消息挤在一个 if 链里，静音规则插在中间 |
+| `AttachmentMessage.tsx` | 536 | 四十多个 case 的 switch，三十个是「一行」 |
+| `CollapsedReadSearchContent.tsx` | 484 | 折叠组：五个最大计数器抗抖动 + 提示最短显示 700ms |
+| `AssistantToolUseMessage.tsx` | 368 | 工具调用那一行：图标 / 主进度 / 排队补充三层 |
+| `UserTextMessage.tsx` | 275 | 十七个 if，顺序即协议 |
+| `AssistantTextMessage.tsx` | 270 | `switch (text)` —— 拿文案本身当判别键 |
+| `PlanApprovalMessage.tsx` | 222 | 计划审批：四条 return 路径，拒绝态的末句是指令 |
+| `UserTeammateMessage.tsx` | 206 | 队友消息：五级串联 try + 默认只显示摘要 |
+| `HighlightedThinkingText.tsx` | 162 | 逐字符彩虹 + early return 被编译成什么样 |
+| 其余 32 份 | 2,705 | 每个都是一条消息类型的完整画法 |
+
+**100 终端里的「消息类型」为什么不是一个字段？这决定了分发代码长什么样。**
+
+在 API 那一侧消息是结构化的（`{type: 'assistant', content: [...]}`）。但到了终端这一侧，很多「消息」其实是模型吐出来的**纯文本**，类型信息混在文本里 —— `<bash-stdout>…</bash-stdout>`、`<command-message>…`、`[Request interrupted by user]`。
+
+于是「这条是什么」只能靠**对文本做字符串判断**得出：`startsWith('<bash-stdout')`、`includes('<user-memory-input>')`、`=== INTERRUPT_MESSAGE`、`extractTag(text, TICK_TAG)`。
+
+后果一：分发只能写成**一条 if 链，顺序即协议**。`UserTextMessage.tsx` 顶层 17 个 if（第 39–238 行），删掉任意一条、或调换任意两条的相对位置，行为都可能变 —— 因为 `<local-command-stdout>` 同时也 startsWith `<local-command`，`<bash-input>` 里可能嵌着 `<bash-stdout>`。
+
+后果二：另一个极端是 `AssistantTextMessage.tsx` 第 75 行的 `switch (text)` —— 它的 case 全是**整段文案常量**（`PROMPT_TOO_LONG_ERROR_MESSAGE` / `INVALID_API_KEY_ERROR_MESSAGE` / `TOKEN_REVOKED_ERROR_MESSAGE` …）。拿文案当判别键，只有在「这段文本完全由程序生成」时才成立。
+
+判据：用 `includes`、`startsWith` 还是 `===`，**反映的是这段文本由谁生产** —— 用户手打的会混在句中（`includes`），程序整条生成的必在开头（`startsWith` / `===`）。
+
+还有一条配套手法：**分发宽、渲染严**。判断用宽的 `includes`（宁可多认），真正解析用严的 `extractTag`（必须拿到完整标签）。只宽会误认，只严会漏认，两个都得有。
+
+**101 怎么判定一段代码是死代码？`ThinkingMessage` 给了完整判据。**
+
+本批确认了**源码里**的第一处死代码：`SystemTextMessage.tsx` 第 733 行的 `function ThinkingMessage(t0)`，全文件只有这一处出现（没有第二个同名导入，也没有任何调用点）。
+
+判定要三条同时成立：
+
+| 判据 | 本文件的证据 |
+| --- | --- |
+| 定义存在、零调用 | 第 733 行定义，grep 全文件只有 1 处 |
+| 有替代路径抢先返回 | 第 122 行 `if (message.subtype === "thinking") { return null }` |
+| 它的输入已被别处消费 | 第 69 行的 `away_summary` 分支 |
+
+任意一条单独成立都不够：只有第一条，可能只是「还没接上」；只有第二条，可能另一个分支也走这里。**三条一起，才敢说「这段代码永远不会执行」。**
+
+这也是上一批 `IssueFlagBanner` 的反面：那个是被**构建期删空**的（只剩 `return null`），这个是**源码里就没人调用**。两种死代码判据完全不同 —— 前者查恒假条件，后者查调用点。
+
+**102 一条「静音规则」插在 if 链中间，会造成什么不对称？**
+
+`SystemTextMessage.tsx` 第 200 行：
+
+```ts
+const isStopHookSummary = message.subtype === "stop_hook_summary";
+if (!isStopHookSummary && !verbose && message.level === "info") return null;
+```
+
+这一行**之前**有 8 个 subtype 分支（`turn_duration` / `memory_saved` / `away_summary` / `agents_killed` / `thinking` / `bridge_status` / `scheduled_task_fire` / `permission_retry`），**之后**有 2 个（`api_error` / `stop_hook_summary`）。
+
+结论和直觉相反：**前 8 种系统消息完全不受「静音」影响** —— 它们在静音判断之前就 return 了自己的渲染结果；后 2 种会被静音吞掉。
+
+这不是 bug（`stop_hook_summary` 被显式排除了），但它是**「规则插入点决定覆盖面」**的教科书案例：同一行判断在 if 链里的位置，等价于一份「哪些类型归它管」的隐式声明，而这份声明没有任何地方写下来。
+
+所以读长 if 链的正确顺序是：**先找这类全局规则，再数它前面有几条分支** —— 前面的分支就是这条规则的例外集。
+
+**103 「打包器只做常量折叠，不做死代码消除」—— 这批有七处证据。**
+
+grep 整个目录，`true &&` / `false &&` / `=== 'ant'` 一共七处：
+
+| 位置 | 残留形态 | 什么意思 |
+| --- | --- | --- |
+| `AssistantToolUseMessage.tsx:59` | `false && isClassifierCheckingRaw && …` | 分类器检查整段关掉 |
+| `SystemAPIErrorMessage.tsx:27` | `true && retryAttempt < 4` | 前面曾有过一个条件 |
+| `AttachmentMessage.tsx:366` | `if (false && attachment.status === "killed")` | 整个分支关掉 |
+| `AttachmentMessage.tsx:116` | `"external" === 'ant' && !isDemoEnv && …` | 内部构建专属提示，对外恒假 |
+| `SystemTextMessage.tsx:287 / 419 / 423` | `false && totalDurationMs > 0 ? … : ""` | hook 耗时展示三处一起关 |
+
+为什么 `false && x` 这种明显恒假的表达式没被删干净？因为**折叠和消除是两件事**：`false && x` 会被折叠成 `false`，但要不要把 `if (false) { … }` 这整个块删掉，取决于打包器开没开 DCE、以及 DCE 有没有命中这一处。这里显然没命中。
+
+实用结论：**在 bundle 里看到恒真恒假的条件，不要当成混淆，当成「编译期开关的历史遗留」** —— 顺着它就能反推出内部构建和外部构建的差异。
+
+**104 「case 标签不能被条件消除，if 块可以」—— 这句话为什么重要？**
+
+`AttachmentMessage.tsx` 第 105 行的原文注释：
+
+> skill_discovery rendered here (not in the switch) so the 'skill_discovery' string literal stays inside a feature()-guarded block. A case label can't be conditionally eliminated; an if-body can.
+
+`skill_discovery` 本来应该和另外三十多个类型一样待在 switch 里，它被挪到 switch 外面、包进 `if (feature('EXPERIMENTAL_SKILL_SEARCH'))`，唯一理由就是**构建产物的纯净度**。
+
+原因是：`case 'skill_discovery':` 里的那个字符串字面量会原样留在 bundle 里，**即使整个 case 分支都被 feature 关掉** —— 因为标签是语法骨架，不是可执行语句，DCE 能删语句、删不掉标签。而 `if (feature('X')) { if (type === 'skill_discovery') … }` 在 feature 折叠成 false 之后，整个 if 块连同里面的字符串一起消失。
+
+这条约束很少被写下来：**凡是被 feature 门控的类型，都不能出现在 switch case 里。**
+
+推论：看到某处「明明该用 switch 却写了一串 if」，先别嫌它不整齐 —— 可能每一处 if 都在保护一个字符字面量。
+
+**105 React Compiler 把 early return 改写成了什么？**
+
+`HighlightedThinkingText.tsx` 是本批最干净的教学样本。原始代码是一句早退：
+
+```ts
+if (triggers.length === 0) return <Text color="text">{text}</Text>
+```
+
+编译后变成：
+
+```js
+let t1;
+if ($[15] !== pointerColor || $[16] !== text) {
+  t1 = Symbol.for("react.early_return_sentinel");
+  bb0: {
+    const triggers = isUltrathinkEnabled() ? findThinkingTriggerPositions(text) : [];
+    if (triggers.length === 0) { /* … */ t1 = t4; break bb0; }
+    parts = [];
+    /* 逐字符彩虹切片 */
+  }
+  $[15] = pointerColor; $[16] = text; $[17] = parts; $[18] = t1;
+} else { parts = $[17]; t1 = $[18]; }
+if (t1 !== Symbol.for("react.early_return_sentinel")) return t1;
+```
+
+三个要点：
+
+- `bb0:` 是**带标签的块**，存在的唯一目的就是让 `break bb0` 能跳到块尾。
+- 为什么不直接在 if 里 `return`？因为那会**跳过块外的缓存槽赋值**（`$[17] = parts`），下次进这个块时槽是脏的。
+- 所以真正的返回被推迟到块外：`if (t1 !== sentinel) return t1`。哨兵值表示「这一趟没有早退」。
+
+注意 `bb0` **不必然和早退有关**：`SystemTextMessage` 里同样形态是用来「给不同 subtype 的变量赋不同值」的。分辨方法：看 `break bb0` 之前最后一句是不是 `t1 = …`，以及块外那句 `if (… sentinel)` 在不在。
+
+**106 `isQueued` 为什么写成两个否定？这种定义方式的风险是什么？**
+
+`AssistantToolUseMessage.tsx` 第 113 行：
+
+```ts
+const isQueued = !inProgressToolUseIDs.has(param.id) && !isResolved
+```
+
+翻译：不在「进行中」集合里、也不在「已完成」集合里 —— 那就是排队中。
+
+这么写是因为**数据源只提供了这两个集合**，根本没有地方查「queued 的 id」。第三个状态是由前两个状态的**缺席**定义的。
+
+风险很具体：**将来新增第四个状态时，它会被自动算进 queued**。比如以后加一个 `cancelledIDs`，取消掉的工具调用会显示成「排队中」，而且不报错、不崩溃，只是显示错了。
+
+所以否定式定义成立的正当条件是「状态空间确实封闭、且是二元补集」。这时该做的不是改成肯定式（做不到），而是**在注释里写明「这里假设只有两个集合」**，让下一个加状态的人看见。
+
+**107 渲染期写 ref 一般是错的 —— 但这批有 5 处是正当的，判据是什么？**
+
+`CollapsedReadSearchContent.tsx` 第 171–180 行，五个计数器全在渲染期写：
+
+```ts
+const maxReadCountRef = useRef(0);
+…
+maxReadCountRef.current = Math.max(maxReadCountRef.current, rawReadCount);
+```
+
+它维护的是一个**单调不变量**（只增不减），并且**只用于本次渲染的输出** —— 不参与调度、不同步状态、不在 effect 里读。这种「渲染期写 ref」不是副作用，是「记住历史」。
+
+解决的场景很具体：折叠组的计数是**边加载边涨**的（先 3 个 read，再来 2 个）。直接用当前值，用户会看到「3 reads → 5 reads」跳变；用历史最大值，「5 reads」只出现一次，且计数永不回退。
+
+对照组是**相反**的做法 —— `UserToolSuccessMessage.tsx` 第 45–51 行的一次性读 Map：
+
+```ts
+const [classifierRule] = React.useState(() => getClassifierApproval(toolUseID));
+React.useEffect(() => { deleteClassifierApproval(toolUseID); }, []);
+```
+
+三个动作缺一不可：`useState` 的惰性初始化（只读一次）、空依赖（不随渲染重读）、**删除放在 effect 里而不是渲染期**（渲染期删会因 StrictMode 双调用或重渲染被删第二次）。
+
+判据可以压成一句：**写 ref 是「记住历史」，读 Map 是「认领所有权」，两者都必须是幂等的** —— 否则重渲染就会改变行为。
+
+**108 终端里的「截断」有三种切法，选哪种由约束决定。**
+
+| 切法 | 位置 | 为什么是它 |
+| --- | --- | --- |
+| `stringWidth` 只测量不切 | `AssistantToolUseMessage.tsx:183` | 要算 `minWidth`，需要「占几列」而不是字符数 |
+| `truncateToWidth(body, N)` | `UserChannelMessage.tsx:57` | 正文要显示，得按**显示宽度**切（汉字算 2） |
+| `.slice(0, N)` | `UserResourceUpdateMessage.tsx:57`、`SystemAPIErrorMessage.tsx:66` | 只要一个提示，按码元切省事 |
+| `.slice(0, head)` + `.slice(-tail)` | `UserPromptMessage.tsx:66` | 长提示**首尾都要留**（头看意图、尾看结论） |
+
+关键区别：`slice` 切的是 **UTF-16 码元**，遇到 emoji 会切出半个字符；`truncateToWidth` 切的是**终端列**，保证不超宽。
+
+所以「切法选错」的两种症状完全不同：用 `slice` 切要显示的正文 → 偶尔冒乱码方块；用宽度切 URI → 不会出错，只是没必要（URI 不参与对齐）。
+
+`UserPromptMessage.tsx` 第 19–27 行还有一段值得单记的注释：`MAX_DISPLAY_CHARS = 10_000`，实际显示头 2,500 + 尾 2,500。原因是 `cat 11k-line-file | claude` 会产生**一条**消息，全屏 Ink 渲染器每帧都要为这个 `<Text>` 节点做 wrap 和输出，**实测造成 500ms+ 的按键延迟** —— 而 `React.memo` 救不了，因为它只跳过 React 渲染，跳过不了 Ink 的输出遍历。非全屏模式没这个问题，因为走的是 `<Static>`（打印完就不管了）。
+
+**109 这批最值得记的一条方法论：读编译产物，先删掉所有 `$[n]`。**
+
+41 个文件里三十多个是 React Compiler 产物：`_c(n)` 建槽、`if ($[i] !== x)` 复用、`t1/t2` 是编号不是语义名。直接读会淹死在缓存逻辑里。三步：
+
+1. **先把 `$[n]` 的存取全部划掉**，只留「读哪个变量、调哪个函数、返回什么」。剩下的骨架就是原始代码。
+2. **再看槽的分布**。槽不是随机撒的：正则构造、JSON 解析、对象字面量会建槽；纯字符串拼接不建；被 JSX 用到的值必建；只在一处判断里用的不建。**槽的位置 ≈ 成本 × 复用频率**。
+3. **最后看依赖数组**。编译后 `t5 = [a, b]` 是个变量，而且它自己也可能被缓存 —— 上一批 `SandboxPromptFooterHint` 就栽在这里：`useEffect(…, [])` 被编成缓存好的 `t1 = []`，于是 effect 只跑一次。**依赖数组是缓存的对象**，这条反直觉但必须记住。
+
+一个已知现象（**别当成规律**）：没有 JSX 的组件一定没有 `_c`（如 `GroupedToolUseContent`），但**有 JSX 也不一定有 `_c`**（如 `UserToolSuccessMessage`，只有一个 hook、简单到不需要缓存）。我在这条上推翻过自己两次，最后只记「已知现象」。
+
+### 消息这一批的三个方法论收获
+
+**一、终端里没有样式继承 —— 一个句子要变色，就必须拆节点**
+
+`<Text>` 上的 `color` / `backgroundColor` 只作用于自己这个节点，**不会传给子节点**。所以「前半句灰、后半句红」不能靠嵌套，只能写成两个并列的 `<Text>`。这条约束解释了为什么这批文件里到处是 `{a}{b}{c}` 的兄弟节点，而不是嵌套结构。
+
+**二、排版靠「占位」和几个约定俗成的 hack**
+
+| hack | 位置 | 作用 |
+| --- | --- | --- |
+| `<Box minWidth={2} />` | 多处图标槽 | 没有图标时留出位置，让下一列对齐 |
+| `<Box width={5} flexShrink={0}>` | `CollapsedReadSearchContent.tsx:467` | gutter 固定宽且不许压缩 |
+| `width={999}` | `SystemTextMessage.tsx:817` | Ink 里「尽可能宽」的写法（`undefined` 会按内容收缩） |
+| `overflow="hidden"` | `RejectedPlanMessage.tsx:23` | Windows Terminal 的补丁（否则边框会被顶开） |
+| `dimColor={false}` | `AttachmentMessage.tsx:477` | chalk 的 dim + bold 有 bug（#290），显式关掉 |
+
+**三、计数必须建立在「看得见的东西」上**
+
+`nullRenderingAttachments.ts` 那 70 行只做一件事：把 34 个「渲染出来什么都没有」的 attachment 类型列出来，让 `Messages.tsx` 在**计数之前**滤掉它们（工单 CC-724）。否则 200 条渲染预算会被 `hook_success` / `todo_reminder` / `date_change` 这类看不见的条目吃掉，用户感觉「滚两下就到头了」。
+
+这条原则值得推广：**凡是「上限 / 配额 / 预算」类的计数，先确认被数的东西用户能不能看见。** 数了看不见的东西，配额就等于缩水，而且没有任何报错。
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1925,11 +2140,30 @@ messages 数组（服务端原始）
               ├─ shouldRenderStatically  → 能变吗（决定能否推上 scrollback）
               ├─ areMessageRowPropsEqual → 要重渲染吗
               └─ Message.tsx             两次 switch：消息类型 → 块类型
-                    └─ components/messages/ 十四个渲染组件
+                    ├─ user      → UserTextMessage 十七个 if（顺序即协议）
+                    │                ├─ <bash-stdout>   → UserBashOutputMessage
+                    │                ├─ <bash-input>    → UserBashInputMessage
+                    │                ├─ <command-*>     → UserCommandMessage
+                    │                ├─ <local-command-*> → UserLocalCommandOutputMessage
+                    │                ├─ <teammate-*>    → UserTeammateMessage
+                    │                ├─ <task-notification> → TaskAssignmentMessage
+                    │                └─ <mcp-*-update>  → UserResourceUpdateMessage
+                    ├─ assistant → AssistantTextMessage（switch (text)：十一组文案常量）
+                    │                ├─ thinking        → HighlightedThinkingText
+                    │                └─ tool_use        → AssistantToolUseMessage
+                    │                                        ├─ 进行中 → 主进度
+                    │                                        ├─ 排队   → isQueued
+                    │                                        └─ 完成   → UserToolResultMessage/
+                    │                                                      ├─ 成功 / 出错 / 拒绝 / 取消
+                    │                                                      └─ 计划被拒 / 工具被拒
+                    ├─ system    → SystemTextMessage（十种 subtype，前八个绕过静音规则）
+                    └─ attachment → AttachmentMessage（四十多个 case，三十个是「一行」）
                           └─ ink 的 Box / Text / RawAnsi / NoSelect
 ```
 
-中间那条分界很清楚：**`Messages` 管「显示哪些」，`MessageRow` 管「还会不会变」，`Message` 管「怎么画」**。三层各自有一个 memo，各自有一个不变量。
+这张图的最后两层是这一批补的：**`Message.tsx` 的 switch 只是「分诊台」，真正决定一句话长什么样的是这四十一个文件**。而它们共同的约束只有一个 —— 输出目标是终端，没有样式继承、没有绝对定位、宽度要自己算。
+
+中间那条分界很清楚：**`Messages` 管「显示哪些」，`MessageRow` 管「还会不会变」，`Message` 管「怎么画」，`messages/` 里的每个组件管「画成什么样」**。前三层各自有一个 memo、一个不变量；最后一层没有 memo，因为它只被前三层决定。
 
 反方向（按键 → 文本 → 提交）是这一批补上的：
 
@@ -1952,9 +2186,9 @@ stdin → parse-keypress（字节 → ParsedKey）
 
 - [`src/ink/`](source/src/ink/) **整个目录已清零**：96 个文件、19,842 行，根目录 43 + `layout/` 4 + `termio/` 9 + `events/` 10 + `hooks/` 12 + `components/` 18。渲染器、样式层、转义解析、输入侧、交互原语，一条不缺
 - [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
-- [`src/components/`](source/src/components/)（**8.2 万行，389 个文件**）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构。已批注 25 份：消息渲染主链四份（`Messages` / `MessageRow` / `Message` / `messageActions`，2,294 行）+ 输入框整个 `PromptInput/` 子目录 21 份（5,161 行），剩 364 个文件、7.4 万行
+- [`src/components/`](source/src/components/)（**8.2 万行，389 个文件**）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构。已批注 66 份：消息渲染主链四份（`Messages` / `MessageRow` / `Message` / `messageActions`，2,294 行）+ 输入框整个 `PromptInput/` 子目录 21 份（5,161 行）+ 消息体整个 `messages/` 子目录 41 份（6,055 行），剩 323 个文件、7 万行
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩，界面层的两条主链（消息出来、按键进去）也都通了**：172 个文件、62,408 行原文（批注版 102,897 行）、3,229 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩，界面层的三条链（消息出来、按键进去、一条消息怎么画）也都通了**：213 个文件、68,501 行原文（批注版 112,528 行）、3,503 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1964,11 +2198,10 @@ stdin → parse-keypress（字节 → ParsedKey）
 
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
-- **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`components/messages/`**（19 个文件、5,509 行）—— 消息体那十四个渲染组件，是 `Message.tsx` 分发之后的目的地。`SystemTextMessage.tsx`（826 行）和 `AttachmentMessage.tsx`（535 行）最大。这一块现在是**最自然的下一步**：`Message.tsx` 的两次 switch 已经把十四个目的地点过名了，接上就能把「一条消息怎么画出来」读完整
-- **`components/` 里其余的单点组件** —— 每个都是「一段产品逻辑 + 一点渲染」，读起来快。适合按需挑（比如对权限弹窗感兴趣就读 `permissions/`）
-- **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
-- **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
+- **回头重读** —— 我推荐这个。九条线都闭合了，界面层三条链也通了，现在重读任何一处都比第一次清楚
+- **`components/` 里其余的单点组件**（剩 323 个文件、7 万行）—— 每个都是「一段产品逻辑 + 一点渲染」，读起来快。适合按需挑：对权限弹窗感兴趣就读 `permissions/`，对 diff 显示感兴趣就读 `diff/`，想搞清「文件怎么被编辑」就读 `FileEdit*`
+- **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
+- **`src/services/` 剩下的** —— 主要是 `analytics/`（埋点）与 `oauth/`，前者是「数据怎么上报」，后者和已读的 `mcp/auth.ts` 是同一套 OAuth 的另一半
 
 ---
 
