@@ -86,7 +86,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅ | ✅ 完成 |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 
 ---
@@ -524,8 +524,11 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题                                 |
 | [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件                       |
 | [`mcp/auth.ts`](annotated/src/services/mcp/auth.ts)                       | 2,465 | 4,356 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁           |
+| [`mcp/xaa.ts`](annotated/src/services/mcp/xaa.ts)                         | 511   | 812   | 两跳换票：id_token → ID-JAG → access_token、三道防混淆闸 |
+| [`mcp/xaaIdpLogin.ts`](annotated/src/services/mcp/xaaIdpLogin.ts)         | 487   | 709   | 一次浏览器弹窗、id_token 按 issuer 缓存、URL 拼接两个坑  |
+| [`mcp/useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) | 1,141 | 1,631 | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线 |
 
-合计 **12,173 行原文**，596 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完，MCP 这条线（`config.ts` → `client.ts` → `auth.ts`）也闭合了。
+合计 **14,312 行原文**，704 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完；MCP 这条线四段全通：`config.ts`（允不允许连）→ `client.ts`（连上怎么活）→ `auth.ts`（401 之后怎么办）→ `xaa*.ts`（不弹窗那条路怎么走），最后 `useManageMCPConnections.ts` 把它接进 UI。目录里剩下 16 个百行级小件（`utils.ts` 575、`elicitationHandler.ts` 313、`channel*.ts` 等），单独看价值不高，暂时跳过。
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 
@@ -738,6 +741,70 @@ local 比 project 高的理由：`.mcp.json`（project）会进版本控制、�
 
 ---
 
+## XAA 与连接管理读完了吗？
+
+**㉝ XAA 为什么不直接用 `id_token` 换 `access_token`，非要两张票据？**
+
+因为这是两个互不信任的域。`id_token` 是 IdP 签的，MCP 服务器的 AS 根本不知道这个 IdP 存在；反过来 IdP 也不知道自己的用户会去访问哪些 AS。所以中间必须有第三样东西：**ID-JAG（Identity Assertion Authorization Grant）**—— 一张由 IdP 签发、写明「这个用户授权你去某个 AS 拿某个 resource 的 token」的委托书。
+
+链路是：`id_token` --RFC 8693 Token Exchange--> `ID-JAG` --RFC 7523 JWT Bearer--> `access_token`。
+
+最容易搞混的是两个参数：`audience` 必须填 **AS 的 issuer**（因为委托书是开给 AS 的），`resource` 必须填 **MCP server 的 URL**（因为要说明凭的是哪个资源）。填反了 AS 会拒，理由是「这不是签发给我的」，而错误信息通常不会告诉你填反了。
+
+`ID-JAG` 本身**不能访问任何东西** —— 它只是一个授权凭证，不是访问凭证。
+
+**㉞ `xaa.ts` 里有三道校验（PRM resource 匹配、AS issuer 匹配、HTTPS 强制），前两道为什么挡不住 `http://`？**
+
+因为前两道都是「**自洽性**」校验：PRM 说自己是谁、AS 说自己是谁。一个完全自洽的 http 配置能同时通过：
+
+```
+PRM: resource = http://evil.com/mcp
+AS:  issuer = http://evil.com, token_endpoint = http://evil.com/token
+```
+
+两道比较都通过 —— 然后代码把 `id_token` 和 `client_secret` 明文 POST 出去。
+
+所以第三道闸必须单独存在，而且判的是 **`token_endpoint`**，不是 issuer：真正承载凭据的是那一个 URL，AS 完全可以 `issuer=https` 而 `token_endpoint=http`。
+
+这三道闸是递进的，不是重复的 —— 每一道都覆盖前两道**结构上无法覆盖**的那一类。
+
+**㉟ `xaaIdpLogin.ts` 和 `auth.ts` 的回调服务器，为什么都坚持「先 `listen` 成功，再开浏览器」？**
+
+因为 `listen()` 是异步的。先开浏览器再 listen 的话，端口被占（`EADDRINUSE`）时用户看到的是：一个浏览器标签页弹出来 → 然后自己关掉 → 几秒后终端里出现一行错误。用户完全不知道刚才发生了什么，而且大概率会再点一次。
+
+把「开浏览器」放进 `server.listen` 的回调里，端口冲突就会**先于**弹窗暴露，用户只会看到一条可操作的错误（「端口 54545 被占用，运行 `lsof -ti:54545` 查看」）。
+
+同一个文件里还有两个细节值得记：`res.writeHead(404)` 处理非 `/callback` 路径（浏览器的 favicon 请求不能把 promise reject 掉）；`xss(err)` 转义 query 参数（**127.0.0.1 不等于可信** —— 挡得住外网直连，挡不住用户自己浏览器发起的请求，那是反射型 XSS）。
+
+**㊱ `useManageMCPConnections.ts` 里 `(rawTools ?? [])` 和 `rawTools` 有什么区别？为什么同一份 `undefined` 在一个分支表示「保留」、在另一个分支表示「清空」？**
+
+因为 `updateServer` 的契约是「`tools === undefined` 表示保持原值」。所以：
+
+- 非 `disabled/failed` 时传 `rawTools`：值为 `undefined` → 下游走「保留」分支
+- `disabled/failed` 时传 `(rawTools ?? [])`：`undefined` 变成 `[]` → 下游走「剔除该前缀 + 追加空数组」= **清空**
+
+用 `?? []` 两个字符，把「保持」和「清空」两种完全相反的语义折叠进了同一个变量。L293-296 的注释说了这个契约，但代码里看不出来。
+
+验证方法：把 `?? []` 改回 `?? undefined`，然后禁用某个服务器 —— 它的工具会残留在模型上下文里，模型继续调用一个已经不存在的服务器。
+
+**㊲ 为什么 `toggleMcpServer` 必须「先写盘，再断连」？写反了会怎样？**
+
+死循环。
+
+断连会触发 `onclose`，而 `onclose` 里要判断「这是不是用户主动禁用的」—— 判断依据是 `isMcpServerDisabled(name)`，**读的是磁盘上的配置文件**。为什么不读 AppState？因为 `onclose` 触发时，「把它标成 disabled」那个 setAppState 还没提交，AppState 里它还是 `connected`（源文件 342 行那段 TODO 就是在承认这个）。
+
+所以顺序变成不可交换的：
+
+```
+写盘（disabled）→ clearServerCache（断连 → onclose 读到「已禁用」→ 不重连）
+```
+
+反过来的话：断连 → onclose 读到「还是启用」→ 启动指数退避重连 → 用户点了禁用，五秒后它自己又连上了。
+
+这条契约横跨两处代码（342 行的 TODO 和 1093 行的注释），任何一次「先断连再写盘」的重构都会重新引入它。
+
+---
+
 ## 第 7 步（多智能体）读完了吗？
 
 UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— 它们不影响理解主线。
@@ -847,7 +914,7 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 **第 6 步的三条主线都完整了**：
 
 - **压缩管线**：`src/services/compact/` 目录下 11 个 `.ts` 全部批注完，从「什么时候压」到「压完清什么」没有缺口
-- **MCP 协议与策略**：`config.ts`（配置从哪读、允不允许连）→ `client.ts`（七种 transport、连上之后怎么活）→ `auth.ts`（OAuth 全流程、凭据存哪、什么时候刷新、什么清）。第三段是前两段的下游 —— `client.ts` 里那个 `needs-auth` 状态，落到 `auth.ts` 才有答案
+- **MCP 协议与策略**：`config.ts`（配置从哪读、允不允许连）→ `client.ts`（七种 transport、连上之后怎么活）→ `auth.ts`（OAuth 全流程、凭据存哪、什么时候刷新、什么清）→ `xaa.ts` + `xaaIdpLogin.ts`（不弹窗那条路的两次换票）→ `useManageMCPConnections.ts`（怎么接进 UI）。四段首尾相接 —— `client.ts` 里那个 `needs-auth` 状态，落到 `auth.ts` 才有答案；`auth.ts` 里那个 `xaaRefresh`，落到 `xaa.ts` 才有实现。
 
 第 7 步的多智能体主线也收口了：4 个文件、2,263 行原文、133 处锚点。
 
@@ -860,18 +927,19 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                         └─ mcp/config（有哪些服务器、允不允许）
                                               └─ mcp/client（连上之后怎么活）
                                                     ├─ mcp/auth（401 之后：授权、刷新、吊销）
+                                                    │     └─ mcp/xaa + xaaIdpLogin（企业 SSO：两跳换票）
+                                                    ├─ useManageMCPConnections（异步事件 → AppState）
                                                     └─ AgentTool → coordinator / fork / 普通子 agent
                                                           └─ runAgent（同一套 query 循环，换个身份跑）
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)（1,141 行）—— 把 `client.ts` 的纯连接逻辑接进 React 状态
-- [`mcp/xaa.ts`](source/src/services/mcp/xaa.ts)（511）+ [`xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts)（487）—— XAA 的具体交换细节。`auth.ts` 只调用它们，读过 `auth.ts` 之后这两个是「按需查」的参考
+- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等。它们是主线上的螺丝，单独读价值不高，遇到具体问题时再翻
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）+ [`src/ink/`](source/src/ink/)（1.3 万行）—— 终端 UI。`ink/` 是**自己实现**的渲染器（不是官方包），核心是 `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462
 - [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-到这里，**第 1 到第 7 步的主线全部走完**：31 个文件、约 4.4 万行原文、596 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用再回来落盘，中间没有断点了。
+到这里，**第 1 到第 7 步的主线全部走完**：35 个文件、约 4.65 万行原文、704 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用再回来落盘，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
