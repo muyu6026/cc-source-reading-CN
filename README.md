@@ -164,12 +164,15 @@
 > - [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts)
 > - [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts)
 
-| 读什么 | 学什么 |
-|--------|--------|
-| [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) + `config.ts` | 怎么连外部工具 |
-| [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts) | 长对话怎么不爆窗口 |
-| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 |
-| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 登录鉴权 |
+| 读什么 | 学什么 | 批注版 |
+|--------|--------|--------|
+| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 529 白名单 / 无限重试 | [✅ 822 → 1,419 行](annotated/src/services/api/withRetry.ts) |
+| [`src/services/compact/apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) | 发给 API 的 `context_management` 指令 | [✅ 153 → 329 行](annotated/src/services/compact/apiMicrocompact.ts) |
+| [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts) | 什么时候压、四道抑制闸门、熔断 | [✅ 351 → 668 行](annotated/src/services/compact/autoCompact.ts) |
+| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) | 摘要压缩本体 | ⬜ 待批注 |
+| [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) + `config.ts` | 怎么连外部工具 | ⬜ 待批注 |
+| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 | ⬜ 待批注 |
+| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 登录鉴权 | ⬜ 待批注 |
 
 **对应章节**：[07 服务层详解](docs/07-服务层详解.md)、[11 上下文压缩](docs/11-上下文压缩.md)
 
@@ -359,9 +362,9 @@ source/README.md                    →  annotated/README.annotated.md
 
 **为什么另开目录而不直接改 `source/`**：插中文行会让后面所有行号下移，正文里 225 处链接、48 个精确行号锚点就全废了。所以 `source/` 永远是行号基准，`annotated/` 才是学习时读的那份。
 
-**怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。
+**怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。还有一类更隐蔽的破坏由 `annotate.py` 结构性拦截：`//` 连续注释也成段，锚点落在段中部会把一句英文从中间剪断（语法合法、注释一行不少，只是读起来断了）—— 现在 `before` 自动挪段首、`after` 自动挪段尾。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）。下一步是第 6 步服务层，第一个建议读 `src/services/api/withRetry.ts`。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步进行中**（`withRetry.ts` 822 + `apiMicrocompact.ts` 153 + `autoCompact.ts` 351，合计 1,326 行原文、118 处锚点）。下一步是 `src/services/compact/compact.ts`（1,705 行）。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

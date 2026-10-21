@@ -150,6 +150,17 @@ def main():
             i += 1
         return i - 1
 
+    def comment_run_start(lineno):
+        """从 lineno 起，连续 // 行注释块的**第一行**。
+
+        与 comment_run_end 配对使用：锚点落在注释段中部时，把中文挪到段边界，
+        避免把一句英文从中间劈开。
+        """
+        i = lineno
+        while i > 1 and lines[i - 2].strip().startswith('//'):
+            i -= 1
+        return i
+
     def block_end(lineno):
         """若 lineno 是块注释的开头行，返回该块的结束行；否则返回 None。"""
         s = lines[lineno - 1].strip()
@@ -249,10 +260,26 @@ def main():
     before = {}
     after = {}
     shifted = []
+    snapped = []
     for lineno, pos, text in ann:
         if pos == 'after_block':
             lineno = comment_run_end(lineno)
             pos = 'after'
+        # 结构性保护：`//` 注释也是成段的。锚点落在段中部时，中文会插进
+        # 一段英文注释的中间，把一句话劈成两半（英文上半 → 中文 → 英文下半）。
+        #
+        # 这类破坏语法上完全合法、check-fidelity 也看不出来（注释一行没少），
+        # 但读起来是断的：得把上下两截英文自己接起来才读得懂。
+        # claude.ts 的 Options.taskBudget 四行注释就被劈过（提交 6b09281），
+        # apiMicrocompact.ts / autoCompact.ts 也各劈过一次。
+        #
+        # 处理：after → 挪到整段末尾；before → 挪到整段开头。
+        # 单行注释段（最常见的情况）两个方向都不产生位移。
+        if pos in ('after', 'before') and lines[lineno - 1].strip().startswith('//'):
+            tgt = comment_run_end(lineno) if pos == 'after' else comment_run_start(lineno)
+            if tgt != lineno:
+                snapped.append((lineno, tgt))
+                lineno = tgt
         # 结构性保护：锚点落在块注释的开头行/结尾行时自动挪到块外，
         # 否则中文会被塞进 /** */ 中间，把英文文档注释劈成两半。
         if pos == 'after':
@@ -277,6 +304,10 @@ def main():
         print('  ⟳ %d 个锚点原本落在模板字符串内部，已自动外移：%s'
               % (len(shifted), ', '.join('%d→%d' % (a, b) for a, b in shifted)))
         print('    （这些批注是「解释整段模板」的性质，外移后请确认位置是否仍然通顺）')
+
+    if snapped:
+        print('  ⟳ %d 个锚点原本落在 // 注释段中部，已挪到段边界（避免劈开英文句子）：%s'
+              % (len(snapped), ', '.join('%d→%d' % (a, b) for a, b in snapped)))
 
     # 警告：锚点落在 /* */ 块注释内部时，中文批注会被吞进块注释，
     # 把英文块注释劈成两半，可读性很差（语法上仍合法）。

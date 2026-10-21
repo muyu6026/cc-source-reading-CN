@@ -605,6 +605,7 @@ async function* queryLoop(
   let taskBudgetRemaining: number | undefined = undefined
 
   // Snapshot immutable env/statsig/session state once at entry. See QueryConfig
+  // for what's included and why feature() gates are intentionally excluded.
 // 注：`buildQueryConfig()` 是一次性快照。行 293-295 的注释说得很清楚：
 //     「在入口处快照不可变的 env/statsig/session 状态」。
 //
@@ -617,7 +618,6 @@ async function* queryLoop(
 //     —— feature() **不**进 config，因为它是编译期常量，运行时不会变，
 //     放进去只会让 config 多一堆恒定字段。这又是 DCE 思路的延伸：
 //     编译期能定的，不要留到运行期。
-  // for what's included and why feature() gates are intentionally excluded.
   const config = buildQueryConfig()
 
   // Fired once per user turn — the prompt is invariant across loop iterations,
@@ -672,6 +672,8 @@ async function* queryLoop(
 //     这些标签是 Terminal 联合类型的成员，测试直接断言它们。
   while (true) {
     // Destructure state at the top of each iteration. toolUseContext alone
+    // is reassigned within an iteration (queryTracking, messages updates);
+    // the rest are read-only between continue sites.
 // 注：解构分成两步，是个很细但重要的区别：
 //       let { toolUseContext } = state        ← let，因为本轮内会被重新赋值
 //       const { messages, ... } = state       ← const，本轮内只读
@@ -680,8 +682,6 @@ async function* queryLoop(
 //     注意这里的 messages 是**上一轮结束时的** messages，
 //     而本轮真正要发出去的是稍后算出的 messagesForQuery（行 365）——
 //     两者不同！这是读这段代码最容易搞错的地方之一。
-    // is reassigned within an iteration (queryTracking, messages updates);
-    // the rest are read-only between continue sites.
     let { toolUseContext } = state
     const {
       messages,
@@ -1040,6 +1040,9 @@ async function* queryLoop(
 //     说明一个是从 API 报的、一个是估算的，两个都要留着对比误差。
 
       // task_budget: capture pre-compact final context window before
+      // messagesForQuery is replaced with postCompactMessages below.
+      // iterations[-1] is the authoritative final window (post server tool
+      // loops); see #304930.
 // 注：这是 taskBudgetRemaining 的第一个补偿点（第二个在行 1135 的反应式压缩）。
 //     逻辑：压缩前先量一下「当前上下文窗口有多少 token」，从剩余额度里减掉。
 //     这样服务端下次收到 remaining 时，就知道「有这么多已经被摘要掉了」。
@@ -1048,9 +1051,6 @@ async function* queryLoop(
 //     iterations 是 API 响应里的字段（服务器端工具循环的迭代记录），
 //     取最后一条才是最终窗口。这个细节说明客户端对 API 的响应结构
 //     依赖得很深。
-      // messagesForQuery is replaced with postCompactMessages below.
-      // iterations[-1] is the authoritative final window (post server tool
-      // loops); see #304930.
       if (params.taskBudget) {
         const preCompactContext =
           finalContextTokensFromLastResponse(messagesForQuery)
@@ -1061,6 +1061,9 @@ async function* queryLoop(
       }
 
       // Reset on every compact so turnCounter/turnId reflect the MOST RECENT
+      // compact. recompactionInfo (autoCompact.ts:190) already captured the
+      // old values for turnsSincePreviousCompact/previousCompactTurnId before
+      // the call, so this reset doesn't lose those.
 // 注：`turnCounter: 0` 重置而不是递增 —— 注释说得很清楚：
 //     「每次压缩都重置，好让 turnCounter/turnId 反映**最近一次**压缩」。
 //     而 recompactionInfo 在调用前已经捕获了旧值，所以不会丢信息。
@@ -1068,9 +1071,6 @@ async function* queryLoop(
 //     这个字段的用途是「压缩后已经过了几轮」，用于判断
 //     「上次压缩后是不是很快就又满了」—— 如果 2 轮就又满了，
 //     说明压缩效果不足或上下文增长过快。
-      // compact. recompactionInfo (autoCompact.ts:190) already captured the
-      // old values for turnsSincePreviousCompact/previousCompactTurnId before
-      // the call, so this reset doesn't lose those.
       tracking = {
         compacted: true,
         turnId: deps.uuid(),
@@ -1602,6 +1602,7 @@ async function* queryLoop(
 // 前面行 166 讲了「为什么要扣留」，这里看「什么时候扣留」。
 // 四个来源，任意一个命中就扣住，互不依赖。
 // ═══════════════════════════════════════════════════════════════
+// ── 22.0 一条硬约束：feature() 只能出现在 if/三元里 ──
             // Withhold recoverable errors (prompt-too-long, max-output-tokens)
             // until we know whether recovery (collapse drain / reactive
             // compact / truncation retry) can succeed. Still pushed to
@@ -1610,7 +1611,6 @@ async function* queryLoop(
             // independent so turning one off doesn't break the other's
             // recovery path.
             //
-// ── 22.0 一条硬约束：feature() 只能出现在 if/三元里 ──
             // feature() only works in if/ternary conditions (bun:bundle
             // tree-shaking constraint), so the collapse check is nested
             // rather than composed.
@@ -1885,6 +1885,7 @@ async function* queryLoop(
             })
 
             // Yield system message about fallback — use 'warning' level so
+            // users see the notification without needing verbose mode
 // 注：用 'warning' 级别而不是默认级别，注释说「用户不需要开 verbose 就能看到」。
 //     这是个产品判断：换模型是对用户有实际影响的事（输出风格可能变、计费可能变），
 //     必须主动告知，不能藏在日志里。
@@ -1892,7 +1893,6 @@ async function* queryLoop(
 //     文案也值得看：`Switched to ${fallback} due to high demand for ${original}`
 //     —— 把原因说成「原模型需求过高」，而不是「原模型出错了」。
 //     这是对外话术：不给用户制造「服务不稳定」的印象。
-            // users see the notification without needing verbose mode
             yield createSystemMessage(
               `Switched to ${renderModelName(innerError.fallbackModel)} due to high demand for ${renderModelName(innerError.originalModel)}`,
               'warning',
@@ -1944,6 +1944,9 @@ async function* queryLoop(
       }
 
       // Generally queryModelWithStreaming should not throw errors but instead
+      // yield them as synthetic assistant messages. However if it does throw
+      // due to a bug, we may end up in a state where we have already emitted
+      // a tool_use block but will stop before emitting the tool_result.
 // 注：注释承认了一个设计不彻底之处：
 //     「queryModelWithStreaming 通常不该抛错，而应该把错误作为合成
 //       assistant 消息 yield 出来。但万一它因为 bug 抛了，
@@ -1954,12 +1957,12 @@ async function* queryLoop(
 //
 //     这类「理论上不该发生，但我必须处理」的代码，通常是线上事故的产物。
 //     注释里那句 "due to a bug" 说明作者见过它真的发生。
-      // yield them as synthetic assistant messages. However if it does throw
-      // due to a bug, we may end up in a state where we have already emitted
-      // a tool_use block but will stop before emitting the tool_result.
       yield* yieldMissingToolResultBlocks(assistantMessages, errorMessage)
 
       // Surface the real error instead of a misleading "[Request interrupted
+      // by user]" — this path is a model/runtime failure, not a user action.
+      // SDK consumers were seeing phantom interrupts on e.g. Node 18's missing
+      // Array.prototype.with(), masking the actual cause.
 // 注：这段注释揭示了一个跨平台 bug：
 //     「SDK 调用方在 Node 18 上看到假的 'interrupted by user'，
 //       而真实原因是缺少 Array.prototype.with()」
@@ -1973,9 +1976,6 @@ async function* queryLoop(
 //     这里 yield 的是 errorMessage（真实消息），不是中断文案。
 //     这个决定的优先级很高：**错误可读性 > 界面整洁**。
 //     一个假的中断提示会让用户以为是自己按错了键。
-      // by user]" — this path is a model/runtime failure, not a user action.
-      // SDK consumers were seeing phantom interrupts on e.g. Node 18's missing
-      // Array.prototype.with(), masking the actual cause.
       yield createAssistantAPIErrorMessage({
         content: errorMessage,
       })
@@ -2053,6 +2053,8 @@ async function* queryLoop(
         )
       }
       // chicago MCP: auto-unhide + lock release on interrupt. Same cleanup
+      // as the natural turn-end path in stopHooks.ts. Main thread only —
+      // see stopHooks.ts for the subagent-releasing-main's-lock rationale.
 // 注：chicago MCP 的清理 —— auto-unhide + 释放锁。
 //
 //     注释里三个限定词都重要：
@@ -2071,8 +2073,6 @@ async function* queryLoop(
 //     注意用的是动态 `await import(...)` 而不是顶层 import ——
 //     因为 CHICAGO_MCP 在外部版里是 false，动态 import 才能被 DCE 掉
 //     （如果是顶层 import，模块无论如何都会被打进 bundle）。
-      // as the natural turn-end path in stopHooks.ts. Main thread only —
-      // see stopHooks.ts for the subagent-releasing-main's-lock rationale.
       if (feature('CHICAGO_MCP') && !toolUseContext.agentId) {
         try {
           const { cleanupComputerUseAfterTurn } = await import(
@@ -2085,6 +2085,7 @@ async function* queryLoop(
       }
 
       // Skip the interruption message for submit-interrupts — the queued
+      // user message that follows provides sufficient context.
 // 注：`signal.reason !== 'interrupt'` 才发中断消息。
 //
 //     两种中断的差别：
@@ -2094,7 +2095,6 @@ async function* queryLoop(
 //
 //     这个细节说明「中断」不是一个状态，而是有语义区分的两种用户意图。
 //     同一份清理逻辑，对两种意图给出不同的界面反馈。
-      // user message that follows provides sufficient context.
       if (toolUseContext.abortController.signal.reason !== 'interrupt') {
         yield createUserInterruptionMessage({
           toolUse: false,
@@ -2168,6 +2168,13 @@ async function* queryLoop(
         lastMessage.isApiErrorMessage &&
         isPromptTooLongMessage(lastMessage)
       // Media-size rejections (image/PDF/many-image) are recoverable via
+      // reactive compact's strip-retry. Unlike PTL, media errors skip the
+      // collapse drain — collapse doesn't strip images. mediaRecoveryEnabled
+      // is the hoisted gate from before the stream loop (same value as the
+      // withholding check — these two must agree or a withheld message is
+      // lost). If the oversized media is in the preserved tail, the
+      // post-compact turn will media-error again; hasAttemptedReactiveCompact
+      // prevents a spiral and the error surfaces.
 // 注：media 错误和 PTL 的关键差别，注释写得很清楚：
 //     「不像 PTL，media 错误跳过 collapse drain —— 折叠不会剥掉图片」。
 //
@@ -2183,13 +2190,6 @@ async function* queryLoop(
 //     也就是说：反应式压缩只做一次（标志位），做过了还失败就认输。
 //     没有这个标志位，就会出现「压缩 → 图片还在 → 再压缩 → …」的死循环，
 //     每一圈都花一次压缩的钱。
-      // reactive compact's strip-retry. Unlike PTL, media errors skip the
-      // collapse drain — collapse doesn't strip images. mediaRecoveryEnabled
-      // is the hoisted gate from before the stream loop (same value as the
-      // withholding check — these two must agree or a withheld message is
-      // lost). If the oversized media is in the preserved tail, the
-      // post-compact turn will media-error again; hasAttemptedReactiveCompact
-      // prevents a spiral and the error surfaces.
       const isWithheldMedia =
         mediaRecoveryEnabled &&
         reactiveCompact?.isWithheldMediaSizeError(lastMessage)
@@ -2322,6 +2322,10 @@ async function* queryLoop(
 //     是未来最容易漏改的地方。
 
         // No recovery — surface the withheld error and exit. Do NOT fall
+        // through to stop hooks: the model never produced a valid response,
+        // so hooks have nothing meaningful to evaluate. Running stop hooks
+        // on prompt-too-long creates a death spiral: error → hook blocking
+        // → retry → error → … (the hook injects more tokens each cycle).
 // 注：这段注释解释了一个**死亡螺旋**，值得完整理解：
 //
 //     场景：上下文太长 → 压缩也救不回来。
@@ -2341,10 +2345,6 @@ async function* queryLoop(
 //     `void executeStopFailureHooks(...)` —— 注意调的是 *Failure* 版本，
 //     不是普通的 stop hooks。语义是「这一轮以失败告终」，
 //     让用户配置的钩子有机会做失败通知（比如发 Slack）。
-        // through to stop hooks: the model never produced a valid response,
-        // so hooks have nothing meaningful to evaluate. Running stop hooks
-        // on prompt-too-long creates a death spiral: error → hook blocking
-        // → retry → error → … (the hook injects more tokens each cycle).
         yield lastMessage
         void executeStopFailureHooks(lastMessage, toolUseContext)
         return { reason: isWithheldMedia ? 'image_error' : 'prompt_too_long' }
@@ -2490,6 +2490,9 @@ async function* queryLoop(
       }
 
       // Skip stop hooks when the last message is an API error (rate limit,
+      // prompt-too-long, auth failure, etc.). The model never produced a
+      // real response — hooks evaluating it create a death spiral:
+      // error → hook blocking → retry → error → …
 // 注：这是「死亡螺旋」防御的第二个入口（第一个在行 1168）。
 //
 //     `lastMessage?.isApiErrorMessage` 覆盖所有 API 错误：
@@ -2505,9 +2508,6 @@ async function* queryLoop(
 //     那是**抛异常**的路径，属于「我们没处理好」；
 //     这里是「API 明确返回了错误」，属于「处理好了，结果是个错误」。
 //     两者语义不同，所以 reason 不同。
-      // prompt-too-long, auth failure, etc.). The model never produced a
-      // real response — hooks evaluating it create a death spiral:
-      // error → hook blocking → retry → error → …
       if (lastMessage?.isApiErrorMessage) {
         void executeStopFailureHooks(lastMessage, toolUseContext)
         return { reason: 'completed' }
@@ -2562,6 +2562,10 @@ async function* queryLoop(
           autoCompactTracking: tracking,
           maxOutputTokensRecoveryCount: 0,
           // Preserve the reactive compact guard — if compact already ran and
+          // couldn't recover from prompt-too-long, retrying after a stop-hook
+          // blocking error will produce the same result. Resetting to false
+          // here caused an infinite loop: compact → still too long → error →
+          // stop hook blocking → compact → … burning thousands of API calls.
 // 注：这段注释记录了一个**真实的死循环 bug 及其修复**，极其值得读：
 //
 //     「保留反应式压缩的守卫 —— 如果压缩已经跑过而且没能从
@@ -2579,10 +2583,6 @@ async function* queryLoop(
 //
 //     这是「两个看起来同类的字段，其实语义相反」的典型陷阱。
 //     注释的存在就是为了防止后人「顺手把两个都重置了」。
-          // couldn't recover from prompt-too-long, retrying after a stop-hook
-          // blocking error will produce the same result. Resetting to false
-          // here caused an infinite loop: compact → still too long → error →
-          // stop hook blocking → compact → … burning thousands of API calls.
           hasAttemptedReactiveCompact,
           maxOutputTokensOverride: undefined,
           pendingToolUseSummary: undefined,
@@ -2916,6 +2916,7 @@ async function* queryLoop(
     }
 
     // Be careful to do this after tool calls are done, because the API
+    // will error if we interleave tool_result messages with regular user messages.
 // 注：这句注释是一个**顺序约束**，非常关键：
 //     「务必在工具调用完成之后再做这个，因为如果我们把
 //       tool_result 消息和普通 user 消息交错，API 会报错。」
@@ -2928,7 +2929,6 @@ async function* queryLoop(
 //     这条约束是整段代码顺序的唯一理由。如果看到有人把 attachment
 //     注入提前了，就会踩这个坑 —— 而且报错信息不会告诉你「顺序错了」，
 //     只会说「tool_use 没有对应的 tool_result」，非常难查。
-    // will error if we interleave tool_result messages with regular user messages.
 
     // Instrumentation: Track message count before attachments
     logEvent('tengu_query_before_attachments', {
@@ -3092,6 +3092,7 @@ async function* queryLoop(
 //     如果只有 60%，说明预取经常来不及，优化无效。
 
     // Remove only commands that were actually consumed as attachments.
+    // Prompt and task-notification commands are converted to attachments above.
 // 注：这个 filter 只保留 `mode === 'prompt' || 'task-notification'` 的命令。
 //     为什么不保留全部 queuedCommandsSnapshot？
 //
@@ -3102,7 +3103,6 @@ async function* queryLoop(
 //     这是「删除必须与消费严格对应」的原则：
 //     先看谁真的被消费了，再删谁。反过来（先删再消费）一旦消费失败，
 //     命令就永久丢失。
-    // Prompt and task-notification commands are converted to attachments above.
     const consumedCommands = queuedCommandsSnapshot.filter(
       cmd => cmd.mode === 'prompt' || cmd.mode === 'task-notification',
     )
@@ -3174,6 +3174,9 @@ async function* queryLoop(
     const nextTurnCount = turnCount + 1
 
     // Periodic task summary for `claude ps` — fires mid-turn so a
+    // long-running agent still refreshes what it's working on. Gated
+    // only on !agentId so every top-level conversation (REPL, SDK, HFI,
+    // remote) generates summaries; subagents/forks don't.
 // 注：`claude ps` 是外部命令（列出正在运行的 Claude 会话）。
 //     这个任务摘要就是给它提供「这个会话在干什么」的一句话描述。
 //
@@ -3184,9 +3187,6 @@ async function* queryLoop(
 //
 //     `shouldGenerateTaskSummary()` 内部应该有节流逻辑（不然每轮都生成
 //     一次会很贵），本文件看不到，但从「periodic」这个词可以推断。
-    // long-running agent still refreshes what it's working on. Gated
-    // only on !agentId so every top-level conversation (REPL, SDK, HFI,
-    // remote) generates summaries; subagents/forks don't.
     if (feature('BG_SESSIONS')) {
       if (
         !toolUseContext.agentId &&

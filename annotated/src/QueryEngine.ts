@@ -1184,6 +1184,9 @@ export class QueryEngine {
         }
 
         // Local command output — yield as a synthetic assistant message so
+        // RC renders it as assistant-style text rather than a user bubble.
+        // Emitted as assistant (not the dedicated SDKLocalCommandOutputMessage
+        // system subtype) so mobile clients + session-ingress can parse it.
 // 注：本地命令的输出被包装成**assistant 消息**，而不是专门的
 //     「本地命令输出」类型。注释给了两个理由：
 //       ① RC（远程控制）会渲染成 assistant 风格的文本，而不是用户气泡
@@ -1197,9 +1200,6 @@ export class QueryEngine {
 //     这类「借用已有类型以兼容存量消费者」的做法，在协议演进里很常见，
 //     代价是未来的维护者会困惑「为什么 assistant 消息里会出现
 //     /help 的输出」。
-        // RC renders it as assistant-style text rather than a user bubble.
-        // Emitted as assistant (not the dedicated SDKLocalCommandOutputMessage
-        // system subtype) so mobile clients + session-ingress can parse it.
         if (
           msg.type === 'system' &&
           msg.subtype === 'local_command' &&
@@ -1322,6 +1322,9 @@ export class QueryEngine {
     // Track the last stop_reason from assistant messages
     let lastStopReason: string | null = null
     // Reference-based watermark so error_during_execution's errors[] is
+    // turn-scoped. A length-based index breaks when the 100-entry ring buffer
+    // shift()s during the turn — the index slides. If this entry is rotated
+    // out, lastIndexOf returns -1 and we include everything (safe fallback).
 // 译：基于引用的水位线，让 error_during_execution 的 errors[] 只包含
 //     本轮的错误。基于长度的索引在 100 条环形缓冲 shift() 时会失效 ——
 //     索引会滑动。如果这个条目被轮换出去了，lastIndexOf 返回 -1，
@@ -1354,9 +1357,6 @@ export class QueryEngine {
 //
 //     这个模式（用引用当水位线，而不是索引/长度）在日志、队列、
 //     快照增量里都适用。核心原则：**水位线要绑定到内容，不要绑定到位置。**
-    // turn-scoped. A length-based index breaks when the 100-entry ring buffer
-    // shift()s during the turn — the index slides. If this entry is rotated
-    // out, lastIndexOf returns -1 and we include everything (safe fallback).
     const errorLogWatermark = getInMemoryErrors().at(-1)
     // Snapshot count before this query for delta-based retry limiting
     const initialStructuredOutputCalls = jsonSchema
@@ -2144,6 +2144,8 @@ export class QueryEngine {
       m => m.type === 'assistant' || m.type === 'user',
     )
     // Capture for the error_during_execution diagnostic — isResultSuccessful
+    // is a type predicate (message is Message), so inside the false branch
+    // `result` narrows to never and these accesses don't typecheck.
 // 注：`edeResultType` / `edeLastContentType` 是给错误诊断用的。
 //     注释解释了为什么必须先算出来：
 //     「isResultSuccessful 是类型谓词（message is Message），所以
@@ -2163,8 +2165,6 @@ export class QueryEngine {
 //
 //     这是个「类型系统太聪明反而碍事」的例子。实际项目里遇到谓词，
 //     经常需要在判断前先提取数据 —— 这个模式值得记住。
-    // is a type predicate (message is Message), so inside the false branch
-    // `result` narrows to never and these accesses don't typecheck.
     const edeResultType = result?.type ?? 'undefined'
     const edeLastContentType =
       result?.type === 'assistant'
@@ -2228,6 +2228,10 @@ export class QueryEngine {
         ),
         uuid: randomUUID(),
         // Diagnostic prefix: these are what isResultSuccessful() checks — if
+        // the result type isn't assistant-with-text/thinking or user-with-
+        // tool_result, and stop_reason isn't end_turn, that's why this fired.
+        // errors[] is turn-scoped via the watermark; previously it dumped the
+        // entire process's logError buffer (ripgrep timeouts, ENOENT, etc).
 // 注：注释解释了这个诊断字符串的价值：
 //     「这些是 isResultSuccessful() 检查的东西 —— 如果 result 类型
 //       不是 assistant-with-text/thinking 或 user-with-tool_result，
@@ -2244,10 +2248,6 @@ export class QueryEngine {
 //     这是「错误报告的信噪比」问题：一个 result 里塞了几百条
 //     无关的历史错误，等于没有错误信息。用水位线（行 669）切出
 //     本轮的部分，才让这个字段真正可用。
-        // the result type isn't assistant-with-text/thinking or user-with-
-        // tool_result, and stop_reason isn't end_turn, that's why this fired.
-        // errors[] is turn-scoped via the watermark; previously it dumped the
-        // entire process's logError buffer (ripgrep timeouts, ENOENT, etc).
         errors: (() => {
           const all = getInMemoryErrors()
           const start = errorLogWatermark

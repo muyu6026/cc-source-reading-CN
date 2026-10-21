@@ -766,6 +766,8 @@ export function userMessageToMessageParam(
     }
   }
   // Clone array content to prevent in-place mutations (e.g., insertCacheEditsBlock's
+  // splice) from contaminating the original message. Without cloning, multiple calls
+  // to addCacheBreakpoints share the same array and each splices in duplicate cache_edits.
 // 这段注释说的是一个真实踩过的坑，值得展开：
 //
 // addCacheBreakpoints 会对同一条消息调用本函数，而它在 useCachedMC 模式下
@@ -776,8 +778,6 @@ export function userMessageToMessageParam(
 //
 // 注意「只在非缓存路径克隆」这个细节：addCache 为真时上面已经 map 出了新数组，
 // 天然是副本，不必再克隆一次（那是每次请求都要走的热路径）。
-  // splice) from contaminating the original message. Without cloning, multiple calls
-  // to addCacheBreakpoints share the same array and each splices in duplicate cache_edits.
   return {
     role: 'user',
     content: Array.isArray(message.message.content)
@@ -877,13 +877,13 @@ export type Options = {
   advisorModel?: string
   addNotification?: (notif: Notification) => void
   // API-side task budget (output_config.task_budget). Distinct from the
+  // tokenBudget.ts +500k auto-continue feature — this one is sent to the API
+  // so the model can pace itself. `remaining` is computed by the caller
+  // (query.ts decrements across the agentic loop).
 // 这条注释明确划清了两个预算的边界，值得记住：
 // taskBudget 发给 API（模型自己看），tokenBudget.ts 自己记账（客户端看）。
 // remaining 由**调用方**递减（query.ts 的 agentic 循环里），
 // 而不是在这里扣 —— 这个文件只负责「如实转发当前余额」。
-  // tokenBudget.ts +500k auto-continue feature — this one is sent to the API
-  // so the model can pace itself. `remaining` is computed by the caller
-  // (query.ts decrements across the agentic loop).
   taskBudget?: { total: number; remaining?: number }
 }
 
@@ -912,13 +912,13 @@ export async function queryModelWithoutStreaming({
   options: Options
 }): Promise<AssistantMessage> {
   // Store the assistant message but continue consuming the generator to ensure
+  // logAPISuccessAndDuration gets called (which happens after all yields)
 // 这里的写法有个必须理解的怪处：**循环不是为了拿数据，是为了让生成器跑完**。
 //
 // logAPISuccessAndDuration 在 queryModel 里位于所有 yield **之后**（行 2858）。
 // 如果调用方拿到第一条 assistant 消息就 break，生成器停在 yield 处，
 // 后面那段永远不会执行——成功日志、成本累计、资源释放全丢。
 // 所以这里的 for await 必须跑到 done，assistantMessage 只是「顺便记一下最后一条」。
-  // logAPISuccessAndDuration gets called (which happens after all yields)
   let assistantMessage: AssistantMessage | undefined
   for await (const message of withStreamingVCR(messages, async function* () {
     yield* queryModel(
@@ -1391,13 +1391,13 @@ async function* queryModel(
     options.querySource === 'verification_agent'
   const betas = getMergedBetas(options.model, { isAgenticQuery })
 
-  // Always send the advisor beta header when advisor is enabled, so
-  // non-agentic queries (compact, side_question, extract_memories, etc.)
 // advisor beta 头**无条件**发送（只要 advisor 开着），
 // 哪怕这次是压缩调用、根本没用到 advisor。
 // 原因是历史消息里可能残留 advisor 的 server_tool_use 块，
 // 不带这个头，API 会把那些块当成未知类型直接拒绝。
 // 「为了读得懂历史而声明能力」——这类兼容性考虑在协议层很常见。
+  // Always send the advisor beta header when advisor is enabled, so
+  // non-agentic queries (compact, side_question, extract_memories, etc.)
   // can parse advisor server_tool_use blocks already in the conversation history.
   if (isAdvisorEnabled()) {
     betas.push(ADVISOR_BETA_HEADER)
@@ -3237,6 +3237,14 @@ async function* queryModel(
 // 但我们用的是 raw Stream（行 1818 换的），它没有 —— 于是自己补。
 // 不补的后果很隐蔽：生成器静默返回空，上层拿到 undefined，
 // -p 模式下报一个看不出原因的 "Execution error"。
+// ⚠ 这个 stopReason 判断是防止**误报**的关键，注释给的例子特别值得记：
+//
+// 结构化输出（--json-schema）模式下，模型第一轮调 StructuredOutput 工具，
+// 第二轮只回一个 end_turn、**零个内容块**。
+// 这是完全合法的空回复，不是流坏了。
+//
+// 所以判据不能是「newMessages 为空」，必须是「为空**且**没有 stop_reason」。
+// stop_reason 有值 = 服务端明确表示「这一轮结束了」，那就信它。
       // Detect when the stream completed without producing any assistant messages.
       // This covers two proxy failure modes:
       // 1. No events at all (!partialMessage): proxy returned 200 with non-SSE body
@@ -3246,14 +3254,6 @@ async function* queryModel(
       // BetaMessageStream had the first check in _endRequest() but the raw Stream
       // does not - without it the generator silently returns no assistant messages,
       // causing "Execution error" in -p mode.
-// ⚠ 这个 stopReason 判断是防止**误报**的关键，注释给的例子特别值得记：
-//
-// 结构化输出（--json-schema）模式下，模型第一轮调 StructuredOutput 工具，
-// 第二轮只回一个 end_turn、**零个内容块**。
-// 这是完全合法的空回复，不是流坏了。
-//
-// 所以判据不能是「newMessages 为空」，必须是「为空**且**没有 stop_reason」。
-// stop_reason 有值 = 服务端明确表示「这一轮结束了」，那就信它。
       // Note: We must check stopReason to avoid false positives. For example, with
       // structured output (--json-schema), the model calls a StructuredOutput tool
       // on turn 1, then on turn 2 responds with end_turn and no content blocks.

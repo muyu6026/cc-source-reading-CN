@@ -86,7 +86,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅ | ✅ 完成 |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | —                                                                                                                                                                                           | ⬜ 待做    |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅ | 🔄 进行中 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
 
 ---
@@ -502,16 +502,66 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
+## 第 6 步（服务层）读完了吗？
+
+第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工三个：
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`withRetry.ts`](annotated/src/services/api/withRetry.ts) | 822 | 1,419 | 重试边界、退避曲线、529 白名单、无限重试模式 |
+| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153 | 329 | 发给 API 的 `context_management` 指令（**不调模型**） |
+| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) | 351 | 668 | 阈值计算、四道抑制闸门、三振熔断、session memory 优先 |
+
+合计 **1,326 行原文**，118 处批注锚点。
+
+**① `withRetry` 里的 `attempt` 变量承担了几个角色？**
+
+三个：第几次尝试（遥测用）、循环退出条件、以及被手动改写以阻止退出的开关（`attempt = maxRetries`）。正因为一个变量干三件事，才需要 `persistentAttempt` 这个第二计数器专门算退避。这是「用状态污染换控制流改动最小」的取舍。
+
+**② 为什么 529 要按 querySource 白名单决定重不重试，而「未标注来源」反而重试？**
+
+529 是服务端过载，重试会把流量放大 3–10 倍。只有用户真的在等的路径（主线程、子 agent、压缩、分类器）值得重试；摘要/标题/建议这类用户看不见的调用直接放弃。而 `undefined` 代表「来源未知」，无法判断用户在不在等，所以保守选重试 —— **已知的次要路径不重试，未知路径重试**，这两个默认值方向相反但都对。
+
+**③ `x-should-retry: true` 为什么对订阅用户不算数？**
+
+因为同一个 `true` 在不同计费形态下含义不同：订阅用户的 429 是配额窗口（几小时后才恢复），服务端说「可以重试」在字面上正确、在实践上无意义；企业用户是 PAYG，429 只是瞬时速率限制，重试有效。这个区别 header 里没有，只能靠 `isClaudeAISubscriber()` / `isEnterpriseSubscriber()` 补。
+
+**④ `apiMicrocompact.ts` 是压缩器吗？**
+
+不是。它一次模型调用都不发，只构造 `context_management.edits` 塞进请求体，让**服务端**在推理时自己清工具结果/思考轮次。好处是不破坏 prompt cache（我们这边发出去的字节不变）。这和客户端压缩（`microCompact.ts` / `compact.ts`）是两条并行的路线。
+
+**⑤ 为什么 `autoCompact` 的四道抑制闸门比阈值计算更重要？**
+
+阈值算错只是压缩早一点或晚一点；闸门缺失会造成实打实的故障：压缩触发压缩会死锁、`marble_origami` 压缩会通过模块级状态毁掉主线程已提交的日志、autocompact 和 context-collapse 会在 93% 这个点上抢同一段上下文。而且闸门必须加在**调用点**而不是 `isAutoCompactEnabled()` 里 —— 因为 reactive compact 会直接查那个函数，闸门塞进去会连 413 兜底一起关掉。
+
+---
+
 ## 继续往下读之前
 
-**第 5 步（主循环）已全部完成**：4 个文件、7,357 行原文、564 处批注锚点。
+第 6 步还剩两块主线（都很大，各自单独一轮）：
 
-下一步是第 6 步 —— 服务层。主线建议先读这三块（顺序有讲究，因为它们是主循环的下游）：
+- [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts)（1,705 行）—— 传统摘要压缩的本体：怎么把对话变成摘要、怎么替换消息数组。`autoCompact.ts` 只是它的调用方
+- [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts)（530 行）+ [`sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts)（630 行）—— 客户端微压缩，以及 `autoCompact` 里那条「先试 session memory」的路径
+- [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts)（3,348 行）—— MCP 协议接入，`claude.ts` 里所有 `hasPendingMcpServers` / `mcp_instructions_delta` 的源头
 
-- [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) —— 五层压缩管线的实际实现。`query.ts` 只负责「什么时候压」，这里决定「怎么压」。同目录的 [`apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) 是唯一会调模型的一层
-- [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) —— 刚读完的 `claude.ts` 每一步都在调它，但它的内部（退避算法、529 计数、`FallbackTriggeredError` 的抛出时机）还没看
-- [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) —— MCP 协议接入。`claude.ts` 里那些 `hasPendingMcpServers`、`mcp_instructions_delta` 都指向这里
+告诉我下一个读哪个，或者直接说「继续」我就按上面顺序往下推。
 
-读法建议和这一轮相反：`claude.ts` 是先读协议本体再看容错，服务层要**先看它的入口被谁调用**（`grep` 调用点），再看实现 —— 因为服务层的函数往往只有一个调用方，孤零零读实现不容易看出「为什么需要这个参数」。
+---
 
-告诉我「继续第 6 步」或点名某个模块，我就接着批注。
+## 这一轮修的一个工具缺陷（第三类结构破坏）
+
+**中文批注插在 `//` 注释段中部，把英文句子劈成两半。**
+
+`annotate.py` 之前只防「插进 `/* */` 块注释」和「插进多行模板字符串」，但 `//` 连续注释同样成段。锚点落在段中部时，结果是：
+
+```
+// When clearAllThinking is set (>1h idle = cache miss), keep only the last
+// 中文批注……
+// thinking turn — the API schema requires value >= 1, and omitting the edit
+```
+
+语法完全合法，`check-fidelity.py` 也看不出来（注释一行都没少），但读的人得把上下两截英文自己接起来。这类破坏比前两类更隐蔽，因为它**不改变行为也不丢内容**，只是把一句话剪断了。
+
+修法：`before` 自动挪到段首、`after` 自动挪到段尾（单行注释段不产生位移）。全量重新生成后共纠正 **72 处**，其中 `bashSecurity.ts` 一个文件 42 处、`query.ts` 17 处 —— 说明这个错误在之前几轮里一直在积累，只是没人从「句子被剪断」这个角度看。
+
+顺带修了上一轮 `claude.ts` 的一处：`Options.taskBudget` 那四行英文注释被劈了（提交 `6b09281` 引入）。
