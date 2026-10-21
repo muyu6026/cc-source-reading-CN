@@ -65,12 +65,22 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 不支持注释的文件（`.json`）改用 `<原名>.annotated.md`，用「原片段 + 中文说明」对照。Markdown 文件（如仓库自述 `README.md` → `README.annotated.md`）直接在每段英文下方写中文。
 
-**怎么验证没改坏原文**：跑 `python scripts/check-fidelity.py`。它把批注版拆成「代码行 / 注释行 / 批注行」三堆，然后要求：
+**怎么验证没改坏原文**：跑 `python scripts/check-fidelity.py`。它把批注版拆成「代码行 / 注释行 / 批注行」三堆，然后六条判据：
 
-1. 代码行与原文**逐行完全相等**（少一个 `}` 也会被点名）
-2. 原文每行注释都按原顺序出现在批注版里（英文被改写会被抓出来）
+| # | 判据 | 拦什么 |
+| --- | --- | --- |
+| 1【硬】 | 代码行与原文**逐行完全相等** | 少一个 `}` 也会被点名 |
+| 2【硬】 | 原文每行注释按原顺序出现在批注版里 | 英文被改写、被挤出顺序 |
+| 3【硬】 | 块注释内部不许出现中文 | `/** */` 被中文从中间截断（语法合法，但难读） |
+| 4【硬】 | 多行模板字符串内部不许出现中文 | 注释变成提示词正文（**代码行为被改变**） |
+| 5【硬】 | 不劈开未结束的多行表达式 | `const x =` 后面插一段再给值 |
+| 6【硬】 | 批注版不得含控制字符 | 批注里的 `\n`、`\0`、`\x1b` 被 Python 转义成真实字节（NUL 会让 `grep` 把文件当二进制，ESC 直接把转义序列写进源码） |
 
-只允许变多，不允许变样。
+另外还有一条软统计：每个文件多了多少行注释，用来发现「批注密度突然异常」。
+
+然后跑 `python scripts/check-links.py` 检查所有 Markdown 链接（源码链接 + 文档内链）。
+
+**总原则：只允许变多，不允许变样。**
 
 ---
 
@@ -88,7 +98,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />`screen.ts` / `render-node-to-output.ts` / `log-update.ts` ⬜ | ⏳ React 侧完成 |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅ | ✅ 三上三下全通 |
 
 ---
 
@@ -912,15 +922,20 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 ## 第 8 步（终端渲染器）读完了吗？
 
-`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。这一轮只做了 **React 侧**三份，绘制侧（`screen.ts` 1,486 + `render-node-to-output.ts` 1,462 + `log-update.ts` 773）还没动。
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。六个文件、6,439 行原文，读完之后「一条用户输入 → 一屏字符」这条路是通的。
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
 | [`reconciler.ts`](annotated/src/ink/reconciler.ts) | 512 | 727 | React 19 自定义 renderer 的 host config：14 个类型参数、commit 阶段算布局、release 顺序 |
 | [`dom.ts`](annotated/src/ink/dom.ts) | 484 | 685 | 七个元素名的极简 DOM、yoga 桥（两棵树两套下标）、文本测量、脏标记冒泡 |
 | [`ink.tsx`](annotated/src/ink/ink.tsx) | 1,722 | 2,470 | 帧循环九阶段、双缓冲、diff 与 optimize、光标定位、终端模式、退出清理 |
+| [`screen.ts`](annotated/src/ink/screen.ts) | 1,486 | 2,167 | 打包格子（2 个 int 装一格）、样式池的位标签、宽字符四态、blit/shift/clear、两帧 diff |
+| [`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) | 1,462 | 2,180 | 沿树走一遍：blit / 清空 / 重画三选一，ScrollBox 的三遍渲染与 DECSTBM 快路径 |
+| [`log-update.ts`](annotated/src/ink/log-update.ts) | 773 | 1,193 | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型 |
 
-合计 **2,718 行原文**，125 处批注锚点。
+合计 **6,439 行原文**，286 处批注锚点。
+
+**这个目录可以按「三加三」记**：前三份是**上半场**（React 元素 → 布局树 → 屏幕缓冲），后三份是**下半场**（屏幕缓冲 → 终端字节）。分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。
 
 **㊳ 终端里没有排版引擎，那 `<Text>` 的高度是谁算出来的？**
 
@@ -958,6 +973,94 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 第三条里最值得记的细节：Kitty 键盘协议是**栈**（`CSI >1u` 压栈），所以必须 pop-before-push，否则每次空闲都加一层，退出时排不干净，`Ctrl+C` 会以转义序列的形式漏给 shell。
 
+**㊸ 一个整数的**最低位**能干什么？`screen.ts` 用它省掉了每帧几万次判断。**
+
+`StylePool.intern` 把 ID 算成 `(rawId << 1) | 标志位`，标志位表示「这个样式画在**空格**上有没有视觉效果」（背景色、反色、下划线等）。取回时 `>>> 1` 把标签剥掉。
+
+下游 `visibleCellAtIndex` 对整格做一次位与 `(word1 & 0x3fffc) === 0`——这一个操作同时问了三个问题：这是空格吗、有超链接吗、样式在空格上可见吗。全否就整格跳过不写。
+
+这是「把语义塞进 ID 的冗余位」。代价是 `get()` 多一次右移，换掉的是每格每帧一次数组查找。同一套路在 `screen.ts` 里出现三次（还有 `softWrap` 把「上一行内容结束在哪」存在下一行身上、`hyperlinkId=0` 表示无链接）。
+
+**㊹ 宽字符占两格，覆盖其中任意一格会怎样？**
+
+三种残形态，后果不同：
+
+| 谁被覆盖 | 残留 | 症状 |
+| --- | --- | --- |
+| 宽字符被窄字符顶掉 | 后面那个 `SpacerTail` 成孤儿 | 这一列**保持上一帧的内容**（渲染时跳过占位格，没人写它） |
+| 占位格被顶掉 | 前面那个宽字符变成「占一格的宽字符」 | **光标模型失步** —— 终端仍按两列画，之后所有坐标都偏 |
+| 宽字符盖宽字符 | 对方更靠后的占位格成孤儿 | 那一列残留旧内容 |
+
+第二条最严重：它不是显示错，是**我们和终端对「第 x 列在哪」的理解分了叉**。所以 `setCellAt` 里那三段清理都必须发生在写入时，而不是「渲染前统一扫一遍」—— 扫描是全屏的，写入是单格的。
+
+**㊺ blit 的前提是「上一帧这块没变」。父节点干净为什么不等于子树干净？**
+
+正常情况下 React 的 dirty 是向上冒泡的（子脏父必脏），所以父节点干净 ⇒ 子树没变。但有三条路径**绕过冒泡**，每一条都在 `render-node-to-output.ts` 里留了一个补丁：
+
+- **`display:none`**：`hideInstance` 的 markDirty 只往上走，子孙的 dirty 保持 false，cache 里还留着隐藏前的位置。取消隐藏时若位置恰好没变，blit 检查全过 → 从已被清空的位置拷回空白 → **内容消失**（只在位置没变时出现，挪一下窗口反而好了）
+- **`pendingScrollDelta`**：滚动还没排空，位置即将变而 dirty 已被清
+- **被裁剪的子节点**：cache 被删了（为了防「重新进入视口时对别人的位置发 clear」），但它不是 dirty
+
+所以 blit 那八个条件里，有五个是在确认「我凭什么相信这块没变」，不是「这块变了吗」。
+
+**㊻ 光标下移一行，`LF` 和 `CSI n B` 有什么区别？**
+
+在虚拟模型里都是 `y += 1`，但真实终端里：`CSI CUD`（cursor down）**在视口底边会停住且不滚动**——规范就是这么定的，它只移动光标不改内容。而 `LF` 会滚动。
+
+所以 `renderFrameSlice` 推进到新行时必须用 `CR + LF`。用 CUD 的后果：光标已经到底了，再要求它往下走它不动，而虚拟光标以为它动了 → 两者永久差一行 → 之后每帧都错位。
+
+这是整个渲染层最典型的一类 bug：**两个操作在模型里等价，在终端里不等价**。同类的还有「清 N 行之后光标在哪」（少算一行就整块上移）、「写满最后一列时是否已经换行」（DEC 的 pending wrap，`moveCursorTo` 里专门要发一个 CR 把它消化掉）。
+
+**㊼ 全量重绘会闪，那什么时候非闪不可？**
+
+四个判据，都写在 `log-update.ts` 里，每个调用点都解释了「为什么这次躲不掉」：
+
+| 场景 | 为什么不能增量 |
+| --- | --- |
+| 终端 resize | 增量更新要预测「重排后每行长什么样」，等于重算一遍换行 |
+| 内容从「超出视口」缩到「视口内」 | 顶部那些行已经在 scrollback 里，而清屏指令**不能把 scrollback 拉回视野** |
+| 改动落在 scrollback 区域 | 光标到不了那里 —— 跳过这一格会在历史里留一个错字，用户往回翻就看见 |
+| 要清的行数 > 视口高度 | 同理，`eraseLines` 只能在视口内工作 |
+
+函数名直接叫 `fullResetSequence_CAUSES_FLICKER`。**当某个操作有不可避免的副作用时，把副作用写进名字**，比写注释更难被忽略。
+
+---
+
+**㊽ 收口题：一个汉字从 React 元素到终端上的一格，中间换了几个身份？**
+
+五次，每次都由不同的层负责：
+
+1. **React 元素** —— `<Text>本</Text>`。此时它还只是一个「有样式的子节点」，连尺寸都没有
+2. **yoga 节点** —— `dom.ts` 给它建布局盒。但 yoga **不识字宽**，所以 `<Text>` 上挂了 measure 回调，把子树展平、折行、量高度
+3. **字符串片段** —— `render-node-to-output.ts` 的 `squashTextNodesToSegments` 把它变成 `{ text: '本', styles, hyperlink }`，换行、套样式、缩进之后是一个带转义序列的字符串
+4. **两个 int** —— `output.write` 把它 tokenize 成格子，`setCellAt` 写进 `cells`：`word0 = charPool.intern('本')`，`word1 = styleId<<17 | hyperlinkId<<2 | Wide`，并在下一列补一个 `SpacerTail`
+5. **字节** —— `log-update.ts` 比较前后两帧，发现这格变了 → 发 `CSI x;y H`（或相对移动）+ SGR 转移 + `本`，然后**光标前进两列**
+
+每一步都有一次「信息丢失」，也都有一次「补回来」：
+
+- 第 2 步丢了字符内容（yoga 只见盒子），靠 measure 回调补
+- 第 3 步丢了「这是原文的换行还是折行的换行」，靠 `softWrap` 补
+- 第 4 步丢了「这个格子是不是真的写过了」（未写和写了空格都是全 0），靠 `softWrap` 的「内容结束列」补
+- 第 5 步丢了「终端认为这个字符多宽」，靠 `needsWidthCompensation` 补（老终端的 wcwidth 表更新很慢，emoji 会被算成 1 列 → 用 CHA 强制对齐光标）
+
+读完这条链再回头看第 1～7 步，会发现同一个模式反复出现：**凡是有「两份状态」的地方（我们的模型 vs 终端的实际、客户端预算 vs 服务端预算、设计声明的数值 vs 开发落地的数值），所有复杂度都在处理两者的偏差。**
+
+### 这一轮修的一个判据误报
+
+`screen.ts` 的原文里有这么一行英文注释，举例时用了汉字：
+
+```
+// Scenario: [a, 💻, spacer] → [本, spacer, ORPHAN spacer] when
+```
+
+`check-fidelity.py` 判定「批注版行」的规则是「这行注释里有没有中日韩字符」。这一行有一个「本」，于是被判成中文批注、从「原文注释」那一堆里排除，然后判据 2 报「原文注释丢失 1 行」。
+
+**这是误报，不是批注出错。** 修法是把判据从「含有中日韩字符」改成「以中日韩字符为主」（占比 ≥ 15%）：中文批注行里中文通常占 30%–80%，而英文注释夹一两个汉字不到 5%，两边分得开。
+
+这是本项目第三次「校验工具本身出错」：前两次分别是模板字符串扫描器被布尔量骗过（46 行批注一直错位）、`check-links.py` 用 `isfile` 判目录链接。
+
+规律很清楚：**当一个判据写成「含有某类字符」时，先想一遍「正常内容里会不会恰好含有它」。** 边界情况的误报比漏报更难发现，因为它只在特定输入上出现，而且报告的信息离真正原因很远。
+
 ---
 
 ## 继续往下读之前
@@ -984,18 +1087,24 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                                           └─ runAgent（同一套 query 循环，换个身份跑）
 
 （以上全是「业务逻辑」。它们最终都变成 React 元素，交给下面这一层画到屏幕上：）
+
+```
 src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测量）
                                           → ink.tsx（一帧九阶段：渲染 → diff → 写终端）
+                                                └─ render-node-to-output.ts（树 → 格子）
+                                                      └─ screen.ts（打包格子 / blit / shift / 两帧 diff）
+                                                            └─ log-update.ts（差异 → 终端字节）
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 的**绘制侧**还没做：`screen.ts` 1,486（字符格子/样式池/宽字符）+ `render-node-to-output.ts` 1,462（把布局树画成格子）+ `log-update.ts` 773（两份缓冲之间的最小写入序列）。这三份是「React 侧」的下游，接上就完整了
-- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等。它们是主线上的螺丝，单独读价值不高，遇到具体问题时再翻
+- [`src/ink/`](source/src/ink/) 还差 30 来个百行级小件：`parse-keypress.ts`（键序列 → 事件）、`render-border.ts`（边框字符）、`selection.ts`（拖选）、`optimizer.ts`（写入合并）、`wrapAnsi.ts` 等。它们是主线的螺丝，遇到具体问题时再翻
+- [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
+- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 - [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-到这里，**第 1 到第 8 步的主线全部走完**：38 个文件、约 4.97 万行原文、829 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一屏字符格子写进终端，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完**：41 个文件、38,850 行原文（批注版 66,677 行）、2,010 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int` 写进终端，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 

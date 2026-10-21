@@ -49,9 +49,25 @@ KNOWN_OMIT = {
 ANN_PREFIXES = ('// 译：', '// 注：', '// ─', '// ═')
 
 # 批注常写成「// ═══ 标题 ═══ + 若干缩进续行」的块，续行没有固定前缀。
-# 判据：批注侧含中日韩字符的注释行都算批注（原文代码里的注释是纯英文）。
+# 判据：批注侧以中日韩字符为主的注释行算批注（原文代码里的注释是纯英文）。
 # 只对 annotated 侧启用，避免原文里万一有中文注释时被判成批注而漏检。
 _CJK = re.compile(r'[\u3400-\u4dbf\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]')
+_NONSPACE = re.compile(r'\S')
+
+# 「以中日韩字符为主」而不是「含有中日韩字符」。
+# 起因：screen.ts 原文有一行英文注释举例用了汉字
+#   // Scenario: [a, 💻, spacer] → [本, spacer, ORPHAN spacer] when
+# 旧的「含有即算批注」把它归到批注侧，于是判据 2 报原文注释丢失 —— 误报。
+# 中文行里中文占比通常 30%-80%，而英文行夹一两个汉字不到 5%，
+# 用 0.15 这个门限两边都分得开。
+_CJK_RATIO = 0.15
+
+
+def _mostly_cjk(s):
+    total = len(_NONSPACE.findall(s))
+    if total == 0:
+        return False
+    return len(_CJK.findall(s)) / total >= _CJK_RATIO
 
 
 def read_lines(path):
@@ -65,7 +81,7 @@ def classify(line, cjk_as_annotation=False):
     if s.startswith(ANN_PREFIXES):
         return 'annotation'
     if s.startswith('//') or s.startswith('/*') or s.startswith('*'):
-        if cjk_as_annotation and _CJK.search(s):
+        if cjk_as_annotation and _mostly_cjk(s):
             return 'annotation'
         return 'comment'
     # 行尾注释也算代码行（行尾注释的变化会在注释检查里被抓到）
