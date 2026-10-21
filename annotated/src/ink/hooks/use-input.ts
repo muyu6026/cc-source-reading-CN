@@ -1,0 +1,134 @@
+import { useEffect, useLayoutEffect } from 'react'
+import { useEventCallback } from 'usehooks-ts'
+import type { InputEvent, Key } from '../events/input-event.js'
+import useStdin from './use-stdin.js'
+
+type Handler = (input: string, key: Key, event: InputEvent) => void
+
+type Options = {
+  /**
+   * Enable or disable capturing of user input.
+   * Useful when there are multiple useInput hooks used at once to avoid handling the same input several times.
+   *
+   * @default true
+   */
+  isActive?: boolean
+}
+
+/**
+ * This hook is used for handling user input.
+ * It's a more convenient alternative to using `StdinContext` and listening to `data` events.
+ * The callback you pass to `useInput` is called for each character when user enters any input.
+ * However, if user pastes text and it's more than one character, the callback will be called only once and the whole string will be passed as `input`.
+ *
+ * ```
+ * import {useInput} from 'ink';
+ *
+ * const UserInput = () => {
+ *   useInput((input, key) => {
+ *     if (input === 'q') {
+ *       // Exit program
+ *     }
+ *
+ *     if (key.leftArrow) {
+ *       // Left arrow key pressed
+ *     }
+ *   });
+ *
+ *   return …
+ * };
+ * ```
+ */
+// 【两条 effect，各管一件，不能合并】
+//
+//   useLayoutEffect  管 raw mode（开/关终端的逐字节模式）
+//   useEffect        管监听者注册（挂到 internal_eventEmitter 上）
+//
+// 为什么 raw mode 必须用 layout：layout effect 在 React 的 commit 阶段
+// **同步**跑，而 useEffect 会被调度到下一个 tick。用一个 tick 的窗口
+// 就足够让终端的行规程把按键回显一遍 —— 用户看到自己敲的字闪一下，
+// 光标也露出来了。注释里这段写得很具体，不是理论问题。
+//
+// 反过来监听者注册用普通 useEffect 就行：晚一个 tick 注册，只是
+// 「这一 tick 里的按键收不到」，不会造成视觉问题。
+const useInput = (inputHandler: Handler, options: Options = {}) => {
+  const { setRawMode, internal_exitOnCtrlC, internal_eventEmitter } = useStdin()
+
+  // useLayoutEffect (not useEffect) so that raw mode is enabled synchronously
+  // during React's commit phase, before render() returns. With useEffect, raw
+  // mode setup is deferred to the next event loop tick via React's scheduler,
+  // leaving the terminal in cooked mode — keystrokes echo and the cursor is
+  // visible until the effect fires.
+  useLayoutEffect(() => {
+    if (options.isActive === false) {
+      return
+    }
+
+    setRawMode(true)
+
+    return () => {
+      setRawMode(false)
+    }
+  }, [options.isActive, setRawMode])
+// raw mode 是**引用计数**的（App.rawModeEnabledCount），不是布尔开关。
+// 所以这里放心地「挂载时 +1、卸载时 -1」，多个 useInput 同时存在
+// 不会互相关掉。isActive === false 时干脆不计数 —— 否则一个
+// 被禁用的输入框也会让终端停在 raw 模式，Ctrl+C 就交给应用而不是
+// 交给 shell 了。
+//
+// 注意第 51 行的早退：isActive 为 false 时连 cleanup 都不返回。
+// 这是对的（没加过就不该减），但读的时候容易以为漏了 cleanup。
+
+  // Register the listener once on mount so its slot in the EventEmitter's
+  // listener array is stable. If isActive were in the effect's deps, the
+  // listener would re-append on false→true, moving it behind listeners
+  // that registered while it was inactive — breaking
+  // stopImmediatePropagation() ordering. useEventCallback keeps the
+  // reference stable while reading latest isActive/inputHandler from
+  // closure (it syncs via useLayoutEffect, so it's compiler-safe).
+// 【为什么不把 isActive 放进下面那个 effect 的依赖里】
+//
+// EventEmitter 的监听顺序 = 注册顺序。如果 isActive 变化时重新注册，
+// 这个监听者会被**追加到数组末尾** —— 于是它从「先注册者」变成了
+// 「后注册者」，stopImmediatePropagation 的语义跟着变：
+// 本来它能挡住后面的监听者，现在变成了被前面的人挡住。
+//
+// 正确做法是「注册一次，用闭包读最新的 isActive」。useEventCallback
+// 提供稳定引用 + 最新闭包（它自己也靠 layout effect 同步，所以对
+// React Compiler 是安全的）。
+//
+// 这是「顺序即契约」的又一例：数组下标被当成了优先级。
+  const handleData = useEventCallback((event: InputEvent) => {
+    if (options.isActive === false) {
+      return
+    }
+    const { input, key } = event
+
+    // If app is not supposed to exit on Ctrl+C, then let input listener handle it
+    // Note: discreteUpdates is called at the App level when emitting events,
+    // so all listeners are already within a high-priority update context.
+    if (!(input === 'c' && key.ctrl) || !internal_exitOnCtrlC) {
+      inputHandler(input, key, event)
+    }
+// 这一行的布尔逻辑值得拆开看，因为它看着像「允许 ctrl+c」，
+// 实际是**吞掉** ctrl+c：
+//
+//   !(input === 'c' && key.ctrl)   → 不是 ctrl+c，正常处理
+//   !internal_exitOnCtrlC          → ctrl+c 但应用不负责退出，也正常处理
+//
+// 两个都不成立（= 是 ctrl+c 且 exitOnCtrlC 为 true）时，handler 不被调用。
+// 也就是说：**exitOnCtrlC 为 true 时，组件收不到 ctrl+c**。
+// 想在退出前做点事（比如存草稿），只能把 exitOnCtrlC 关掉自己处理 ——
+// 这是个真实的行为约束，不在文档里，只在代码里。
+  })
+
+  useEffect(() => {
+    internal_eventEmitter?.on('input', handleData)
+
+    return () => {
+      internal_eventEmitter?.removeListener('input', handleData)
+    }
+  }, [internal_eventEmitter, handleData])
+}
+
+export default useInput

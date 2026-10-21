@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅ | ✅ 五十六份全通<br />（含 `termio/` 十个、`layout/` 四个） |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
 
 ---
 
@@ -927,7 +927,7 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 ## 第 8 步（终端渲染器）读完了吗？
 
-`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），19,842 行。到这一批为止已批注 **五十六份、16,140 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），19,842 行。**这个目录现已全部批注完：96 个文件、19,842 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
@@ -1426,6 +1426,128 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 所以最后一条用的是最保守的白名单，而且注释里带着事故记录。这种「同一个人在同一份文件里对三件事采取三种保守程度」的写法，比任何设计文档都清楚。
 
+## `ink/` 的交互原语读完了吗？七道自测题
+
+这一批是 `ink/` 的最后 40 个文件：`events/` 十个、`hooks/` 十二个、`components/` 十八个，**3,717 行原文（批注版 5,340 行）、177 处锚点**。
+
+到这里 `src/ink/` **整个目录清零**：96 个文件、19,842 行，一份不剩。
+
+它们回答的是「渲染器之上那一层」—— 前面二十几批讲的是「怎么把一个字符画到格子里」，这批讲的是「一次按键怎么落到某个组件上」「光标该停在哪一列」「滚动为什么不能走 React」。
+
+| 分组 | 文件 | 它回答的问题 |
+| --- | --- | --- |
+| 事件基座 | `events/event.ts` / `terminal-event.ts` | 两套继承线的根；传播控制的三个标志 |
+| 派发 | `events/dispatcher.ts` / `emitter.ts` | 一趟收两个方向；React 优先级从哪读 |
+| 事件类 | `input-event.ts` / `keyboard-event.ts` / `click-event.ts` / `focus-event.ts` / `terminal-focus-event.ts` | 按键怎么翻译；点击为什么不算 DOM 事件 |
+| 事件表 | `events/event-handlers.ts` | prop 名与事件类型的双向映射（含两处缺口） |
+| 输入 | `components/App.tsx`（658 行） | stdin 的唯一拥有者：模式宣示、批处理、鼠标状态机 |
+| 组件 | `Box.tsx` / `Text.tsx` / `ScrollBox.tsx` / `AlternateScreen.tsx` / `Button.tsx` | 布局容器、文本叶子、命令式滚动、全屏、交互原语 |
+| hooks | `use-input` / `use-selection` / `use-declared-cursor` / `use-terminal-viewport` / `use-animation-frame` / `use-interval` | 订阅的时机、槽位的稳定性、可见性判定 |
+| 杂项 | `Link` / `NoSelect` / `RawAnsi` / `Newline` / `Spacer` / 五个 context | 各自一个终端特有的坑 |
+
+**77 一次按键为什么会同时触发 `useInput` 和 `onKeyDown`？两套事件继承线的根分别在哪？**
+
+`App.tsx` 的 `processKeysInBatch` 对每个按键做两件事（第 506-510 行）：`emitter.emit('input', new InputEvent(item))` 走旧路径，`dispatchKeyboardEvent(item)` 走新路径。**同一个组件如果既用 `useInput` 又挂 `onKeyDown`，会收到两次。**
+
+不是过渡期的疏忽，是刻意的兼容层：`useInput` 是公开 API，`onKeyDown` 是 DOM 风格的新接口。
+
+两套继承线：
+
+- `Event`（11 行，只有「能不能喊停」）→ `InputEvent` / `ClickEvent` / `TerminalFocusEvent`
+- `TerminalEvent`（DOM 风格：target / phase / bubbles）→ `KeyboardEvent` / `FocusEvent`
+
+`terminal-event.ts` 的类注释自己承认是半迁移：「so existing event types can migrate later」。所以 `onClick` 的冒泡是 `hit-test.ts` 里手写的 while 循环，和 `onKeyDown` 的 Dispatcher 完全不共享实现 —— 行为看着一样，代码毫无关系。
+
+**78 `App.tsx` 里「启用扩展按键」受门控、「禁用」却不受门控 —— 为什么这是个坑？**
+
+因为 `DISABLE_KITTY_KEYBOARD` 是 `CSI < u`，语义是 **pop**（从键盘协议栈弹一层），不是「关掉」。而 `ENABLE_KITTY_KEYBOARD` 是 `CSI > 1 u`，是 **push**。
+
+于是：门控判成 false（白名单漏了某个终端）但我们仍然 pop 了 —— 弹出的是**外层**（用户的 shell 或上层应用）push 的那一层。症状出现在「退出 Claude Code 之后，另一个程序里键盘行为变了」，极难归因。
+
+正确写法本该是「记录有没有 push 过」。当前不是。这一对必须对照着读，单看任何一行都合理。
+
+**79 50ms 的 flush 定时器为什么会把机会让给 `readable`？全文件还有哪两处在「用时间猜状态」？**
+
+因为 Node 的事件循环里 **timers 阶段先于 poll 阶段**。一次重渲染阻塞超过 50ms 时，续块明明已经在缓冲区里，定时器却先跑 —— 于是完整的鼠标序列被劈成「一个假的 Esc + 一截尾巴」。
+
+补丁是问一句事实：`stdin.readableLength > 0` 就**重新装定时器**，让下一轮 `readable` 拿到它。比把超时调大可靠（调大只让另一个方向的延迟变差）。
+
+三处「用时间猜状态」：
+
+| 判据 | 值 | 猜的是什么 | 猜错的代价 |
+| --- | --- | --- | --- |
+| `NORMAL_TIMEOUT` | 50ms | 转义序列还有没有续块 | 序列被劈开（已用 readableLength 补） |
+| `PASTE_TIMEOUT` | 500ms | 粘贴是不是还在继续 | 长粘贴被切成几段 |
+| `STDIN_RESUME_GAP_MS` | 5000ms | tmux/ssh 是不是断过 | 重连后鼠标失效 |
+
+第三个最无奈：tmux detach 再 attach、ssh 重连、合盖唤醒，终端都会重置 DEC 私有模式，但**没有任何信号到达进程**。唯一可观测的就是「安静了多久」。
+
+**80 `bold` 和 `dim` 为什么要在类型层面互斥？**
+
+因为 **SGR 22 一次取消两者**（"normal intensity"，一对二）。终端里没有「只关掉 dim、保留 bold」的办法 —— 这和 `termio/sgr.ts` 里那条「`22` 一对二」是同一件事，只是那边在解析时承认限制，这边在构造时就禁止。
+
+实现手法值得记：`bold?: never` 那一支是关键。写 `bold?: boolean; dim?: boolean` 是拦不住的。
+
+**81 `ScrollBox` 为什么绕过 React？绕过之后靠什么保证不出错？**
+
+滚轮一次拨动几十个事件，走 state 就是几十次重渲染 + 完整 yoga 布局。所以直接改 DOM 节点上的 `scrollTop` → 标脏 → 调根节点的节流渲染，`reconciler` 一次都不跑。
+
+代价是**没有 reducer 帮忙保证一致性**，于是有四个字段必须手工协调：
+
+- `scrollTop` / `pendingScrollDelta`（累加器） / `scrollAnchor`（延迟读取的寻位） / `stickyScroll`（粘底）
+
+`scrollTo` 要一次清掉另外三个，`scrollBy` 要清掉 anchor 但累加 delta。少清任何一个都会打架：比如滚轮累加时调 `scrollTo`，累加量会在渲染时又把它推开。
+
+还有一个细节：`scrollMutated` 里用 `queueMicrotask` 合并 —— 因为 `scheduleRenderFrom` 有自己的 leading edge，每个事件都直接调的话，第一个事件就渲染了「中途状态」。
+
+**82 这一批有几处「零读者的扩展点」？为什么会有这么多？**
+
+三处，全是同一类：
+
+| 位置 | 状态 |
+| --- | --- |
+| `terminal-event.ts` 的 `_prepareForTarget` | **零覆写**，但 Dispatcher 每个监听者都调一次 |
+| `dispatcher.ts` 的 `dispatchContinuous` | 零调用；连带 `ContinuousEventPriority` 分支够不着 |
+| `dispatcher.ts` 的 `getEventPriority` | 表里 7 行只有 keydown / focus / blur 能走到（click 走 hit-test 手写冒泡，paste 的事件类缺失，scroll / resize / mousemove 根本没有代码构造这类事件） |
+
+共同点：**基础设施先建好，需求从旁边绕过去了**。`_prepareForTarget` 本想解决「点击坐标要按 handler 重算」，最后在 `hit-test.ts` 的循环里顺手做了；`dispatchContinuous` 本想给滚轮用，最后滚轮被 `parse-keypress` 当成按键处理了。
+
+查法还是那一条：每个导出符号 grep 一次，只数「定义处以外」的命中。
+
+**83 鼠标的 release 丢了，为什么要三个恢复点？一个不够因为谁？**
+
+三个恢复点覆盖「用户去哪了」的三种情况：
+
+1. **失焦**（`FOCUS_OUT`）—— 切到别的应用了
+2. **无按钮移动**（mode-1003）—— 松在窗口外又回来了
+3. **新的按下**（mode-1002）—— 老终端没有无按钮移动
+
+一个不够是因为 **tmux 默认不转发焦点事件**（要 `focus-events on`），第 1 个在 tmux 里直接失效，第 2 个才是主力。而没有 release 的后果很具体：`isDragging` 卡在 true，拖选不结束，拖选滚动的定时器一直跑到边界。
+
+### 顺带挖出来的两个「源码不完整」的证据
+
+**一、`events/event-handlers.ts` 的两个 import 指向空气。**
+
+第 4、5 行引用 `./paste-event.js` 与 `./resize-event.js`，但 `events/` 目录下只有十个文件，这两个**不存在**。`import type` 编译后被抹掉，所以运行时不报错，只有 `tsc` 会报 "Cannot find module"。
+
+这是「还原过程丢了东西」的直接证据 —— 这份源码是从打包产物 + sourcemap 反推的，这两个模块要么被内联进别的 chunk 没被单独还原，要么真的没了。后果是 `onPaste` / `onResize` 有 prop 名、有映射表条目，但没有对应的事件类；而且 Dispatcher 实际只派发 keydown/focus/blur，就算补回来也没人构造它。
+
+**二、`useHasSelection` 直接把裸方法传给了 `useSyncExternalStore`。**
+
+`ink.hasTextSelection` 和 `ink.subscribeToSelectionChange` 在 `ink.tsx` 里是**原型方法**（`hasTextSelection(): boolean {`，不是箭头函数类字段），而 React 调 `getSnapshot()` 时没有接收者 —— 严格模式下读 `this.selection` 会抛错。
+
+同一份文件第 71-84 行，作者对每个方法都包了一层箭头（`() => ink.hasTextSelection()`），**唯独这里没包**。是漏了，还是 `Ink` 的方法在实际构建里被绑定过（源码看不出这一点），光读源码无法判定 —— 但「同文件里两种写法并存」本身就是信号。
+
+### 这一批还有一个观察：注释密度和坑的密度成正比
+
+三个文件放一起看很有意思：
+
+- `ScrollBox.tsx`：12 个方法的接口，8 个带多行说明，每一条都在解释一个踩过的坑（`scrollToElement` 为什么不能烘焙数字、`getFreshScrollHeight` 为什么需要「新鲜」版本）
+- `terminal-event.ts` / `dispatcher.ts`：注释在解释「为什么和浏览器默认值相反」（`bubbles` 默认 true）
+- `App.tsx`：注释里带具体数字（44 次重渲染、1402ms 帧间隔、85+32='u' 的坐标巧合）
+
+反过来说：**注释最少的文件（`use-app.ts` / `Spacer.tsx`）恰好是没有坑的文件**。读代码时这是一个可用的信号 —— 一个 200 行的文件如果注释寥寥，通常不是「作者不爱写注释」，是「这段代码不需要解释」。
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1484,11 +1606,11 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 根目录 + `layout/` 已全部清空（含上一条提到的全部小件）。剩下三类共 40 个文件、3,702 行：`components/`（18 个，`App.tsx` 657 行最大）、`hooks/`（12 个）、`events/`（10 个）—— 都是交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox` / 事件派发），比 `components/` 更薄、更接近框架
+- [`src/ink/`](source/src/ink/) **整个目录已清零**：96 个文件、19,842 行，根目录 43 + `layout/` 4 + `termio/` 9 + `events/` 10 + `hooks/` 12 + `components/` 18。渲染器、样式层、转义解析、输入侧、交互原语，一条不缺
 - [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：107 个文件、51,260 行原文（批注版 85,451 行）、2,698 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩**：147 个文件、54,977 行原文（批注版 90,791 行）、2,875 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1499,8 +1621,8 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
 - **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`src/ink/` 剩下 40 个交互原语** —— `components/` 18 + `hooks/` 12 + `events/` 10，共 3,702 行。`App.tsx`（657 行）是 stdin 总入口、`events/dispatcher.ts`（233 行）是事件派发、`ScrollBox.tsx`（236 行）是滚动容器 —— 这三个补完，`ink/` 就彻底清零了
-- **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
+- **`src/components/`**（4.2 万行，389 个文件）—— 唯一剩下的大块。具体界面组件，读它们得到的是产品逻辑而不是架构。真要读，优先 `PromptInput`（输入框那一套，和 `useInput` / `useDeclaredCursor` 直接接壤）和 `Messages`（消息渲染，接 `RawAnsi` / `Ansi` / `NoSelect`）
+- **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
 
 ---
 
