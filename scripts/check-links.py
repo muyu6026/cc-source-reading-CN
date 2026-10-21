@@ -48,7 +48,10 @@ for f in FILES:
                 bad.append((f, t, '文档不存在'))
             continue
         src_links += 1
-        if not os.path.isfile(full):
+        # 用 exists 而不是 isfile：指向目录的链接是合法的
+        # （例如 `source/src/services/compact/` 让读者直接浏览整个目录）。
+        # 之前写成 isfile，导致所有目录链接被误报为「源码文件不存在」。
+        if not os.path.exists(full):
             bad.append((f, t, '源码文件不存在'))
             continue
         if frag.startswith('L'):

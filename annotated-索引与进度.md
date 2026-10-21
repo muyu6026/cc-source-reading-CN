@@ -76,18 +76,18 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 ## 进度总表
 
-| 学习路线的步骤                 | 涉及文件                                                                               | 批注版位置                                                                                                                                                                                       | 状态      |
-| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| **第 1 步** 先认门面（30 分钟）   | `package.json`                                                                     | [`package.json.annotated.md`](annotated/package.json.annotated.md)                                                                                                                          | ✅ 完成    |
-|                         | `README.md`（仓库自带的）                                                                 | [`README.annotated.md`](annotated/README.annotated.md)                                                                                                                                      | ✅ 完成    |
-|                         | `src/entrypoints/cli.tsx`（302 行，全文件）                                               | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx)                                                                                                                              | ✅ 完成    |
-| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行）                                                | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts)                                                                                                                      | ✅ 完成    |
-|                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                | ✅ 完成    |
-| **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
-| **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
-| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅ | ✅ 完成 |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅<br />[`compact.ts`](annotated/src/services/compact/compact.ts) ✅<br />[`microCompact.ts`](annotated/src/services/compact/microCompact.ts) ✅<br />[`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) ✅ | 🔄 进行中 |
-| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
+| 学习路线的步骤                 | 涉及文件                                                                               | 批注版位置                                                                                                                                                                                                                                                                                                       | 状态     |
+| ----------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| **第 1 步** 先认门面（30 分钟）   | `package.json`                                                                     | [`package.json.annotated.md`](annotated/package.json.annotated.md)                                                                                                                                                                                                                                          | ✅ 完成   |
+|                         | `README.md`（仓库自带的）                                                                 | [`README.annotated.md`](annotated/README.annotated.md)                                                                                                                                                                                                                                                      | ✅ 完成   |
+|                         | `src/entrypoints/cli.tsx`（302 行，全文件）                                               | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx)                                                                                                                                                                                                                                              | ✅ 完成   |
+| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行）                                                | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts)                                                                                                                                                                                                                                      | ✅ 完成   |
+|                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                                                                                                                                | ✅ 完成   |
+| **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
+| **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
+| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅<br />[`compact.ts`](annotated/src/services/compact/compact.ts) ✅<br />[`microCompact.ts`](annotated/src/services/compact/microCompact.ts) ✅<br />[`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅ | ✅ 主线完成 |
+| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                                                                                                                                           | ⬜ 待做   |
 
 ---
 
@@ -99,7 +99,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>**只有 1 个** —— 就是 `cli.tsx` 自己。</summary>
+<summary>\*\*只有 1 个\** —— 就是 \`cli.tsx\` 自己。</summary>
 
 `cli.tsx` 第 37-42 行：只要参数正好是一个 `--version` / `-v` / `-V`，直接 `console.log` 后 `return`，连 `startupProfiler` 都还没加载。文件头注释里那句 `Fast-path for --version has zero imports beyond this file`（译：--version 这条快速路径除了本文件之外零导入）说的就是这个。
 
@@ -109,7 +109,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>**为了让「快速路径」不加载用不上的模块。**</summary>
+<summary>\*\*为了让「快速路径」不加载用不上的模块。\*\*</summary>
 
 `main.js` 有 789 KB、4600 行。如果顶部就 `import { main } from '../main.js'`，那么连 `claude --version` 都得先把这 789 KB 解析、求值一遍，启动要慢上千毫秒。写成动态 `await import()`，只有真正走到那一步才加载。
 
@@ -121,7 +121,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>**被打包器（Bun）内联进产物了。**</summary>
+<summary>\*\*被打包器（Bun）内联进产物了。\*\*</summary>
 
 发布出去的是一个自包含的包，所有依赖的代码都被塞进了最终产物文件里，所以 `package.json` 不需要声明依赖。
 
@@ -139,7 +139,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>加载发生在 **`src/utils/processUserInput/processSlashCommand.tsx:668`**：</summary>
+<summary>加载发生在 \*\*\`src/utils/processUserInput/processSlashCommand.tsx:668\`\*\*：</summary>
 
 ```ts
 const mod = await command.load()   // ← 到这一行才真的去读 clear.js
@@ -156,7 +156,7 @@ const result = await mod.call(args, context)
 
 <details>
 
-<summary>后果：**`-p`（headless / 管道脚本）模式下 `/clear` 根本不在命令列表里**，敲了也匹配不到。</summary>
+<summary>后果：\*\*\`-p\`（headless / 管道脚本）模式下 \`/clear\` 根本不在命令列表里\*\*，敲了也匹配不到。</summary>
 
 管这事的是 `src/main.tsx:2622`：
 
@@ -176,7 +176,7 @@ commands.filter(command =>
 
 <details>
 
-<summary>**退出码 1 → 算成功。** 查表命中 `grep` 条目，`isError = exitCode >= 2` → `1 >= 2` 为 false，于是不抛错，输出照常交给模型。</summary>
+<summary>\*\*退出码 1 → 算成功。\** 查表命中 \`grep\` 条目，\`isError = exitCode >= 2\` → \`1 >= 2\` 为 false，于是不抛错，输出照常交给模型。</summary>
 
 **退出码 2 → 算失败。**（grep 的 2 通常是正则语法错误、文件读不了这类真问题。）此时 `isError` 为 true，`BashTool.tsx:714` 会：
 
@@ -192,7 +192,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>**第一问**：`splitCommand_DEPRECATED` 按 `&&` 拆成两段 → 取**最后一段** `grep -r foo .` → 取首词 `grep` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。</summary>
+<summary>\*\*第一问\*\*：\`splitCommand_DEPRECATED\` 按 \`&&\` 拆成两段 → 取\*\*最后一段\** \`grep -r foo .\` → 取首词 \`grep\` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。</summary>
 
 **第二问**：`||` 的情况，最后一段是 `echo none`，于是查 `echo` → 查不到 → 走默认语义（非 0 即错）。但真实退出码是 `echo` 的 0，所以这次判断**碰巧不算错**；反过来 `grep foo x | head` 的退出码其实来自 `head`（管道最后一段），也会和直觉不同。
 
@@ -212,11 +212,12 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>因为 hook 配置是从 **`<cwd>/.claude/settings.json`** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。</summary>
+因为 hook 配置是从 \*\*\`<cwd>/.claude/settings.json\`\** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。
 
 症状很隐蔽：**不报错**，只表现为"我的 hook 有时候生效、有时候不生效"，或者"在 A 项目里配的 hook 在 B 项目也触发了"。这类"顺序错了但不崩"的 bug 最难查。
 
 源码里连写两行大写 `IMPORTANT` 就是在防这件事。
+
 
 </details>
 
@@ -224,7 +225,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>**bug**：内置技能/插件的注册原先写在 `setup()` 里，但它前面有约 20ms 的 `await`（UDS socket）。而并行的 `getCommands()` 已经跑完并 **memoize** 了结果 —— 缓存里没有内置技能。等 `setup()` 走到注册那一步，命令表早就定死了。</summary>
+<summary>\*\*bug\*\*：内置技能/插件的注册原先写在 \`setup()\` 里，但它前面有约 20ms 的 \`await\`（UDS socket）。而并行的 \`getCommands()\` 已经跑完并 \*\*memoize\** 了结果 —— 缓存里没有内置技能。等 \`setup()\` 走到注册那一步，命令表早就定死了。</summary>
 
 **修法**：不是加锁，而是把注册**挪到并行启动点之前**（`main.tsx:1923-1926`），让它变成纯内存的数组 push（<1ms、零 IO），必然先于 `getCommands()`。
 
@@ -238,7 +239,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>`void` **不改变任何运行时行为** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"</summary>
+<summary>\`void\` \*\*不改变任何运行时行为\** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"</summary>
 
 目的：让"装监听器 / 抢锁 / 预热缓存"这类工作不拖慢启动。
 
@@ -250,7 +251,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>**两道闸**：</summary>
+<summary>\*\*两道闸\*\*：</summary>
 
 1. **root 检查**（对所有平台）：是 root 且不在沙箱（`IS_SANDBOX` / bubblewrap 都没有）→ 直接退出。
 2. **沙箱 + 断网检查**（仅内部员工、排除 Desktop 两个入口）：必须 `isSandboxed && !hasInternet`。也就是"不在沙箱"或"能上网"都拒绝 —— 因为在沙箱里且离线时，模型乱来的破坏范围被容器和断网限制住了。
@@ -269,7 +270,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>因为它是**能力凭证**，不是**环境**。</summary>
+<summary>因为它是\*\*能力凭证\*\*，不是\*\*环境\*\*。</summary>
 
 实测：没有任何一个工具在自己的 `call()` 里调用它（5 个工具直接把它命名为 `_canUseTool`，下划线表示不用）。它真正的用途是**往下传** —— `AgentTool`、`SendMessageTool`、`SkillTool` 把它递给子代理的 `runAgent()`，因为子代理执行工具时也要过权限关。
 
@@ -292,9 +293,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q3**：为什么 `Read` 的 `maxResultSizeChars` 要写 `Infinity`，写 `1e9` 不行吗？
 
-<details><summary>点开看答案</summary>
+<details>
 
-不行，因为 `Infinity` 在这里是**哨兵值**，不是"一个很大的数"。
+<summary>不行，因为 `Infinity` 在这里是**哨兵值**，不是"一个很大的数"。</summary>
 
 `query.ts:391` 是这么筛的：
 
@@ -306,14 +307,13 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 为什么要排除 Read？源码注释写得很直白：Read 的结果落盘，会导致 **Read → 结果文件 → 再 Read 它** 的循环，指数级放大。而 Read 本身已经用 `fileReadingLimits` 自我约束了。
 
-
 </details>
 
 **Q4**：一个工具明明返回了 `contextModifier`，却没有任何效果，而且不报错。最可能是什么原因？
 
 <details>
 
-<summary>它的 `isConcurrencySafe()` 返回了 `true`。</summary>
+<summary>它的 \`isConcurrencySafe()\` 返回了 \`true\`。</summary>
 
 `Tool.ts:329` 那句注释是全文最容易被忽略的一句：**"contextModifier is only honored for tools that aren't concurrency safe."**
 
@@ -379,10 +379,10 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 这是刻意的**有方向的不对称**，不是不一致：
 
-| 规则 | 剥离强度 | 为什么 |
-| --- | --- | --- |
-| allow | 只剥 `SAFE_ENV_VARS` 白名单 | 多剥一点就可能把 `DOCKER_HOST=evil docker ps` 认成 `docker ps` 而**自动放行** |
-| deny／ask | `stripAllLeadingEnvVars` 剥光所有赋值 | 少剥一点就可能让 `FOO=bar rm -rf /` **绕过** `Bash(rm:*)` |
+| 规则       | 剥离强度                            | 为什么                                                            |
+| -------- | ------------------------------- | -------------------------------------------------------------- |
+| allow    | 只剥 `SAFE_ENV_VARS` 白名单          | 多剥一点就可能把 `DOCKER_HOST=evil docker ps` 认成 `docker ps` 而**自动放行** |
+| deny／ask | `stripAllLeadingEnvVars` 剥光所有赋值 | 少剥一点就可能让 `FOO=bar rm -rf /` **绕过** `Bash(rm:*)`                |
 
 两种错误的代价不同（误放行 vs 误拦截），所以朝不同方向偏。很多权限系统的失败就在于对两者用了同一套归一化逻辑。
 
@@ -410,14 +410,14 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 4 步完整清单
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`Tool.ts`](annotated/src/Tool.ts) | 792 | 2,013 | 工具类型契约，逐字段讲「为什么必须有」 |
-| [`tools.ts`](annotated/src/tools.ts) | 389 | 647 | 工具注册表 + 两套条件加载 |
-| [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) | 1,143 | 1,757 | 最复杂的工具实现 |
-| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | 141 | 314 | 退出码语义判定表 |
-| [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) | 2,592 | 3,658 | 22 个 validator 的编排 |
-| [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) | 2,621 | 3,906 | 895 行主函数的权限裁决编排 |
+| 文件                                                                        | 原文    | 批注版   | 讲什么                 |
+| ------------------------------------------------------------------------- | ----- | ----- | ------------------- |
+| [`Tool.ts`](annotated/src/Tool.ts)                                        | 792   | 2,013 | 工具类型契约，逐字段讲「为什么必须有」 |
+| [`tools.ts`](annotated/src/tools.ts)                                      | 389   | 647   | 工具注册表 + 两套条件加载      |
+| [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)               | 1,143 | 1,757 | 最复杂的工具实现            |
+| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | 141   | 314   | 退出码语义判定表            |
+| [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)         | 2,592 | 3,658 | 22 个 validator 的编排  |
+| [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts)   | 2,621 | 3,906 | 895 行主函数的权限裁决编排     |
 
 合计 **7,678 行原文**，全部逐行保真（`scripts/check-fidelity.py` 可复算）。
 
@@ -449,11 +449,11 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 5 步完整清单（已全部完成）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`prompts.ts`](annotated/src/constants/prompts.ts) | 914 | 2,042 | 系统提示词拼装 + 缓存布局 + DCE 裁剪 |
-| [`query.ts`](annotated/src/query.ts) | 1,729 | 3,305 | `while(true)` 状态机、五层压缩、七种恢复 |
-| [`QueryEngine.ts`](annotated/src/QueryEngine.ts) | 1,295 | 2,572 | 会话状态、内外协议转换、时序正确性 |
+| 文件                                                  | 原文    | 批注版   | 讲什么                           |
+| --------------------------------------------------- | ----- | ----- | ----------------------------- |
+| [`prompts.ts`](annotated/src/constants/prompts.ts)  | 914   | 2,042 | 系统提示词拼装 + 缓存布局 + DCE 裁剪       |
+| [`query.ts`](annotated/src/query.ts)                | 1,729 | 3,305 | `while(true)` 状态机、五层压缩、七种恢复   |
+| [`QueryEngine.ts`](annotated/src/QueryEngine.ts)    | 1,295 | 2,572 | 会话状态、内外协议转换、时序正确性             |
 | [`claude.ts`](annotated/src/services/api/claude.ts) | 3,419 | 4,656 | SSE 解析、缓存打点、sticky latch、三级降级 |
 
 合计 **7,357 行原文**，全部逐行保真（`scripts/check-fidelity.py` 可复算）。
@@ -473,6 +473,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 **③ 为什么 `message_delta` 里回写 `usage` 必须「原地改属性」，不能换对象？**
 
 会话落盘有一个 100ms 延迟队列，它持有的是 `message.message` 的**引用**，真正序列化时才读值。写 `lastMsg.message = { ...lastMsg.message, usage }` 会换掉引用，队列里的旧引用仍然指向 `output_tokens: 0`、`stop_reason: null` 的版本 —— 落盘后成本统计全是 0，而且几乎无法排查。
+
 
 **④ 流式失败后降级到非流式，什么情况下**不允许**降级？**
 
@@ -498,24 +499,25 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 `const x =` 后面插一段注释再给值，语法合法但语句被劈成两半。判据 5 只抓 `=` 和 `?` 结尾的行 —— 刻意放过 `,`、`:`、`(`、`&&`，因为「数组元素之间」「case 分支」「函数参数」「逐条解释 if 条件」这四种后面插注释都是正当写法（试宽了会让 9 个文件全部误报）。
 
-顺带修了扫描器的一个盲区：正则字面量里也有反引号（`/^[)}`|&;(<>]/`），不识别就会把后面几十行误判成模板内部。现在两个脚本都做了正则字面量识别。
+顺带修了扫描器的一个盲区：正则字面量里也有反引号（`/^[)}`|&;(<>]/\`），不识别就会把后面几十行误判成模板内部。现在两个脚本都做了正则字面量识别。
 
 ---
 
 ## 第 6 步（服务层）读完了吗？
 
-第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工六个：
+第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工七个：
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`withRetry.ts`](annotated/src/services/api/withRetry.ts) | 822 | 1,419 | 重试边界、退避曲线、529 白名单、无限重试模式 |
-| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153 | 329 | 发给 API 的 `context_management` 指令（**不调模型**） |
-| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) | 351 | 668 | 阈值计算、四道抑制闸门、三振熔断、session memory 优先 |
-| [`compact.ts`](annotated/src/services/compact/compact.ts) | 1,705 | 3,629 | 摘要压缩本体、PTL 逃生舱、两条摘要路径、七类附件重建 |
-| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts) | 530 | 1,353 | 三条微压缩路径、缓存编辑、时间触发 |
-| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,518 | 零调用压缩、索引对齐、两种恢复场景 |
+| 文件                                                                        | 原文    | 批注版   | 讲什么                                        |
+| ------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------ |
+| [`withRetry.ts`](annotated/src/services/api/withRetry.ts)                 | 822   | 1,419 | 重试边界、退避曲线、529 白名单、无限重试模式                   |
+| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153   | 329   | 发给 API 的 `context_management` 指令（**不调模型**） |
+| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts)         | 351   | 668   | 阈值计算、四道抑制闸门、三振熔断、session memory 优先         |
+| [`compact.ts`](annotated/src/services/compact/compact.ts)                 | 1,705 | 3,628 | 摘要压缩本体、PTL 逃生舱、七类附件重建                     |
+| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts)       | 530   | 1,352 | 缓存热不热决定改不改本地内容                            |
+| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐                   |
+| [`mcp/client.ts`](annotated/src/services/mcp/client.ts)                   | 3,348 | 4,776 | 七种 transport、错误桥接、MCP 工具封装                |
 
-合计 **4,191 行原文**，313 处批注锚点。
+合计 **7,539 行原文**，393 处批注锚点。
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 
@@ -537,51 +539,78 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 阈值算错只是压缩早一点或晚一点；闸门缺失会造成实打实的故障：压缩触发压缩会死锁、`marble_origami` 压缩会通过模块级状态毁掉主线程已提交的日志、autocompact 和 context-collapse 会在 93% 这个点上抢同一段上下文。而且闸门必须加在**调用点**而不是 `isAutoCompactEnabled()` 里 —— 因为 reactive compact 会直接查那个函数，闸门塞进去会连 413 兜底一起关掉。
 
-**⑥ 压缩本身为什么会「自己撞上上下文上限」？**
+**⑥ 为什么「压缩」这件事本身会失败、会花钱、会卡住？**
 
-因为压缩的输入就是那个已经太长的上下文。它是一次完整的 API 调用，不是本地删数据。所以 `compact.ts` 花了 50 行写 `truncateHeadForPTLRetry` —— 按 API 轮次分组、从最老的开始砍、砍到刚好覆盖缺口。而且每轮重试前必须先剥掉自己上次插入的占位消息，否则第二次重试会原地打转。
+因为压缩不是一次本地计算，而是**一次完整的 API 调用**：把整个上下文发过去让模型写摘要。所以它会花 5–10 秒、会被限流、会被用户 Esc 中断，而且它自己也会撞上上下文上限（PTL）。`compact.ts` 一半的复杂度都在处理这些失败路径，不在「怎么总结」。
 
-**⑦ 为什么 `compact.ts` 的缓存复用路径**不能**设 `maxOutputTokens`，而备路径**必须**设？**
+**⑦ `truncateHeadForPTLRetry` 里那个必须先「剥掉自己上次插的 marker」的理由是什么？**
 
-主路径走 `runForkedAgent`，靠「参数和主线程逐字节相同」来命中 prompt cache。而 `maxOutputTokens` 会经 `Math.min(budget, maxOutputTokens-1)` 间接改写 thinking 的 `budget_tokens` —— thinking config 就在缓存键里，改了整条缓存作废。备路径（普通流式）本来就共享不了前缀，所以可以放心设，用来把摘要长度限制在合理范围。
+砍头之后 API 要求首条是 user，所以要补一条合成 user 消息。但下一轮重试进来时，这条 marker 自己会变成一个 group，20% 回退算出来「只删掉 marker」，然后又补回去 —— 净进展为零，死循环。所以每轮开头必须先剥掉上一次插的。
 
-**⑧ 压缩后要补回哪七类东西？为什么它们是「必须」而不是「锦上添花」？**
+**⑧ 为什么主路径严禁设 `maxOutputTokens`，而备路径必须设？**
 
-文件内容、后台 agent 列表、plan 文件、plan mode 状态、调用过的技能、延迟工具清单、MCP 指令。每一项对应一种真实的能力退化：不补文件 → 模型重新 Read 几十次；不补 agent → 重复 spawn 同一个任务；不补 plan mode → 模型直接开始改代码。**压缩的真实成本不是 token，是这些信息损失。**
+主路径靠「参数逐字节相同」命中主线程的 prompt cache。而 `maxOutputTokens` 会经 `claude.ts` 里的 `Math.min(budget, maxOutputTokens - 1)` 间接改掉 thinking 的 `budget_tokens`，thinking config 在缓存键里 —— 改了整条缓存作废。备路径本来就共享不了前缀，所以随便设。同一文件对同一参数采取相反策略。
 
-**⑨ `microCompact` 的两条路径为什么一条改本地消息、一条不改？**
+**⑨ 微压缩和摘要压缩对「本地消息数组」的态度为什么是相反的？**
 
-判据只有一条：缓存热不热。热 → 用 `cache_edits` 让服务端逻辑删除，本地字节不动，前缀命中；冷 → 直接改内容，反正整条前缀都要重建，不如先把内容清掉让重建量更小。这也解释了为什么时间触发一旦命中就直接 `return`，不再走缓存路径 —— 两者前提互斥。
+判据只有一条：**缓存热不热**。缓存热 → 用 `cache_edits` 让服务端逻辑删除，本地消息一个字节都不改（改了前缀就废）；缓存冷 → 直接改内容（反正要重建）。所以 `microCompact.ts` 里那条 `return messages` 原样返回不是漏写，是刻意保留前缀。
 
-**⑩ `sessionMemoryCompact` 里那个 82 行的索引对齐函数在防什么？**
+**⑩ `adjustIndexToPreserveAPIInvariants` 防的是哪两类「本地看不出、发 API 才 400」的错误？**
 
-防两种「本地看不出来、发到 API 才 400」的错误。一是切点劈开 `tool_use`/`tool_result` 配对（流式把一次响应拆成多条消息，合并后 tool_use 消失但 tool_result 还在 → 孤儿）。二是切点劈开共享 `message.id` 的 thinking 块（后续 `normalizeMessagesForAPI` 合并时 thinking 没有容器，直接丢失，而它带 signature，丢了会破坏 extended thinking 的连续性）。修复方向只有一个：**把切点往前挪**，宁可多保留，不可断链。
+① 劈开 `tool_use` / `tool_result` 配对 —— 流式会把一次响应拆成多条同 id 消息，normalize 合并后 tool_use 消失，tool_result 成了孤儿。② 劈开同 `message.id` 的 thinking 块 —— 合并时没有容器，直接丢失，而且会破坏 signature 对应的 extended thinking 连续性。修复方向只能是「把切点往前挪」，宁可多留不可断链。
 
----
+**⑪ `connectToServer` 连接失败时为什么不抛异常？**
 
-## 第 6 步的三条主线结论
+因为它返回的是 `{ type: 'failed', error }` 这个普通对象。于是「一个服务器」成了四选一的代数类型：`connected` / `failed` / `needs-auth` / `disabled`。好处是调用方不需要 try/catch 就能遍历所有服务器，一个坏服务器不会中断整批连接 —— 在批量连接 20 个外部服务的场景里，这是必须的。代价是每个消费方都要先判 `type`。
 
-1. **压缩的所有复杂度都来自「压缩是一次会失败的 API 调用」** —— 不是本地数据操作。它要钱、要时间、会被限流、会自己 PTL、会被用户 Esc 打断，而且中断还可能被误判成成功。`compact.ts` 里超过一半的代码在处理这些失败路径。
+**⑫ MCP SDK 的 transport 在连接失败时有个「缺一半」的行为，CC 怎么补的？**
 
-2. **prompt cache 是这一层的最高约束** —— 缓存键包含 system / tools / model / 消息前缀 / thinking config，任何一项变了整条前缀作废。这条约束反过来决定了很多看似奇怪的设计：备路径的 system prompt 只有一句话、摘要指令必须作为 user 消息追加在末尾、微压缩有一条路径宁可不改内容、`compact.ts` 宁愿不设 maxOutputTokens。
+SDK 会调 `client.onerror`，但**不调 `client.onclose`**。而 CC 的重连机制完全依赖 `onclose`（它负责清缓存）。后果：SSE 流被掐断后，`callTool()` 的 promise 既不 resolve 也不 reject，界面上那个工具会一直转。
 
-3. **两条实现路径会漂移** —— session memory 压缩漏了 `notifyCompaction`，导致 20% 的缓存断裂告警是误报；`cachedMCState` 被主线程和时间触发两条路径共享，互相污染后要手动 reset。凡是「同一件事有两套实现」的地方，副作用清单最容易不同步。
+补法是三件套：自己数连续 terminal 错误（阈值 3）→ 数到 3 就主动 `client.close()` → 借关闭动作触发 SDK 的 `_onclose()`，它会 reject 所有挂起的 request handler。另有两条快速路径不等三振：会话过期（404 + `-32001`）和 SDK 自己重连耗尽（`"Maximum reconnection attempts"`）。
+
+**⑬ 为什么不能直接调 `client.onclose?.()` 来「假装关闭」？**
+
+因为那样只清了缓存，**挂起的 promise 还挂着**。必须走 `client.close() → transport.close() → transport.onclose → SDK 的 _onclose()`，只有 `_onclose()` 会 reject 那些 pending 的 `callTool()`。直接调我们自己的 handler 等于跳过了一半。
+
+**⑭ `fetchToolsForClient` 里为什么要把 `_meta.searchHint` 的空白压成一个空格？**
+
+因为那个字段是**外部 MCP 服务器完全可控**的，而它最终会进「延迟工具列表」，那个列表是**按换行符拼接**的。一个 hint 里只要带一个换行，就能凭空多出几行工具描述 —— 模型会把它当成真的工具条目读。这叫结构性注入：不是转义问题，是用数据去伪造结构。
+
+**⑮ `callMCPTool` 为什么要在 SDK 的超时之外再套一层 `Promise.race`？**
+
+因为 SDK 内部的超时在有些情况下根本不触发 —— 比如 SSE 流中途断了，SDK 连触发定时器的机会都没有。外面这层保证调用方一定能拿到结果，而不是无限等待。注意 `finally` 里要 `clearTimeout`，否则一个早已完成的调用会在 27.8 小时后触发一个无人处理的 reject。
 
 ---
 
 ## 继续往下读之前
 
-第 6 步的压缩主线已经闭环。剩下最大的一块是 MCP：
+**第 6 步主线已收口**：7 个文件、7,539 行原文、393 处批注锚点。
 
-- [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts)（3,348 行）—— MCP 协议接入，`claude.ts` 里所有 `hasPendingMcpServers` / `mcp_instructions_delta` 的源头
+服务层总共有约 4 万行，我们没有全量做 —— 只做了「主循环直接依赖」的那条链：
 
-如果要先补齐「压缩管线」周边的小文件（加起来不到 600 行，一轮能做完）：
+```
+query.ts
+  ├─ autoCompact → compact（摘要压缩）+ microCompact（微压缩）+ sessionMemoryCompact
+  ├─ apiMicrocompact（服务端压缩指令）
+  └─ mcp/client（工具来源）
+        └─ claude.ts（把工具序列化进请求）
+```
 
-- [`compact/prompt.ts`](source/src/services/compact/prompt.ts)（374 行）—— 摘要指令的实际文本。上面所有函数都在拼「发什么」，这里是「说什么」
-- [`compact/grouping.ts`](source/src/services/compact/grouping.ts)（63 行）—— `groupMessagesByApiRound` 的实现，PTL 截断和边界扫描都依赖它
-- [`compact/postCompactCleanup.ts`](source/src/services/compact/postCompactCleanup.ts)（77 行）+ `compactWarningState.ts`（18 行）+ `compactWarningHook.ts`（16 行）—— 压缩后的状态清理
+这条链现在闭环了。剩下的服务层模块都是**枝叶**，不影响理解主干：
 
-告诉我下一个读哪个，或者直接说「继续」我就按 MCP 往下推。
+- [`mcp/config.ts`](source/src/services/mcp/config.ts)（1,578 行）—— 配置从哪读（`.mcp.json` / 用户级 / 项目级 / 企业策略）
+- [`mcp/auth.ts`](source/src/services/mcp/auth.ts)（2,465 行）—— `ClaudeAuthProvider` 的实现，OAuth 全流程
+- [`mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)（1,141 行）—— 把 `client.ts` 的纯连接逻辑接进 React 状态
+- `mcp/` 剩下的小文件（types 258 / utils 575 / elicitationHandler 313 / headersHelper 138 …）
+
+**第 7 步（UI 与多智能体，可选）** 是另一条线：
+
+- [`src/components/`](source/src/components/) —— Ink 渲染的终端 UI
+- [`src/ink/`](source/src/ink/) —— 自己实现的 Ink 渲染器（不是官方包）
+- [`src/coordinator/`](source/src/coordinator/) —— 多 agent 编排
+
+告诉我「继续第 7 步」我就开始，或者点名某个模块（比如先补 `mcp/config.ts`，因为它是 `client.ts` 上游唯一没读的一块）。
 
 ---
 
