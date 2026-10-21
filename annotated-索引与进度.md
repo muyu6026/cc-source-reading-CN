@@ -86,7 +86,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅ | ✅ 完成 |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 
 ---
@@ -505,7 +505,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 6 步（服务层）读完了吗？
 
-第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工十四个：
+第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工十五个：
 
 | 文件                                                                        | 原文    | 批注版   | 讲什么                                        |
 | ------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------ |
@@ -523,8 +523,9 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | [`timeBasedMCConfig.ts`](annotated/src/services/compact/timeBasedMCConfig.ts) | 43 | 228   | 缓存注定要 miss 时顺手整理上下文                        |
 | [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题                                 |
 | [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件                       |
+| [`mcp/auth.ts`](annotated/src/services/mcp/auth.ts)                       | 2,465 | 4,356 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁           |
 
-合计 **9,708 行原文**，492 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完，MCP 这条线（`client.ts` + `config.ts`）也闭合了。
+合计 **12,173 行原文**，596 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完，MCP 这条线（`config.ts` → `client.ts` → `auth.ts`）也闭合了。
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 
@@ -679,6 +680,64 @@ local 比 project 高的理由：`.mcp.json`（project）会进版本控制、�
 
 ---
 
+## `mcp/auth.ts` 读完了吗？
+
+**㉗ `wrapFetchWithStepUpDetection` 这个补丁到底在绕什么？**
+
+绕一段**必然发生**的死循环。token 有效但 scope 不够 → 403 `insufficient_scope` → SDK 的 `authInternal` 看到内存里有 `refresh_token` 就去刷新 → 但 RFC 6749 §6 **禁止**用 refresh 提升 scope，服务器只能返回同样 scope 的 token → SDK 认为刷新成功、重试 → 又 403 → 放弃，报 "Server returned 403 after trying upscoping"。
+
+关键点是：它**永远到不了** `redirectToAuthorization`，而 step-up 的 scope 正是在那里持久化的。所以下一轮重新认证时仍然不知道要申请更大 scope，同一个循环再来一次。
+
+补丁手法：在 SDK 处理 403 之前先把 scope 记到 provider 上，然后让 `tokens()` 在 step-up 待处理时**故意不返回 `refresh_token`**。SDK 发现无路可刷，只能落回 PKCE 授权码流程，于是走到 `redirectToAuthorization`。
+
+这是一个「用返回值的缺失改变调用方控制流」的技巧 —— 比 patch SDK 便宜，代价是 `tokens()` 的返回值和 SDK 内部分支被一条**隐式契约**绑在一起。
+
+**㉘ `tokens()` 里为什么不能 `clearKeychainCache()`？**
+
+因为它在**热路径**上。macOS 读 keychain 走 `spawnSync('security find-generic-password')`，而 `tokens()` 每秒被调 30–40 次（MCP SDK 的 `_commonHeaders` 每个请求都取一次 token）。CPU profile 显示仅 `spawnSync` 就占了总 CPU 的 **7.2%**（PR #19436 之后测到）。
+
+真正的代价不是 7.2% 的 CPU，而是**同步阻塞事件循环** —— 每次 spawnSync 期间 UI 掉帧、其他回调延迟。
+
+所以策略是分层：读的时候用缓存（最终一致）；真要读最新值时，只在**低频路径**上清（拿到刷新锁之后、遇到 `invalid_grant` 之后）；本进程自己写的由 `storage.update()` 主动失效。
+
+「能不能这么做」的答案取决于「在哪个路径上做」—— 同一个操作在 30 次/秒 和 1 次/小时 的路径上，代价差三个数量级。
+
+**㉙ 为什么「没有 access_token 就静默换 token」不用 `accessToken !== ''` 判断？**
+
+因为 SDK 在认证**中途**会调 `saveClientInformation`，那里为了满足类型要求写了 `accessToken: ''`。也就是说凭据库里会留下一个「空 token 的 marker」。
+
+如果判据是 `!== ''`：用户上次认证被打断 → marker 残留 → 下次连接认为「有 token」不走静默分支 → 走普通路径发现没 token → 401 → needs-auth → 用户点认证 → 中途又写 marker → 又被挡住。结果 **XAA 自动认证永久失效**，每次都要手工登录（注释里说 `xaa.dev` 上真发生过）。
+
+代价是承认的「无害重复」：第一次 `tokens()` 静默换失败 → `auth()` 写 marker → 又调 `tokens()` → 又一次静默换。多一次 keychain 读（约 1ms），换「自动认证总能工作」。
+
+**㉚ Slack 用 HTTP 200 返回 OAuth 错误，后果为什么不是「报错难看」而是「永久连不上」？**
+
+因为 2xx 的响应不会被 SDK 当成错误去解析，它直接进 `OAuthTokensSchema.parse()` → ZodError → 被归成不透明的 `request_failed`。
+
+于是本该走的路走不通了：`invalid_grant` → `invalidateCredentials('tokens')` → 提示重新登录（**自愈**）；`request_failed` → 重试三次 → 放弃 → **坏 token 还留在 keychain 里**。用户看到的是「这个服务器怎么点重试都连不上」。
+
+补丁是 `normalizeOAuthErrorBody` 把「200 + error 体」重写成「400 + 同样的体」，让 SDK 既有的错误映射自动生效。配套的 `NONSTANDARD_INVALID_GRANT_ALIASES` 把 Slack 的 `invalid_refresh_token` / `expired_refresh_token` / `token_expired` 归一到 `invalid_grant`。
+
+**错误码归一不是代码整洁问题，是功能可用性问题。**
+
+**㉛ `saveDiscoveryState` 为什么只存两个 URL，不存完整的 `authorizationServerMetadata`？**
+
+因为 macOS keychain 写入走 `security -i`，stdin 有 **4096 字节行限制**，而凭据库用 hex 编码，等于约 2,013 字节的 JSON 上限。完整元数据单个就有 1.5–2 KB（每种 grant type、PKCE 方法、端点全列出来），**两个** OAuth 服务器就会溢出 —— 溢出不是「这个服务器失败」，是**整个凭据库损坏**（#30337），所有 MCP 服务器的凭据一起丢。
+
+解法：只存 `authorizationServerUrl` + `resourceMetadataUrl`。丢掉的东西能廉价重建 —— SDK 的逻辑是 `cachedState.authorizationServerMetadata ?? await discover...`，多一次幂等 GET 而已。
+
+判断依据：**丢掉的东西能不能廉价重建？能，就丢。**
+
+**㉜ 刷新锁重试 5 次仍拿不到时，为什么「不带锁继续刷新」而不是放弃？**
+
+因为两种后果的量级不同：没锁的后果是「可能重复刷新」（偶发、可恢复，代价是浪费几个请求）；拒绝刷新的后果是「token 过期 → 用户被登出」（必然、需人工介入）。
+
+锁在这里是优化，不是正确性保证。**判断一把锁能不能 fail-open，看它保护的动作做两次会不会出事** —— 刷新做两次只是浪费，所以可以。如果保护的是「扣款」或者「发消息」，就必须 fail-closed。
+
+配套的两个细节：重试间隔带随机抖动（1–2 秒，防多进程同步重试造成惊群）；拿到锁之后必须 `clearKeychainCache()` 重读 —— 因为进锁前的判断用的是缓存，可能正是「别人刚刷好之前」的旧值。
+
+---
+
 ## 第 7 步（多智能体）读完了吗？
 
 UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— 它们不影响理解主线。
@@ -785,10 +844,10 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 ## 继续往下读之前
 
-**第 6 步的两条主线都完整了**：
+**第 6 步的三条主线都完整了**：
 
 - **压缩管线**：`src/services/compact/` 目录下 11 个 `.ts` 全部批注完，从「什么时候压」到「压完清什么」没有缺口
-- **MCP**：`client.ts`（协议实现）+ `config.ts`（配置与策略）闭合，从「配置从哪读、允不允许连」到「连上之后怎么活下去」都通了
+- **MCP 协议与策略**：`config.ts`（配置从哪读、允不允许连）→ `client.ts`（七种 transport、连上之后怎么活）→ `auth.ts`（OAuth 全流程、凭据存哪、什么时候刷新、什么清）。第三段是前两段的下游 —— `client.ts` 里那个 `needs-auth` 状态，落到 `auth.ts` 才有答案
 
 第 7 步的多智能体主线也收口了：4 个文件、2,263 行原文、133 处锚点。
 
@@ -800,24 +859,31 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                         ├─ withRetry（发请求的失败重试）
                                         └─ mcp/config（有哪些服务器、允不允许）
                                               └─ mcp/client（连上之后怎么活）
+                                                    ├─ mcp/auth（401 之后：授权、刷新、吊销）
                                                     └─ AgentTool → coordinator / fork / 普通子 agent
                                                           └─ runAgent（同一套 query 循环，换个身份跑）
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`mcp/auth.ts`](source/src/services/mcp/auth.ts)（2,465 行）—— `ClaudeAuthProvider` 的实现，OAuth 全流程。`client.ts` 里 `needs-auth` 状态的下游
 - [`mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)（1,141 行）—— 把 `client.ts` 的纯连接逻辑接进 React 状态
+- [`mcp/xaa.ts`](source/src/services/mcp/xaa.ts)（511）+ [`xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts)（487）—— XAA 的具体交换细节。`auth.ts` 只调用它们，读过 `auth.ts` 之后这两个是「按需查」的参考
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）+ [`src/ink/`](source/src/ink/)（1.3 万行）—— 终端 UI。`ink/` 是**自己实现**的渲染器（不是官方包），核心是 `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462
 - [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-我的建议是**先停下来回头读一遍索引** —— 现在这条链已经完整了，从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工，再回到一次落盘，全程都能串起来。这时候重读 `query.ts` 那个 `while(true)` 状态机，会比第一次读时清楚很多。
+到这里，**第 1 到第 7 步的主线全部走完**：31 个文件、约 4.4 万行原文、596 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用再回来落盘，中间没有断点了。
 
-想继续的话，说模块名就行。
+我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
-如果只想再读一个文件，我建议 `mcp/config.ts` —— 因为 `client.ts` 里那些 `needs-auth`、企业策略覆盖、`hasPendingMcpServers` 的上游都在那里，读完这条线就彻底闭合了。
+1. **缓存前缀稳定性** —— `prompts.ts` 的动态边界 → `claude.ts` 的 `deferred_tools_delta` → `AgentTool/prompt.ts` 把 agent 清单挪进 attachment → `microCompact` 宁可逻辑删除也不改本地字节。同一个手法出现四次。
+2. **`needs-auth` 这个状态** —— `config.ts` 决定「允不允许连」→ `client.ts` 返回 `{type:'needs-auth'}` → `auth.ts` 的 `hasMcpDiscoveryButNoToken` 判断「跳过连接直接提示授权」。一个状态的定义和使用分在三个文件里。
+3. **失败归因** —— `withRetry` 的 529 白名单、`compact.ts` 的 PTL 逃生舱、`auth.ts` 的 `failureStage` 游标，本质都是「先分清是哪一类失败，再决定怎么办」。三处用了三种不同的手法（白名单 / 专用错误类 / 里程碑布尔量）。
 
-告诉我「继续」我就按 `mcp/config.ts` 往下走；想换方向（比如 `ink/` 渲染器）直接点名。
+想继续的话，说模块名就行。剩下的方向按性价比排：
+
+- **UI 线**（`ink/` 渲染器）—— 5.5 万行，是最大的未读区。价值在于「终端里怎么做到像 GUI」，但和工作原理无关
+- **`xaa.ts` / `xaaIdpLogin.ts`** —— 补完 XAA 的细节，只有 998 行，但属于「知道了很好，不知道也不影响」
+- **回头重读** —— 我推荐这个
 
 ---
 
@@ -873,3 +939,27 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 改完重跑全量 24 个文件，`bashSecurity.ts` 有 46 行变化 —— 全是那批被错误外移的批注**回到了原位**（比如 `isSafeHeredoc` 的形态说明回到了函数声明之前，而不是被推到后面的 `for` 循环里）。
 
 这类 bug 的教训是：**校验工具本身也要被质疑**。当一个文件报失败而目视检查合理时，先怀疑扫描器，不要急着改批注 —— 否则会把正确的批注改错。
+
+---
+
+## 这一轮修的第五类问题（批注数据自己的转义）
+
+批注数据是 Python 文件里的三引号字符串，所以**批注正文也要走 Python 的转义规则**。写 `auth.ts` 那段「raw mode 下要自己处理哪些控制字符」时踩到了：
+
+```python
+//     \n / \r   提交        ← Python 把 \n \r 变成真换行，一行批注裂成三行
+//     \u0003    Ctrl-C      ← 变成不可见的 ETX 控制字符
+//     \b        退格         ← 变成退格符
+```
+
+结果 `check-fidelity.py` 报「第 1813 个代码行不一致：原文 `return new Promise(...)`，批注版是『提交』」—— 因为那一行裂出来的裸中文（没有 `//` 前缀）被当成了代码行。
+
+这类问题的特点是：**批注文件本身语法合法**（Python 照常执行）、**生成脚本也正常**（它只管给每行加 `//`），只有对着「代码行序列」逐行比对的校验能发现。而报错信息指向的位置（`return new Promise`）和真正的问题（四行批注的上方）离得很远。
+
+三条经验：
+
+1. **批注里要写字面反斜杠，一律双写**（`\\n`）。或者干脆用文字描述（「换行符」「回车符」），反正读者是中文用户，`\n` 不比「换行」更清楚。
+2. **校验脚本要能指出「哪一行是多余的」**，而不只是「第 N 个代码行不一致」。现在的报错只给了序号和两个值，定位靠人肉数。这是一个可以改进的点。
+3. **写完一批批注先跑一次校验再往下写**。这次是四个分片全写完才跑，所以出问题时不知道是哪个分片 —— 只能靠 grep `^\*` 和 `\\[nrtub]` 反查。
+
+顺带一提，同一轮还修了另一个纯排版问题：`1570` 那个锚点原本落在 `//` 注释段中部，被自动挪到段首 `1554`，于是两条批注叠在一起没有空行分隔。修法是在批注文本开头加一个空行（`render()` 会把空行输出成裸 `//`，正好当分隔线）。
