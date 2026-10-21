@@ -42,6 +42,8 @@ KNOWN_OMIT = {
         '末尾 sourceMappingURL 单行 27,448 字符的 base64 sourcemap，批注版改为一句话说明',
     'src/tools/BashTool/BashTool.tsx':
         '末尾 sourceMappingURL 单行约 8 万字符的 base64 sourcemap，批注版改为一句话说明',
+    'src/ink/ink.tsx':
+        '末尾 sourceMappingURL 单行约 10 万字符的 base64 sourcemap，批注版改为一句话说明',
 }
 
 ANN_PREFIXES = ('// 译：', '// 注：', '// ─', '// ═')
@@ -310,6 +312,25 @@ def check_split_expression(lines):
     return bad
 
 
+def check_control_chars(lines):
+    """批注里不该出现控制字符。
+
+    起因：批注数据是 Python 三引号字符串，正文里写字面的 `\\n` `\\r` `\\0`
+    `\\x1b` 会被 Python 转义成真字符。前两类会让一行批注裂成多行，
+    后两类更糟——NUL 让 grep 把整个文件当二进制，ESC 直接把转义序列
+    写进了源文件（编辑器/终端渲染时会真的生效）。
+
+    规则：除制表符外，任何 < 0x20 的字符都算失败。
+    """
+    bad = []
+    for i, ln in enumerate(lines, start=1):
+        for ch in ln:
+            if ch != '\t' and ord(ch) < 0x20:
+                bad.append((i, ord(ch)))
+                break
+    return bad
+
+
 def check_one(rel):
     src_path = os.path.join(SRC, rel.replace('/', os.sep))
     ann_path = os.path.join(ANN, rel.replace('/', os.sep))
@@ -319,6 +340,12 @@ def check_one(rel):
         return 'MISSING_ANN', rel, '还没有批注版'
 
     ann_lines = read_lines(ann_path)
+    bad_chars = check_control_chars(ann_lines)
+    if bad_chars:
+        return 'FAIL', rel, (
+            '批注版里出现控制字符（多半是 Python 字符串转义泄漏，字面量要双写反斜杠）：%s'
+            % ', '.join('第 %d 行 U+%04X' % (n, c) for n, c in bad_chars[:8]))
+
     impure = check_block_purity(ann_lines)
     if impure:
         return 'FAIL', rel, (

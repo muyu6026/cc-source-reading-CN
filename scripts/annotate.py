@@ -381,6 +381,13 @@ def main():
     out = []
     for i, line in enumerate(lines, start=1):
         out.extend(before.get(i, []))
+        # 末尾那行 `//# sourceMappingURL=data:application/json;base64,...`
+        # 是编译产物的一部分（几万字符），对读逻辑毫无帮助，且会让编辑器卡死。
+        # 判定要严：行长 + 前缀两个条件同时满足，避免误伤正常代码。
+        if len(line) > 4000 and line.lstrip().startswith('//# sourceMappingURL='):
+            out.append('// 原文件此处有一行 %d 字符的 sourceMappingURL（base64 source map），' % len(line))
+            out.append('// 它只用于把编译产物映射回源码，对理解逻辑没有帮助，这里省略不抄。')
+            continue
         out.append(line)
         out.extend(after.get(i, []))
 

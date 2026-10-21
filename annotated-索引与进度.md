@@ -88,6 +88,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />`screen.ts` / `render-node-to-output.ts` / `log-update.ts` ⬜ | ⏳ React 侧完成 |
 
 ---
 
@@ -909,6 +910,56 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 ---
 
+## 第 8 步（终端渲染器）读完了吗？
+
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。这一轮只做了 **React 侧**三份，绘制侧（`screen.ts` 1,486 + `render-node-to-output.ts` 1,462 + `log-update.ts` 773）还没动。
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`reconciler.ts`](annotated/src/ink/reconciler.ts) | 512 | 727 | React 19 自定义 renderer 的 host config：14 个类型参数、commit 阶段算布局、release 顺序 |
+| [`dom.ts`](annotated/src/ink/dom.ts) | 484 | 685 | 七个元素名的极简 DOM、yoga 桥（两棵树两套下标）、文本测量、脏标记冒泡 |
+| [`ink.tsx`](annotated/src/ink/ink.tsx) | 1,722 | 2,470 | 帧循环九阶段、双缓冲、diff 与 optimize、光标定位、终端模式、退出清理 |
+
+合计 **2,718 行原文**，125 处批注锚点。
+
+**㊳ 终端里没有排版引擎，那 `<Text>` 的高度是谁算出来的？**
+
+是 `dom.ts` 332 行的 `measureTextNode`。yoga 只管盒子（它不知道一个汉字和一个 `i` 差多少宽），所以 `<Text>` 节点上挂了一个 measure 回调：yoga 布局时问它「给你 `width` 这么宽，你多高」，它把整棵子树的文字展平（`squashTextNodes`）、展开 tab、按宽度折行，再量一遍。
+
+这一个回调解释了三件看起来无关的事：为什么 `<Text>` 里不能放 `<Box>`（展不平就没法量宽度）、为什么裸字符串必须包在 `<Text>` 里（没有父级就不知道该继承什么样式、也不知道放哪一行）、为什么宽字符/emoji 要单独处理。
+
+**㊴ 为什么 `<Box>` 套在 `<Text>` 里是**运行时抛错**，而不是「不推荐」？**
+
+因为文本测量要求把内容展平成一段连续字符串。中间插一个 flex 盒子，这段文字就不再是「一行有宽度的字符序列」——它变成了「若干块，各自的宽度要由布局决定」，而布局又要先知道文字宽度。这是一个环，没有解。
+
+所以这不是风格检查，是**能力边界**：`<Text>` 的子树必须能被压成字符串。
+
+**㊵ 已经画出整屏了，为什么还要 `optimize(diff)` 这一趟？**
+
+因为 `diff` 回答的是「哪些格子变了」，输出是逐段写入指令；`optimize` 回答的是「怎么用最少的字节写出去」——相邻同色写入合并、连续光标移动合成一条、能被一次 SGR 覆盖的样式变化不重复发。
+
+两层分开的价值在维护上：diff 逻辑可以保持直白（就是逐格比较），字节级优化单独演进，改一个不会动另一个。终端带宽不是瓶颈，但**写入次数**影响滚动流畅度。
+
+**㊶ `prevFrameContaminated` 到底在防什么？为什么它是个布尔量而不是计数？**
+
+它防的是「blit 快速路径拷了不该拷的东西」。blit 的前提是「上一帧这个区域的像素还是我们以为的内容」。有两类操作会破坏这个前提：往屏幕缓冲里写选区/搜索高亮（涂改了数据）、重建 frontFrame 为空白（基准本身是假的）。两者都在帧末收敛成同一个结论：**下一帧必须全量重绘一次**。
+
+所以它是布尔量：只需要表达「下一帧别走快路径」，下一帧画完就清掉。不需要知道被污染了几次，也不需要累加。
+
+**㊷ `ink.tsx` 一半的复杂度都在防「失步」——为什么终端这么容易失步？**
+
+因为「屏幕上现在是什么」这个状态，我们和终端各存了一份，而外部世界一直在单方面修改终端那一份：tmux 重画状态栏、用户按 Cmd+K、SSH 断线重连、笔记本合盖睡眠、外部编辑器进出 alt screen（写 `?1049l` 把我们踢回主屏）。
+
+具体对策分散在各处，但模式只有三种：
+
+- **每帧重建锚点**：alt 屏每帧先发 `CSI H` 把物理光标钉回 (0,0)，于是相对移动永远从确定位置算起（568 行）
+- **主动作废基准**：`forceRedraw` 把 frontFrame 清成空白，骗 diff 说「之前什么都没有」，逼它整屏重画（825 行）
+- **重新宣示模式**：`reassertTerminalModes` 在 >5 秒静默或事件循环卡顿后重设 kitty 键盘/鼠标跟踪，因为终端可能被重置过而我们这边的标志位还是「已开启」（896 行）
+
+第三条里最值得记的细节：Kitty 键盘协议是**栈**（`CSI >1u` 压栈），所以必须 pop-before-push，否则每次空闲都加一层，退出时排不干净，`Ctrl+C` 会以转义序列的形式漏给 shell。
+
+---
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -931,15 +982,20 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                                     ├─ useManageMCPConnections（异步事件 → AppState）
                                                     └─ AgentTool → coordinator / fork / 普通子 agent
                                                           └─ runAgent（同一套 query 循环，换个身份跑）
+
+（以上全是「业务逻辑」。它们最终都变成 React 元素，交给下面这一层画到屏幕上：）
+src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测量）
+                                          → ink.tsx（一帧九阶段：渲染 → diff → 写终端）
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
+- [`src/ink/`](source/src/ink/) 的**绘制侧**还没做：`screen.ts` 1,486（字符格子/样式池/宽字符）+ `render-node-to-output.ts` 1,462（把布局树画成格子）+ `log-update.ts` 773（两份缓冲之间的最小写入序列）。这三份是「React 侧」的下游，接上就完整了
 - [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等。它们是主线上的螺丝，单独读价值不高，遇到具体问题时再翻
-- [`src/components/`](source/src/components/)（4.2 万行，389 个文件）+ [`src/ink/`](source/src/ink/)（1.3 万行）—— 终端 UI。`ink/` 是**自己实现**的渲染器（不是官方包），核心是 `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462
+- [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 - [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-到这里，**第 1 到第 7 步的主线全部走完**：35 个文件、约 4.65 万行原文、704 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用再回来落盘，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完**：38 个文件、约 4.97 万行原文、829 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一屏字符格子写进终端，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
