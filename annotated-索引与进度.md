@@ -84,7 +84,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行） | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts) | ✅ 完成 |
 | | `src/tools/BashTool/commandSemantics.ts`（141 行） | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | ✅ 完成 |
 | **第 3 步** 读初始化流程（2 小时） | `src/setup.ts`（477 行） | [`src/setup.ts`](annotated/src/setup.ts) | ✅ 完成 |
-| **第 4 步** 读工具系统（半天）★ | `src/tools.ts`、`src/Tool.ts`、`BashTool/` 三个文件 | [`src/Tool.ts`](annotated/src/Tool.ts) ✅<br>`tools.ts`、`BashTool/` ⬜ | 🚧 进行中 |
+| **第 4 步** 读工具系统（半天）★ | `src/Tool.ts`、`src/tools.ts`、`BashTool/` | [`Tool.ts`](annotated/src/Tool.ts) ✅<br>[`tools.ts`](annotated/src/tools.ts) ✅<br>[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br>`bashSecurity`／`bashPermissions` ⬜ | 🚧 主体完成 |
 | **第 5 步** 读主循环（1 天）★★ | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | — | ⬜ 待做 |
 | **第 6 步** 读服务层（半天） | `src/services/` 各模块 | — | ⬜ 待做 |
 | **第 7 步** UI 与多智能体（可选） | `src/components/`、`src/ink/`、`src/coordinator/` | — | ⬜ 待做 |
@@ -334,12 +334,51 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
+---
+
+## 第 4 步后半（`tools.ts` + `BashTool.tsx`）读完了吗？四个自测问题
+
+**1. 四个"取工具列表"的函数，谁是谁？**
+
+`getAllBaseTools()` 是全量清单（不做过滤）；`getTools(ctx)` 在它基础上滤掉特殊工具、deny 规则、`isEnabled()` 为假的；`filterToolsByDenyRules()` 只做 deny 过滤（MCP 工具也要过）；`assembleToolPool(ctx, mcp)` 才是真正在用的"内置 + MCP 合并"。
+那 `getMergedTools()` 呢？**它是死代码，外部调用点 0 个。**
+
+**2. `feature('KAIROS')` 和 `process.env.USER_TYPE === 'ant'` 差在哪？**
+
+前者是**构建期**开关 —— 关闭时整段代码被死代码消除删掉，运行时根本不存在，`cli.js` 里一个字节都没有。后者是**运行期**开关 —— 代码进了包，只是对非员工恒为 false。源码里两种写法混用，看着像一回事，其实是两个世界。
+
+**3. `BashTool` 的 `data.stderr` 为什么不装子进程的错误输出？**
+
+因为子进程用了 merged fd（stderr 并进 stdout）。`result.stdout` 里混着两者，且是**真实交错顺序**。`stderr` 字段只在一种情况下有内容：命令把 cwd 改到项目外、被强制拉回时的一句提示。所以埋点里的 `stderr_length: 0` 是写死的常量，不是 bug。
+
+**4. `_simulatedSedEdit` 为什么必须从给模型的 schema 里 omit？**
+
+它不是"内部字段不方便暴露"，而是**安全边界**。一旦模型能填它，就能拿一条无害命令配一次任意文件写入，同时绕开权限检查和沙箱。所以代码用 `fullInputSchema`（含全字段），模型用 `inputSchema`（omit 掉它）——**同一份类型，两套 schema**。
+
+<details>
+<summary>点开看三个读源码才看得出的问题</summary>
+
+1. **`specialTools` 里有一条永远不命中** —— `SYNTHETIC_OUTPUT_TOOL_NAME` 被放进过滤集合，但它**根本不在** `getAllBaseTools()` 的清单里。过滤一个不存在的东西，无害，但说明清理时漏了一行。
+
+2. **`BashTool.userFacingName` 里藏着一次 P0 事故的修复**（源码注释 issue #21605）：`shouldUseSandbox → splitCommand → shell-quote` 每次调用都 `new RegExp`，而这个函数对历史里每条 bash 消息都在每次渲染时跑一遍。50 条消息就超过 shimmer 的 tick 间隔 → 动画中断 → 无限重试。修法不是加缓存，而是**把最便宜的判断提到最前面**（先查环境变量），让绝大多数用户根本不执行后面的重活。
+
+3. **`assembleToolPool` 为什么要分两段排序** —— 不是代码风格，是**钱**。服务端在"最后一个内置工具"之后放缓存断点，如果 MCP 工具被整体排序插进内置工具中间，断点之前的序列就变了，prompt cache 全失效，每次请求按全价计费。一个排序细节直接连着运营成本。
+
+</details>
+
+---
+
 ## 继续往下读之前
 
-第 4 步还有后半段：`src/tools.ts`（工具注册表，`getAllBaseTools()` 是唯一真相来源）和 `src/tools/BashTool/`（最复杂的一个工具实现）。
+第 4 步还剩两个大文件没批注，都不小：
 
-顺序建议：先读 `tools.ts`（很短，就是一张清单 + 一批 feature flag 过滤），再读 `BashTool/`（会用到前面全部概念：`isConcurrencySafe` 按命令分级、`validateInput` 查路径、`checkPermissions` 处理组合命令、`maxResultSizeChars` 落盘）。
+- [`src/tools/BashTool/bashSecurity.ts`](source/src/tools/BashTool/bashSecurity.ts) —— 2,592 行，危险命令识别
+- [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) —— 2,621 行，权限判定（`bashToolHasPermission` 就在这儿）
 
-告诉我「继续第 4 步后半」或「继续第 5 步」，我就接着批注。
+`BashTool.tsx` 里 `checkPermissions` 那一行只做转发，真正的判定全在这两个文件里。想彻底搞懂"AI 怎么安全地跑命令"，这两个必须读。
+
+再往下是第 5 步（主循环）：`constants/prompts.ts`、`query.ts`、`QueryEngine.ts`、`services/api/`。
+
+告诉我「继续第 4 步剩下两个」或「继续第 5 步」，我就接着批注。
 
 

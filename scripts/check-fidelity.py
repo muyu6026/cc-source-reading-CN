@@ -30,6 +30,8 @@ SKIP_NAMES = {'README.annotated.md', 'package.json.annotated.md'}
 KNOWN_OMIT = {
     'src/entrypoints/cli.tsx':
         '末尾 sourceMappingURL 单行 27,448 字符的 base64 sourcemap，批注版改为一句话说明',
+    'src/tools/BashTool/BashTool.tsx':
+        '末尾 sourceMappingURL 单行约 8 万字符的 base64 sourcemap，批注版改为一句话说明',
 }
 
 ANN_PREFIXES = ('// 译：', '// 注：', '// ─', '// ═')
