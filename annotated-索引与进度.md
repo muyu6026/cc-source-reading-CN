@@ -86,7 +86,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅ | ✅ 完成 |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅ | 🔄 进行中 |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅<br />[`compact.ts`](annotated/src/services/compact/compact.ts) ✅<br />[`microCompact.ts`](annotated/src/services/compact/microCompact.ts) ✅<br />[`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) ✅ | 🔄 进行中 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
 
 ---
@@ -504,15 +504,18 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 6 步（服务层）读完了吗？
 
-第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工三个：
+第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工六个：
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
 | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) | 822 | 1,419 | 重试边界、退避曲线、529 白名单、无限重试模式 |
 | [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153 | 329 | 发给 API 的 `context_management` 指令（**不调模型**） |
 | [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) | 351 | 668 | 阈值计算、四道抑制闸门、三振熔断、session memory 优先 |
+| [`compact.ts`](annotated/src/services/compact/compact.ts) | 1,705 | 3,629 | 摘要压缩本体、PTL 逃生舱、两条摘要路径、七类附件重建 |
+| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts) | 530 | 1,353 | 三条微压缩路径、缓存编辑、时间触发 |
+| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,518 | 零调用压缩、索引对齐、两种恢复场景 |
 
-合计 **1,326 行原文**，118 处批注锚点。
+合计 **4,191 行原文**，313 处批注锚点。
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 
@@ -534,17 +537,51 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 阈值算错只是压缩早一点或晚一点；闸门缺失会造成实打实的故障：压缩触发压缩会死锁、`marble_origami` 压缩会通过模块级状态毁掉主线程已提交的日志、autocompact 和 context-collapse 会在 93% 这个点上抢同一段上下文。而且闸门必须加在**调用点**而不是 `isAutoCompactEnabled()` 里 —— 因为 reactive compact 会直接查那个函数，闸门塞进去会连 413 兜底一起关掉。
 
+**⑥ 压缩本身为什么会「自己撞上上下文上限」？**
+
+因为压缩的输入就是那个已经太长的上下文。它是一次完整的 API 调用，不是本地删数据。所以 `compact.ts` 花了 50 行写 `truncateHeadForPTLRetry` —— 按 API 轮次分组、从最老的开始砍、砍到刚好覆盖缺口。而且每轮重试前必须先剥掉自己上次插入的占位消息，否则第二次重试会原地打转。
+
+**⑦ 为什么 `compact.ts` 的缓存复用路径**不能**设 `maxOutputTokens`，而备路径**必须**设？**
+
+主路径走 `runForkedAgent`，靠「参数和主线程逐字节相同」来命中 prompt cache。而 `maxOutputTokens` 会经 `Math.min(budget, maxOutputTokens-1)` 间接改写 thinking 的 `budget_tokens` —— thinking config 就在缓存键里，改了整条缓存作废。备路径（普通流式）本来就共享不了前缀，所以可以放心设，用来把摘要长度限制在合理范围。
+
+**⑧ 压缩后要补回哪七类东西？为什么它们是「必须」而不是「锦上添花」？**
+
+文件内容、后台 agent 列表、plan 文件、plan mode 状态、调用过的技能、延迟工具清单、MCP 指令。每一项对应一种真实的能力退化：不补文件 → 模型重新 Read 几十次；不补 agent → 重复 spawn 同一个任务；不补 plan mode → 模型直接开始改代码。**压缩的真实成本不是 token，是这些信息损失。**
+
+**⑨ `microCompact` 的两条路径为什么一条改本地消息、一条不改？**
+
+判据只有一条：缓存热不热。热 → 用 `cache_edits` 让服务端逻辑删除，本地字节不动，前缀命中；冷 → 直接改内容，反正整条前缀都要重建，不如先把内容清掉让重建量更小。这也解释了为什么时间触发一旦命中就直接 `return`，不再走缓存路径 —— 两者前提互斥。
+
+**⑩ `sessionMemoryCompact` 里那个 82 行的索引对齐函数在防什么？**
+
+防两种「本地看不出来、发到 API 才 400」的错误。一是切点劈开 `tool_use`/`tool_result` 配对（流式把一次响应拆成多条消息，合并后 tool_use 消失但 tool_result 还在 → 孤儿）。二是切点劈开共享 `message.id` 的 thinking 块（后续 `normalizeMessagesForAPI` 合并时 thinking 没有容器，直接丢失，而它带 signature，丢了会破坏 extended thinking 的连续性）。修复方向只有一个：**把切点往前挪**，宁可多保留，不可断链。
+
+---
+
+## 第 6 步的三条主线结论
+
+1. **压缩的所有复杂度都来自「压缩是一次会失败的 API 调用」** —— 不是本地数据操作。它要钱、要时间、会被限流、会自己 PTL、会被用户 Esc 打断，而且中断还可能被误判成成功。`compact.ts` 里超过一半的代码在处理这些失败路径。
+
+2. **prompt cache 是这一层的最高约束** —— 缓存键包含 system / tools / model / 消息前缀 / thinking config，任何一项变了整条前缀作废。这条约束反过来决定了很多看似奇怪的设计：备路径的 system prompt 只有一句话、摘要指令必须作为 user 消息追加在末尾、微压缩有一条路径宁可不改内容、`compact.ts` 宁愿不设 maxOutputTokens。
+
+3. **两条实现路径会漂移** —— session memory 压缩漏了 `notifyCompaction`，导致 20% 的缓存断裂告警是误报；`cachedMCState` 被主线程和时间触发两条路径共享，互相污染后要手动 reset。凡是「同一件事有两套实现」的地方，副作用清单最容易不同步。
+
 ---
 
 ## 继续往下读之前
 
-第 6 步还剩两块主线（都很大，各自单独一轮）：
+第 6 步的压缩主线已经闭环。剩下最大的一块是 MCP：
 
-- [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts)（1,705 行）—— 传统摘要压缩的本体：怎么把对话变成摘要、怎么替换消息数组。`autoCompact.ts` 只是它的调用方
-- [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts)（530 行）+ [`sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts)（630 行）—— 客户端微压缩，以及 `autoCompact` 里那条「先试 session memory」的路径
 - [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts)（3,348 行）—— MCP 协议接入，`claude.ts` 里所有 `hasPendingMcpServers` / `mcp_instructions_delta` 的源头
 
-告诉我下一个读哪个，或者直接说「继续」我就按上面顺序往下推。
+如果要先补齐「压缩管线」周边的小文件（加起来不到 600 行，一轮能做完）：
+
+- [`compact/prompt.ts`](source/src/services/compact/prompt.ts)（374 行）—— 摘要指令的实际文本。上面所有函数都在拼「发什么」，这里是「说什么」
+- [`compact/grouping.ts`](source/src/services/compact/grouping.ts)（63 行）—— `groupMessagesByApiRound` 的实现，PTL 截断和边界扫描都依赖它
+- [`compact/postCompactCleanup.ts`](source/src/services/compact/postCompactCleanup.ts)（77 行）+ `compactWarningState.ts`（18 行）+ `compactWarningHook.ts`（16 行）—— 压缩后的状态清理
+
+告诉我下一个读哪个，或者直接说「继续」我就按 MCP 往下推。
 
 ---
 

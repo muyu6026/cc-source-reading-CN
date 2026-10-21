@@ -169,7 +169,9 @@
 | [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 529 白名单 / 无限重试 | [✅ 822 → 1,419 行](annotated/src/services/api/withRetry.ts) |
 | [`src/services/compact/apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) | 发给 API 的 `context_management` 指令 | [✅ 153 → 329 行](annotated/src/services/compact/apiMicrocompact.ts) |
 | [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts) | 什么时候压、四道抑制闸门、熔断 | [✅ 351 → 668 行](annotated/src/services/compact/autoCompact.ts) |
-| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) | 摘要压缩本体 | ⬜ 待批注 |
+| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) | 摘要压缩本体、PTL 逃生舱、七类附件重建 | [✅ 1,705 → 3,629 行](annotated/src/services/compact/compact.ts) |
+| [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts) | 三条微压缩路径、缓存编辑、时间触发 | [✅ 530 → 1,353 行](annotated/src/services/compact/microCompact.ts) |
+| [`src/services/compact/sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts) | 零调用压缩、索引对齐、两种恢复场景 | [✅ 630 → 1,518 行](annotated/src/services/compact/sessionMemoryCompact.ts) |
 | [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) + `config.ts` | 怎么连外部工具 | ⬜ 待批注 |
 | [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 | ⬜ 待批注 |
 | [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 登录鉴权 | ⬜ 待批注 |
@@ -364,7 +366,7 @@ source/README.md                    →  annotated/README.annotated.md
 
 **怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。还有一类更隐蔽的破坏由 `annotate.py` 结构性拦截：`//` 连续注释也成段，锚点落在段中部会把一句英文从中间剪断（语法合法、注释一行不少，只是读起来断了）—— 现在 `before` 自动挪段首、`after` 自动挪段尾。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步进行中**（`withRetry.ts` 822 + `apiMicrocompact.ts` 153 + `autoCompact.ts` 351，合计 1,326 行原文、118 处锚点）。下一步是 `src/services/compact/compact.ts`（1,705 行）。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步进行中**（`withRetry.ts` 822 + `apiMicrocompact.ts` 153 + `autoCompact.ts` 351 + `compact.ts` 1,705 + `microCompact.ts` 530 + `sessionMemoryCompact.ts` 630，合计 4,191 行原文、313 处锚点）。下一步是 `src/services/mcp/client.ts`（3,348 行）。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 
