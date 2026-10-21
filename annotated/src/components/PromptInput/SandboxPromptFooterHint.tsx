@@ -1,0 +1,137 @@
+// ═══════════════════════════════════════════════════════════════
+//  SandboxPromptFooterHint：沙箱拦截了几次，5 秒后自动消失
+// ═══════════════════════════════════════════════════════════════
+//
+//  逻辑很短，但有三个值得看的地方：
+//
+//    1. 订阅在 effect 里只建一次（编译后 deps 是空数组）
+//    2. 计数用「差值」而不是「总数」—— 只报这次新增了几次
+//    3. 5 秒没新拦截才清零，连续拦截会不断重置计时器
+//
+//  它是一个「瞬时提示」组件：平时返回 null，没有任何布局占用。
+import { c as _c } from "react/compiler-runtime";
+import * as React from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { Box, Text } from '../../ink.js';
+import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
+import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
+// 【组件体内只有一个 useState 和一个 useRef 是自己的】
+//
+//  showCursor / 颜色 / 定时器全都不是 React 状态：定时器用 ref 存句柄，
+//  因为改句柄不需要触发渲染；真正的显示状态只有 recentViolationCount。
+//
+//  `useRef(null)` 在编译产物里出现得很频繁，一个规律：
+//  **凡是「值变了但不需要重渲染」的东西，都是 ref；凡是「值变了界面要跟着变」的，
+//  才是 state。** 这里定时器句柄属于前者，计数属于后者。
+export function SandboxPromptFooterHint() {
+  const $ = _c(6);
+  const [recentViolationCount, setRecentViolationCount] = useState(0);
+  const timerRef = useRef(null);
+  const detailsShortcut = useShortcutDisplay("app:toggleTranscript", "Global", "ctrl+o");
+  let t0;
+  let t1;
+// 【effect 和它的依赖数组一起被缓存了，于是 deps 变成 []】
+//
+//  源码写的是 useEffect(() => {...}, [])，编译后 deps 被算成 `t1 = []`
+//  并和回调一起存进 $[0] / $[1]。也就是说：**这个 effect 只会在挂载时跑一次**。
+//
+//  这带来一个真实的行为约束：第 16 行 `SandboxManager.isSandboxingEnabled()`
+//  只在挂载那一刻判断一次。如果用户在会话中途用 /sandbox 打开沙箱，
+//  这个组件不会去订阅违规事件 —— 因为订阅是在「当时沙箱已开」的前提下建立的。
+//
+//  而第 48 行的渲染期判断每次渲染都会重新读，所以一旦有别的原因触发重渲染，
+//  提示又能正常出现。**两处的「读」时机不同，这是本文件最容易读错的地方。**
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t0 = () => {
+      if (!SandboxManager.isSandboxingEnabled()) {
+        return;
+      }
+      const store = SandboxManager.getSandboxViolationStore();
+// 【记基线，然后只报增量】
+//
+//  lastCount 是「订阅建立那一刻的累计数」，不是 0。
+//  原因：违规总数是会话级的累计值，如果从 0 开始算，第一次订阅时
+//  会把之前所有历史违规当成「刚刚发生的」报出来。
+//
+//  这个模式叫「基线 + 差值」，凡是订阅一个累计计数器都要这么写。
+//  反例（很常见）：直接 `setCount(store.getTotalCount())`，
+//  结果每次订阅都把历史重播一遍。
+      let lastCount = store.getTotalCount();
+      const unsubscribe = store.subscribe(() => {
+        const currentCount = store.getTotalCount();
+        const newViolations = currentCount - lastCount;
+        if (newViolations > 0) {
+          setRecentViolationCount(newViolations);
+// 【连续拦截时不累加显示，而是重置计时 —— 这点和直觉不同】
+//
+//  每来一次新违规：清掉上一个定时器 → 重新起 5 秒 → 显示「最近 5 秒内的次数」。
+//
+//  效果是：用户在 30 秒内被拦了 5 次，提示持续显示且始终只写「1 operation」
+//  （因为每次都差 1），而不是「5 operations」。听起来像 bug，其实是选择：
+//  它报的是「这一波」的次数，而每一波之间的间隔如果小于 5 秒，就并成同一波。
+//
+//  如果想让数字累加，得把 lastCount 的更新挪到定时器回调里。
+//  现在的写法是「提示器」，不是「计数器」—— 别指望它给出总数。
+          lastCount = currentCount;
+          if (timerRef.current) {
+            clearTimeout(timerRef.current);
+          }
+// 【setTimeout(setter, 5000, 0) 又是那种「不套闭包」的写法】
+//
+//  三个参数分别是：要调的函数、延迟、要传的参数。
+//  等价于 `setTimeout(() => setRecentViolationCount(0), 5000)`。
+//
+//  这里用直接传 setter 有个额外好处：**不捕获那次渲染的闭包**。
+//  如果套了箭头函数，它捕获的是创建时的作用域；直接传 setter 则是
+//  函数引用本身（setter 引用永远稳定），语义更干净。
+//
+//  第 33-38 行的清账同时做了 unsubscribe 和 clearTimeout ——
+//  少任何一件，卸载后要么泄漏订阅，要么在已卸载组件上 setState。
+          timerRef.current = setTimeout(setRecentViolationCount, 5000, 0);
+        }
+      });
+      return () => {
+        unsubscribe();
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      };
+    };
+    t1 = [];
+    $[0] = t0;
+    $[1] = t1;
+  } else {
+    t0 = $[0];
+    t1 = $[1];
+  }
+  useEffect(t0, t1);
+// 【渲染期再判一次「沙箱还开着吗」】
+//
+//  和第 16 行的 effect 内判断不同，这一句每次渲染都重新执行。
+//  所以：沙箱被关掉后，只要有任何一次重渲染，提示就消失 ——
+//  不需要等那次 5 秒定时器。
+//
+//  两个条件是与关系：沙箱开着 且 有未过期的计数。
+//  计数归零的路径只有一条（定时器），所以「提示消失」有两条路径：
+//  计数到期，或者沙箱被关。
+//
+//  第 51 行的单复数处理（1 operation / N operations）是英语 UI 的标准礼貌，
+//  中文界面不需要，但看源码时别误以为是逻辑判断的一部分。
+  if (!SandboxManager.isSandboxingEnabled() || recentViolationCount === 0) {
+    return null;
+  }
+  const t2 = recentViolationCount === 1 ? "operation" : "operations";
+  let t3;
+  if ($[2] !== detailsShortcut || $[3] !== recentViolationCount || $[4] !== t2) {
+    t3 = <Box paddingX={0} paddingY={0}><Text color="inactive" wrap="truncate">⧈ Sandbox blocked {recentViolationCount}{" "}{t2} ·{" "}{detailsShortcut} for details · /sandbox to disable</Text></Box>;
+    $[2] = detailsShortcut;
+    $[3] = recentViolationCount;
+    $[4] = t2;
+    $[5] = t3;
+  } else {
+    t3 = $[5];
+  }
+  return t3;
+}
+// 原文件此处有一行 5836 字符的 sourceMappingURL（base64 source map），
+// 它只用于把编译产物映射回源码，对理解逻辑没有帮助，这里省略不抄。

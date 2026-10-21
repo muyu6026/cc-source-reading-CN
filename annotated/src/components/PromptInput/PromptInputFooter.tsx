@@ -1,0 +1,324 @@
+// ═══════════════════════════════════════════════════════════════
+//  PromptInputFooter：输入框下面那一行，谁有资格占用
+// ═══════════════════════════════════════════════════════════════
+//
+//  这个文件没被 React Compiler 编译过（没有 _c / $ 槽），是手写代码 ——
+//  对比同目录那些 `t0`/`$[n]` 满地的文件，一眼能分出来。
+//
+//  它的结构是**三级仲裁**，三个 early return 依次判断：
+//
+//    1. 有补全建议 且 非全屏   → 整行都给建议列表
+//    2. 帮助菜单打开           → 整行都给帮助菜单
+//    3. 其余情况               → 左边一列状态 + 右边一列通知/桥接状态
+//
+//  「谁占整行」的优先级写在代码顺序里，比任何文档都清楚。
+import { feature } from 'bun:bundle';
+import * as React from 'react';
+import { memo, type ReactNode, useMemo, useRef } from 'react';
+import { isBridgeEnabled } from '../../bridge/bridgeEnabled.js';
+import { getBridgeStatus } from '../../bridge/bridgeStatusUtil.js';
+import { useSetPromptOverlay } from '../../context/promptOverlayContext.js';
+import type { VerificationStatus } from '../../hooks/useApiKeyVerification.js';
+import type { IDESelection } from '../../hooks/useIdeSelection.js';
+import { useSettings } from '../../hooks/useSettings.js';
+import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import { Box, Text } from '../../ink.js';
+import type { MCPServerConnection } from '../../services/mcp/types.js';
+import { useAppState } from '../../state/AppState.js';
+import type { ToolPermissionContext } from '../../Tool.js';
+import type { Message } from '../../types/message.js';
+import type { PromptInputMode, VimMode } from '../../types/textInputTypes.js';
+import type { AutoUpdaterResult } from '../../utils/autoUpdater.js';
+import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';
+import { isUndercover } from '../../utils/undercover.js';
+import { CoordinatorTaskPanel, useCoordinatorTaskCount } from '../CoordinatorAgentStatus.js';
+import { getLastAssistantMessageId, StatusLine, statusLineShouldDisplay } from '../StatusLine.js';
+import { Notifications } from './Notifications.js';
+import { PromptInputFooterLeftSide } from './PromptInputFooterLeftSide.js';
+import { PromptInputFooterSuggestions, type SuggestionItem } from './PromptInputFooterSuggestions.js';
+import { PromptInputHelpMenu } from './PromptInputHelpMenu.js';
+type Props = {
+  apiKeyStatus: VerificationStatus;
+  debug: boolean;
+  exitMessage: {
+    show: boolean;
+    key?: string;
+  };
+  vimMode: VimMode | undefined;
+  mode: PromptInputMode;
+  autoUpdaterResult: AutoUpdaterResult | null;
+  isAutoUpdating: boolean;
+  verbose: boolean;
+  onAutoUpdaterResult: (result: AutoUpdaterResult) => void;
+  onChangeIsUpdating: (isUpdating: boolean) => void;
+  suggestions: SuggestionItem[];
+  selectedSuggestion: number;
+  maxColumnWidth?: number;
+  toolPermissionContext: ToolPermissionContext;
+  helpOpen: boolean;
+  suppressHint: boolean;
+  isLoading: boolean;
+  tasksSelected: boolean;
+  teamsSelected: boolean;
+  bridgeSelected: boolean;
+  tmuxSelected: boolean;
+  teammateFooterIndex?: number;
+  ideSelection: IDESelection | undefined;
+  mcpClients?: MCPServerConnection[];
+  isPasting?: boolean;
+  isInputWrapped?: boolean;
+  messages: Message[];
+  isSearching: boolean;
+  historyQuery: string;
+  setHistoryQuery: (query: string) => void;
+  historyFailedMatch: boolean;
+  onOpenTasksDialog?: (taskId?: string) => void;
+};
+// 【32 个 props，几乎全是布尔标志】
+//
+//  这是典型的「状态上提过度」的信号：PromptInput 把所有子状态都攒在自己身上，
+//  再一个个传给 footer。后果是这个组件的 memo 比较器要逐个比 32 个值，
+//  而且任何一处变化都会让整行重建。
+//
+//  它仍然这么快，是因为：footer 里真正贵的是子组件（StatusLine 等），
+//  而那些子组件自己有 memo。这一层只是个「开关面板」。
+//
+//  读这种签名的方法：**别从上往下读，先找哪些 props 只被用一次**。
+//  比如 teamsSelected 只传给 PromptInputFooterLeftSide，tmuxSelected 也是 ——
+//  它们的存在说明「选中状态」这个概念在这一层是透传的，没有任何加工。
+function PromptInputFooter({
+  apiKeyStatus,
+  debug,
+  exitMessage,
+  vimMode,
+  mode,
+  autoUpdaterResult,
+  isAutoUpdating,
+  verbose,
+  onAutoUpdaterResult,
+  onChangeIsUpdating,
+  suggestions,
+  selectedSuggestion,
+  maxColumnWidth,
+  toolPermissionContext,
+  helpOpen,
+  suppressHint: suppressHintFromProps,
+  isLoading,
+  tasksSelected,
+  teamsSelected,
+  bridgeSelected,
+  tmuxSelected,
+  teammateFooterIndex,
+  ideSelection,
+  mcpClients,
+  isPasting = false,
+  isInputWrapped = false,
+  messages,
+  isSearching,
+  historyQuery,
+  setHistoryQuery,
+  historyFailedMatch,
+  onOpenTasksDialog
+}: Props): ReactNode {
+  const settings = useSettings();
+  const {
+    columns,
+    rows
+  } = useTerminalSize();
+// 【messagesRef：既想读到最新值，又不想进 memo 比较】
+//
+//      const messagesRef = useRef(messages)
+//      messagesRef.current = messages      ← 渲染期直接赋值
+//
+//  这两行是一个经典组合：把「最新 props」钉在一个稳定容器里，
+//  于是下游（StatusLine）可以拿着同一个 ref 反复读，而父组件不用因为
+//  messages 变化而重新渲染它。
+//
+//  代价：渲染期写 ref 在并发渲染下理论上有风险（渲染可能被丢弃，
+//  而 ref 已经被改了）。这个项目显然接受这个风险 —— 因为它渲染的是终端文本，
+//  没有 Suspense 中断，也不做时间切片。
+//
+//  什么时候该用这个模式：**下游只想「读一下」，而你想避免把整个大数组
+//  传进 memo 比较**。什么时候不该用：下游要根据它改变渲染结果
+//  （那就必须走 props，否则不会重渲染）。
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const lastAssistantMessageId = useMemo(() => getLastAssistantMessageId(messages), [messages]);
+// 【80 列和 24 行：两个「换布局」的门槛】
+//
+//  isNarrow（列 < 80）→ 左右两列改成上下两行，并且让左侧不再 flexShrink。
+//  80 是终端的传统宽度，也是这套 UI 的设计基准。
+//
+//  isShort（全屏 且 行 < 24）→ 提前丢掉可选的 StatusLine。
+//  注意它**只在全屏下成立**：非全屏时终端有 scrollback，多出来的行可以滚上去，
+//  所以宁可不隐藏。全屏没有 scrollback，每一行都是从正文区抢来的。
+//
+//  同一个「空间不够」的问题，在两种模式下答案不同 —— 差别就在有没有 scrollback。
+//  这类「环境决定了取舍」的判断，在 ink/ 目录里反复出现（AlternateScreen）。
+  const isNarrow = columns < 80;
+  // In fullscreen the bottom slot is flexShrink:0, so every row here is a row
+  // stolen from the ScrollBox. Drop the optional StatusLine first. Non-fullscreen
+  // has terminal scrollback to absorb overflow, so we never hide StatusLine there.
+  const isFullscreen = isFullscreenEnvEnabled();
+  const isShort = isFullscreen && rows < 24;
+
+  // Pill highlights when tasks is the active footer item AND no specific
+  // agent row is selected. When coordinatorTaskIndex >= 0 the pointer has
+  // moved into CoordinatorTaskPanel, so the pill should un-highlight.
+  // coordinatorTaskCount === 0 covers the bash-only case (no agent rows
+  // exist, pill is the only selectable item).
+  const coordinatorTaskCount = useCoordinatorTaskCount();
+  const coordinatorTaskIndex = useAppState(s => s.coordinatorTaskIndex);
+// 【pillSelected：一个「选中」需要两个条件同时成立】
+//
+//      tasksSelected && (coordinatorTaskCount === 0 || coordinatorTaskIndex < 0)
+//
+//  第一个条件：任务胶囊是当前选中的 footer 项。
+//  第二个条件：要么没有可展开的任务行，要么光标还没进入任务行列表
+//  （coordinatorTaskIndex 的 -1 是「停在胶囊上，没进列表」的哨兵，见 PromptInput）。
+//
+//  为什么必须加第二个：光标在胶囊里往下走会进入「任务行」，此时胶囊仍然
+//  是 tasksSelected，但视觉高亮应该转移到具体那一行上。
+//  不加判断就会出现「胶囊和某一行同时高亮」。
+//
+//  **一个布尔状态被两处使用（导航 + 高亮）时，两处对「选中」的定义往往不同。**
+  const pillSelected = tasksSelected && (coordinatorTaskCount === 0 || coordinatorTaskIndex < 0);
+
+  // Hide `? for shortcuts` if the user has a custom status line, or during ctrl-r
+  const suppressHint = suppressHintFromProps || statusLineShouldDisplay(settings) || isSearching;
+  // Fullscreen: portal data to FullscreenLayout — see promptOverlayContext.tsx
+// 【全屏时，建议列表要被「传送」到别处渲染】
+//
+//  原因：全屏布局里输入框所在的那个槽位（bottom slot）设了 overflow 裁剪，
+//  建议列表向上溢出会被切掉。所以这里不直接渲染它，而是把数据交给
+//  useSetPromptOverlay，由 FullscreenLayout 在更高的层级画出来。
+//
+//  这正是 React Portal 的思想，只是没走 createPortal —— 而是「把数据塞进
+//  context，让另一个位置的组件去取」。在终端渲染器里，portal 的代价较高
+//  （yoga 树要能跨父级定位），用 context 传递数据更省事。
+//
+//  第 130 行那句 `if (suggestions.length && !isFullscreen)` 是配套的另一半：
+//  非全屏才自己画。**同一份数据，两个渲染位置，靠一个布尔分流。**
+  const overlayData = useMemo(() => isFullscreen && suggestions.length ? {
+    suggestions,
+    selectedSuggestion,
+    maxColumnWidth
+  } : null, [isFullscreen, suggestions, selectedSuggestion, maxColumnWidth]);
+  useSetPromptOverlay(overlayData);
+  if (suggestions.length && !isFullscreen) {
+    return <Box paddingX={2} paddingY={0}>
+        <PromptInputFooterSuggestions suggestions={suggestions} selectedSuggestion={selectedSuggestion} maxColumnWidth={maxColumnWidth} />
+      </Box>;
+  }
+  if (helpOpen) {
+    return <PromptInputHelpMenu dimColor={true} fixedWidth={true} paddingX={2} />;
+  }
+  return <>
+      <Box flexDirection={isNarrow ? 'column' : 'row'} justifyContent={isNarrow ? 'flex-start' : 'space-between'} paddingX={2} gap={isNarrow ? 0 : 1}>
+        <Box flexDirection="column" flexShrink={isNarrow ? 0 : 1}>
+          {mode === 'prompt' && !isShort && !exitMessage.show && !isPasting && statusLineShouldDisplay(settings) && <StatusLine messagesRef={messagesRef} lastAssistantMessageId={lastAssistantMessageId} vimMode={vimMode} />}
+          <PromptInputFooterLeftSide exitMessage={exitMessage} vimMode={vimMode} mode={mode} toolPermissionContext={toolPermissionContext} suppressHint={suppressHint} isLoading={isLoading} tasksSelected={pillSelected} teamsSelected={teamsSelected} teammateFooterIndex={teammateFooterIndex} tmuxSelected={tmuxSelected} isPasting={isPasting} isSearching={isSearching} historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} historyFailedMatch={historyFailedMatch} onOpenTasksDialog={onOpenTasksDialog} />
+        </Box>
+        <Box flexShrink={1} gap={1}>
+          {isFullscreen ? null : <Notifications apiKeyStatus={apiKeyStatus} autoUpdaterResult={autoUpdaterResult} debug={debug} isAutoUpdating={isAutoUpdating} verbose={verbose} messages={messages} onAutoUpdaterResult={onAutoUpdaterResult} onChangeIsUpdating={onChangeIsUpdating} ideSelection={ideSelection} mcpClients={mcpClients} isInputWrapped={isInputWrapped} isNarrow={isNarrow} />}
+// 【`"external" === 'ant' && …` —— 编译期常量，永远是 false】
+//
+//  这一行和下面第 150 行的 CoordinatorTaskPanel 都是内部构建专属代码，
+//  在对外构建里被折成 false。注意它们**并没有被删除**（对比 IssueFlagBanner
+//  里整块 JSX 消失）—— 因为这是个 `&&` 表达式，折叠后剩下 `false && x`，
+//  打包器认为去掉它和保留它一样安全，于是留在了产物里。
+//
+//  后果：`isUndercover()` 这个函数永远不会被调用，但它仍然被 import 着，
+//  所以它的模块还在包里。也就是说——**这段代码在产物里存在，但不可达**。
+//
+//  判据：想确认某个功能在对外版本里到底有没有，不能只看「代码在不在」，
+//  要看「常量条件是不是恒假」。一行 `"external" === 'ant'` 就够了。
+          {"external" === 'ant' && isUndercover() && <Text dimColor>undercover</Text>}
+          <BridgeStatusIndicator bridgeSelected={bridgeSelected} />
+        </Box>
+      </Box>
+      {"external" === 'ant' && <CoordinatorTaskPanel />}
+    </>;
+}
+export default memo(PromptInputFooter);
+type BridgeStatusProps = {
+  bridgeSelected: boolean;
+};
+// 【这个子组件的注释密度反常，因为它踩过坑】
+//
+//  BridgeStatusIndicator 是「远端控制」的连接状态胶囊。三个坑全在注释里：
+//
+//    1. feature 判断在 hook 之前（第 160 行），所以每个 useAppState 都要
+//       标 `biome-ignore useHookAtTopLevel` —— 因为 linter 看到「条件后面有 hook」
+//       就会报错，而这里条件其实是编译期常量，永远为真/永远为假。
+//    2. 失败状态不在这里显示，走通知（注释第 173 行）—— 同一个信息不占两个地方。
+//    3. 隐式远端（配置驱动）只在重连时显示（第 183 行）—— 用户没主动要求的东西，
+//       不要常驻占位。
+//
+//  第 3 条是个很克制的设计决定：胶囊代表「有个你没打开的功能在跑」，
+//  稳态时不显示，只在出问题时冒出来。
+function BridgeStatusIndicator({
+  bridgeSelected
+}: BridgeStatusProps): React.ReactNode {
+  if (!feature('BRIDGE_MODE')) return null;
+
+  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+// 【五个 useAppState，而不是一次取出一个对象】
+//
+//      useAppState(s => s.replBridgeEnabled)
+//      useAppState(s => s.replBridgeConnected)
+//      … 一共五个
+//
+//  如果写成 `useAppState(s => ({enabled: s.a, connected: s.b, ...}))`，
+//  每次 selector 都返回新对象 → 引用不等 → **每次都判定为变化 → 每次都重渲染**。
+//  （zustand 默认用 Object.is 比较返回值。）
+//
+//  想一次取多个字段，正确做法是传 shallow 比较函数；这里选了最笨但最稳的办法：
+//  一个字段一个订阅，每个返回都是标量。
+//
+//  代价：五个订阅 vs 一个订阅。在只有 5 个字段时完全可接受；
+//  字段多了（比如 20 个）就该换成 shallow 或 useShallow 了。
+  const enabled = useAppState(s => s.replBridgeEnabled);
+  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+  const connected = useAppState(s_0 => s_0.replBridgeConnected);
+  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+  const sessionActive = useAppState(s_1 => s_1.replBridgeSessionActive);
+  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+  const reconnecting = useAppState(s_2 => s_2.replBridgeReconnecting);
+  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+  const explicit = useAppState(s_3 => s_3.replBridgeExplicit);
+
+  // Failed state is surfaced via notification (useReplBridge), not a footer pill.
+  if (!isBridgeEnabled() || !enabled) return null;
+  const status = getBridgeStatus({
+    error: undefined,
+    connected,
+    sessionActive,
+    reconnecting
+  });
+
+  // For implicit (config-driven) remote, only show the reconnecting state
+// 【隐式远端只在重连中显示 —— 「不是用户要的，就别常驻」】
+//
+//  explicit 为真表示用户显式开启了远端控制（他可以按需关掉，所以显示状态是为他好）。
+//  explicit 为假表示这是配置文件里带出来的，用户可能根本不知道有这回事：
+//
+//    · 稳态 → 不显示（省一行，也免得用户困惑「这是什么」）
+//    · 重连中 → 显示（这时候正在出问题，必须让人知道）
+//
+//  判断依据竟然是 `status.label !== 'Remote Control reconnecting'` ——
+//  用**文案**当状态判据。这很脆：改一个字（比如大小写、加个省略号），
+//  这个判断就永久失效，表现为「重连时也不显示了」。
+//
+//  更稳的写法是让 getBridgeStatus 返回一个 kind/state 字段，文案只用于展示。
+//  这里没这么做，属于「用显示层的东西做了逻辑判断」的典型隐患。
+  if (!explicit && status.label !== 'Remote Control reconnecting') {
+    return null;
+  }
+  return <Text color={bridgeSelected ? 'background' : status.color} inverse={bridgeSelected} wrap="truncate">
+      {status.label}
+      {bridgeSelected && <Text dimColor> · Enter to view</Text>}
+    </Text>;
+}
+// 原文件此处有一行 24464 字符的 sourceMappingURL（base64 source map），
+// 它只用于把编译产物映射回源码，对理解逻辑没有帮助，这里省略不抄。

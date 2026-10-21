@@ -1,0 +1,78 @@
+// ═══════════════════════════════════════════════════════════════
+//  useShowFastIconHint：「一会话只显示一次」用模块变量实现
+// ═══════════════════════════════════════════════════════════════
+//
+//  31 行，一个 hook，一个 5 秒定时器。
+//
+//  真正的知识点在第 5 行：状态没有放在 React 里，而是放在了**模块作用域**。
+//  这不是偷懒，而是因为「一次会话」的范围比「组件生命周期」大：
+//  组件会因为切换视图卸载重挂，模块变量不会。
+import { useEffect, useState } from 'react'
+
+const HINT_DISPLAY_DURATION_MS = 5000
+
+// 【模块级变量 = 进程级内存，重启即清零】
+//
+//  React state 随组件卸载消失；这个变量活到进程退出。
+//  所以「本会话只显示一次」这个需求，用 state 是做不到的 ——
+//  组件一重挂，state 就回到 false，提示又出现一次。
+//
+//  代价也很明确：**它不会触发渲染**。如果别的地方想在「已显示」后改变 UI，
+//  读这个变量没用，必须用 state。这里之所以行得通，是因为唯一的读点
+//  就在下面这个 hook 自己的 useEffect 里。
+let hasShownThisSession = false
+
+/**
+ * Hook to manage the /fast hint display next to the fast icon.
+ * Shows the hint for 5 seconds once per session.
+ */
+// 【两次「置位」的时机不一样，读的时候别混】
+//
+//  第 19 行 `hasShownThisSession = true` 在**开始显示**时就置位，
+//  不是等 5 秒后。这样即使组件在第 2 秒被卸载，也不会重新显示。
+//
+//  于是有一个可观察的边界行为：显示中途组件卸载 → 那 5 秒没显示完 →
+//  但额度已经用掉了 → 再挂回来也不会显示。
+//  这是「额度按开始算」还是「按完成算」的选择，这里选前者（不容易重复打扰）。
+export function useShowFastIconHint(showFastIcon: boolean): boolean {
+  const [showHint, setShowHint] = useState(false)
+
+  useEffect(() => {
+    if (hasShownThisSession || !showFastIcon) {
+      return
+    }
+
+    hasShownThisSession = true
+    setShowHint(true)
+
+// 【setTimeout 的第三个参数，是「不想为了传参而套一层闭包」】
+//
+//    setTimeout(setShowHint, 5000, false)
+//
+//  等价于 setTimeout(() => setShowHint(false), 5000)，但少建了一个闭包。
+//  在这个文件里差别可忽略；这种写法真正有价值的场合是定时器很多、
+//  或者闭包里会捕获大对象的时候。
+//
+//  注意 setShowHint 是 useState 的 setter，引用永远稳定，所以直接传它是安全的
+//  —— 如果换成普通函数，就会有「闭包里拿着旧值」的问题。
+    const timer = setTimeout(setShowHint, HINT_DISPLAY_DURATION_MS, false)
+
+// 【cleanup 里既清定时器又 setState，两件事都有必要】
+//
+//  clearTimeout：防止 5 秒后在已卸载的组件上调用 setState。
+//  setShowHint(false)：这一句不是给卸载用的，是给**依赖变化**用的 ——
+//  showFastIcon 从 true 变 false 时，effect 重跑，上一次的 cleanup 先把提示收起来。
+//
+//  由此推出一个行为：用户按 alt+o 关掉 fast 模式，提示立刻消失；
+//  再打开也不会出现（额度已在第 19 行用掉）。
+//
+//  「一次会话仅一次」和「关闭时立刻收起」两个需求写在同一个 cleanup 里，
+//  读代码时要分清哪一句是为哪个场景服务的。
+    return () => {
+      clearTimeout(timer)
+      setShowHint(false)
+    }
+  }, [showFastIcon])
+
+  return showHint
+}

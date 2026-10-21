@@ -1,0 +1,120 @@
+// ═══════════════════════════════════════════════════════════════
+//  useMaybeTruncateInput：把一个「渲染期的判断」搬进 effect
+// ═══════════════════════════════════════════════════════════════
+//
+//  inputPaste.ts 里的 maybeTruncateInput 是纯函数。这个 hook 负责把它接进 React：
+//
+//    发现输入超长 → 算出截断结果 → 一次性写回四个地方
+//                （文本、光标、粘贴内容表、自己的哨兵）
+//
+//  难点不在截断，而在**怎么保证只截一次**：
+//  截断会改变 input，而 input 又是这个 effect 的依赖 —— 天然会自我触发。
+import { useEffect, useState } from 'react'
+import type { PastedContent } from 'src/utils/config.js'
+import { maybeTruncateInput } from './inputPaste.js'
+
+type Props = {
+  input: string
+  pastedContents: Record<number, PastedContent>
+  onInputChange: (input: string) => void
+  setCursorOffset: (offset: number) => void
+  setPastedContents: (contents: Record<number, PastedContent>) => void
+}
+
+export function useMaybeTruncateInput({
+  input,
+  pastedContents,
+  onInputChange,
+  setCursorOffset,
+  setPastedContents,
+}: Props) {
+  // Track if we've initialized this specific input value
+// 【这个布尔值叫「哨兵」比叫「状态」更准确】
+//
+//  它没有任何信息量，只表达一件事：这批输入我已经处理过了。
+//
+//  为什么不比较「截断前后长度」来判断？因为截断结果本身也是超长的，
+//  下一次渲染再算一遍会算出**不同的结果**（又截一次中间段），
+//  这样每渲染一次就吃一次内容，直到字符串短到不再触发。
+//  那是个很隐蔽的「越用越少」型 bug。
+  const [hasAppliedTruncationToInput, setHasAppliedTruncationToInput] =
+    useState(false)
+
+  // Process input for truncation and pasted images from MessageSelector.
+  useEffect(() => {
+// 【guard 放在最前面，代价是「external 改动 + 已截断」时不再处理】
+//
+//  顺序上必须这么写：先看哨兵，再看长度。反过来也能工作，
+//  但会每次渲染都调一次 maybeTruncateInput（白算一遍正则和切片）。
+//
+//  副作用是：一旦置位，这个组件实例就对「新的超长输入」不再敏感了。
+//  比如语音转写直接塞进来一个 2 万字，只要哨兵还是 true，就不会被截断。
+//  所以第 52 行必须有一个复位机制 —— 见下一条。
+    if (hasAppliedTruncationToInput) {
+      return
+    }
+
+// 【10000 在这里是第二个副本】
+//
+//  inputPaste.ts 第 4 行定义过 TRUNCATION_THRESHOLD = 10000。
+//  这里没有再 import 它，而是重新写了一遍字面量 `10_000`。
+//
+//  两个副本会漂移：把阈值改成 5 万，只改 inputPaste 的话，
+//  这个 effect 会在 1 万字符时白跑一趟（算出「没截断」然后什么都不做），
+//  后果只是浪费，不会错 —— 因为真正的判断在纯函数里。
+//  但如果有人把这个门槛**调大**到 5 万，就会出现「1 万到 5 万之间不截断」的窗口，
+//  因为 effect 根本没进去。
+//
+//  判据：门槛类常量一旦拷贝，就要接受「两侧可能不一致」，并且保证
+//  不一致时**偏保守的那一侧**是纯函数（它才是真相）。
+    if (input.length <= 10_000) {
+      return
+    }
+
+    const { newInput, newPastedContents } = maybeTruncateInput(
+      input,
+      pastedContents,
+    )
+
+// 【一次写四个状态，顺序有讲究】
+//
+//    onInputChange(newInput)   —— 改文本
+//    setCursorOffset(len)      —— 光标挪到末尾（截断后原位置已无意义）
+//    setPastedContents(...)    —— 把挖出来的中间段登记为一条粘贴内容
+//    setHasApplied(true)       —— 最后才置哨兵
+//
+//  哨兵放最后，是因为前面三个 setState 会被 React 批量处理：
+//  如果先置哨兵，中间任何一处抛错，就会留下「标记为已处理但实际没处理」的状态。
+//
+//  另外注意 onInputChange 传的是 trackAndSetInput（PromptInput 里的包装版），
+//  它会把这次改动登记为「内部改动」—— 否则 PromptInput 会误判成外部注入
+//  （比如语音转写），把光标又挪一次。
+    onInputChange(newInput)
+    setCursorOffset(newInput.length)
+    setPastedContents(newPastedContents)
+    setHasAppliedTruncationToInput(true)
+  }, [
+    input,
+    hasAppliedTruncationToInput,
+    pastedContents,
+    onInputChange,
+    setPastedContents,
+    setCursorOffset,
+  ])
+
+  // Reset hasInitializedInput when input is cleared (e.g., after submission)
+// 【复位条件只有「输入被清空」一种】
+//
+//  为什么是清空而不是「长度回落」：
+//    · 提交后 PromptInput 会把 input 置空 → 正好复位，下次输入重新算
+//    · 用户手动删到 1 万字符以下 → 不复位，但也没关系：再涨上去也不会重复截断，
+//      因为中间段已经在 pastedContents 里了，没有内容可再挖
+//
+//  换句话说，这个复位不是「为了正确」，是「为了下一轮对话能重新工作」。
+//  理解这一点，就不会误以为它是缺失了某个边界处理。
+  useEffect(() => {
+    if (input === '') {
+      setHasAppliedTruncationToInput(false)
+    }
+  }, [input])
+}

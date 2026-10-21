@@ -104,7 +104,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
-| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅ | 🚧 消息渲染主链（4/389） |
+| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行） | 🚧 消息主链 + 输入框（25/389） |
 
 ---
 
@@ -1673,6 +1673,191 @@ isActiveCollapsedGroup = isCollapsed &&
 
 这已经是第四次「既有数字是错的」（前三次：文件数 38→41、行数 4.97 万→3.89 万、锚点 829→2,010）。**报数一律脚本算，不引用上一轮的数字。**
 
+## `PromptInput/` 读完了吗？九道自测题
+
+`PromptInput/` 是 `components/` 里第一个**完整的子目录**（21 个文件，5,161 行），也是「按键 → 光标 → 文本 → 提交」这条链的另一半 —— 上一步读的 `Messages/Message/MessageRow` 管的是「文字怎么变成屏幕」，这一批管的是「按键怎么变成文字」。
+
+| 文件 | 行数 | 它回答的问题 |
+| --- | --- | --- |
+| `PromptInput.tsx` | 2,338 | 输入框本体：六种角色挤在一个组件里 |
+| `useSwarmBanner.ts` | 155 | 六种身份抢输入框上方那条横幅 |
+| `PromptInputFooterLeftSide.tsx` | 516 | footer 左半边：十几种小药丸抢一行 |
+| `Notifications.tsx` | 331 | footer 右半边：九个指示器竖着摞 |
+| `PromptInputHelpMenu.tsx` | 357 | 三列快捷键表（一张被编译器展开成 99 个槽的声明） |
+| `PromptInputFooterSuggestions.tsx` | 292 | 补全列表：一半代码是宽度算术 |
+| `ShimmeredInput.tsx` | 142 | 彩虹流光：终端没有渐变，只能逐字符换色 |
+| `PromptInputQueuedCommands.tsx` | 116 | 排队消息：伪造一条通知来复用渲染器 |
+| `VoiceIndicator.tsx` | 136 | 语音三态 + 「为什么这里故意不做动画」 |
+| `inputPaste.ts` / `useMaybeTruncateInput.ts` | 90 / 58 | 十万字符粘贴：截断只发生在显示侧 |
+| `IssueFlagBanner.tsx` | 11 | 一个被构建工具删空的组件（读 bundle 的入门样本） |
+
+**共 5,161 行原文（批注版 8,530 行）、235 处锚点。**
+
+**91 `PromptInput.tsx` 为什么会有 2,338 行？它到底在承担几种职责？**
+
+六种，而且是**没法拆**的六种：
+
+| 职责 | 为什么必须在这里 |
+| --- | --- |
+| 文本框 | 光标、选区、多行、vim、粘贴 |
+| 命令面板 | `/` 与 `@` 补全、参数提示 |
+| 通知中心 | 十几种一次性提示（思考档位、模型切换、草稿提示…） |
+| 导航器 | footer 药丸的四个方向、任务列表、队友切换 |
+| 弹窗宿主 | 模型选择、快速打开、历史、任务、团队、Bridge |
+| 提交总闸 | 十几个守卫决定「这次回车算不算提交」 |
+
+根本原因在终端：**没有全局焦点系统**。输入框是唯一持续读 stdin 的组件，所有键都要先经过它；所有弹窗也得在它这里「让路」。所以「拆成小模块」在这里不成立 —— 拆出去的部分仍然要回到这里注册按键。
+
+**判据：一个组件之所以巨大，是因为它处在「事件总入口」的位置，而不是因为作者不会拆。**
+
+**92 ESC 在这个文件里有几种含义？它们靠什么共存？**
+
+六种，按优先级：
+
+1. 有推测在执行 → 中止推测
+2. `/btw` 侧问题在显示 → 收起侧问题
+3. 帮助菜单开着 → 关帮助
+4. footer 有选中 → **让路**给 Footer 上下文的键位（`footer:clearSelection`）
+5. 队列里有可编辑命令 → 捞回来编辑
+6. 有消息 + 输入为空 + 没在加载 → 双击打开消息选择器
+
+共存靠两点：**条件互斥**（每个条件对应一个明确模式）+ **严格的判断顺序**（先命中的赢）。
+
+第 4 条是「让路」而不是「处理」：那里只写了一个 `return`，把键留给别处注册的处理器。**在终端 UI 里，「不处理」也是一条必须写在正确位置的逻辑** —— 少了这个 return，用户想取消选中，结果输入框里被塞进一条排队命令。
+
+（第 7 种「加载中取消请求」不在这个文件里，由 `CancelRequestHandler` 在别的上下文处理。）
+
+**93 `onSubmit` 开头为什么要 `store.getState()`，而不是用闭包里的值？**
+
+因为 `footer:openSelected` 的处理是「先 `selectFooterItem(null)`，再 `onSubmit()`」，两步在**同一个 tick** 里。React 还没重渲染，闭包里的 `footerItemSelected` 还是旧值 true —— 用它会直接把这次回车吞掉。
+
+命令式读一次就能拿到最新值。但注意它还**重跑了一遍派生判断**：
+
+```
+if (state.footerSelection && footerItems.includes(state.footerSelection)) return
+```
+
+因为 store 里的值可能是脏的（选中的药丸已经消失）。**读最新值 + 用同一判据重算**，两件事缺一不可：只读不重算会误吞回车，只重算不读会漏掉同一 tick 的变更。
+
+**94 「选中了 footer 药丸」有三个版本的状态，各自解决什么？**
+
+| 状态 | 存在哪 | 职责 |
+| --- | --- | --- |
+| `rawFooterSelection` | AppState | 唯一的真值 |
+| `footerItemSelected` | 渲染期派生 | **当帧就正确**（药丸消失 → 立刻变 null） |
+| 清理 effect | `useEffect` | **防止诈尸**（把 raw 也清掉） |
+
+只用派生值：raw 会一直是脏的，药丸重新出现时焦点会凭空跳回去（注释里叫 "resurrect"）。
+只用 raw：药丸消失的那一帧，UI 还显示着一个不存在的高亮。
+
+**「立刻正确」和「迟早清理」是两个需求，需要两个状态。**
+
+**95 React Compiler 把 `useEffect` 的依赖数组也算成了常量 —— 这会造成什么真实后果？**
+
+`SandboxPromptFooterHint.tsx` 里 `useEffect(…, [])` 被编译成缓存好的 `t1 = []`，于是 effect 只跑一次。而它的函数体第一行是：
+
+```
+if (!SandboxManager.isSandboxingEnabled()) return
+```
+
+**这个判断只在挂载那一刻做一次。** 用户在会话中途用 `/sandbox` 打开沙箱，这个组件不会去订阅违规事件 —— 订阅是在「当时沙箱已开」的前提下建立的。
+
+但渲染期（第 48 行）还有一个同样的判断，每次渲染都重新读。所以「沙箱关闭后提示消失」是灵的，「沙箱中途打开后开始计数」是不灵的。**两处读同一个全局值，时机不同，行为就不同。**
+
+这是读编译产物的一个具体收益：`[]` 这个依赖数组是**结论**而不是**输入**，它告诉你作者假设了什么不变。
+
+**96 图片胶囊为什么「反色块就是光标」，而不是额外画一个光标？**
+
+`[Image #1]` 是不可分割的对象。光标可以停在它的**左边界**（`chip.start`）或**右边界**（`chip.end`），两者语义不同：
+
+- 停在 start → 胶囊反色 = 「已选中，退格删掉整块」
+- 停在 end → 正常光标 = 「在它后面，可以继续打字」
+
+所以 `showCursor` 的条件里有一项是 `!cursorAtImageChip` —— 此时光标已经由反色块表达了，再画一根竖线就是两个光标。
+
+配套还有两个机制：方向键/点击把光标送进胶囊**内部**时，吸附到更近的边界（第 594 行）；文字里的引用消失后，`pastedContents` 里的孤儿图片被清理（第 1189 行）。三处合起来才构成「对象编辑」的完整语义。
+
+**97 粘贴 20 万字符时，数据去哪了？为什么说「截断只发生在显示侧」？**
+
+`inputPaste.ts` 把中间那段挖出来，存进 `pastedContents` 当作一条「粘贴内容」，文本里只留一个占位符：
+
+```
+[...Truncated text #3 +2048 lines...]
+```
+
+于是三个已有机制零改动就复用了：渲染时按占位符展开、提交时还原全文、删除占位符时清理附件。
+
+两个细节值得记：
+- 它的格式刻意和普通长文本粘贴的占位符同构（`[...Pasted text #3 +12 lines]`），所以解析端不用改
+- `slice(start, -end)` 的首尾各 500 字是对称切的，和原文严丝合缝 —— **无损挖洞**
+
+而「只截一次」靠的是一个纯哨兵布尔（`hasAppliedTruncationToInput`），不是比较长度：截断结果本身仍然超长，比较长度会导致每渲染一次吃一次内容。
+
+**98 读一个「已经被构建工具删空的组件」，能学到什么？**
+
+`IssueFlagBanner.tsx` 只剩：
+
+```
+export function IssueFlagBanner() { return null; }
+```
+
+但文件头还 import 着 `FLAG_ICON` / `Box` / `Text`，一个都没用。这个矛盾只有一种解释：**这里原本有 JSX，被条件折叠删掉了**。证据在那一行 base64 sourcemap 里（`sourcesContent` 就是原始源码）：
+
+```
+if ("external" !== 'ant') { return null }
+return (<Box …>Something off with Claude?</Box>)
+```
+
+所以读 bundle 的正确顺序是：**先看代码 → 找矛盾（死 import、恒假条件）→ 去 sourcemap 里找真相**。
+
+顺带产出一张「构建残留指纹表」，遇到就直接当死分支处理：
+
+| 形态 | 含义 |
+| --- | --- |
+| `"external" === 'ant' && …` | 内部构建专属，对外恒假 |
+| `"external" !== 'ant'`（折叠后只剩 return null） | 内部专属组件，对外被删空 |
+| `false ? A : B` | feature 折叠后的三元残骸，恒取 B |
+| `feature('X') ? useHook() : 常量` | 编译期开关包 hook（安全，但需要 biome-ignore） |
+
+**99 同一个 `??` 操作符，默认值的选择能说明什么？**
+
+这批里出现两次，方向相反：
+
+| 位置 | 写法 | 含义 |
+| --- | --- | --- |
+| `PromptInputFooterLeftSide.isPrStatusEnabled` | `?? true` | 新增功能，默认让人看见 |
+| `usePromptInputPlaceholder` | `?? 0` | 计数类，从零开始 |
+
+`??` 只是语法，真正决定用户体验的是那个默认值。读配置类代码时，**「默认值是多少」往往比「读了什么」更重要** —— 它决定了绝大多数用户（从不改配置的人）实际看到什么。
+
+### 输入框这一批的三个方法论收获
+
+**一、`feature()` 是构建期常量，所以它不能出现在「会被共享的函数体」里**
+
+`PromptInput.tsx` 里彩虹高亮的代码出现了四遍（ultrathink / ultraplan / ultrareview / buddy），每遍 12 行，只有触发器和开关不同。没有抽成函数，是因为抽出去之后 `feature()` 就折不动了 —— 函数体是共享的，无法为不同调用点生成不同产物。
+
+这是「为构建工具让步，牺牲 DRY」的典型。看到重复代码先别急着重构，先确认它是不是被**打包期折叠**绑住了。
+
+**二、「空实现」比「条件渲染」更省事，但要用对地方**
+
+这一批里出现了三种空实现：
+
+| 形态 | 用在哪 | 为什么 |
+| --- | --- | --- |
+| `() => null` 组件 | `VoiceIndicator`（功能关闭时） | 调用点可以无脑 `<X />`，判断收敛到 1 处 |
+| `NO_OP_SUBSCRIBE` / `NULL` 常量 | `useSyncExternalStore` 的兜底 | hook 签名要求必传，且内联箭头会导致重复订阅 |
+| `EMPTY_SET` / `EMPTY_LOOKUPS` 常量 | 传给 `Message` 的空集合 | 每次 `new Set()` 都会让 memo 失效 |
+
+共同点：**把「没有」也变成一个稳定的值**。它同时解决两个问题 —— 调用点不用判空，引用保持不变。
+
+**三、订阅的粒度由「值的变化频率」决定，不是由「代码整洁」决定**
+
+`PromptInputFooter` 里五个 `useAppState` 各订阅一个标量字段，而不是一次性取一个对象。因为 selector 返回新对象时，`Object.is` 永远不等 → 每次都判定为变化 → 每次重渲染。
+
+反过来，`SuggestionItemRow` 里每行都调 `useTerminalSize()`（N 个订阅），因为终端尺寸变化的频率极低，而一旦变化必然全屏重绘 —— 多几个订阅淹没在重绘里。
+
+**订阅越细越好，前提是那个值变化得频繁；变化很少的值，粗粒度也无所谓。**
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1746,13 +1931,30 @@ messages 数组（服务端原始）
 
 中间那条分界很清楚：**`Messages` 管「显示哪些」，`MessageRow` 管「还会不会变」，`Message` 管「怎么画」**。三层各自有一个 memo，各自有一个不变量。
 
+反方向（按键 → 文本 → 提交）是这一批补上的：
+
+```
+stdin → parse-keypress（字节 → ParsedKey）
+  └─ useInput / TextInput（焦点、光标、选区、多行编辑）
+        ├─ inputFilter           ← lazySpaceInputFilter（图片后补空格）
+        ├─ onChange              ← 模式字符 ! / Tab→4 空格 / 撤销快照
+        ├─ combinedHighlights    ← 九个触发器各算区间，按 priority 覆盖
+        └─ onSubmit（总闸）
+              ├─ 建议接受 / 推测注入（speculation）
+              ├─ @名字 → 队友 mailbox（不进模型）
+              ├─ getActiveAgentForInput → onAgentSubmit（发给正在看的 agent）
+              └─ onSubmitProp → handlePromptSubmit（进主循环）
+```
+
+`PromptInput.tsx` 在这个方向上就是**唯一入口**：终端没有全局焦点，所有键必须先经过它，所有弹窗也得在它这里让路（`isModalOverlayActive` 是那个总闸）。这解释了这个文件为什么 2,338 行 —— 不是不会拆，是位置决定的。
+
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
 - [`src/ink/`](source/src/ink/) **整个目录已清零**：96 个文件、19,842 行，根目录 43 + `layout/` 4 + `termio/` 9 + `events/` 10 + `hooks/` 12 + `components/` 18。渲染器、样式层、转义解析、输入侧、交互原语，一条不缺
 - [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
-- [`src/components/`](source/src/components/)（**8.2 万行，389 个文件**）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构。已批注消息渲染主链四份（`Messages` / `MessageRow` / `Message` / `messageActions`，2,294 行），剩 385 个文件、79,256 行
+- [`src/components/`](source/src/components/)（**8.2 万行，389 个文件**）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构。已批注 25 份：消息渲染主链四份（`Messages` / `MessageRow` / `Message` / `messageActions`，2,294 行）+ 输入框整个 `PromptInput/` 子目录 21 份（5,161 行），剩 364 个文件、7.4 万行
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩，界面层也已经开了头**：151 个文件、57,271 行原文（批注版 94,410 行）、2,994 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩，界面层的两条主链（消息出来、按键进去）也都通了**：172 个文件、62,408 行原文（批注版 102,897 行）、3,229 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1763,8 +1965,9 @@ messages 数组（服务端原始）
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
 - **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`components/PromptInput/`**（15 个文件、5,161 行）—— 输入框那是下一块最值的。`PromptInput.tsx` 一家就 2,338 行，它和已经读完的 `useInput` / `useDeclaredCursor` / bracketed paste 直接接壤，也是全仓库唯一同时处理「多行编辑 + 光标定位 + 粘贴 + 语音 + 队列命令」的地方
-- **`components/messages/`**（19 个文件、5,509 行）—— 消息体那十四个渲染组件，是 `Message.tsx` 分发之后的目的地。`SystemTextMessage.tsx`（826 行）和 `AttachmentMessage.tsx`（535 行）最大
+- **`components/messages/`**（19 个文件、5,509 行）—— 消息体那十四个渲染组件，是 `Message.tsx` 分发之后的目的地。`SystemTextMessage.tsx`（826 行）和 `AttachmentMessage.tsx`（535 行）最大。这一块现在是**最自然的下一步**：`Message.tsx` 的两次 switch 已经把十四个目的地点过名了，接上就能把「一条消息怎么画出来」读完整
+- **`components/` 里其余的单点组件** —— 每个都是「一段产品逻辑 + 一点渲染」，读起来快。适合按需挑（比如对权限弹窗感兴趣就读 `permissions/`）
+- **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
 - **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
 
 ---
