@@ -205,7 +205,7 @@
 | [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx) | 派活的十道检查、两套执行路径 | [1,397 → 2,793 行](annotated/src/tools/AgentTool/AgentTool.tsx) ✅ |
 | [`src/tools/AgentTool/prompt.ts`](source/src/tools/AgentTool/prompt.ts) | agent 清单注入策略、简报写法 | [287 → 601 行](annotated/src/tools/AgentTool/prompt.ts) ✅ |
 | [`src/tools/AgentTool/forkSubagent.ts`](source/src/tools/AgentTool/forkSubagent.ts) | fork：共享缓存的自我复制 | [210 → 559 行](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ |
-| [`src/ink/`](source/src/ink/) 渲染内核 | 终端界面怎么画（见第 8 步） | ✅ 核心十一份 |
+| [`src/ink/`](source/src/ink/) 渲染内核 | 终端界面怎么画（见第 8 步） | ✅ 核心二十一份 |
 
 **对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)、[10 子智能体与计划模式](docs/10-子智能体与计划模式.md)
 
@@ -410,14 +410,26 @@ source/README.md                    →  annotated/README.annotated.md
 | [`src/ink/colorize.ts`](source/src/ink/colorize.ts) | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 | [✅ 232 → 372 行](annotated/src/ink/colorize.ts) |
 | [`src/ink/stringWidth.ts`](source/src/ink/stringWidth.ts) | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 实现的 1 vs 2 | [✅ 223 → 413 行](annotated/src/ink/stringWidth.ts) |
 | [`src/ink/Ansi.tsx`](source/src/ink/Ansi.tsx) | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的语义降维 | [✅ 292 → 504 行](annotated/src/ink/Ansi.tsx) |
+| [`src/ink/termio/ansi.ts`](source/src/ink/termio/ansi.ts) | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽 | [✅ 76 → 150 行](annotated/src/ink/termio/ansi.ts) |
+| [`src/ink/termio/csi.ts`](source/src/ink/termio/csi.ts) | 三个字节区间（中间/参数/尾）就是 CSI 的完整语法；`csi()` 的单参数与多参数两副面孔 | [✅ 320 → 493 行](annotated/src/ink/termio/csi.ts) |
+| [`src/ink/termio/dec.ts`](source/src/ink/termio/dec.ts) | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序 | [✅ 61 → 119 行](annotated/src/ink/termio/dec.ts) |
+| [`src/ink/termio/esc.ts`](source/src/ink/termio/esc.ts) | 两字符序列；`null`（已处理无事发生）与 `unknown`（没认出来）两种「空」的差别 | [✅ 68 → 128 行](annotated/src/ink/termio/esc.ts) |
+| [`src/ink/termio/types.ts`](source/src/ink/termio/types.ts) | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计（absent / null / 值） | [✅ 237 → 424 行](annotated/src/ink/termio/types.ts) |
+| [`src/ink/termio/sgr.ts`](source/src/ink/termio/sgr.ts) | 分号与冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二 | [✅ 309 → 541 行](annotated/src/ink/termio/sgr.ts) |
+| [`src/ink/termio/tokenize.ts`](source/src/ink/termio/tokenize.ts) | 词法层：八个状态、`escape` 分支的判定顺序为什么不能重排、降级时不前移游标 | [✅ 320 → 564 行](annotated/src/ink/termio/tokenize.ts) |
+| [`src/ink/termio/parser.ts`](source/src/ink/termio/parser.ts) | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 两个默认值、只处理第一个模式 | [✅ 395 → 671 行](annotated/src/ink/termio/parser.ts) |
+| [`src/ink/termio/osc.ts`](source/src/ink/termio/osc.ts) | OSC 全家族：DCS 透传的两套约定、剪贴板三条路、内层为什么选 BEL 而不是 ST | [✅ 494 → 879 行](annotated/src/ink/termio/osc.ts) |
+| [`src/ink/termio.ts`](source/src/ink/termio.ts) | 桶文件只导出「读」的一侧，生成函数走深路径 | [✅ 43 → 83 行](annotated/src/ink/termio.ts) |
 
-**三上三下，加五个旁支**：前六份是一条直线（React 元素 → 布局树 → 屏幕缓冲 → 终端字节），分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。后五份不在主线上，但每一步都用到：`output.ts` 是 `render-node-to-output` 与 `screen` 之间的操作队列，`styles.ts` 管盒子、`colorize.ts` 管字，`stringWidth.ts` 是整条链的尺子，`Ansi.tsx` 走反方向。
+**三上三下，五个旁支，外加一组解析器**：前六份是一条直线（React 元素 → 布局树 → 屏幕缓冲 → 终端字节），分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。后五份不在主线上，但每一步都用到：`output.ts` 是 `render-node-to-output` 与 `screen` 之间的操作队列，`styles.ts` 管盒子、`colorize.ts` 管字，`stringWidth.ts` 是整条链的尺子，`Ansi.tsx` 走反方向。
+
+最后十份 `termio/` 是**反方向的那条路**：`Ansi.tsx` 收进来一段带转义序列的字符串，`termio/` 把它拆成结构化事件。读的顺序是 `ansi`（字节表）→ `csi`/`dec`/`esc`（三族序列的常量与生成）→ `tokenize`（切边界）→ `sgr`（样式参数）→ `parser`（拼成 action）→ `osc`（唯一带自由文本负载的一族）。前四个是字典，后四个才是逻辑。
 
 **对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)
 
 **目标**：理解「终端 UI 为什么能像 GUI 一样增量更新」，以及那些看起来古怪的代码（`?1049h`、`unref()`、`writeSync`）各自在防什么。
 
-**十一份读完之后，最值得带走的六条**：
+**二十一份读完之后，最值得带走的六条**：
 
 ① **终端里没有排版引擎，文字尺寸得自己算。** yoga 只管盒子，不识字宽。所以 `<Text>` 挂了一个 measure 回调（`dom.ts` 332 行），yoga 布局时问它「给这么宽你要多高」。这一个回调决定了：为什么 `<Text>` 里不能放 `<Box>`（展不平就没法量）、为什么裸字符串必须包在 `<Text>` 里（没有父级就不知道该继承什么样式）、为什么宽字符和 emoji 要单独处理。
 
@@ -435,7 +447,7 @@ source/README.md                    →  annotated/README.annotated.md
 
 ---
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步完成**（`withRetry.ts` 822 + `src/services/compact/` **全部 11 个文件** 4,864 + `mcp/client.ts` 3,348 + `mcp/config.ts` 1,578 + `mcp/auth.ts` 2,465 + `mcp/xaa.ts` 511 + `mcp/xaaIdpLogin.ts` 487 + `useManageMCPConnections.ts` 1,141 = 15,216 行原文、704 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）；**第 8 步终端渲染器完成**（`reconciler.ts` 512 + `dom.ts` 484 + `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462 + `log-update.ts` 773 + `output.ts` 798 + `styles.ts` 772 + `colorize.ts` 232 + `stringWidth.ts` 223 + `Ansi.tsx` 292 = 8,756 行原文、397 处锚点）。**第 1～8 步主线全部走完**：46 个文件、41,163 行原文（批注版 70,081 行）、2,121 处锚点 —— 压缩管线、MCP 四段（配置 → 连接 → 认证 → 企业 SSO）加 UI 接缝、多智能体两条路径、终端渲染的「React 侧 + 绘制侧 + 样式/颜色/宽度」都闭合了。剩下的 `components/`（4.2 万行产品界面）、`ink/termio/`（2,271 行终端序列解析器）和 `ink/` 里二十来个百行级小件都是枝叶，按需再做。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步完成**（`withRetry.ts` 822 + `src/services/compact/` **全部 11 个文件** 4,864 + `mcp/client.ts` 3,348 + `mcp/config.ts` 1,578 + `mcp/auth.ts` 2,465 + `mcp/xaa.ts` 511 + `mcp/xaaIdpLogin.ts` 487 + `useManageMCPConnections.ts` 1,141 = 15,216 行原文、704 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）；**第 8 步终端渲染器完成**（`reconciler.ts` 512 + `dom.ts` 484 + `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462 + `log-update.ts` 773 + `output.ts` 798 + `styles.ts` 772 + `colorize.ts` 232 + `stringWidth.ts` 223 + `Ansi.tsx` 292 + `termio/` 十个文件 2,323 = 11,079 行原文、553 处锚点）。**第 1～8 步主线全部走完**：56 个文件、43,476 行原文（批注版 74,123 行）、2,277 处锚点 —— 压缩管线、MCP 四段（配置 → 连接 → 认证 → 企业 SSO）加 UI 接缝、多智能体两条路径、终端渲染的「React 侧 + 绘制侧 + 样式/颜色/宽度 + 转义序列解析」都闭合了。剩下的 `components/`（4.2 万行产品界面）和 `ink/` 里二十来个百行级小件（`parse-keypress.ts` / `selection.ts` 最有价值）都是枝叶，按需再做。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

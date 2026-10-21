@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅ | ✅ 十一份全通 |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅ | ✅ 二十一份全通<br />（含 `termio/` 十个） |
 
 ---
 
@@ -927,7 +927,7 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 ## 第 8 步（终端渲染器）读完了吗？
 
-`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。**十一份、8,756 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的，再加上这一轮的样式与颜色层，「一屏字符长什么样」也有了答案。
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。**二十一份、11,079 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
@@ -942,8 +942,20 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 | [`colorize.ts`](annotated/src/ink/colorize.ts) | 232 | 372 | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 |
 | [`stringWidth.ts`](annotated/src/ink/stringWidth.ts) | 223 | 413 | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 的 1 vs 2 |
 | [`Ansi.tsx`](annotated/src/ink/Ansi.tsx) | 292 | 504 | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的降维 |
+| [`termio/ansi.ts`](annotated/src/ink/termio/ansi.ts) | 76 | 150 | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽 |
+| [`termio/csi.ts`](annotated/src/ink/termio/csi.ts) | 320 | 493 | 三个字节区间就是 CSI 的完整语法；`csi()` 的单参数/多参数两副面孔 |
+| [`termio/dec.ts`](annotated/src/ink/termio/dec.ts) | 61 | 119 | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序 |
+| [`termio/esc.ts`](annotated/src/ink/termio/esc.ts) | 68 | 128 | 两字符序列；`null` 与 `unknown` 两种「空」的语义差别 |
+| [`termio/types.ts`](annotated/src/ink/termio/types.ts) | 237 | 424 | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计 |
+| [`termio/sgr.ts`](annotated/src/ink/termio/sgr.ts) | 309 | 541 | 分号/冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二 |
+| [`termio/tokenize.ts`](annotated/src/ink/termio/tokenize.ts) | 320 | 564 | 词法层：八个状态、判定顺序为什么不能重排、`i++` 缺失处的降级 |
+| [`termio/parser.ts`](annotated/src/ink/termio/parser.ts) | 395 | 671 | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 的两个默认值 |
+| [`termio/osc.ts`](annotated/src/ink/termio/osc.ts) | 494 | 879 | OSC 全家族：DCS 透传、剪贴板三条路、内层为什么选 BEL 而不是 ST |
+| [`termio.ts`](annotated/src/ink/termio.ts) | 43 | 83 | 桶文件只导出读的一侧，生成函数走深路径 |
 
-合计 **8,756 行原文**，397 处批注锚点。
+合计 **11,079 行原文**，553 处批注锚点（其中 `termio/` 十个文件 2,323 行、156 锚点）。
+
+**`termio/` 这一组可以按下标顺序读**：`ansi`（字节表）→ `csi`/`dec`/`esc`（三族序列的常量与生成）→ `tokenize`（切边界）→ `sgr`（样式参数）→ `parser`（拼起来变成 action）→ `osc`（唯一带自由文本负载的一族）。前四个是字典，后四个才是逻辑。
 
 **这个目录可以按「三加三」记**：前三份是**上半场**（React 元素 → 布局树 → 屏幕缓冲），后三份是**下半场**（屏幕缓冲 → 终端字节）。分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。
 
@@ -1112,7 +1124,61 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 如果想看人写的版本：文件末尾 `sourceMappingURL` 的 base64 里，除了映射表还内嵌了原始 TSX 全文（`sourcesContent` 字段）。解出来是 308 行，带注释、带类型。**编译后的代码能看懂逻辑，但「为什么这么写」的痕迹只在原文里**——这一步值得做。
 
-### 这一轮修的一个判据误报
+**53 同一个字节串 `ESC [ M`，为什么在输出流里是「删行」、在输入流里是「鼠标事件」？**
+
+因为**方向决定语义**。`CSI M` 是 ECMA-48 的 DL（Delete Lines）；而 X10 鼠标协议借用了同一个前缀，后面再跟三个原始字节（`Cb+32, Cx+32, Cy+32`）。
+
+所以 `createTokenizer` 有一个 `x10Mouse` 选项，默认 `false`（输出语义，`ESC [ M` 就是删行），只有 stdin 才传 `true`。开错了方向的后果不是报错，是**静默吞掉文本**：输出方向开了 `x10Mouse`，`ESC [ M` 后面紧跟的三个字符会被当坐标吃掉。
+
+判定条件里还有一条容易忽略的：`i - seqStart === 2`，即 `M` 必须紧跟在 `ESC [` 后面、中间没有任何参数。因为 SGR 鼠标是 `ESC [ < ... M`，`M` 出现在有参数的后面。
+
+同一类「同序列两义」还有一处：`CSI I` 在出站方向是 CHT（水平制表），在入站方向是 `FOCUS_IN`。区分方式也是方向 —— 而 `parseCSI` 干脆只声明 CHT 不解析它，于是入站的 `CSI I` 归成 unknown 被丢掉。
+
+**54 SGR 在仓库里有两个解析器，为什么不能合并？**
+
+因为**一个是有损的，一个是无损的**。
+
+`parser.ts` 的 `parseCSIParams` 是 `split(/[;:]/)` —— 冒号和分号一视同仁，空串变 0。对光标命令（`CSI 3 ; 5 H`）完全够用，而且快。
+
+但对 SGR 就致命：`38:2::255:0:0` 被切成 `[38, 2, 0, 255, 0, 0]`，色彩空间的「空」和「0」被抹平，而且子参数的层级信息全丢了。所以 `parser.ts` 在 `finalByte === CSI.SGR` 时**不做参数解析**，直接把原始字符串交给 `sgr.ts` 的 `parseParams`（那一个会记 `colon` 标志和 `subparams` 数组）。
+
+这是「有损版够用就别上无损版」的取舍 —— 光标命令占绝大多数调用量，为它们付无损解析的代价不值得。代价是同一个语法有两份实现，且**必须记得 SGR 走哪一份**。
+
+**55 `applySGR` 里的 `22`，为什么一次关掉两个属性？**
+
+因为 ECMA-48 把 bold（1）和 faint（2）归为**同一个属性**「强度」，而 22 是「normal intensity」—— 所以它必须同时清掉两者。
+
+直觉写法是 `s.bold = false` 就收工，后果是：一段用了 `dim` 的文字，在遇到「取消加粗」之后仍然保持暗淡，而终端已经恢复正常亮度。**屏幕上的样子和终端内部状态分叉了**，之后的每一格都会跟着错。
+
+这一组里只有 22 是一对二，其余（23/24/25/27/28/29）都是一对一。所以「每个取消码对应一个设置码」这个规律在这里有个例外，写代码时容易按规律办事。
+
+**56 OSC 穿过 tmux 时，内层为什么故意用 BEL 而不是标准推荐的 ST？**
+
+因为**嵌套转义**。DCS 透传要求负载里的每个 ESC 双写；如果内层 OSC 用 ST（`ESC \`）终止，那个 ESC 也要双写。tmux 解出来是一个，正确 —— 但一旦层级超过一层（tmux 里套 screen），双写次数就算不清了。
+
+选 BEL 则彻底绕开：**内层序列里根本不含 ESC，就不存在嵌套转义**。
+
+通用规律：设计嵌套协议时优先选一种「不需要转义的编码」，而不是把转义规则写对。前者是结构性的，后者靠纪律。同理，`wrapForMultiplexer` 的注释特意提醒「Do NOT wrap BEL」—— 因为包进 DCS 之后 tmux 就看不见那个 BEL 了，窗口的提醒标记也就没了。
+
+**57 `tokenize.ts` 的 `escape` 分支里那五个 `if`，顺序能重排吗？**
+
+不能。前两个（CSI/OSC/DCS/APC 和 SS3 的 `0x4f`）**必须**在 `isEscFinal` 之前，因为它们的字节全都落在尾字节区间 `0x30-0x7e` 里。
+
+如果先判 `isEscFinal`，`ESC [ 3 1 m` 会在 `ESC [` 这一步就被判成「两字符序列」发射出去，剩下的 `31m` 变成文本 —— **所有 CSI 序列全部失效**，屏幕上直接出现可见的 `[31m`。
+
+这种「看似随意的 if 顺序其实是正确性前提」的写法，这个仓库里反复出现：`setClipboard` 必须先 native 后 tmux（否则用户切走的窗口期里复制没完成）、`log-update` 推进行必须用 LF 不能用 CSI CUD（后者在视口底边静默失败）。共同点是**顺序错了不报错，只是行为微妙地不对**。
+
+**58 怎么在十分钟内发现「`Grapheme.width` 算了但没人读」这种死代码？**
+
+从「谁消费这个字段」倒着查，而不是从定义正着读。
+
+具体做法：`grep "\.width" Ansi.tsx` —— 零结果。而 `Ansi.tsx` 是 `Parser` 唯一的调用点。于是整条链断在那里：`parser.ts` 里那几个 `isEmoji` / `isEastAsianWide` 区间判断、`graphemeWidth` 的两条分支，全都服务于一个没有读者的字段。
+
+同一手法在这一轮还发现了 `Parser.inLink` / `linkUrl`（写而不读 —— 因为 `Ansi.tsx` 自己用局部变量管链接状态）和 `termio.ts` 导出的 `TextSegment`（全仓库零引用，而且和 `utils/textHighlighting.ts` 里的同名类型完全不同）。
+
+**读代码时，「这个字段被谁读」比「这个字段是什么意思」更省时间。** 前者一条 grep，后者要读完整条调用链。
+
+### 前几轮修的几个判据误报
 
 `screen.ts` 的原文里有这么一行英文注释，举例时用了汉字：
 
@@ -1173,17 +1239,19 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
   colorize.ts      字样式 → SGR 转义序列（画的那一侧）
   stringWidth.ts   宽度 —— dom / output / wrap 三处都调它，是整条链的尺子
   Ansi.tsx         反方向：别人的 ANSI 字符串 → 我们的组件树
+       └─ termio/tokenize.ts（切边界）→ parser.ts（拼成 action）
+                └─ sgr.ts（样式参数）/ osc.ts（超链接）/ esc.ts / dec.ts
+                        └─ ansi.ts（字节表）+ csi.ts（参数区间与生成）
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 还有二十来个百行级小件，其中三份有一点独立价值：`parse-keypress.ts`（801 行，键序列 → 事件，Kitty 协议与 bracketed paste）、`selection.ts`（917 行，跨屏幕滚动的拖选）、`render-border.ts`（231 行，边框字符怎么拼）。其余（`bidi.ts` / `hit-test.ts` / `optimizer.ts` / `wrap-text.ts` 等）都是主线的螺丝
-- [`src/ink/termio/`](source/src/ink/termio/)（2,271 行）—— 完整的终端序列解析器（CSI / SGR / OSC / DEC 各一个文件）。`Ansi.tsx` 用的就是它，想深挖「一个 ANSI 字符串怎么变成 action 流」可以从这里进
+- [`src/ink/`](source/src/ink/) 还有二十来个百行级小件，其中三份有一点独立价值：`parse-keypress.ts`（801 行，键序列 → 事件，Kitty 协议与 bracketed paste —— 它是 `termio/tokenize.ts` 的**输入侧**消费者，也是唯一开 `x10Mouse` 的地方）、`selection.ts`（917 行，跨屏幕滚动的拖选）、`render-border.ts`（231 行，边框字符怎么拼）。其余（`bidi.ts` / `hit-test.ts` / `optimizer.ts` / `wrap-text.ts` 等）都是主线的螺丝
 - [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
 - [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 
-到这里，**第 1 到第 8 步的主线全部走完**：46 个文件、41,163 行原文（批注版 70,081 行）、2,121 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完**：56 个文件、43,476 行原文（批注版 74,123 行）、2,277 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1194,7 +1262,7 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
 - **回头重读** —— 我推荐这个。八条线都闭合了，现在重读任何一处都比第一次清楚
-- **UI 线剩下的** —— `src/ink/termio/`（2,271 行的终端序列解析器）+ `parse-keypress.ts` / `selection.ts`。前者是「ANSI 字符串怎么变成结构化事件」的完整实现，后者是「拖选跨滚动」这个具体难题
+- **UI 线剩下的** —— `parse-keypress.ts`（801 行，键序列 → 事件）+ `selection.ts`（917 行，拖选跨滚动）。`termio/` 那 2,271 行已经补完了，`parse-keypress` 是它在输入侧的下游，接上就形成「键盘按键 → 转义序列 → 结构化事件」的完整闭环
 - **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
 
 ---

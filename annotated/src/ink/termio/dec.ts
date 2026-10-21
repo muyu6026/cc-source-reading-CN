@@ -1,0 +1,118 @@
+// DEC 私有模式：`CSI ? N h` 开、`CSI ? N l` 关。
+//
+//   这里的 DEC 是 Digital Equipment Corporation —— VT100 的厂商。
+//   「私有」的意思是：这个 `?` 前缀（0x3F）不在 ANSI 标准里，是 DEC 当年
+//   自己加的，后来成了事实标准。但凡是终端模拟器都得实现它。
+//
+//   对照 csi.ts 的 CSI_RANGE：参数字节区间是 0x30-0x3f，
+//   `?` `>` `=` `<` 这四个就在区间右端 —— 它们是「参数」的一种，
+//   只是语义为「这是私有参数」。所以词法上不需要特殊处理，
+//   语义上（parser.ts 98 行）才把它摘出来。
+/**
+ * DEC (Digital Equipment Corporation) Private Mode Sequences
+ *
+ * DEC private modes use CSI ? N h (set) and CSI ? N l (reset) format.
+ * These are terminal-specific extensions to the ANSI standard.
+ */
+
+import { csi } from './csi.js'
+
+/**
+ * DEC private mode numbers
+ */
+// 【47 与 1049 的区别，是这一层最容易用错的一处】
+//
+//   47       切到备用屏（不清屏）
+//   1049     保存光标 → 切备用屏 → 清屏
+//
+//   1049 = 47 + 保存/恢复光标 + 清屏，是后来补的「完整版」。
+//   两份都用 1049 才是自洽的：进用 1049、出用 1049，光标会自动复原。
+//   进 1049 出 47 的话，主屏会留下一堆不该有的内容，且光标位置丢了。
+//
+//   另外 1006（SGR 鼠标编码）单独出现是无意义的 —— 它是 1000/1002/1003
+//   的**编码格式**开关，不是独立的追踪模式。所以下面 51 行必须四个一起开。
+export const DEC = {
+  CURSOR_VISIBLE: 25,
+  ALT_SCREEN: 47,
+  ALT_SCREEN_CLEAR: 1049,
+  MOUSE_NORMAL: 1000,
+  MOUSE_BUTTON: 1002,
+  MOUSE_ANY: 1003,
+  MOUSE_SGR: 1006,
+  FOCUS_EVENTS: 1004,
+  BRACKETED_PASTE: 2004,
+  SYNCHRONIZED_UPDATE: 2026,
+} as const
+
+/** Generate CSI ? N h sequence (set mode) */
+// 【模式号是用模板字符串拼进「裸体」的】
+//
+//   csi(`?${mode}h`) 走的是 csi() 的单参数分支 —— 单参数时整串当原文，
+//   不做 join。所以结果是 ESC [ ? 2 5 h，而不是 ESC [ ? ; 2 5 h。
+//
+//   这个 API 形状很容易写错：`csi('?25', 'h')` 会得到 ESC [ ? 2 5 ; h
+//   （多了一个分号），终端不认。**单参数 = 原文，多参数 = 参数+尾字节**，
+//   这条规则在 csi.ts 45 行，但调用点看不出来。
+export function decset(mode: number): string {
+  return csi(`?${mode}h`)
+}
+
+/** Generate CSI ? N l sequence (reset mode) */
+export function decreset(mode: number): string {
+  return csi(`?${mode}l`)
+}
+
+// Pre-generated sequences for common modes
+export const BSU = decset(DEC.SYNCHRONIZED_UPDATE)
+export const ESU = decreset(DEC.SYNCHRONIZED_UPDATE)
+export const EBP = decset(DEC.BRACKETED_PASTE)
+export const DBP = decreset(DEC.BRACKETED_PASTE)
+export const EFE = decset(DEC.FOCUS_EVENTS)
+export const DFE = decreset(DEC.FOCUS_EVENTS)
+export const SHOW_CURSOR = decset(DEC.CURSOR_VISIBLE)
+export const HIDE_CURSOR = decreset(DEC.CURSOR_VISIBLE)
+// 【备用屏这一对必须成对出现，而且退出路径要无条件发】
+//
+//   ink.tsx 的退出清理里，EXIT_ALT_SCREEN 是「无论检测到什么终端都发」的。
+//   原因见那一份的批注：漏发的后果是用户回到 shell 之后屏幕内容全错，
+//   而多发一次在没有进过备用屏的终端上是无害的 no-op。
+//
+//   幂等的清理可以激进，幂等的设置不行 —— 这一对正好横跨两种。
+export const ENTER_ALT_SCREEN = decset(DEC.ALT_SCREEN_CLEAR)
+export const EXIT_ALT_SCREEN = decreset(DEC.ALT_SCREEN_CLEAR)
+// Mouse tracking: 1000 reports button press/release/wheel, 1002 adds drag
+// events (button-motion), 1003 adds all-motion (no button held — for
+// hover), 1006 uses SGR format (CSI < btn;col;row M/m) instead of legacy
+// X10 bytes. Combined: wheel + click/drag for selection + hover.
+// 【四个模式一起开，是有意冗余】
+//
+//   1000  按下/释放/滚轮
+//   1002  加上拖动（按住移动）
+//   1003  加上纯移动（不按键也报，用于 hover）
+//   1006  编码格式换成 SGR（ESC [ < b ; x ; y M）
+//
+//   理论上 1003 覆盖 1002 覆盖 1000（后开的取代先开的），所以只发 1003
+//   似乎就够。但「取代」在真实终端里并不统一：有的终端把三者当独立开关，
+//   有的当等级。全开一遍是**用冗余换确定性**。
+//
+//   代价：1003 意味着鼠标每移动一个字符就产生一个事件。所以这个程序
+//   一旦开启鼠标追踪，就必须能扛住高频 move 事件 —— 这也是为什么
+//   useManageMCPConnections 那边要用 16ms 批处理窗口。
+export const ENABLE_MOUSE_TRACKING =
+  decset(DEC.MOUSE_NORMAL) +
+  decset(DEC.MOUSE_BUTTON) +
+  decset(DEC.MOUSE_ANY) +
+  decset(DEC.MOUSE_SGR)
+// 【关的时候顺序反过来】
+//
+//   如果终端把它们当等级（后开的生效），那么按 1000→1003 的正序去关，
+//   中间会被更高级别重新覆盖一次。逆序关最安全。
+//
+//   这种「开正序关逆序」的对称写法，在信号量、嵌套锁、以及这里的
+//   模式栈上都是同一个道理：**状态是栈，就得按栈的规矩退**。
+//   上一轮 ink.tsx 里 kitty 键盘协议必须 pop-before-push，是同一条规则。
+export const DISABLE_MOUSE_TRACKING =
+  decreset(DEC.MOUSE_SGR) +
+  decreset(DEC.MOUSE_ANY) +
+  decreset(DEC.MOUSE_BUTTON) +
+  decreset(DEC.MOUSE_NORMAL)

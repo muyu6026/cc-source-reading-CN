@@ -1,0 +1,492 @@
+// CSI = Control Sequence Introducer，也就是 `ESC [` 开头的那一大族。
+//   光标移动、擦除、滚动、颜色（SGR）全在这里。
+//
+//   这份文件做两件事，且两件事互不依赖：
+//     上半（14-124 行）  常量表：字节区间、尾字节、参数枚举
+//     下半（126-319 行） 生成函数：把「移动到第 3 行」变成一个字符串
+//
+//   **生成是输出的方向，解析是输入的方向** —— 这份文件只负责生成。
+//   反向的解析在 parser.ts（把 ESC [ 3 ; 5 H 变成 position 动作）。
+//   两者共用同一张尾字节表，这是唯一的耦合点。
+/**
+ * CSI (Control Sequence Introducer) Types
+ *
+ * Enums and types for CSI command parameters.
+ */
+
+import { ESC, ESC_TYPE, SEP } from './ansi.js'
+
+export const CSI_PREFIX = ESC + String.fromCharCode(ESC_TYPE.CSI)
+
+/**
+ * CSI parameter byte ranges
+ */
+// 【这三个区间就是 CSI 的完整语法，记熟它比记函数名有用】
+//
+//   0x20-0x2F  中间字节（intermediate）：空格、! 到 /。数量 0-2 个，
+//              在参数之后、尾字节之前。DECSCUSR 的 `CSI 2 q`（一个空格）
+//              就是它；字符集选择的 ESC ( 也是这一类。
+//   0x30-0x3F  参数字节（parameter）：0-9 和 ; : < = > ?
+//              前四个是数字与分隔符，后四个是「私有标记」。
+//   0x40-0x7E  尾字节（final）：@ 到 ~，**决定这条命令是什么**。
+//
+//   一条 CSI 的完整形状：
+//     ESC [ 私有标记? 参数(;参数)* 中间字节* 尾字节
+//     ESC [ ?        2 5                 h        ← 显示光标
+//     ESC [          2                  q        ← 不对，缺了空格
+//     ESC [          2                 (空格) q  ← 光标样式
+//
+//   三个区间互不重叠，这是词法器能只靠 charCode 范围判断状态的原因
+//   （tokenize.ts 204 行的 csi 分支）。
+export const CSI_RANGE = {
+  PARAM_START: 0x30,
+  PARAM_END: 0x3f,
+  INTERMEDIATE_START: 0x20,
+  INTERMEDIATE_END: 0x2f,
+  FINAL_START: 0x40,
+  FINAL_END: 0x7e,
+} as const
+
+/** Check if a byte is a CSI parameter byte */
+export function isCSIParam(byte: number): boolean {
+  return byte >= CSI_RANGE.PARAM_START && byte <= CSI_RANGE.PARAM_END
+}
+
+/** Check if a byte is a CSI intermediate byte */
+export function isCSIIntermediate(byte: number): boolean {
+  return (
+    byte >= CSI_RANGE.INTERMEDIATE_START && byte <= CSI_RANGE.INTERMEDIATE_END
+  )
+}
+
+/** Check if a byte is a CSI final byte (@ through ~) */
+export function isCSIFinal(byte: number): boolean {
+  return byte >= CSI_RANGE.FINAL_START && byte <= CSI_RANGE.FINAL_END
+}
+
+/**
+ * Generate a CSI sequence: ESC [ p1;p2;...;pN final
+ * Single arg: treated as raw body
+ * Multiple args: last is final byte, rest are params joined by ;
+ */
+// 【csi() 的多态：1 个参数是原文，多个参数才拼分号】
+//
+//   csi()                → ESC [
+//   csi('?25h')          → ESC [ ? 2 5 h        （整串原文）
+//   csi(2, 'J')          → ESC [ 2 J            （参数 + 尾字节）
+//   csi(1, 2, 'H')       → ESC [ 1 ; 2 H        （多参数用 ; 连接）
+//
+//   这个设计的好处是「想发什么就发什么」，坏处是**调用点看不出区别**：
+//   csi('200~') 和 csi(200, '~') 生成的字符串完全一样，但前者是
+//   「一个原文」，后者是「参数 200 + 尾字节 ~」。一旦有人以为
+//   多参数版本会做校验，就会写出 `csi('?25', 'h')` 这种多出分号的错。
+//
+//   判据：**参数化只在「尾字节必须是最后一个参数」时成立**，
+//   私有标记和中间字节只能走单参数原文那条路。
+export function csi(...args: (string | number)[]): string {
+  if (args.length === 0) return CSI_PREFIX
+  if (args.length === 1) return `${CSI_PREFIX}${args[0]}`
+  const params = args.slice(0, -1)
+  const final = args[args.length - 1]
+  return `${CSI_PREFIX}${params.join(SEP)}${final}`
+}
+
+/**
+ * CSI final bytes - the command identifier
+ */
+// 【尾字节表里有一半是「只为可读性存在」的】
+//
+//   真正被 parser.ts 用到的：CUU CUD CUF CUB CNL CPL CHA CUP HVP VPA
+//                          ED EL ECH SU SD DECSTBM SCOSC SCORC
+//                          DECSCUSR SM RM SGR
+//
+//   声明了但解析器没处理的：CHT / CBT（水平制表位跳转）、
+//                          DSR（设备状态报告，就是 terminal-querier 发出去
+//                          问「你多大」的那个 CSI 6 n 的反向）
+//
+//   保留它们的价值是：terminal-querier.ts 那边要发 DSR，得有个名字。
+//   所以这张表其实是**出站和入站共用的字典**，覆盖度按两边并集算。
+export const CSI = {
+  // Cursor movement
+  CUU: 0x41, // A - Cursor Up
+  CUD: 0x42, // B - Cursor Down
+  CUF: 0x43, // C - Cursor Forward
+  CUB: 0x44, // D - Cursor Back
+  CNL: 0x45, // E - Cursor Next Line
+  CPL: 0x46, // F - Cursor Previous Line
+  CHA: 0x47, // G - Cursor Horizontal Absolute
+  CUP: 0x48, // H - Cursor Position
+  CHT: 0x49, // I - Cursor Horizontal Tab
+  VPA: 0x64, // d - Vertical Position Absolute
+  HVP: 0x66, // f - Horizontal Vertical Position
+
+  // Erase
+  ED: 0x4a, // J - Erase in Display
+  EL: 0x4b, // K - Erase in Line
+  ECH: 0x58, // X - Erase Character
+
+  // Insert/Delete
+  IL: 0x4c, // L - Insert Lines
+  DL: 0x4d, // M - Delete Lines
+  ICH: 0x40, // @ - Insert Characters
+  DCH: 0x50, // P - Delete Characters
+
+  // Scroll
+  SU: 0x53, // S - Scroll Up
+  SD: 0x54, // T - Scroll Down
+
+  // Modes
+  SM: 0x68, // h - Set Mode
+  RM: 0x6c, // l - Reset Mode
+
+  // SGR
+  SGR: 0x6d, // m - Select Graphic Rendition
+
+  // Other
+  DSR: 0x6e, // n - Device Status Report
+  DECSCUSR: 0x71, // q - Set Cursor Style (with space intermediate)
+  DECSTBM: 0x72, // r - Set Top and Bottom Margins
+  SCOSC: 0x73, // s - Save Cursor Position
+  SCORC: 0x75, // u - Restore Cursor Position
+  CBT: 0x5a, // Z - Cursor Backward Tabulation
+} as const
+
+/**
+ * Erase in Display regions (ED command parameter)
+ */
+// 【数组下标 = 参数值，这个约定同时是简写和陷阱】
+//
+//   ED 参数：0 → toEnd   1 → toStart   2 → all   3 → scrollback（CSI 3 J）
+//   EL 参数：0 → toEnd   1 → toStart   2 → all
+//
+//   ED 有第四项而 EL 没有，所以两个数组长度不同 —— 这是故意的，
+//   因为 `CSI 3 K` 在标准里不存在。
+//
+//   陷阱在 parser.ts 161 行：`ERASE_DISPLAY[params[0] ?? 0] ?? 'toEnd'`。
+//   双重的兜底：参数缺失按 0（标准如此），下标越界（比如 CSI 9 J）也按
+//   toEnd。后者是"防御性默认"，标准里没说越界怎么办。
+//
+//   用数组而不是 switch 的代价：类型是 `as const` 的元组，下标访问
+//   返回的是联合类型或 undefined，每个调用点都得处理 undefined。
+export const ERASE_DISPLAY = ['toEnd', 'toStart', 'all', 'scrollback'] as const
+
+/**
+ * Erase in Line regions (EL command parameter)
+ */
+export const ERASE_LINE_REGION = ['toEnd', 'toStart', 'all'] as const
+
+/**
+ * Cursor styles (DECSCUSR)
+ */
+export type CursorStyle = 'block' | 'underline' | 'bar'
+
+// 【DECSCUSR 的参数从 0 开始，所以 0 和 1 是同一项】
+//
+//   0 或 1 → 闪烁方块（默认）
+//   2      → 静止方块
+//   3 / 4  → 闪烁/静止下划线
+//   5 / 6  → 闪烁/静止竖线
+//
+//   为什么 0 要在表里占一格：参数缺失时 parser.ts 用 `params[0] ?? 1`，
+//   得到 1，落在下标 1 上；而显式写 `CSI 0 q` 时落在下标 0 上。
+//   两格内容必须一样，否则「写 0」和「省略」会得到不同的光标。
+//
+//   这和 UNDEFINED 与空串的区别是同一类问题：**默认值不是「另开一路」，
+//   而是「指回默认那一项」**。sgr.ts 里 `2 || 1` 的处理是同一个思路。
+export const CURSOR_STYLES: Array<{ style: CursorStyle; blinking: boolean }> = [
+  { style: 'block', blinking: true }, // 0 - default
+  { style: 'block', blinking: true }, // 1
+  { style: 'block', blinking: false }, // 2
+  { style: 'underline', blinking: true }, // 3
+  { style: 'underline', blinking: false }, // 4
+  { style: 'bar', blinking: true }, // 5
+  { style: 'bar', blinking: false }, // 6
+]
+
+// Cursor movement generators
+
+/** Move cursor up n lines (CSI n A) */
+// 【这里的 n === 0 返回空串，是语义，不是优化】
+//
+//   `CSI 0 A` 和 `CSI A` 在标准里都表示「上移 1 行」（0 等于省略）。
+//   如果这里老老实实生成 `ESC [ 0 A`，终端会移动 1 行 —— 而调用方
+//   传 0 时的意图是「不要动」。
+//
+//   所以这个函数把「0」解释成「没有这个操作」，返回空串。
+//   cursorMove(x, y)（169 行）正依赖这一点：它分别判断 x/y 是否非零
+//   来决定拼不拼那一段，两处约定必须一致。
+//
+//   对比 149 行的 cursorTo：**它没有 0 的保护**。cursorTo(0) 会生成
+//   `ESC [ 0 G`，终端按第 1 列处理。所以两个函数对 0 的处理不一致 ——
+//   cursorTo 的调用方必须自己保证 col ≥ 1。
+export function cursorUp(n = 1): string {
+  return n === 0 ? '' : csi(n, 'A')
+}
+
+/** Move cursor down n lines (CSI n B) */
+export function cursorDown(n = 1): string {
+  return n === 0 ? '' : csi(n, 'B')
+}
+
+/** Move cursor forward n columns (CSI n C) */
+export function cursorForward(n = 1): string {
+  return n === 0 ? '' : csi(n, 'C')
+}
+
+/** Move cursor back n columns (CSI n D) */
+export function cursorBack(n = 1): string {
+  return n === 0 ? '' : csi(n, 'D')
+}
+
+/** Move cursor to column n (1-indexed) (CSI n G) */
+export function cursorTo(col: number): string {
+  return csi(col, 'G')
+}
+
+/** Move cursor to column 1 (CSI G) */
+export const CURSOR_LEFT = csi('G')
+
+/** Move cursor to row, col (1-indexed) (CSI row ; col H) */
+export function cursorPosition(row: number, col: number): string {
+  return csi(row, col, 'H')
+}
+
+/** Move cursor to home position (CSI H) */
+export const CURSOR_HOME = csi('H')
+
+/**
+ * Move cursor relative to current position
+ * Positive x = right, negative x = left
+ * Positive y = down, negative y = up
+ */
+// 【先横后竖，且分成两段独立的序列】
+//
+//   输出是 `ESC [ n C` + `ESC [ m B` 两段拼接，而不是一条
+//   `CSI n ; m H` 绝对定位。相对移动的好处是不需要知道当前位置；
+//   代价是任何一次漏算都会累积成永久偏移。
+//
+//   顺序（先横后竖）注释说是「matches ansi-escapes behavior」——
+//   也就是照抄了主流库。真实原因可能是：横向移动经过自动换行边界时，
+//   如果纵向还没定位，落点会不一样。终端在写满一行时的自动换行
+//   会让「右移」变成「下一行行首」，所以横竖顺序在某些边界上不等价。
+//
+//   这类「照抄」在终端代码里很常见：标准写得含糊，事实标准由
+//   几个主流实现的行为定，抄它们比自己推导安全。
+export function cursorMove(x: number, y: number): string {
+  let result = ''
+  // Horizontal first (matches ansi-escapes behavior)
+  if (x < 0) {
+    result += cursorBack(-x)
+  } else if (x > 0) {
+    result += cursorForward(x)
+  }
+  // Then vertical
+  if (y < 0) {
+    result += cursorUp(-y)
+  } else if (y > 0) {
+    result += cursorDown(y)
+  }
+  return result
+}
+
+// Save/restore cursor position
+
+/** Save cursor position (CSI s) */
+export const CURSOR_SAVE = csi('s')
+
+/** Restore cursor position (CSI u) */
+export const CURSOR_RESTORE = csi('u')
+
+// Erase generators
+
+/** Erase from cursor to end of line (CSI K) */
+export function eraseToEndOfLine(): string {
+  return csi('K')
+}
+
+/** Erase from cursor to start of line (CSI 1 K) */
+export function eraseToStartOfLine(): string {
+  return csi(1, 'K')
+}
+
+/** Erase entire line (CSI 2 K) */
+export function eraseLine(): string {
+  return csi(2, 'K')
+}
+
+/** Erase entire line - constant form */
+export const ERASE_LINE = csi(2, 'K')
+
+/** Erase from cursor to end of screen (CSI J) */
+export function eraseToEndOfScreen(): string {
+  return csi('J')
+}
+
+/** Erase from cursor to start of screen (CSI 1 J) */
+export function eraseToStartOfScreen(): string {
+  return csi(1, 'J')
+}
+
+/** Erase entire screen (CSI 2 J) */
+export function eraseScreen(): string {
+  return csi(2, 'J')
+}
+
+/** Erase entire screen - constant form */
+export const ERASE_SCREEN = csi(2, 'J')
+
+/** Erase scrollback buffer (CSI 3 J) */
+export const ERASE_SCROLLBACK = csi(3, 'J')
+
+/**
+ * Erase n lines starting from cursor line, moving cursor up
+ * This erases each line and moves up, ending at column 1
+ */
+// 【eraseLines 的收尾是「擦 n 行 + 上移 n-1 次 + 回行首」】
+//
+//   执行过程（n=3，光标在第 3 行）：
+//     擦第 3 行 → 上移 1 → 擦第 2 行 → 上移 1 → 擦第 1 行 → 回第 0 列
+//
+//   为什么是 n-1 次上移：最后擦的那行不需要再往上跳，否则会多退一行。
+//
+//   为什么末尾一定要 CURSOR_LEFT（`CSI G`）：擦除不移动光标，而擦完
+//   之后光标停在第 1 行原来的列上。调用方（log-update 的重绘）接下来
+//   要写新内容，必须从行首开始。
+//
+//   注意它**不处理滚动**：如果 n 大于光标上方的行数，cursorUp 会停在
+//   第 1 行反复擦同一行。调用方得自己保证 n 不超界 —— log-update 里
+//   「要清的行数 > 视口高度」就是走全量重置的分支之一。
+export function eraseLines(n: number): string {
+  if (n <= 0) return ''
+  let result = ''
+  for (let i = 0; i < n; i++) {
+    result += ERASE_LINE
+    if (i < n - 1) {
+      result += cursorUp(1)
+    }
+  }
+  result += CURSOR_LEFT
+  return result
+}
+
+// Scroll
+
+/** Scroll up n lines (CSI n S) */
+export function scrollUp(n = 1): string {
+  return n === 0 ? '' : csi(n, 'S')
+}
+
+/** Scroll down n lines (CSI n T) */
+export function scrollDown(n = 1): string {
+  return n === 0 ? '' : csi(n, 'T')
+}
+
+/** Set scroll region (DECSTBM, CSI top;bottom r). 1-indexed, inclusive. */
+// DECSTBM：设滚动区域（top;bottom，1 基，含两端）。
+//
+//   设了之后，LF / 滚动只在区域内发生，区域外的内容钉住不动。
+//   这是 ScrollBox 那条 DECSTBM 快路径的基础（render-node-to-output）。
+//
+//   269 行的注释「Homes the cursor」是个容易忽略的副作用：
+//   **重设滚动区域会把光标移到 (1,1)**。所以「设区域 → 画内容 → 清区域」
+//   这个序列里，清区域之后必须重新定位光标，否则内容会从左上角开始写。
+//   这也是为什么 ink.tsx 每帧都要发一次 CSI H 锚定。
+export function setScrollRegion(top: number, bottom: number): string {
+  return csi(top, bottom, 'r')
+}
+
+/** Reset scroll region to full screen (DECSTBM, CSI r). Homes the cursor. */
+export const RESET_SCROLL_REGION = csi('r')
+
+// Bracketed paste markers (input from terminal, not output)
+// These are sent by the terminal to delimit pasted content when
+// bracketed paste mode is enabled (via DEC mode 2004)
+
+/** Sent by terminal before pasted content (CSI 200 ~) */
+// 【方向翻转：这两条是「终端发给我们的」，不是「我们发给终端的」】
+//
+//   2004 是 bracketed paste 模式。开启之后，终端在粘贴内容的两端
+//   包上 `CSI 200 ~` 和 `CSI 201 ~`。于是程序能区分「用户一个个敲的」
+//   和「一次性贴进来的」—— 前者里的回车该当提交，后者里的回车
+//   只是文本里的换行。
+//
+//   没有这个标记的话，粘贴一段多行代码会让每一行都被当成一次提交。
+//
+//   对照 287 / 290 行的 FOCUS_IN / FOCUS_OUT：同一个道理，
+//   这两条只从终端来。
+//
+//   【但这里有个真实的歧义】CSI I（0x49）在出站方向是 CHT
+//   （Cursor Horizontal Tab）。所以同一个字节序列，看方向决定语义。
+//   parser.ts 里 CHT 只声明、没解析，于是入站的 CSI I 会被归成 unknown
+//   直接丢掉 —— 对「只解析自己要渲染的文本」这个用途来说正好。
+export const PASTE_START = csi('200~')
+
+/** Sent by terminal after pasted content (CSI 201 ~) */
+export const PASTE_END = csi('201~')
+
+// Focus event markers (input from terminal, not output)
+// These are sent by the terminal when focus changes while
+// focus events mode is enabled (via DEC mode 1004)
+
+/** Sent by terminal when it gains focus (CSI I) */
+export const FOCUS_IN = csi('I')
+
+/** Sent by terminal when it loses focus (CSI O) */
+export const FOCUS_OUT = csi('O')
+
+// Kitty keyboard protocol (CSI u)
+// Enables enhanced key reporting with modifier information
+// See: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
+
+/**
+ * Enable Kitty keyboard protocol with basic modifier reporting
+ * CSI > 1 u - pushes mode with flags=1 (disambiguate escape codes)
+ * This makes Shift+Enter send CSI 13;2 u instead of just CR
+ */
+// 【kitty 键盘协议是「栈」，所以压栈和出栈必须配对】
+//
+//   `CSI > 1 u`   压栈，flags=1（消解转义歧义：Shift+Enter 发 CSI 13;2 u
+//                 而不是裸 CR）
+//   `CSI < u`     出栈
+//
+//   注意两个私有标记方向相反：`>` 是 push，`<` 是 pop。这在视觉上
+//   很不直观（一般会以为 `>` 和 `<` 是一对括号，同进同出）。
+//
+//   不配对出栈的后果在 ink.tsx 的退出清理里踩过：每次 >5 秒空闲后
+//   reassertTerminalModes 都会再压一层，退出时排不干净，shell 里
+//   残留 CSI u 模式，Ctrl+C 变成转义序列漏给 shell。
+export const ENABLE_KITTY_KEYBOARD = csi('>1u')
+
+/**
+ * Disable Kitty keyboard protocol
+ * CSI < u - pops the keyboard mode stack
+ */
+export const DISABLE_KITTY_KEYBOARD = csi('<u')
+
+/**
+ * Enable xterm modifyOtherKeys level 2.
+ * tmux accepts this (not the kitty stack) to enable extended keys — when
+ * extended-keys-format is csi-u, tmux then emits keys in kitty format.
+ */
+// 【xterm 的 modifyOtherKeys，和 kitty 协议是两条路】
+//
+//   `CSI > 4 ; 2 m`  开 level 2（所有修饰键组合都发扩展序列）
+//   `CSI > 4 m`      关
+//
+//   tmux 只认这个、不认 kitty 的栈。所以 tmux 里要先发它，
+//   再靠 tmux 的 extended-keys-format=csi-u 把按键转成 kitty 格式。
+//
+//   【这行和 parser.ts 114 行是一对，必须连起来看】
+//   它的尾字节是 `m` —— 和 SGR 一样。如果解析器只看尾字节，
+//   `ESC [ > 4 ; 2 m` 会被当成 SGR 参数 ">4;2" 去解析，parseInt(">4")
+//   是 NaN，然后静默什么都不做。
+//
+//   parser.ts 因此写了 `finalByte === CSI.SGR && privateMode === ''` ——
+//   那个 `privateMode === ''` 条件存在的唯一理由，就是这条序列。
+//   **一个模块的生成函数，决定了另一个模块的解析条件。**
+export const ENABLE_MODIFY_OTHER_KEYS = csi('>4;2m')
+
+/**
+ * Disable xterm modifyOtherKeys (reset to default).
+ */
+export const DISABLE_MODIFY_OTHER_KEYS = csi('>4m')
