@@ -1,0 +1,51 @@
+// ═══════════════════════════════════════════════════════════════
+//  逐行宽度缓存：流式输出的一个专门优化
+// ═══════════════════════════════════════════════════════════════
+//
+//  场景：模型在流式输出一段长回复。每一帧都会重新测量整段文本的
+//  宽度和高度（因为 yoga 要重新布局），但**已完成的行一个字都不会变**，
+//  只有最后一行在长。
+//
+//  没有缓存时，`stringWidth` 每帧要对全部行重跑一遍 —— 而它是
+//  「快路径 + 慢路径 + 可能走 Bun 原生」的分级实现，代价不低。
+//  缓存之后命中率接近 100%（只有正在长的那一行 miss）。
+//
+//  注意缓存键是**整行字符串**，不是行号 —— 因为行号会随着「前面
+//  插入新行」而全部错位，而字符串内容才是稳定的身份。
+import { stringWidth } from './stringWidth.js'
+
+// During streaming, text grows but completed lines are immutable.
+// Caching stringWidth per-line avoids re-measuring hundreds of
+// unchanged lines on every token (~50x reduction in stringWidth calls).
+const cache = new Map<string, number>()
+
+const MAX_CACHE_SIZE = 4096
+
+export function lineWidth(line: string): number {
+  const cached = cache.get(line)
+  if (cached !== undefined) return cached
+
+  const width = stringWidth(line)
+
+// 满了就**整个清空**，不是 LRU / FIFO。
+//
+//  理由注释里给了：清空后一帧就能重填（当前可见的行数最多几百行）。
+//  而 LRU 需要维护访问顺序（双向链表或 Map 的 delete+set），
+//  每次命中都要改结构 —— 记账成本比重新测量还高。
+//
+//  这个取舍的判断标准很实用：**缓存的价值 = 命中率 × 单次计算成本**。
+//  这里单次成本中等、命中率极高，所以「粗粒度淘汰」完全够；
+//  换成一个单次成本极低的缓存，连缓存本身都不该有。
+  // Evict when cache grows too large (e.g. after many different responses).
+  // Simple full-clear is fine — the cache repopulates in one frame.
+  if (cache.size >= MAX_CACHE_SIZE) {
+    cache.clear()
+  }
+
+// `cache.set` 在**清空之后**才执行 —— 顺序很重要。
+//
+//  如果先 set 再判满，刚算的这一行可能正好被清掉，下一帧又要重算。
+//  虽然只差一行，但那是「最长的那一行」（正在流式的），最贵。
+  cache.set(line, width)
+  return width
+}

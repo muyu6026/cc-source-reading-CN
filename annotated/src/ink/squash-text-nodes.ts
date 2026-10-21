@@ -1,0 +1,175 @@
+// ═══════════════════════════════════════════════════════════════
+//  squash：一份树，两种摊平方式
+// ═══════════════════════════════════════════════════════════════
+//
+//  两个几乎一样的函数，只差一件事：
+//
+//    `squashTextNodesToSegments`  带样式 → 给**渲染**用
+//                                 （render-node-to-output.ts:550）
+//    `squashTextNodes`（默认导出）不带样式 → 给**测量**用
+//                                 （dom.ts:338，setMeasureFunc 里）
+//
+//  为什么测量不需要样式：yoga 只问「这段文字多宽多高」，样式不影响
+//  尺寸（粗体、颜色都不改字符宽度）。所以测量路径上能省掉所有
+//  样式合并的开销 —— 而测量是每帧每行都要跑的。
+//
+//  两个函数必须产出**相同的字符序列**，否则「量出来的宽度」和
+//  「画出来的内容」不一致，表现为折行位置鬼打墙。所以它们对
+//  nodeName 的处理必须严格同步 —— 这是一处隐性的双份实现。
+import type { DOMElement } from './dom.js'
+import type { TextStyles } from './styles.js'
+
+/**
+ * A segment of text with its associated styles.
+ * Used for structured rendering without ANSI string transforms.
+ */
+export type StyledSegment = {
+  text: string
+  styles: TextStyles
+  hyperlink?: string
+}
+
+/**
+ * Squash text nodes into styled segments, propagating styles down through the tree.
+ * This allows structured styling without relying on ANSI string transforms.
+ */
+// 递归 + 累积器（`out` 参数）。用累积器而不是「返回数组 + concat」，
+// 是为了避免每个节点都新建一个数组再合并 —— 长文本嵌套几十层时，
+// 那样的开销很可观。
+//
+// 注意 `out` 有默认值 `[]`，所以第一次调用不用传。
+export function squashTextNodesToSegments(
+  node: DOMElement,
+  inheritedStyles: TextStyles = {},
+  inheritedHyperlink?: string,
+  out: StyledSegment[] = [],
+): StyledSegment[] {
+// `{ ...inheritedStyles, ...node.textStyles }` —— 浅合并，**子覆盖父**。
+//
+// 这跟 CSS 的继承模型有个重要区别：CSS 里没有「取消」以外的自由度
+// （`inherit` / `unset` / `initial`），而这里只要子节点写了一个字段，
+// 就彻底覆盖父节点的同名字段。
+//
+// 后果：父节点 `bold`、子节点 `dimColor`，子节点同时拿到 bold + dim
+// （不同字段不冲突，正确）；但如果子节点想「不要父节点的 bold」，
+// 做不到 —— 只能写 `bold: false`。这就是为什么 TextStyles 里的字段
+// 都是 boolean 而不是「有/无」—— 需要有「显式关掉」的表达能力。
+  const mergedStyles = node.textStyles
+    ? { ...inheritedStyles, ...node.textStyles }
+    : inheritedStyles
+
+// `childNode === undefined` —— 数组里可能有空洞。
+//
+// 这不是防御性编程：`dom.ts` 的 appendChild / insertBefore 会往
+// childNodes 里塞元素，删除时用 `splice` 还是留洞取决于实现。
+// 空洞会让 `childNode.nodeName` 抛 TypeError，所以必须跳过。
+//
+// 一个可读性细节：这个检查写在最前面、且不合并到下面的 if 链里 ——
+// 因为它不是「某类节点」的判断，而是「这个位置有没有节点」的判断。
+  for (const childNode of node.childNodes) {
+    if (childNode === undefined) {
+      continue
+    }
+
+// 只认三种 nodeName：
+//
+//    #text              纯文本
+//    ink-text           嵌套的 <Text>
+//    ink-virtual-text   内部用的虚拟文本节点（squash 的产物）
+//    ink-link           <Link>，带 href
+//
+// **其他的（ink-box 等）直接不递归** —— 于是 `<Text>` 里面放一个
+// `<Box>`，Box 里的文字会被静默丢掉。
+//
+// 这就是那条著名限制的根源：**Text 里不能放 Box**。不是不想支持，
+// 是这条 squash 路径根本不看 Box 的子节点。而在 yoga 那一侧，
+// Box 是有自己的布局节点的，所以「测量说有内容、渲染说没有」这种
+// 不一致也就无从发现 —— 内容直接消失。
+//
+// 对比 Ink 上游的做法：它在 dom.ts 里就禁止了这种嵌套（抛错）。
+// 这里选了「静默忽略」，代价是排查困难。
+    if (childNode.nodeName === '#text') {
+// `length > 0` 才 push —— 空文本节点不产生空 segment。
+//
+// 这条看起来无害，实际上影响测量：如果空节点也 push，segment 数量
+// 会变多，但总字符数不变 —— 对宽度没影响。所以过滤它是为了
+// **渲染侧的遍历效率**（少几次 setCellAt 的空转）。
+      if (childNode.nodeValue.length > 0) {
+        out.push({
+          text: childNode.nodeValue,
+          styles: mergedStyles,
+          hyperlink: inheritedHyperlink,
+        })
+      }
+    } else if (
+      childNode.nodeName === 'ink-text' ||
+      childNode.nodeName === 'ink-virtual-text'
+    ) {
+      squashTextNodesToSegments(
+        childNode,
+        mergedStyles,
+        inheritedHyperlink,
+        out,
+      )
+// `<Link>` 的处理是这条链里唯一「改上下文」的地方：它把 href 往下传，
+// 之后的文本都会带上这个超链接（直到遇到另一个 Link）。
+//
+// `href || inheritedHyperlink` —— 注意是 `||` 不是 `??`。
+// `<Link href="">`（空字符串）会 fallback 到父级的 href，而不是
+// 「取消超链接」。语义上有点怪，但实际用法里没人给空 href。
+    } else if (childNode.nodeName === 'ink-link') {
+      const href = childNode.attributes['href'] as string | undefined
+      squashTextNodesToSegments(
+        childNode,
+        mergedStyles,
+        href || inheritedHyperlink,
+        out,
+      )
+    }
+  }
+
+  return out
+}
+
+/**
+ * Squash text nodes into a plain string (without styles).
+ * Used for text measurement in layout calculations.
+ */
+// 无样式版。逐字符 `+=` 拼字符串。
+//
+// 这里没有用数组 + join —— 在 V8 里，`+=` 对短字符串是 rope
+// （拼接树），最终展开时才分配；对反复拼接的长字符串，V8 有
+// 「cons string」优化。所以 `+=` 在这个场景下不比数组慢，而且省一次
+// 数组分配。
+//
+// 但要注意：这个函数的产物会直接进 `measureText`，而 measureText
+// 按换行切分 —— 也就是说**拼接是必要的**（不能保留结构）。
+function squashTextNodes(node: DOMElement): string {
+  let text = ''
+
+  for (const childNode of node.childNodes) {
+    if (childNode === undefined) {
+      continue
+    }
+
+    if (childNode.nodeName === '#text') {
+      text += childNode.nodeValue
+// 注意这里**没有** ink-link 的 href 逻辑 —— 因为测量不需要它。
+//
+// 但 `ink-link` 分支仍然要递归（`text += squashTextNodes(childNode)`），
+// 否则 Link 里的文字会被算成 0 宽。这就是「两个函数必须同步」的
+// 一个具体例子：将来如果 Link 里能放 Box，两处都要改。
+    } else if (
+      childNode.nodeName === 'ink-text' ||
+      childNode.nodeName === 'ink-virtual-text'
+    ) {
+      text += squashTextNodes(childNode)
+    } else if (childNode.nodeName === 'ink-link') {
+      text += squashTextNodes(childNode)
+    }
+  }
+
+  return text
+}
+
+export default squashTextNodes

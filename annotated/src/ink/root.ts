@@ -1,0 +1,266 @@
+// ═══════════════════════════════════════════════════════════════
+//  root：三个入口，一个实例表
+// ═══════════════════════════════════════════════════════════════
+//
+//  这个文件是「外部代码怎么启动一棵 Ink 树」的全部答案。三个出口：
+//
+//    `renderSync(node)`        同步渲染（历史上的默认 API）
+//    `wrappedRender(node)`     默认导出，比上面多一个微任务边界
+//    `createRoot({...})`       不渲染，只造实例（类似 react-dom 的 createRoot）
+//
+//  三者共用 `instances` 这张表，表以 **stdout 流对象** 为键。这个键的
+//  选择是整个设计的关键：同一进程里可能有多块 stdout（主界面 + 测试 +
+//  子实例），按「流」分身才互不干扰；而同一块流上的连续 render() 必须
+//  复用同一个 Ink 实例，否则会同时有两套渲染循环抢着写屏。
+import type { ReactNode } from 'react'
+import { logForDebugging } from 'src/utils/debug.js'
+import { Stream } from 'stream'
+import type { FrameEvent } from './frame.js'
+import Ink, { type Options as InkOptions } from './ink.js'
+import instances from './instances.js'
+
+export type RenderOptions = {
+  /**
+   * Output stream where app will be rendered.
+   *
+   * @default process.stdout
+   */
+  stdout?: NodeJS.WriteStream
+  /**
+   * Input stream where app will listen for input.
+   *
+   * @default process.stdin
+   */
+  stdin?: NodeJS.ReadStream
+  /**
+   * Error stream.
+   * @default process.stderr
+   */
+  stderr?: NodeJS.WriteStream
+  /**
+   * Configure whether Ink should listen to Ctrl+C keyboard input and exit the app. This is needed in case `process.stdin` is in raw mode, because then Ctrl+C is ignored by default and process is expected to handle it manually.
+   *
+   * @default true
+   */
+  exitOnCtrlC?: boolean
+
+  /**
+   * Patch console methods to ensure console output doesn't mix with Ink output.
+   *
+   * @default true
+   */
+  patchConsole?: boolean
+
+  /**
+   * Called after each frame render with timing and flicker information.
+   */
+  onFrame?: (event: FrameEvent) => void
+}
+
+export type Instance = {
+  /**
+   * Replace previous root node with a new one or update props of the current root node.
+   */
+  rerender: Ink['render']
+  /**
+   * Manually unmount the whole Ink app.
+   */
+  unmount: Ink['unmount']
+  /**
+   * Returns a promise, which resolves when app is unmounted.
+   */
+  waitUntilExit: Ink['waitUntilExit']
+  cleanup: () => void
+}
+
+/**
+ * A managed Ink root, similar to react-dom's createRoot API.
+ * Separates instance creation from rendering so the same root
+ * can be reused for multiple sequential screens.
+ */
+export type Root = {
+  render: (node: ReactNode) => void
+  unmount: () => void
+  waitUntilExit: () => Promise<void>
+}
+
+/**
+ * Mount a component and render the output.
+ */
+// `getOptions` 在下面（第 159 行）。它做的是**鸭子类型兼容**：
+// 老式调用是 `render(node, process.stdout)`，新式是 `render(node, {...})`。
+// 用 `instanceof Stream` 区分 —— 因为 `RenderOptions` 是普通对象，
+// 不会是 Stream 的实例。
+export const renderSync = (
+  node: ReactNode,
+  options?: NodeJS.WriteStream | RenderOptions,
+): Instance => {
+  const opts = getOptions(options)
+  const inkOptions: InkOptions = {
+    stdout: process.stdout,
+    stdin: process.stdin,
+    stderr: process.stderr,
+    exitOnCtrlC: true,
+    patchConsole: true,
+    ...opts,
+  }
+
+// `getInstance` 的第二个参数是**工厂函数**而不是实例 —— 因为只有
+// 「表里没有」时才需要构造。如果传实例，每次调用都会 new 一个
+// Ink（连带启动渲染循环），那就白搭了。
+//
+// 这是惰性构造的标配写法，但在这里还有额外后果：`new Ink()` 会读
+// 终端能力、装 stdin 监听、可能写序列。少构造一次就是少一堆副作用。
+  const instance: Ink = getInstance(
+    inkOptions.stdout,
+    () => new Ink(inkOptions),
+  )
+
+  instance.render(node)
+
+// 返回值把 `instance.render` 直接透出（不包一层箭头函数）——
+// 因为 Ink 的 `render` 方法是绑定过 this 的（或者用箭头属性），
+// 透出比包装省一次分配，也保证引用相等（React 上下文里有用）。
+//
+// `cleanup` 是唯一有实际动作的：从表里删掉。删了之后再 render
+// 会新建实例 —— 这是「我要重开一个干净世界」的语义。
+  return {
+    rerender: instance.render,
+    unmount() {
+      instance.unmount()
+    },
+    waitUntilExit: instance.waitUntilExit,
+    cleanup: () => instances.delete(inkOptions.stdout),
+  }
+}
+
+// 这一行是整份文件里唯一「看不出为什么」的代码，注释解释得很清楚：
+//
+//   **保留一个微任务边界。**
+//
+//   历史上这里是 `await loadYoga()`（WASM 版 yoga 需要异步加载）。
+//   后来换成了纯 TS 的 yoga port（同步可用），这行 `await` 就没了存在
+//   理由 —— 直到发现少了它之后首帧会在**同步阶段**就跑完。
+//
+//   而首帧同步跑完的后果很具体：调用方后面紧跟的 `Static` 写入
+//   （比如 logo）会**覆盖 scrollback**，而不是追加在 logo 下面。
+//   因为首帧已经把光标位置定了，Static 以为「上面没东西」。
+//
+//   所以 `await Promise.resolve()` 不是仪式，而是「让出一次微任务，
+//   等其他启动阶段的 effect 落定」。代价是语义耦合在时序上 ——
+//   删掉它不会有任何类型错误，只会让首屏排版错。
+//
+//   这是「移除一个 await 会改变执行时机」的典型案例：`await` 除了等，
+//   还会**切分同步执行流**。
+const wrappedRender = async (
+  node: ReactNode,
+  options?: NodeJS.WriteStream | RenderOptions,
+): Promise<Instance> => {
+  // Preserve the microtask boundary that `await loadYoga()` used to provide.
+  // Without it, the first render fires synchronously before async startup work
+  // (e.g. useReplBridge notification state) settles, and the subsequent Static
+  // write overwrites scrollback instead of appending below the logo.
+  await Promise.resolve()
+  const instance = renderSync(node, options)
+// 这一行日志看起来只是打点，实际上是**启动耗时的基准线**：
+// `process.uptime()` 从进程启动算起，所以这个数包含了 node 启动、
+// 模块加载、CLI 解析的全部时间。排查「为什么第一屏出来得慢」时，
+// 先看这个数：如果它已经很大，问题不在渲染。
+  logForDebugging(
+    `[render] first ink render: ${Math.round(process.uptime() * 1000)}ms since process start`,
+  )
+  return instance
+}
+
+export default wrappedRender
+
+/**
+ * Create an Ink root without rendering anything yet.
+ * Like react-dom's createRoot — call root.render() to mount a tree.
+ */
+// `createRoot` 与 `renderSync` 的实质区别只有两点：
+//   1. **不渲染**（`root.render(node)` 才挂树）
+//   2. **不查表**（直接 new，然后自己塞进表）
+//
+// 第 2 点是有意的：createRoot 的语义是「我要一个新的根」，
+// 而不是「接到已有的那棵树上」。所以它覆盖表里的旧值 ——
+// 连带把旧实例孤立掉（旧实例的渲染循环还在跑，但没人再引用它）。
+//
+// ⚠️ 这是这份文件里唯一一处「可能泄漏渲染循环」的地方。实际使用
+// 都保证先 unmount 再 createRoot，但类型上没有任何强制。
+export async function createRoot({
+  stdout = process.stdout,
+  stdin = process.stdin,
+  stderr = process.stderr,
+  exitOnCtrlC = true,
+  patchConsole = true,
+  onFrame,
+}: RenderOptions = {}): Promise<Root> {
+  // See wrappedRender — preserve microtask boundary from the old WASM await.
+  await Promise.resolve()
+  const instance = new Ink({
+    stdout,
+    stdin,
+    stderr,
+    exitOnCtrlC,
+    patchConsole,
+    onFrame,
+  })
+
+// 自己塞表，而不是复用 `getInstance` —— 因为这里**必须**是新建的
+// 那个实例，不能被表里的旧实例顶掉。
+//
+// 注释里给了塞表的理由：有代码靠 stdout 反查 Ink 实例
+// （`FullscreenLayout.tsx:472`、`overlayContext.tsx:120`、
+// `thinkback.tsx:106`）。所以这张表不只是「去重」，还是一个
+// **服务定位器** —— 这让它同时承担了两个职责，也是为什么删除时机
+// 必须小心（删早了，反查的人拿到 undefined）。
+  // Register in the instances map so that code that looks up the Ink
+  // instance by stdout (e.g. external editor pause/resume) can find it.
+  instances.set(stdout, instance)
+
+  return {
+    render: node => instance.render(node),
+    unmount: () => instance.unmount(),
+    waitUntilExit: () => instance.waitUntilExit(),
+  }
+}
+
+// 鸭子类型分派。`stdout instanceof Stream` 能成立是因为 Node 的
+// WriteStream 继承自 Stream；普通对象字面量不是。
+//
+// 注意返回的分支不对称：Stream 分支只填了 stdout + stdin（stderr
+// 和其余项走后面的默认值展开），对象分支原样返回。也就是说
+// `render(node, someStream)` 这种老式调用**拿不到 exitOnCtrlC 的
+// 显式值** —— 靠 `renderSync` 里的默认值兜。
+const getOptions = (
+  stdout: NodeJS.WriteStream | RenderOptions | undefined = {},
+): RenderOptions => {
+  if (stdout instanceof Stream) {
+    return {
+      stdout,
+      stdin: process.stdin,
+    }
+  }
+
+  return stdout
+}
+
+// 惰性单例：有就复用，没有才造。整个「同一 stdout 一个实例」的
+// 保证最终落在这一行 `instances.get` 上。
+//
+// 反过来说，**任何绕过这个函数的地方都会破坏保证** —— 比如
+// `createRoot` 里的直接 `new`（那是刻意的，见上）。
+const getInstance = (
+  stdout: NodeJS.WriteStream,
+  createInstance: () => Ink,
+): Ink => {
+  let instance = instances.get(stdout)
+
+  if (!instance) {
+    instance = createInstance()
+    instances.set(stdout, instance)
+  }
+
+  return instance
+}

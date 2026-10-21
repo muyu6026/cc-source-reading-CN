@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅ | ✅ 二十五份全通<br />（含 `termio/` 十个） |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅ | ✅ 五十六份全通<br />（含 `termio/` 十个、`layout/` 四个） |
 
 ---
 
@@ -927,7 +927,7 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 ## 第 8 步（终端渲染器）读完了吗？
 
-`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。**二十一份、11,079 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），19,842 行。到这一批为止已批注 **五十六份、16,140 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
@@ -1337,6 +1337,95 @@ resolve 成 cancel 是协议层面的选择：MCP 那边等的是 `ElicitResult`
 
 ---
 
+## `ink/` 剩余三十一个小件读完了吗？六道自测题
+
+上一批把「输入侧」四份补上之后，`ink/` 根目录只剩一堆百行小件。这一批全清了：根目录 27 个 + `layout/` 四个，共 **2,997 行原文（批注版 5,117 行）、224 处锚点**。
+
+它们不是「补细节」这么简单 —— 这一批挖出了**三处零读者的代码**和**一处注释漂移**，比任何一处实现细节都值得记。
+
+| 分组 | 文件 | 它回答的问题 |
+| --- | --- | --- |
+| 出口 | `terminal.ts` | 这个终端能做什么 + 最后一站 `write` |
+| 探测 | `terminal-querier.ts` | 没有超时，怎么知道终端不支持 |
+| 一帧 | `renderer.ts` / `frame.ts` | DOM 怎么变成屏幕缓冲；一帧的数据契约 |
+| 入口 | `root.ts` / `instances.ts` | 三个起点，一张按 stdout 分身的表 |
+| 文本 | `wrap-text.ts` / `wrapAnsi.ts` / `measure-text.ts` / `widest-line.ts` / `squash-text-nodes.ts` | 折行、截断、测量、摊平 |
+| 缓存 | `line-width-cache.ts` / `node-cache.ts` | 两个 Map，一个为流式，一个为 blit |
+| 交互 | `focus.ts` | 焦点栈、Tab 环、删除节点后焦点恢复到哪 |
+| 终端杂项 | `bidi.ts` / `tabstops.ts` / `clearTerminal.ts` / `supports-hyperlinks.ts` / `terminal-focus-state.ts` / `useTerminalNotification.ts` | 各自一个真实世界的坑 |
+| 布局 | `layout/node.ts` / `yoga.ts` / `geometry.ts` / `engine.ts` | 52 个方法的适配层，一半是样板 |
+
+**71 `optimizer` 里 `cursorMove` 可以相加、`cursorTo` 只能留最后一条，为什么 `styleStr` 一条都不能丢？**
+
+区别在操作的性质：
+- `cursorMove` 是**相对**（`CSI n A`）→ 两次相对移动等于一次合位移，可以相加
+- `cursorTo` 是**绝对**（`CSI n G`）→ 后者直接覆盖前者，前面那条白写
+- `styleStr` 是**转移**（transition，由 `diffAnsiCodes(from, to)` 算出），不是设置
+
+最后一条的后果很具体：`[ESC[49m, ESC[2m]` 里第一条是「取消背景色」，第二条是「降低亮度」。看上去第二条跟背景无关，丢了应该没事 —— 但背景色会一直保持到下一个 `ESC[2J` / `ESC[2K`，而**这两个操作在有背景色的终端上会用当前背景色填充新区域**（BCE, Background Color Erase）。于是整片屏幕被涂成上一个格子的背景色。
+
+所以「这条转移不改变我关心的位」不能作为丢弃理由 —— **下一条转移不负责复位任何东西**。同一个「相邻合并」，三条规则三种动作（相加 / 取后者 / 拼接），区别全在相对、绝对、增量。
+
+**72 没有任何超时，怎么知道终端「不支持」某个查询？**
+
+用一条**必定有答复**的查询当栅栏。DA1（`CSI c`）从 VT100 就有，所有终端都会答，而且终端**按接收顺序答复**。于是每一批查询后面跟一条 DA1：
+
+- 你的答复在 DA1 之前到 → 支持
+- DA1 先到 → 不支持（你的问题被静默忽略了）
+
+这个技巧只依赖「按序答复」这一个 VT 基本约定，比任何能力探测都可靠。`flush()` 的语义因此是双重的：等 DA1 到达，同时把哨兵之前所有还没答的查询判为 `undefined`。
+
+两处顺序不能换：`onResponse` 必须**先找精确匹配、再找哨兵**（否则显式 `send(da1())` 的答复会被哨兵抢走）；哨兵只 drain **到第一个** 为止（否则并发批次会互相判死）。
+
+**73 tmux 明明会把 BSU/ESU 转发给外层终端，为什么反而要排除它？**
+
+因为**中间层破坏了原子性**。tmux 会把每个字节都解析一遍，但它自己也在攒缓冲、按块刷新 —— 于是「开始同步」和「结束同步」之间插进了 tmux 的刷新时机。原子性已经在那一层断掉了，再发这两个序列只是白费 16 字节加解析开销。
+
+这条规则可推广：**判断「上游支持某能力」时，要问的是「整条路径上每个中间层是否都不破坏它」**，而不是「最终端支持吗」。
+
+同一份文件里的另外两种态度正好对照：`isProgressReportingAvailable` 用的是**黑名单**（排除 Windows Terminal，因为它把 OSC 9;4 当通知——语义不同），`supportsExtendedKeys` 用的是**白名单 + 事故记忆**（注释里明写「我们曾经无条件开启，结果有些终端认真执行了 enable 并发出解析不了的码点」）。
+
+**74 `getComputedWidth()` 为什么会比 `getComputedHeight()` 对应的宽度更宽？**
+
+yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」→ 决定 width；`Exactly` 趟给确定宽度问「你多高」→ 决定 height。于是 `getComputedWidth()` 反映的是宽的那一趟，`getComputedHeight()` 反映的是窄的那一趟。
+
+什么时候真的会发生：**column 方向的 flex 父容器里**。width 是 cross axis，而 `align-items: stretch` 从不会把子节点缩到 intrinsic 尺寸以下 —— 标准 CSS 行为，不是 bug。
+
+后果：按这个宽度折行，折出来的行数比 height 多 → 溢出。所以 `render-node-to-output.ts:568` 必须再钳一次：`Math.min(getMaxWidth(yogaNode), output.width - x)`。
+
+**75 `bidi.ts` 为什么在 macOS 上反而要跳过（而 Windows 上要自己排）？**
+
+因为 macOS 的终端（Terminal.app、iTerm2）**已经实现了 UBA**。你再排一遍就是**双重反转**，RTL 文本会变回错的。
+
+所以判据是「只在没能力的平台自己补」：`win32 || WT_SESSION || TERM_PROGRAM=vscode`。最后一项容易漏 —— VS Code 的终端是 xterm.js，一个 JS 实现的终端模拟器，不实现 bidi。
+
+这份实现里最危险的一行是「levels 数组也要跟着反转」：只反转字符不反转 levels，下一轮（层级更低的）会用错位的 levels 判断连续段 —— 一部分该翻的没翻、一部分不该翻的翻了。而且**不报错**，看起来像字体问题。
+
+**76 这一批里有几个「零读者」的东西？怎么在十分钟内查出来？**
+
+四个。判定方法只有一个：**每个导出符号 grep 一次，只数「定义处以外」的命中**。
+
+| 符号 | 位置 | 为什么读代码的人会被误导 |
+| --- | --- | --- |
+| `shouldClearScreen()` | `frame.ts:105` | 名字像是清屏决策的入口，实际判据已内联到 `log-update.ts` 四处（更精细，要看 `cursor.y`） |
+| `clearTerminal`（常量） | `clearTerminal.ts:74` | 真正被用的是同文件的 `getClearTerminalSequence()` 函数 |
+| `renderToScreen()` | `render-to-screen.ts:59` | 注释说「Used for search」，但搜索路径只调 `scanPositions` 扫主屏 |
+| `edges` / `addEdges` / `ZERO_EDGES` / `resolveEdges` / `clampRect` / `withinBounds` | `layout/geometry.ts` | 几何工具箱，只有 `unionRect` 和 `clamp` 活着 |
+
+`terminal-querier.ts` 是第五种情况，值得单独说：它的**框架是活的**（哨兵机制确实在服务 `xtversion`），但七个查询构造器里六个零读者。`decrqm` / `da1` / `da2` / `kittyKeyboard` / `cursorPosition` / `oscColor` 全都没人调 —— 包括本该最合适的 `kittyKeyboard`（它比 `supportsExtendedKeys` 的环境变量白名单精确得多）。
+
+**一处注释漂移**：`renderer.ts:152` 说 `viewport.height = terminalRows + 1` 是为了绕开 `shouldClearScreen()` 的 `screen.height >= viewport.height` 检查。但那个函数已经零读者了 —— 实际生效的是 `log-update.ts` 第 205 / 222 行的同形判断。**代码有效、理由正确、指针失效**。读代码时如果发现注释引用的符号查不到调用方，先别怀疑自己。
+
+### 这一批还有一个「设计水位」的观察
+
+`terminal.ts` 是整份 `ink/` 里注释质量最高的文件之一 —— 它把三种探测态度（白名单 / 黑名单+例外 / 问了才知道）摆在同一个文件里，而分界线是**错的代价**：
+
+- 探错「支持同步输出」→ 一帧闪光
+- 探错「支持进度上报」→ 弹一条通知
+- 探错「扩展按键」→ 用户的按键被吃
+
+所以最后一条用的是最保守的白名单，而且注释里带着事故记录。这种「同一个人在同一份文件里对三件事采取三种保守程度」的写法，比任何设计文档都清楚。
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1395,12 +1484,11 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 里还剩三十来个百行级小件：`optimizer.ts`（差异合并）、`wrap-text.ts` / `wrapAnsi.ts`（折行）、`bidi.ts`（双向文本）、`focus.ts`（焦点环）、`frame.ts`（帧对象）、`searchHighlight.ts`（搜索高亮落色）、`terminal.ts` / `terminal-querier.ts`（能力探测）、`render-to-screen.ts`、`squash-text-nodes.ts` 等。都已经在主线里被调用过，读它们主要是补细节
-- [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
+- [`src/ink/`](source/src/ink/) 根目录 + `layout/` 已全部清空（含上一条提到的全部小件）。剩下三类共 40 个文件、3,702 行：`components/`（18 个，`App.tsx` 657 行最大）、`hooks/`（12 个）、`events/`（10 个）—— 都是交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox` / 事件派发），比 `components/` 更薄、更接近框架
 - [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：76 个文件、48,263 行原文（批注版 80,334 行）、2,474 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：107 个文件、51,260 行原文（批注版 85,451 行）、2,698 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1411,7 +1499,7 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
 - **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`src/ink/` 剩下的三十来个百行小件** —— 都在主线里被调用过，属于补细节。真要补，优先 `optimizer.ts`（差异合并，能解释「为什么终端不闪」）和 `wrap-text.ts`（折行，接 `stringWidth` 那条线）
+- **`src/ink/` 剩下 40 个交互原语** —— `components/` 18 + `hooks/` 12 + `events/` 10，共 3,702 行。`App.tsx`（657 行）是 stdin 总入口、`events/dispatcher.ts`（233 行）是事件派发、`ScrollBox.tsx`（236 行）是滚动容器 —— 这三个补完，`ink/` 就彻底清零了
 - **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
 
 ---

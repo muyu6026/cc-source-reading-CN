@@ -1,0 +1,123 @@
+// ═══════════════════════════════════════════════════════════════
+//  measure-text：yoga 的 measure 回调最终落到这里
+// ═══════════════════════════════════════════════════════════════
+//
+//  调用链（`dom.ts:332` 起）：
+//
+//    Text 节点挂 setMeasureFunc(measureTextNode)
+//      → measureTextNode 拼出纯文本、展开 tab、按需折行
+//      → measureText(text, width)  ← 这里
+//
+//  也就是说：**这个函数返回的数字直接变成 XText 的 yoga 尺寸**。
+//  它错了，整个布局就错了 —— 包括父容器的高度、兄弟节点的位置、
+//  以及最终屏幕缓冲的高度。这是自研渲染器里「尺子」的定义处。
+//
+//  一个容易忽略的后果：yoga 的 measure 是**两趟**调的
+//  （AtMost 定宽、Exactly 定高），所以这个函数一次布局会被调两次以上。
+//  这也是为什么 line-width-cache 那么重要。
+import { lineWidth } from './line-width-cache.js'
+
+type Output = {
+  width: number
+  height: number
+}
+
+// Single-pass measurement: computes both width and height in one
+// iteration instead of two (widestLine + countVisualLines).
+// Uses indexOf to avoid array allocation from split('\n').
+// 单趟算宽高。对比更直观的写法：
+//
+//    width  = widestLine(text)          // 一趟
+//    height = countVisualLines(text, w) // 又一趟
+//
+//  两趟的代价是两倍的切行 + 两倍的 lineWidth 调用（虽有缓存，但查表
+//  也要钱）。合并成一趟是这个函数存在的全部理由。
+//
+//  注意 「width」的语义是「最长那一行的宽度」，**不是**折行后的宽度。
+//  对已经折好的文本，这两者相同；对未折行的原文，width 可能远大于
+//  maxWidth（那是调用方的事，见 get-max-width.ts 的警告）。
+function measureText(text: string, maxWidth: number): Output {
+// 空串直接返回 0×0，不进循环。
+//
+//  这与 widest-line.ts 里的 `start <= length`（让空串也走一次）**不同**。
+//  这里返回 height 0 是**刻意的**：空的 Text 节点不占行高。
+//  而 widest-line 只关心宽度，走一次拿到 0 也无所谓。
+//
+//  两处对空串的不同处理，反映的是「测量高度」和「测量宽度」的语义差别。
+  if (text.length === 0) {
+    return {
+      width: 0,
+      height: 0,
+    }
+  }
+
+  // Infinite or non-positive width means no wrapping — each line is one visual line.
+  // Must check before the loop since Math.ceil(w / Infinity) = 0.
+// `noWrap` 必须在循环**之前**算，注释给了理由但值得展开：
+//
+//  `Math.ceil(w / Infinity)` 是 `Math.ceil(0)` = 0 —— 于是每一行的高度
+//  贡献都是 0，总高度变成 0。一个「不限宽所以不折行」的文本会得到
+//  零高度，整块内容消失。
+//
+//  这个 bug 极其隐蔽：只在 maxWidth 传 Infinity 时出现，而 Infinity
+//  来自「父容器没有宽度约束」的路径（比如 Text 直接挂在根节点下）。
+//
+//  `maxWidth <= 0` 也算 noWrap：宽 0 意味着「没给约束」，而不是
+//  「一个字都放不下」。这两者的区别在这里被有意合并了。
+  const noWrap = maxWidth <= 0 || !Number.isFinite(maxWidth)
+
+  let height = 0
+  let width = 0
+  let start = 0
+
+// `start <= text.length` —— 让末尾的空行也被计一次。
+//
+//  对 `'a\n'`：第一轮算 'a'（height 1），第二轮 start=2 == length，
+//  算 ''（height 2）。正确：`'a\n'` 在终端里确实占两行
+//  （第二行是空的，但光标在那一行）。
+//
+//  如果用 `<`，`'a\n'` 会被算成 1 行 —— 少了一行，父容器高度不足，
+//  后面的内容会往上压一行。这类「差一行」的 bug 在终端里表现为
+//  「边框接不上」，很难联想到换行符的处理。
+  while (start <= text.length) {
+    const end = text.indexOf('\n', start)
+    const line = end === -1 ? text.substring(start) : text.substring(start, end)
+
+    const w = lineWidth(line)
+    width = Math.max(width, w)
+
+    if (noWrap) {
+      height++
+    } else {
+// 折行高度：`Math.ceil(w / maxWidth)`，但 `w === 0` 时给 1。
+//
+//  两个分支各自的理由：
+//    `w === 0`   —— 空行也占一行（`ceil(0/maxWidth)` 是 0，就丢了）
+//    其余        —— 向上取整，因为超出的部分要占新的一行
+//
+//  向上取整 vs 向下：宽 10、maxWidth 4，实际是 4+4+2 三行 →
+//  ceil(10/4) = 3。正确。
+//
+//  ⚠️ 一个隐含假设：**折行是按「每行刚好 maxWidth」算的**，
+//  而真实的折行（wrap-ansi）会尽量在空格处断，可能多用一行。
+//  这就是为什么调用方必须保证「传进来的 text 已经折好了」——
+//  也就是说这个 `ceil` 只在「硬折」语义下准确。
+//  见 dom.ts 的 measureTextNode：它对 `textWrap === 'wrap'` 的
+//  情况会先调 wrapText 再量。
+      height += w === 0 ? 1 : Math.ceil(w / maxWidth)
+    }
+
+    if (end === -1) break
+    start = end + 1
+  }
+
+  return { width, height }
+// 返回的是 `{width, height}` —— yoga 需要的两个数。
+//
+//  注意 width 这里返回的是**最长行的宽度**，可能超过 maxWidth
+//  （如果文本没有空格、无法折行，wrap-ansi 也无能为力）。
+//  yoga 拿到这个值后会把节点撑宽，然后**父容器可能溢出** ——
+//  这就是 get-max-width.ts 里那段警告的来源。
+}
+
+export default measureText
