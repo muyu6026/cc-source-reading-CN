@@ -147,8 +147,8 @@
 | [`src/constants/prompts.ts`](source/src/constants/prompts.ts) | 系统提示词怎么拼 | [✅ 914 → 2,042 行](annotated/src/constants/prompts.ts) |
 | [`src/query.ts`](source/src/query.ts) | 对话主循环的真身 `while(true)` | [✅ 1,729 → 3,305 行](annotated/src/query.ts) |
 | [`src/QueryEngine.ts`](source/src/QueryEngine.ts) | 查询引擎（流程编排） | [✅ 1,295 → 2,572 行](annotated/src/QueryEngine.ts) |
-| [`src/services/api/claude.ts`](source/src/services/api/claude.ts) | 真正调 API 的地方 | ⬜ 待批注 |
-| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 限流 | ⬜ 待批注 |
+| [`src/services/api/claude.ts`](source/src/services/api/claude.ts) | 真正调 API 的地方（SSE 解析 + 缓存打点 + 三级降级） | [✅ 3,419 → 4,656 行](annotated/src/services/api/claude.ts) |
+| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 限流 | ⬜ 待批注（归入第 6 步） |
 
 **对应章节**：[05 提示词与命令](docs/05-提示词与命令.md)、[06 对话主循环与模型调用](docs/06-对话主循环与模型调用.md)
 
@@ -361,7 +361,7 @@ source/README.md                    →  annotated/README.annotated.md
 
 **怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步已完成 3/4**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295，合计 3,938 行原文）。下一步是 `src/services/api/claude.ts`（3,419 行）。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）。下一步是第 6 步服务层，第一个建议读 `src/services/api/withRetry.ts`。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

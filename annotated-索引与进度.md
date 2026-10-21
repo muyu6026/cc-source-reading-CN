@@ -85,7 +85,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 |                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                | ✅ 完成    |
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
-| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />`src/services/api/claude.ts` ⬜ | 🔄 进行中 |
+| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅ | ✅ 完成 |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | —                                                                                                                                                                                           | ⬜ 待做    |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
 
@@ -447,15 +447,40 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
-## 第 5 步完整清单（已完成部分）
+## 第 5 步完整清单（已全部完成）
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
 | [`prompts.ts`](annotated/src/constants/prompts.ts) | 914 | 2,042 | 系统提示词拼装 + 缓存布局 + DCE 裁剪 |
 | [`query.ts`](annotated/src/query.ts) | 1,729 | 3,305 | `while(true)` 状态机、五层压缩、七种恢复 |
 | [`QueryEngine.ts`](annotated/src/QueryEngine.ts) | 1,295 | 2,572 | 会话状态、内外协议转换、时序正确性 |
+| [`claude.ts`](annotated/src/services/api/claude.ts) | 3,419 | 4,656 | SSE 解析、缓存打点、sticky latch、三级降级 |
 
-合计 **3,938 行原文**。
+合计 **7,357 行原文**，全部逐行保真（`scripts/check-fidelity.py` 可复算）。
+
+---
+
+## `claude.ts` 读完了吗？五个自测问题
+
+**① `queryModel` 有 1,881 行，为什么没有拆成多个函数？**
+
+因为它围绕一组「只在流解析期间存在」的状态变量（`partialMessage` / `contentBlocks` / `usage` / `stopReason` / `newMessages`）。这些变量要跨几十个 SSE 事件存活，还要在 `catch` 和 `finally` 里被读到。拆成函数就得把它们打包成对象传来传去，或者塞进类字段 —— 前者每次调用都在重建对象，后者会把「一次请求」变成「一个有状态对象」，反而更难推理。它的复杂度不在长度，在分支密度。
+
+**② 为什么每个 `beta` 头一旦发出去就要「锁存」（latch）整个会话？**
+
+服务端的 prompt cache 键包含请求签名。中途翻转一个 beta 头，前面整段前缀（约 50–70K token）就按全价重算。所以做法是：**头锁存、body 参数实时**。例如 fast mode 冷却期只是不再传 `speed: 'fast'`，`FAST_MODE_BETA_HEADER` 照发。`/clear` 和 `/compact` 是两个缓存本来就要重建的时刻，顺手清 latch。
+
+**③ 为什么 `message_delta` 里回写 `usage` 必须「原地改属性」，不能换对象？**
+
+会话落盘有一个 100ms 延迟队列，它持有的是 `message.message` 的**引用**，真正序列化时才读值。写 `lastMsg.message = { ...lastMsg.message, usage }` 会换掉引用，队列里的旧引用仍然指向 `output_tokens: 0`、`stop_reason: null` 的版本 —— 落盘后成本统计全是 0，而且几乎无法排查。
+
+**④ 流式失败后降级到非流式，什么情况下**不允许**降级？**
+
+开了「流式工具执行」的时候（`inc-4258`）。流式那半截可能已经收到 `tool_use` 并开始执行工具，降级重放会让同一个工具跑第二遍 —— 写文件、发请求、删数据这类有副作用的操作被执行两次。所以宁可直接失败让 `withRetry` 重来。
+
+**⑤ `executeNonStreamingRequest` 为什么要单独传 `initialConsecutive529Errors`？**
+
+因为「连续撞几次 529 就切换模型」这个计数器被两条代码路径维护。流式撞了 2 次然后降级，非流式又撞 2 次，如果不把已有的事实传下去，计数器只记到 2 而不是 4 —— 那么「流式还是非流式」会改变模型降级的时机。修法是把已发生的事实显式传下去，而不是让两条路径共享一个可变全局。
 
 ---
 
@@ -479,10 +504,14 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 继续往下读之前
 
-第 5 步还剩最后一个文件：
+**第 5 步（主循环）已全部完成**：4 个文件、7,357 行原文、564 处批注锚点。
 
-- [`src/services/api/claude.ts`](source/src/services/api/claude.ts)（3,419 行）—— 最底层的 HTTP 客户端：SSE 解析、重试与退避、prompt cache 控制、图片处理、错误分类
+下一步是第 6 步 —— 服务层。主线建议先读这三块（顺序有讲究，因为它们是主循环的下游）：
 
-它是整份源码里单文件最长的几个之一。读它之前建议先明确：前面三个文件都在「组装请求」和「消费响应」，而它负责的是**中间那一段字节流**。所以关注点会从「状态机」转向「协议细节」。
+- [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) —— 五层压缩管线的实际实现。`query.ts` 只负责「什么时候压」，这里决定「怎么压」。同目录的 [`apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) 是唯一会调模型的一层
+- [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) —— 刚读完的 `claude.ts` 每一步都在调它，但它的内部（退避算法、529 计数、`FallbackTriggeredError` 的抛出时机）还没看
+- [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) —— MCP 协议接入。`claude.ts` 里那些 `hasPendingMcpServers`、`mcp_instructions_delta` 都指向这里
 
-告诉我「继续」或「继续第 5 步后半」，我就接着批注 claude.ts。
+读法建议和这一轮相反：`claude.ts` 是先读协议本体再看容错，服务层要**先看它的入口被谁调用**（`grep` 调用点），再看实现 —— 因为服务层的函数往往只有一个调用方，孤零零读实现不容易看出「为什么需要这个参数」。
+
+告诉我「继续第 6 步」或点名某个模块，我就接着批注。
