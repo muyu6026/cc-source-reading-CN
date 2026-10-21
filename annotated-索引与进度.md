@@ -101,7 +101,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅ | ✅ 二十五份全通<br />（含 `termio/` 十个） |
 
@@ -1264,6 +1264,79 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 ---
 
+## `services/mcp/` 十六个小件读完了吗？六道自测题
+
+主干那六份（`config` / `client` / `auth` / `xaa` / `xaaIdpLogin` / `useManageMCPConnections`）讲的是「一个连接的一生」。这十六个小件讲的是**连接之外的一切**：名字怎么定、闸怎么设、审批怎么从手机回来、表单怎么问人。
+
+| 文件 | 行数 | 一句话 |
+| --- | --- | --- |
+| [`utils.ts`](annotated/src/services/mcp/utils.ts) | 575 | 名字过滤、配置哈希、过期客户端回收、项目级 server 的信任判定 |
+| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts) | 316 | 通道的六道闸 + `<channel>` 标签怎么拼 |
+| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts) | 313 | server 向人提问（表单 / 打开链接）的整条链路 |
+| [`types.ts`](annotated/src/services/mcp/types.ts) | 258 | 八种 transport 的配置 schema、连接状态机 |
+| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts) | 240 | 把审批提示发到手机，等一句 "yes tbxkq" |
+| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts) | 164 | 从 claude.ai 拉组织下发的 server 列表 |
+| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts) | 138 | 连之前先跑一条本地命令，拿动态 header |
+| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts) | 136 | 把 JSON-RPC 套进 control 信封，跨进程 |
+| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts) | 112 | 和 VSCode 扩展之间的两条 notification |
+| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts) | 106 | `mcp__server__tool` 的拼与拆 |
+| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts) | 78 | 回调端口怎么挑（含 Windows 的坑） |
+| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts) | 76 | 哪些插件被批准可以当通道 |
+| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts) | 72 | 官方 MCP 名单（只用于埋点） |
+| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts) | 63 | 同进程里的一对假传输 |
+| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts) | 38 | `${VAR:-默认值}` |
+| [`normalization.ts`](annotated/src/services/mcp/normalization.ts) | 23 | 名字归一化 |
+
+**65 一个 23 行的名字归一化文件，凭什么单独存在？它又故意不做什么？**
+
+单独存在是为了**破环**：它有七个引用方，而这些模块彼此有环，把共用函数拔到环外是最省事的解法。
+
+它故意不做的是**长度校验** —— 注释里写着目标是 1~64 字符，但代码只做字符替换。超长名字会一路活到工具名里，最后由 API 拒绝。这是「信任上游」：名字是用户自己配的，报错也看得懂；反过来在这里截断，会造出两个 server 映射到同一个工具前缀的坑。
+
+**66 `${VAR:-default}` 里 `split(':-', 2)` 的那个 `2` 在防什么？环境变量设成空串为什么不能当「没设」？**
+
+`2` 是「最多切几段」：默认值自己也可能带冒号（`${PATH:-/usr/bin:/bin}`），不限制就会把默认值切碎。代价是**嵌套默认值**（`${A:-${B:-x}}`）会被切坏 —— 这个展开器不支持。
+
+空串必须算「设了」：`FOO=` 是一个合法的值「我要空」。用真值判断（`if (envValue)`）会让它回落到默认值，这是这类展开器最经典的 bug。
+
+**67 手机上的 "yes tbxkq" 能批准一次工具调用，那信任边界在终端还是在别处？5 个字母为什么要配一张屏蔽词表？**
+
+都不在终端 —— 而在 **allowlist**（`tengu_harbor_ledger`）。文件头自己承认：一个被攻陷的通道可以伪造 "yes <id>"，人根本没看见提示。之所以接受，是因为「被攻陷的通道本来就能无限次往对话里注入内容，自批只是更快，不是更强」—— 这是**增量风险**的算法，不是绝对风险。
+
+屏蔽词表则是在承认另一件事：25 个字母的 5 次方（约 980 万）**不够随机**，能拼出的英文词足够多，而这条消息要发到用户手机上。表永远补不全，所以真正的保险是「命中就加盐重算」。
+
+**68 通道的六道闸为什么 killswitch 必须排在认证之前？「server 类条目永远过不了名单」那个 else 分支在防什么？**
+
+顺序是：capability → 全局开关 → 认证 → 组织策略 → 会话名单 → 市场/名单。killswitch 排在认证前面，不只是为了「省一次检查」：如果反过来，一个 OAuth 失效的用户会看到「请登录」，而不是「功能没开」—— 他会去修一个没坏的东西。
+
+那个 else 分支防的是**形状不匹配被当成匹配**：名单条目的 schema 是 `{marketplace, plugin}`，没有 server 这一维。不加这段，`--channels server:plugin:foo:bar` 会匹配上某个插件的运行时名，于是完全没过名单就注册成功。
+
+**69 `AbortSignal` 已经 aborted 时，为什么还要显式判一次？abort 为什么 resolve 成 cancel 而不是 reject？**
+
+因为 `addEventListener` 在 signal 已 aborted 时**不会补发事件**。漏了前置判断，Promise 永不 resolve，上面那个 `await` 把整个请求挂住 —— 而症状是「server 那边一直等，UI 这边什么都没发生」。
+
+resolve 成 cancel 是协议层面的选择：MCP 那边等的是 `ElicitResult`，reject 会把「用户取消了」这个信息丢掉，只剩一个协议错误。把异常翻译成「协议表达得出来的那一种正常状态」，几乎总比让异常穿透好。
+
+**70 `/reload-plugins` 判断「配置变没变」的哈希，为什么摘掉 `scope`、排序对象键、却不排序数组？**
+
+- 摘掉 `scope`：它是**出身**不是**内容**。把同一个 server 从 `.mcp.json` 挪到 `settings.json`，不该被判成变了、白重连一次
+- 排序对象键：`{a:1,b:2}` 和 `{b:2,a:1}` 是同一个配置
+- **不**排序数组：`["-y","pkg"]` 和 `["pkg","-y"]` 是两个不同的命令。一刀切递归排序数组，会让「参数顺序改了」被判成没变，该重连的没重连
+
+### 三个「一行注释顶一段设计」的地方
+
+`officialRegistry.ts` 的 `isOfficialMcpUrl` 是 **fail-closed**：名单没拉到时返回 false。方向选得对 —— 这个布尔只用于给埋点打标签，误判成「非官方」只是统计少一点；反过来 fail-open 会让一次网络失败把上万个第三方 server 全记成官方，那批数据就废了，而且没人会发现。
+
+`headersHelper.ts` 里的 `shell: true` 是关键的一行：`headersHelper` 是**一整条 shell 命令**，不是「可执行文件 + 参数」。所以这个配置字段等于任意命令执行权，上面那道「工作区信任确认了吗」是它唯一的闸。而那道闸在非交互模式下被跳过 —— 代价是 SDK / `-p` 场景下这条防线不存在，安全责任转移到「别在不可信目录里跑 `-p`」。
+
+`vscodeSdkMcp.ts` 有两处不一致值得记：`file_updated` 那条 notification 带 `.catch`，`experiment_gates` 那条没有 —— client 已断开时后者是未处理的 rejection。一处有、一处没有，这类不一致几乎总是不小心留下的。
+
+### 顺带倒查出两块死代码
+
+`types.ts` 里 `TransportSchema` / `type Transport` 全仓库零读者；`SerializedTool` / `SerializedClient` / `MCPCliState` 三个 interface 只互相引用，外面没人用。判定方法还是那一条：**grep 符号名，只命中定义处**。
+
+---
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1284,6 +1357,8 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                                     ├─ mcp/auth（401 之后：授权、刷新、吊销）
                                                     │     └─ mcp/xaa + xaaIdpLogin（企业 SSO：两跳换票）
                                                     ├─ useManageMCPConnections（异步事件 → AppState）
+                                                    │     └─ 十六个小件：名字归一化 / 通道六道闸 /
+                                                    │        手机审批中继 / elicitation / 动态 header
                                                     └─ AgentTool → coordinator / fork / 普通子 agent
                                                           └─ runAgent（同一套 query 循环，换个身份跑）
 
@@ -1322,10 +1397,10 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 - [`src/ink/`](source/src/ink/) 里还剩三十来个百行级小件：`optimizer.ts`（差异合并）、`wrap-text.ts` / `wrapAnsi.ts`（折行）、`bidi.ts`（双向文本）、`focus.ts`（焦点环）、`frame.ts`（帧对象）、`searchHighlight.ts`（搜索高亮落色）、`terminal.ts` / `terminal-querier.ts`（能力探测）、`render-to-screen.ts`、`squash-text-nodes.ts` 等。都已经在主线里被调用过，读它们主要是补细节
 - [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
-- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts 240`、`types.ts` 258 等
+- [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：60 个文件、45,555 行原文（批注版 77,126 行）、2,394 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：76 个文件、48,263 行原文（批注版 80,334 行）、2,474 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1335,8 +1410,8 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
-- **回头重读** —— 我推荐这个。八条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`src/services/mcp/` 的 16 个小件** —— `utils.ts` 575 / `elicitationHandler.ts` 313 / `channelNotification.ts` 316 / `channelPermissions.ts` 240 / `types.ts` 258。这条线是「服务层」最后没扫干净的角落，和已经读完的 config/client/auth 直接接壤
+- **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
+- **`src/ink/` 剩下的三十来个百行小件** —— 都在主线里被调用过，属于补细节。真要补，优先 `optimizer.ts`（差异合并，能解释「为什么终端不闪」）和 `wrap-text.ts`（折行，接 `stringWidth` 那条线）
 - **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
 
 ---

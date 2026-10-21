@@ -1,0 +1,44 @@
+/**
+ * Pure utility functions for MCP name normalization.
+ * This file has no dependencies to avoid circular imports.
+ */
+// 为什么这 23 行要单独一个文件：它有七个引用方（client / config / utils /
+// mcpStringUtils / toolExecution / claudeInChrome / computerUse），而这些模块彼此
+// 之间有环。本文件零依赖，环就断在这里 —— 这是 ESM 里最省事的破环手法：
+// 把「共用的小函数」拔出来放在环外，而不是去理清环本身。
+//
+// 代价也要知道：函数被复制到这里之后，谁都可以再复制一份。全仓库另有
+// 一到两处自己写的同类替换逻辑，改规则时容易漏。
+
+// Claude.ai server names are prefixed with this string
+const CLAUDEAI_SERVER_PREFIX = 'claude.ai '
+
+/**
+ * Normalize server names to be compatible with the API pattern ^[a-zA-Z0-9_-]{1,64}$
+ * Replaces any invalid characters (including dots and spaces) with underscores.
+ *
+ * For claude.ai servers (names starting with "claude.ai "), also collapses
+ * consecutive underscores and strips leading/trailing underscores to prevent
+ * interference with the __ delimiter used in MCP tool names.
+ */
+export function normalizeNameForMCP(name: string): string {
+  let normalized = name.replace(/[^a-zA-Z0-9_-]/g, '_')
+// 注意这里**只做字符替换，不管长度**。上面注释说目标是
+// 「1 到 64 个字符」，但没人在这里数长度：一个 200 字符的 server 名会原样
+// 活到工具名里，最后由 API 拒绝。
+//
+// 这是「信任上游」的写法 —— 名字来自用户自己的配置，错了报错也看得懂。
+// 反过来若在这里截断，会造出两个不同的 server 映射到同一个工具前缀的坑。
+  if (name.startsWith(CLAUDEAI_SERVER_PREFIX)) {
+    normalized = normalized.replace(/_+/g, '_').replace(/^_|_$/g, '')
+// 折叠连续下划线与去首尾下划线，只对 claude.ai 前缀的名字生效，为什么：
+//
+// 工具名是 `mcp__<server>__<tool>`，`__` 是分隔符。server 名里一旦出现 `__`，
+// 解析就会切错（mcpStringUtils 里明写了这条已知缺陷）。
+//
+// 而 claude.ai 的名字来自用户随手写的 display_name（"My  Server!!" 这种），
+// 最容易产出连续下划线；用户自己起的 server 名通常干净，于是那一侧没做。
+// 这个不对称是「按风险来源打补丁」，不是「按规则统一处理」。
+  }
+  return normalized
+}
