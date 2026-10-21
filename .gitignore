@@ -1,0 +1,21 @@
+# ── 上游源码完整克隆（147 MB / 1902 文件），不纳入本仓库 ──
+source/
+
+# ── 改造前的备份 ──
+.backup/
+
+# ── 系统 / 编辑器 ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# ── Python ──
+__pycache__/
+*.pyc
+
+# ── 临时文件 ──
+*.tmp
+~$*

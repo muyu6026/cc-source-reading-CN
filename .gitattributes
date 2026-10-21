@@ -1,0 +1,8 @@
+# 统一使用 LF，避免 Windows 换行转换破坏批注版的逐行保真校验
+* text=auto eol=lf
+
+*.md   text eol=lf
+*.py   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
