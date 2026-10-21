@@ -1,0 +1,118 @@
+// ═══════════════════════════════════════════════════════════════
+//  firstTokenDate：登录后顺手记下「你第一天用 Claude Code 是哪天」
+// ═══════════════════════════════════════════════════════════════
+//
+//  60 行，一个 GET，然后写配置。但这个文件演示了一个常被忽略的模式：
+//  **一次性的、可选的、失败无害的副作用**，该怎么写。
+//
+//  四个特征：先看本地有没有缓存 → 有就立刻返回；网络失败只记日志；
+//  返回值是 void 而不是数据；整个函数体包在一个 try 里。
+import axios from 'axios'
+import { getOauthConfig } from '../../constants/oauth.js'
+import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
+import { getAuthHeaders } from '../../utils/http.js'
+import { logError } from '../../utils/log.js'
+import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+
+// 【注释里有两个限定词，都是关键】
+//
+//      after successful login   —— 只在登录后调，不在启动时调
+//      cache when they started  —— 目的是「缓存」，不是「每次都要准确」
+//
+//  「缓存一个几乎不变的事实」这件事，正确做法是：**写进持久配置，
+//  然后永远不再问。** 所以下面第 16 行有一个「有值就 return」的短路。
+/**
+ * Fetch the user's first Claude Code token date and store in config.
+ * This is called after successful login to cache when they started using Claude Code.
+ */
+// 【返回 Promise<void> 而不是日期 —— 调用方不该关心结果】
+//
+//  这个函数的输出是「配置里多了一个字段」，不是「一个日期」。
+//  所以它不该返回数据：一旦返回数据，调用方就会开始用它，
+//  而它随时可能是 null（没登录、网络失败、字段不合法）。
+//
+//  判据：**副作用函数的返回值越小越好，最好是 void。**
+//  返回 void 等于在类型层面说「别依赖我」。
+export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
+  try {
+    const config = getGlobalConfig()
+
+//   // 【这里用 !== undefined 而不是 !config.claudeCodeFirstTokenDate】
+//   //
+//   //  差别很实在：这个字段的类型是 `string | null`。
+//   //  服务端可能明确告诉你「你没有首日」（返回 null），那也是**一个有效答案**，
+//   //  应该缓存下来、以后不再问。
+//   //
+//   //  写成 `if (!config.claudeCodeFirstTokenDate)` 的话，null 会被当成
+//   //  「还没查过」，于是每次登录都重新请求一次 —— 而且永远不会结束。
+//   //
+//   //  这是 `!x` 判空最典型的坑：**把「有值但是假」误判成「没有值」。**
+    if (config.claudeCodeFirstTokenDate !== undefined) {
+      return
+    }
+
+    const authHeaders = getAuthHeaders()
+    if (authHeaders.error) {
+      logError(new Error(`Failed to get auth headers: ${authHeaders.error}`))
+      return
+    }
+
+    const oauthConfig = getOauthConfig()
+    const url = `${oauthConfig.BASE_API_URL}/api/organization/claude_code_first_token_date`
+
+    const response = await axios.get(url, {
+      headers: {
+        ...authHeaders.headers,
+        'User-Agent': getClaudeCodeUserAgent(),
+      },
+      timeout: 10000,
+    })
+
+    const firstTokenDate = response.data?.first_token_date ?? null
+
+//     // 【收到了日期，还要再验一次 —— 这是对外部数据的默认不信任】
+//     //
+//     //  注释只写了 Validate the date if it's not null，但代码做的是：
+//     //  用 new Date(x).getTime() 算出毫秒数，如果是 NaN 就**不保存**。
+//     //
+//     //  为什么不保存错的？因为这份配置是「一次写入、长期使用」的：
+//     //  写进去一个 'unknown' 或者空串，以后所有读这个字段的地方都要自己防一遍。
+//     //  **在写入端做校验，读取端就能永远假设它合法。**
+//     //
+//     //  注意它连「不合法」这件事都没有缓存 —— 下次登录会再试一次。
+//     //  因为「服务端返回了坏数据」通常是暂时的（灰度、发布中的版本不一致）。
+    // Validate the date if it's not null
+    if (firstTokenDate !== null) {
+      const dateTime = new Date(firstTokenDate).getTime()
+      if (isNaN(dateTime)) {
+        logError(
+          new Error(
+            `Received invalid first_token_date from API: ${firstTokenDate}`,
+          ),
+        )
+        // Don't save invalid dates
+        return
+      }
+    }
+
+//     // 【saveGlobalConfig 收的是函数而不是对象 —— 这个签名值得单独说】
+//     //
+//     //      saveGlobalConfig(current => ({ ...current, 某字段: 新值 }))
+//     //
+//     //  参数是 `current => next`，而不是直接给一个新对象。原因是配置文件
+//     //  可能被多个进程/多个模块同时改：传函数的话，写盘前会重新读一次最新内容，
+//     //  在最新内容上做增量修改，不会把别人刚写的字段覆盖掉。
+//     //
+//     //  这个模式在本仓库里出现了几十次，凡是看到 `saveGlobalConfig(prev => ...)`
+//     //  都应该理解成「基于锁内最新值做增量」，而不是「我有一个完整的新对象」。
+//     //
+//     //  反面写法（直接传对象）的 bug 形态是：读配置 → 改一个字段 → 写回，
+//     //  中间别人改了另一个字段，就被这次写回吃掉了。
+    saveGlobalConfig(current => ({
+      ...current,
+      claudeCodeFirstTokenDate: firstTokenDate,
+    }))
+  } catch (error) {
+    logError(error)
+  }
+}
