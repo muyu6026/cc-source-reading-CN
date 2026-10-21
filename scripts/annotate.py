@@ -25,6 +25,13 @@
 这两条是结构性的：中文插进块注释内部语法上合法，但会把英文文档注释劈成两半。
 bashPermissions.ts 一轮就犯过 14 次，check-fidelity.py 现在把它列为硬判据。
 
+自动纠正（模板字符串，本轮新增）：
+    · 锚点落在「多行模板字符串内部」→ after 自动挪到闭合反引号之后，
+      before 自动挪到开头反引号之前
+为什么这条比块注释那条更严重：模板字符串里的反引号之间是**字符串内容**，
+插进去的 `// 注：...` 不会变成注释，它会变成发给模型的提示词正文。
+prompts.ts 一轮犯过 3 处（那个文件的函数体整体就是一个大模板字符串）。
+
 用法：
     python scripts/annotate.py src/tools/BashTool/bashSecurity.ts
 """
@@ -38,6 +45,44 @@ ANNOT_DIR = os.path.join(ROOT, 'scripts', '_annot')
 
 # 中文批注里可能出现这些「看起来像注释标记」的前缀，统一由脚本加 //
 PREFIX = '// '
+
+# ── 正则字面量识别 ──
+# 反引号也能出现在正则里：/^[)}`|&;(<>]/ 、/[a-zA-Z0-9\\${`-]/
+# 不识别的话，扫到那个反引号就以为开了模板字符串，把后面几十行全判成
+# 「模板内部」，然后把这些批注莫名其妙地外移（bashSecurity.ts 一轮 16 处）。
+_REGEX_PREV = set('(,=:[!&|?{};+-*%~^<>')
+_REGEX_KW = ('return', 'typeof', 'case', 'in', 'of', 'do', 'else')
+
+
+def _regex_end(line, i):
+    """若 line[i]=='/' 是正则字面量的开头，返回结束 '/' 的下标；否则 None。
+
+    判据：`/` 前面是「期望表达式开始」的字符（= ( , : [ ! & | ? { } ; 运算符），
+    或前面是 return/typeof/case 这类关键字。这是 JS 词法里区分
+    「除号」和「正则开头」的标准做法（简化版）。
+    """
+    k = i - 1
+    while k >= 0 and line[k].isspace():
+        k -= 1
+    prev = line[k] if k >= 0 else ''
+    head = line[:i].rstrip()
+    if prev and prev not in _REGEX_PREV and not head.endswith(_REGEX_KW):
+        return None
+    j = i + 1
+    in_class = False
+    while j < len(line):
+        c = line[j]
+        if c == '\\':
+            j += 2
+            continue
+        if c == '[':
+            in_class = True
+        elif c == ']':
+            in_class = False
+        elif c == '/' and not in_class:
+            return j
+        j += 1
+    return None
 
 
 def load_annotations(rel_path):
@@ -128,8 +173,82 @@ def main():
                 return None
         return None
 
+    def template_spans():
+        """找出所有「多行模板字符串」的 (起始行, 结束行)。
+
+        为什么必须做这件事：模板字符串里反引号之间的内容是**字符串字面量**。
+        往中间插一行 `// 注：xxx`，它不会被当成注释 —— 它会变成字符串的一部分，
+        也就是直接写进了发给模型的系统提示词里。
+        prompts.ts 里 getProactiveSection() 整个函数体就是一个 50 行的模板，
+        getScratchpadInstructions() / computeEnvInfo() 的返回值也是，
+        三处都踩了这个坑，而 check-fidelity.py 完全看不出来（代码行确实都在）。
+
+        扫描规则（简版词法）：
+          · 反引号开/闭切换 in_template
+          · 反斜杠转义跳过下一个字符（\\` 不算闭合）
+          · 进模板前遇到 // → 该行剩余部分是行注释，break
+          · 进模板前遇到引号 → 整段跳到配对引号（处理 'http://x' 里的 //）
+          · 进模板前遇到正则字面量 → 整段跳到闭合 /（处理 /[a-z`]/ 里的反引号）
+          · ${...} 内的嵌套反引号不特殊处理（实际代码里极少见）
+        """
+        spans = []
+        in_tpl = False
+        start = 0
+        for lineno, line in enumerate(lines, start=1):
+            i = 0
+            n = len(line)
+            while i < n:
+                ch = line[i]
+                if ch == '\\':
+                    i += 2
+                    continue
+                if in_tpl:
+                    if ch == '`':
+                        in_tpl = False
+                        spans.append((start, lineno))
+                    i += 1
+                    continue
+                if ch == '/' and i + 1 < n and line[i + 1] == '/':
+                    break
+                if ch == '/':
+                    re_end = _regex_end(line, i)
+                    if re_end is not None:
+                        i = re_end + 1
+                        continue
+                if ch in ('"', "'"):
+                    q = ch
+                    i += 1
+                    while i < n and line[i] != q:
+                        if line[i] == '\\':
+                            i += 1
+                        i += 1
+                    i += 1
+                    continue
+                if ch == '`':
+                    in_tpl = True
+                    start = lineno
+                i += 1
+        return spans
+
+    spans = [s for s in template_spans() if s[1] > s[0]]  # 只看多行的
+
+    def template_shift(lineno, pos):
+        """锚点若落在多行模板内部，返回应该挪到的行号；否则 None。
+
+        注意只对**严格内部**生效（不含起始行和结束行）：
+          · 起始行是 `return \\`XXX`，在它后面插注释等于插在字符串开头 —— 也是错的，
+            但它通常还有别的机会（before 起始行），所以这里也一并处理：
+            after 落在起始行 → 挪到结束行之后
+          · 结束行同理，after 落在结束行本来就是对的（字符串已闭合）
+        """
+        for s, e in spans:
+            if s <= lineno < e:
+                return e if pos == 'after' else s
+        return None
+
     before = {}
     after = {}
+    shifted = []
     for lineno, pos, text in ann:
         if pos == 'after_block':
             lineno = comment_run_end(lineno)
@@ -144,10 +263,20 @@ def main():
             start = block_start(lineno)
             if start is not None:
                 lineno = start
+        # 结构性保护（更硬）：模板字符串内部是字符串内容，不是注释区。
+        tgt = template_shift(lineno, pos)
+        if tgt is not None:
+            shifted.append((lineno, tgt))
+            lineno = tgt
         if lineno < 1 or lineno > len(lines):
             raise SystemExit('行号越界: %d（文件共 %d 行）' % (lineno, len(lines)))
         target = before if pos == 'before' else after
         target.setdefault(lineno, []).extend(render(text))
+
+    if shifted:
+        print('  ⟳ %d 个锚点原本落在模板字符串内部，已自动外移：%s'
+              % (len(shifted), ', '.join('%d→%d' % (a, b) for a, b in shifted)))
+        print('    （这些批注是「解释整段模板」的性质，外移后请确认位置是否仍然通顺）')
 
     # 警告：锚点落在 /* */ 块注释内部时，中文批注会被吞进块注释，
     # 把英文块注释劈成两半，可读性很差（语法上仍合法）。

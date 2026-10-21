@@ -1234,11 +1234,11 @@ function filterRulesByContentsMatchingInput(
   // For exact matching, try both the original command (to preserve quotes)
   // and the command without redirections (to allow rules without redirections to match)
   // For prefix matching, only use the command without redirections
-  const commandsForMatching =
 // 注：精确模式下同时试两个形态（原样 + 去重定向），前缀模式只试去重定向的。
 //     为什么精确模式要保留原样？因为**引号是命令的一部分** ——
 //     `Bash(git commit -m "fix")` 这条精确规则里带引号，只有原样形态能匹配上。
 //     如果只拿去重定向后的形态，引号可能已被改写，规则就失效了。
+  const commandsForMatching =
     matchMode === 'exact'
       ? [command, commandWithoutRedirections]
       : [commandWithoutRedirections]

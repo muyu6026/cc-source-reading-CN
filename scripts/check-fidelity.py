@@ -3,13 +3,22 @@
 """
 批注保真校验：确认 annotated/ 里的文件没有改动 source/ 的任何一行原文。
 
-判据（两条硬规则 + 一条软检查）：
+判据（四条硬规则 + 一条软检查）：
   1. 【硬】annotated 的「代码行」序列，必须与 source 的「代码行」序列**逐行完全相等**
      → 证明没有增删代码、没有改代码、没有漏掉闭括号
   2. 【硬】source 的每一行注释（含块注释），都必须能在 annotated 的
      非批注注释行中按原顺序找到
      → 证明英文原文一个字没删、没改写
-  3. 【软】annotated 多出来的注释行必须是 `// 译：` / `// 注：` / `// ─` / `// ═`
+  3. 【硬】块注释 /* */ 内部不许出现中文
+     → 否则英文文档注释被中文从中间劈开
+  4. 【硬】多行模板字符串内部不许出现中文注释
+     → 反引号之间是**字符串字面量**，插进去的 `// 注：` 不是注释，
+       它会变成发给模型的提示词正文。比判据 3 严重一个量级：
+       判据 3 只是难看，判据 4 是代码行为被改变。
+  5. 【硬】中文批注不得插在「未结束的多行表达式」中间
+     → 前一行以 `=`/`&&`/`?`/`:` 等结尾、或括号未配平时，插注释虽然
+       语法合法，但会把一条语句拆成两半，读起来完全断掉。
+  6. 【软】annotated 多出来的注释行必须是 `// 译：` / `// 注：` / `// ─` / `// ═`
      或文件头部的说明块（仅作统计，不判失败）
 
 用法：
@@ -101,6 +110,151 @@ def check_block_purity(lines):
     return bad
 
 
+# 正则字面量里可以出现反引号（例：/^[)}`|&;(<>]/ 或 /[a-zA-Z0-9\\${`-]/）。
+# 不识别它的话，扫描到那个反引号就会误以为开启了模板字符串，
+# 于是把这个函数后面几十行全判成「模板内部」。bashSecurity.ts 一轮误报 3 处。
+_REGEX_PREV = set('(,=:[!&|?{};+-*%~^<>')
+_REGEX_KW = ('return', 'typeof', 'case', 'in', 'of', 'do', 'else')
+
+
+def _regex_end(line, i):
+    """若 line[i]=='/' 是正则字面量的开头，返回结束 '/' 的下标；否则 None。"""
+    k = i - 1
+    while k >= 0 and line[k].isspace():
+        k -= 1
+    prev = line[k] if k >= 0 else ''
+    head = line[:i].rstrip()
+    if prev and prev not in _REGEX_PREV and not head.endswith(_REGEX_KW):
+        return None
+    j = i + 1
+    in_class = False
+    while j < len(line):
+        c = line[j]
+        if c == '\\':
+            j += 2
+            continue
+        if c == '[':
+            in_class = True
+        elif c == ']':
+            in_class = False
+        elif c == '/' and not in_class:
+            return j
+        j += 1
+    return None
+
+
+def check_template_purity(lines):
+    """判据 4：多行模板字符串内部不许有中文注释行。
+
+    为什么这条比块注释那条更严重：块注释里插入中文只是排版难看，代码行为不变。
+    模板字符串里插入 `// 注：xxx`，它不是注释 —— 它是字符串内容，
+    会跟着返回值一起发给 API，变成模型实际读到的系统提示词。
+    prompts.ts 一轮出现 3 处（getProactiveSection / computeEnvInfo /
+    getScratchpadInstructions 的返回值都是多行模板），
+    而判据 1（代码行相等）对此完全无感：代码行确实一行没动。
+    """
+    bad = []
+    in_tpl = False
+    for lineno, line in enumerate(lines, start=1):
+        s = line.strip()
+        if in_tpl:
+            if s.startswith('//') and _CJK.search(s):
+                bad.append(lineno)
+            # 找本行的闭合反引号（跳过转义）
+            i = 0
+            while i < len(line):
+                if line[i] == '\\':
+                    i += 2
+                    continue
+                if line[i] == '`':
+                    in_tpl = False
+                    break
+                i += 1
+            continue
+        if s.startswith('//') or s.startswith('*') or s.startswith('/*'):
+            continue
+        # 扫描本行，判断是否开启了未闭合的模板字符串
+        i = 0
+        while i < len(line):
+            ch = line[i]
+            if ch == '\\':
+                i += 2
+                continue
+            if ch == '/' and i + 1 < len(line) and line[i + 1] == '/':
+                break
+            if ch == '/':
+                re_end = _regex_end(line, i)
+                if re_end is not None:
+                    i = re_end + 1
+                    continue
+            if ch in ('"', "'"):
+                q = ch
+                i += 1
+                while i < len(line) and line[i] != q:
+                    if line[i] == '\\':
+                        i += 1
+                    i += 1
+                i += 1
+                continue
+            if ch == '`':
+                j = i + 1
+                closed = False
+                while j < len(line):
+                    if line[j] == '\\':
+                        j += 2
+                        continue
+                    if line[j] == '`':
+                        closed = True
+                        break
+                    j += 1
+                if closed:
+                    i = j + 1
+                    continue
+                in_tpl = True
+                break
+            i += 1
+    return bad
+
+
+# 「表达式明显未结束」的行尾特征：赋值号、三元问号。
+# 刻意**不包含**这四种，它们后面插注释都是正当写法：
+#   · `,`   → 对象/数组字面量的元素之间，插注释说明该元素完全正常
+#   · `:`   → `case 'x':` 后面插注释也正常
+#   · `(`   → `function foo(` 后面写参数说明是常见写法
+#   · `&&`  → 逐条解释 if 条件链里的每个条件，是最易读的写法之一
+#     （setup.ts 的 root 校验就是这么写的：每个 `&&` 下面一句说明）
+# 前三种试过，会让每条属性都误报（9 个文件全部失败）。
+# `&&` 是权衡后放弃的：它误伤的那类批注质量比它抓到的那类高。
+_OPEN_TAIL = re.compile(r'(=|\?)\s*$')
+
+
+def check_split_expression(lines):
+    """判据 5：中文批注不得插在未结束的多行表达式中间。
+
+    典型现场（prompts.ts 一轮全中）：
+        const [a, b, c] = await Promise.all([
+        // 注：三件事并行拉……
+          getSkillToolCommands(cwd),
+    语法完全合法（注释在括号里没影响），但语句被劈成两半，
+    读者看到的是「赋值语句突然断开」，完全失去上下文。
+    """
+    bad = []
+    for i, ln in enumerate(lines):
+        if not (ln.lstrip().startswith('//') and _CJK.search(ln)):
+            continue
+        if i == 0:
+            continue
+        prev = lines[i - 1]
+        if prev.lstrip().startswith('//'):
+            continue          # 同一批注块的续行，跳过
+        code = prev.strip()
+        if not code or code.startswith(('*', '/*')):
+            continue
+        if _OPEN_TAIL.search(code):
+            bad.append((i + 1, code[:60]))
+    return bad
+
+
 def check_one(rel):
     src_path = os.path.join(SRC, rel.replace('/', os.sep))
     ann_path = os.path.join(ANN, rel.replace('/', os.sep))
@@ -115,6 +269,18 @@ def check_one(rel):
         return 'FAIL', rel, (
             '有中文插进了 /* */ 块注释内部，英文注释被劈开，行号: %s'
             % ', '.join(map(str, impure[:10])))
+
+    in_tpl = check_template_purity(ann_lines)
+    if in_tpl:
+        return 'FAIL', rel, (
+            '有中文注释插进了多行模板字符串内部 —— 它会变成字符串内容（即发给模型的提示词正文），行号: %s'
+            % ', '.join(map(str, in_tpl[:10])))
+
+    split_expr = check_split_expression(ann_lines)
+    if split_expr:
+        return 'FAIL', rel, (
+            '中文批注插在了未结束的多行表达式中间，语句被劈开：\n        '
+            + '\n        '.join('第 %d 行前：%s' % (n, c) for n, c in split_expr[:6]))
 
     src_code, src_comment, _ = split(read_lines(src_path))
     ann_code, ann_comment, ann_note = split(ann_lines, cjk_as_annotation=True)

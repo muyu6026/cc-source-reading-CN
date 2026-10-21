@@ -480,24 +480,10 @@ function validateIncompleteCommands(
  * This implementation uses LINE-BASED matching, not regex [\s\S]*?, to
  * precisely replicate bash's heredoc-closing behavior.
  */
-// 注：唯一被允许的形态就这一种。逐条拆开看它约束了什么：
-//       前缀            必须有（不能在命令名位置）
-//       $(cat <<'DELIM'  必须 cat，必须引号/转义分隔符
-//       body            字面量文本（因为分隔符被引号了，不展开）
-//       DELIM)          闭合分隔符必须独占一行
-//       后缀            可选，但过完剥离后必须全部无害
-//
-//     为什么单拎出 heredoc？因为它是唯一「看起来像注入、实际是数据」的语法。
-//     用户天天写 `git commit -m "$(cat <<'EOF' ... EOF)"`，
-//     而 `$(` 在 COMMAND_SUBSTITUTION_PATTERNS 里是一律 ask 的。
-//     不特判的话，每次多行提交信息都要弹窗。
 function isSafeHeredoc(command: string): boolean {
   if (!HEREDOC_IN_SUBSTITUTION.test(command)) return false
 
   // SECURITY: Use [ \t] (not \s) between << and the delimiter. \s matches
-// 注：`[ \t]` 而不是 `\s`。\s 包含 `\n`，但 bash 要求 heredoc 的分隔符
-//     词必须和 `<<` 在**同一行**。允许跨行匹配，就等于接受一段 bash
-//     会拒绝的语法 —— 而「我们接受、bash 拒绝」正是所有绕过的前提。
   // newlines, but bash requires the delimiter word on the same line as <<.
   // Matching across newlines could accept malformed syntax that bash rejects.
   // Handle quote variations: 'EOF', ''EOF'' (splitCommand may mangle quotes).
@@ -528,6 +514,24 @@ function isSafeHeredoc(command: string): boolean {
   if (safeHeredocs.length === 0) return false
 
   // SECURITY: For each heredoc, find the closing delimiter using LINE-BASED
+  // matching that exactly replicates bash's behavior. Bash closes a heredoc
+  // at the FIRST line that exactly matches the delimiter. Any subsequent
+  // occurrence of the delimiter is just content (or a new command). Regex
+  // [\s\S]*? can skip past the first delimiter to find a later `DELIM)`
+// 注：唯一被允许的形态就这一种。逐条拆开看它约束了什么：
+//       前缀            必须有（不能在命令名位置）
+//       $(cat <<'DELIM'  必须 cat，必须引号/转义分隔符
+//       body            字面量文本（因为分隔符被引号了，不展开）
+//       DELIM)          闭合分隔符必须独占一行
+//       后缀            可选，但过完剥离后必须全部无害
+//
+//     为什么单拎出 heredoc？因为它是唯一「看起来像注入、实际是数据」的语法。
+//     用户天天写 `git commit -m "$(cat <<'EOF' ... EOF)"`，
+//     而 `$(` 在 COMMAND_SUBSTITUTION_PATTERNS 里是一律 ask 的。
+//     不特判的话，每次多行提交信息都要弹窗。
+// 注：`[ \t]` 而不是 `\s`。\s 包含 `\n`，但 bash 要求 heredoc 的分隔符
+//     词必须和 `<<` 在**同一行**。允许跨行匹配，就等于接受一段 bash
+//     会拒绝的语法 —— 而「我们接受、bash 拒绝」正是所有绕过的前提。
 // 注：这里解释了为什么不用 `[\s\S]*?`。
 //
 //     正则的懒惰匹配会「跳过第一个 DELIM，去找后面某个 DELIM)」：
@@ -541,10 +545,6 @@ function isSafeHeredoc(command: string): boolean {
 //
 //     所以必须逐行扫，找到**第一个**恰好等于分隔符的行就停 —— 精确复刻
 //     bash 的行为。这也是这段代码不能换成一行正则的原因。
-  // matching that exactly replicates bash's behavior. Bash closes a heredoc
-  // at the FIRST line that exactly matches the delimiter. Any subsequent
-  // occurrence of the delimiter is just content (or a new command). Regex
-  // [\s\S]*? can skip past the first delimiter to find a later `DELIM)`
   // pattern, hiding injected commands between the two delimiters.
   type VerifiedHeredoc = { start: number; end: number }
   const verified: VerifiedHeredoc[] = []
@@ -565,12 +565,12 @@ function isSafeHeredoc(command: string): boolean {
     const bodyLines = body.split('\n')
 
     // Find the FIRST line that closes the heredoc. There are two valid forms:
+    //   1. `DELIM` alone on a line (bash-standard), followed by `)` on the
 // 注：两种合法闭合形式，都来自 bash 解析器的真实行为：
 //       1) DELIM 独占一行，`)` 在下一行行首
 //       2) DELIM) 同一行（bash 的 PST_EOFTOKEN 会同时闭合 heredoc 和替换）
 //     第 2 种是 `$(cat <<'EOF'\n...\nEOF)` 这种「右括号跟着分隔符」的写法，
 //     没有它的话，最常见的写法都会被拒。
-    //   1. `DELIM` alone on a line (bash-standard), followed by `)` on the
     //      next line (with only whitespace before it)
     //   2. `DELIM)` on a line (the inline $(cat <<'EOF'\n...\nEOF) form,
     //      where bash's PST_EOFTOKEN closes both heredoc and substitution)
@@ -1890,7 +1890,6 @@ function validateObfuscatedFlags(context: ValidationContext): PermissionResult {
       // we find one containing an alphanumeric char or hit a non-quote boundary.
       // Also handles empty prefix quotes: """-"exec where "" is followed by "-"exec
       // The combined segments form a flag if they contain dash(es) followed by alphanumerics.
-      const hasFlagCharsInNextQuote =
 // 注：`hasFlagCharsInNextQuote` 处理引号链。它是个立即调用的箭头函数，
 //     因为要在里面跑一个 while 循环累积多段引号内容，再判断拼接结果。
 //
@@ -1898,6 +1897,7 @@ function validateObfuscatedFlags(context: ValidationContext): PermissionResult {
 //     注释说「防止 slice(0, -0) 变成 slice(0, 0) 返回空串」。
 //     `-0` 在 JS 里等于 `0`，所以 `slice(0, -0)` 会返回空 —— 这是个
 //     真实存在的语言陷阱，作者踩过并留了注释。
+      const hasFlagCharsInNextQuote =
         // Trigger when: first segment is only dashes OR empty (could be prefix for flag)
         (insideQuote === '' || /^-+$/.test(insideQuote)) &&
         charAfterQuote !== undefined &&
@@ -2573,7 +2573,6 @@ function validateBraceExpansion(context: ValidationContext): PermissionResult {
 // is defense-favorable (shell-quote over-splits), blocking these proactively
 // prevents future edge cases.
 // eslint-disable-next-line no-misleading-character-class
-const UNICODE_WS_RE =
 // 注：清单是 \u00A0（不换行空格）、\u1680、\u2000-\u200A、\u2028/\u2029
 //     （行/段分隔符）、\u202F、\u205F、\u3000（全角空格）、\uFEFF（BOM）。
 //
@@ -2584,6 +2583,7 @@ const UNICODE_WS_RE =
 //     它的实际影响是「不可见字符能藏进命令里」，属于混淆而非解析器差异 ——
 //     而这层由其他 validator（控制字符、混淆 flag）覆盖。
 //     知道清单不完整、也知道为什么不完整，比盲目相信清单更有用。
+const UNICODE_WS_RE =
   /[\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]/
 
 function validateUnicodeWhitespace(

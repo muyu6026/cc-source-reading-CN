@@ -85,7 +85,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 |                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                | ✅ 完成    |
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
-| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | —                                                                                                                                                                                           | ⬜ 待做    |
+| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />`src/services/api/claude.ts` ⬜ | 🔄 进行中 |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | —                                                                                                                                                                                           | ⬜ 待做    |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
 
@@ -423,15 +423,66 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
+## 第 5 步（主循环前半）读完了吗？五个自测问题
+
+**① `getSystemPrompt()` 为什么返回 `string[]` 而不是一个大字符串？**
+
+因为它要配合缓存边界使用。数组元素是缓存断点的单位，中间那个 `'__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'` 哨兵把「可全局缓存的前缀」和「会话专属内容」分开。拼成一个大字符串，下游就得靠字符偏移量切 —— 而偏移量随提示词增删而漂移。
+
+**② 为什么 `process.env.USER_TYPE === 'ant'` 不能提取成 `const IS_ANT = ...`？**
+
+因为它是构建期 `--define` 的文本替换。内联写法 `"external" === 'ant' && x` 能被打包器折叠成 `false` 并删掉整个分支；提取成变量后，`false && x` 这个分支仍留在代码里（压缩器不会跨变量删），外部版的 bundle 就白白变大了。这是 DCE 的硬约束，不是风格问题。
+
+**③ `query()` 是递归函数吗？**
+
+不是。它是 `while (true)` 状态机：9 个字段的 `State` 在每轮开头解构，7 个 `continue` 站点通过 `state = next` 转换。注释里到处写 "recursive call"，但那是概念上的「自己调自己」的说法。真正的递归在别处 —— 子代理调用会重新进入一个新的 `query()`。
+
+**④ 什么叫「withheld」？为什么错误不能立刻上报？**
+
+可恢复的错误（上下文太长、输出被截断、图片太大）先不 `yield`，等确认恢复不了才吐出来。因为 SDK 客户端一看到 `error` 字段就终止会话，而内部恢复循环还在跑 —— 结果就是「没人听了」。所以策略是：错误进内部数组（供恢复逻辑检测），但先不进外部流。
+
+**⑤ `QueryEngine` 和 `query()` 是什么关系？**
+
+`query()` 是**一轮**（无状态，参数进、消息出）。`QueryEngine` 是**一个会话**（有状态，跨 `submitMessage` 持久）。一个引擎实例对应 N 次 `query()` 调用。它兼任内外协议边界：9 种内部消息类型 → 5 种 `SDKMessage`。
+
+---
+
+## 第 5 步完整清单（已完成部分）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`prompts.ts`](annotated/src/constants/prompts.ts) | 914 | 2,042 | 系统提示词拼装 + 缓存布局 + DCE 裁剪 |
+| [`query.ts`](annotated/src/query.ts) | 1,729 | 3,305 | `while(true)` 状态机、五层压缩、七种恢复 |
+| [`QueryEngine.ts`](annotated/src/QueryEngine.ts) | 1,295 | 2,572 | 会话状态、内外协议转换、时序正确性 |
+
+合计 **3,938 行原文**。
+
+---
+
+## 第 5 步这一轮修的两个工具缺陷
+
+批注过程中发现两处此前没被抓住的问题，已固化成硬判据：
+
+**① 中文注释插进多行模板字符串内部**（`prompts.ts` 3 处、`bashSecurity.ts` 4 处）
+
+模板字符串里反引号之间是**字符串字面量** —— 插进去的 `// 注：…` 不是注释，它会变成发给模型的提示词正文。这比「劈开块注释」严重一个量级：后者只是难看，前者是代码行为被改变。而 `check-fidelity.py` 的旧判据完全无感（代码行确实一行没动）。
+
+现在 `annotate.py` 会自动检测并外移，`check-fidelity.py` 新增判据 4 拦截。
+
+**② 中文批注插在未结束的多行表达式中间**（7 处）
+
+`const x =` 后面插一段注释再给值，语法合法但语句被劈成两半。判据 5 只抓 `=` 和 `?` 结尾的行 —— 刻意放过 `,`、`:`、`(`、`&&`，因为「数组元素之间」「case 分支」「函数参数」「逐条解释 if 条件」这四种后面插注释都是正当写法（试宽了会让 9 个文件全部误报）。
+
+顺带修了扫描器的一个盲区：正则字面量里也有反引号（`/^[)}`|&;(<>]/`），不识别就会把后面几十行误判成模板内部。现在两个脚本都做了正则字面量识别。
+
+---
+
 ## 继续往下读之前
 
-第 5 步是主循环，也是整份源码里**调用关系最绕**的一段：
+第 5 步还剩最后一个文件：
 
-- [`src/constants/prompts.ts`](source/src/constants/prompts.ts) —— 系统提示词怎么拼出来
-- [`src/query.ts`](source/src/query.ts) —— 那个 `while(true)` 异步生成器
-- [`src/QueryEngine.ts`](source/src/QueryEngine.ts) —— 把 query 包成可复用的引擎
-- [`src/services/api/claude.ts`](source/src/services/api/claude.ts) —— 流式响应、重试、缓存
+- [`src/services/api/claude.ts`](source/src/services/api/claude.ts)（3,419 行）—— 最底层的 HTTP 客户端：SSE 解析、重试与退避、prompt cache 控制、图片处理、错误分类
 
-建议先读 [03 篇](docs/03-启动流程.md) 和 [06 篇](docs/06-对话主循环与模型调用.md) 拿到骨架，再回来逐行读代码 —— 这里的控制流比第 4 步难跟，因为它是**生成器套生成器**。
+它是整份源码里单文件最长的几个之一。读它之前建议先明确：前面三个文件都在「组装请求」和「消费响应」，而它负责的是**中间那一段字节流**。所以关注点会从「状态机」转向「协议细节」。
 
-告诉我「继续第 5 步」，我就接着批注。
+告诉我「继续」或「继续第 5 步后半」，我就接着批注 claude.ts。
