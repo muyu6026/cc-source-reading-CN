@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅ | ✅ 二十一份全通<br />（含 `termio/` 十个） |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅ | ✅ 二十五份全通<br />（含 `termio/` 十个） |
 
 ---
 
@@ -1178,6 +1178,69 @@ UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不
 
 **读代码时，「这个字段被谁读」比「这个字段是什么意思」更省时间。** 前者一条 grep，后者要读完整条调用链。
 
+---
+
+## 输入侧（`parse-keypress` + `selection`）读完了吗？六道自测题
+
+上面二十一份都是「**画**」出去的方向。这一轮补的是反方向：用户的手怎么变成事件。
+
+**59 同一个 ESC 字节，什么时候是「用户按了 Esc 键」，什么时候是「一个序列的开头」？**
+
+取决于**后面还有没有字节** —— 而这个信息在收到这一刻并不完整（分块读 stdin 时 `ESC [ < 6 4` 可能正好断在中间）。
+
+所以判定权只能给 tokenizer：它有「不完整就缓冲」的能力，解释层拿到的永远是完整序列。兜底在 `App.tsx`：50ms 还没等来续块，就当成真的 Esc 冲出去。
+
+这个 50ms 也是这份代码里**唯一的时间假设**，而它带来一个反直觉的 bug：Node 的事件循环里 **timers 阶段先于 poll 阶段**。一次重渲染把循环阻塞超过 50ms 时，续块其实已经躺在缓冲区里了，定时器却先跑 —— 于是「Esc + 尾巴被劈开」，`parse-keypress` 里那段「孤儿鼠标尾巴重合成」就是为此写的补丁。
+
+**60 输入侧的 `ESC [ M` 和输出侧的 `ESC [ M` 为什么不能共用一套解析？**
+
+因为**方向决定语义**。输出侧它是 ECMA-48 的 DL（删除行）；输入侧它是 X10 鼠标，后面跟三个裸字节当坐标。
+
+所以 `createTokenizer` 有个 `x10Mouse` 选项，全仓库只有 `parse-keypress.ts` 传 `true`。开错方向不会报错，会**静默吃字符**：输出方向误开，`ESC [ M` 后面三个字符被当坐标吞掉；输入方向误关，三个坐标字节当文本漏进输入框。
+
+**61 `parseKeypress` 里 `modifyOtherKeys` 为什么必须排在 `FN_KEY_RE` 之前？**
+
+老正则会**部分匹配**新序列，然后把剩下那截当垃圾。`ESC [ 27 ; mod ; code ~` 有三个参数，而 `FN_KEY_RE` 的参数分支只允许两个 —— 它能把前两个吃掉，第三个参数和 `~` 漏出去，变成输入框里的可见字符。
+
+顺带一个容易看错的细节：`FN_KEY_RE` 里 `(?:1;)?` 那个 `1` 不是键号，是 xterm 给光标键的**固定占位**（真键号靠终结字母表达）。写成 `(\d+);` 反而会匹配上不存在的序列、算出错误的键名。
+
+**62 双击一个汉字，为什么必须先「退回前半格」？**
+
+宽字符占两格，**后一格（SpacerTail）的 char 是空串**。`charClass('')` 把它判成「空白」，于是双击汉字会选中一片空白而不是那个字。
+
+同一件事还决定了左右扩展的规则**不对称**：
+- 往左：遇到 SpacerTail 不能直接比类别，必须**跨过它去看前一格的 head**，用 head 的类别判断
+- 往右：遇到 SpacerTail 直接**吞进来** —— 它属于刚收下的那个宽字符
+
+判断依据是「谁是这段的成员」：head 是成员，tail 只是它的占位。
+
+**63 选区滚出屏幕之后，复制出来的文本为什么还能完整？为什么要额外记 `virtualRow`？**
+
+两本不同的账，缺一本就错：
+
+| 账本 | 解决什么 | 不记的后果 |
+| --- | --- | --- |
+| `scrolledOff*` 累积器 | 屏幕只有一屏，滚出去的行会被覆盖 | 复制结果只剩后半截 |
+| `virtualAnchorRow` / `virtualFocusRow` | clamp 会丢真位置 | 反向滚动后高亮错行，且累积器永远是旧账 |
+
+`virtualRow` 举个数就清楚：起点在第 5 行，PgUp 上移 10 行 → `clamp` 到 0；再 PgDn 回来 10 行，从已 clamp 的 0 算会得 10，真值是 5。**高亮错 5 行，而复制出来的文本比看到的多** —— 症状和原因隔得很远。
+
+两个累积器的操作方向还相反：`above` 用 push（最新在尾）所以从尾部截，`below` 用 unshift（最新在头）所以从头部切。
+
+**64 高亮为什么是「改屏幕缓冲的 styleId」，而不是让 diff 认识选区？**
+
+因为那样 `LogUpdate` 就得知道「选区」这个概念，而它目前是一个**纯粹的两帧比较器** —— 这个纯粹性很值钱：只比文字的话，「高亮变了但文字没变」会被漏掉，于是必须为它再开一条路径。
+
+改缓冲则完全绕开：把选中格子的 `styleId` 换成「保留前景 + 实心底色」的那个 id，diff 自然把它们当普通变化捡走。`LogUpdate` 一行都不用改。
+
+为什么不用 SGR-7 反显（老做法）：反显是**逐格交换**前景/背景，而代码是语法高亮的 —— 一交换，每个 token 变成不同背景色，整片像打了彩色马赛克。
+
+### 顺带两个小件
+
+`hit-test.ts`（130 行）回答「一个终端坐标落在哪个节点」。它不重算布局，只读渲染时存下的矩形 —— 所以**命中的是最后一帧的布局**，这在交互上是对的（用户点的是他看到的东西）。一处容易读漏：`if (!rect) return null` 在递归之前，所以一个节点这帧没渲染，**整棵子树都不会被命中**。
+
+`render-border.ts`（231 行）是这一层最后一件「按字符串画」的东西：拼一条边整条 `write`，靠 `Output.write` 内部按换行分行。它有一处**真会出错**的地方 —— 边框文字太长时用 `substring(0, borderLength)` 按码元截断，而 `content` 是**已上色的字符串**，很容易把 `ESC [ 38 ; 5 ; 196 m` 切在中间，漏出半个转义序列，之后整屏着色错乱。现在没出问题，是因为唯一的调用方（`PromptInput` 的边框标题）永远比边框短 —— 属于「靠调用方保证才不出问题」的代码。
+
 ### 前几轮修的几个判据误报
 
 `screen.ts` 的原文里有这么一行英文注释，举例时用了汉字：
@@ -1242,16 +1305,27 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
        └─ termio/tokenize.ts（切边界）→ parser.ts（拼成 action）
                 └─ sgr.ts（样式参数）/ osc.ts（超链接）/ esc.ts / dec.ts
                         └─ ansi.ts（字节表）+ csi.ts（参数区间与生成）
+
+输入侧（和上面整条链方向相反，字节从外面进来）：
+  stdin → parse-keypress.ts（tokenize 的输入侧消费者，唯一开 x10Mouse 的地方）
+              ├─ 终端应答 → terminal-querier（兑现查询 promise，不进业务）
+              ├─ ParsedKey → input-event.ts → useInput / 文本输入
+              └─ ParsedMouse → App.handleMouseEvent → hit-test.ts（坐标 → 节点）
+                                                    └─ selection.ts（两本账：累积器 + virtual 行）
+                                                          └─ applySelectionOverlay（只改 styleId，
+                                                             让上面的 diff 自己发现）
 ```
+
+**两个方向在这里合上**：输出侧把「一个汉字」写成两个 `int` 加一串 SGR；输入侧把「一次拖选」还原成屏幕坐标上的一个区间。中间那块共享的东西只有一样 —— `screen.ts` 的格子布局。所以选区的坐标能直接当渲染坐标用，不需要任何换算。
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 还有二十来个百行级小件，其中三份有一点独立价值：`parse-keypress.ts`（801 行，键序列 → 事件，Kitty 协议与 bracketed paste —— 它是 `termio/tokenize.ts` 的**输入侧**消费者，也是唯一开 `x10Mouse` 的地方）、`selection.ts`（917 行，跨屏幕滚动的拖选）、`render-border.ts`（231 行，边框字符怎么拼）。其余（`bidi.ts` / `hit-test.ts` / `optimizer.ts` / `wrap-text.ts` 等）都是主线的螺丝
+- [`src/ink/`](source/src/ink/) 里还剩三十来个百行级小件：`optimizer.ts`（差异合并）、`wrap-text.ts` / `wrapAnsi.ts`（折行）、`bidi.ts`（双向文本）、`focus.ts`（焦点环）、`frame.ts`（帧对象）、`searchHighlight.ts`（搜索高亮落色）、`terminal.ts` / `terminal-querier.ts`（能力探测）、`render-to-screen.ts`、`squash-text-nodes.ts` 等。都已经在主线里被调用过，读它们主要是补细节
 - [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
-- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等
+- [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts 240`、`types.ts` 258 等
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
 
-到这里，**第 1 到第 8 步的主线全部走完**：56 个文件、43,476 行原文（批注版 74,123 行）、2,277 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了**：60 个文件、45,555 行原文（批注版 77,126 行）、2,394 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1261,8 +1335,8 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
-- **回头重读** —— 我推荐这个。八条线都闭合了，现在重读任何一处都比第一次清楚
-- **UI 线剩下的** —— `parse-keypress.ts`（801 行，键序列 → 事件）+ `selection.ts`（917 行，拖选跨滚动）。`termio/` 那 2,271 行已经补完了，`parse-keypress` 是它在输入侧的下游，接上就形成「键盘按键 → 转义序列 → 结构化事件」的完整闭环
+- **回头重读** —— 我推荐这个。八条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
+- **`src/services/mcp/` 的 16 个小件** —— `utils.ts` 575 / `elicitationHandler.ts` 313 / `channelNotification.ts` 316 / `channelPermissions.ts` 240 / `types.ts` 258。这条线是「服务层」最后没扫干净的角落，和已经读完的 config/client/auth 直接接壤
 - **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
 
 ---
