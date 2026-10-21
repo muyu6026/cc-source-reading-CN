@@ -2095,11 +2095,6 @@ function validateObfuscatedFlags(context: ValidationContext): PermissionResult {
 //
 // 命令名被「路径穿越」拼出来了，而基于命令名的权限规则一条都没命中。
 /**
-// 注：只在双引号外判定（第 1557 行 `if (!inDoubleQuote)`）。
-//     因为双引号里 `\ ` 虽然也是转义，但 `\t`、`\n` 之类是字面反斜杠 + 字母，
-//     判起来会产生大量误报（想想 `grep "a\tb"`）。
-//     而单引号里反斜杠完全是字面量，连 escaped 都不该置 —— 所以
-//     `!inSingleQuote` 这个 guard 在这里同样必须有。
  * Detects backslash-escaped whitespace characters (space, tab) outside of quotes.
  *
  * In bash, `echo\ test` is a single token (command named "echo test"), but
@@ -2109,6 +2104,11 @@ function validateObfuscatedFlags(context: ValidationContext): PermissionResult {
  * which the parser sees as `echo test/.../touch /tmp/file` (an echo command)
  * but bash resolves as `/usr/bin/touch /tmp/file` (via directory "echo test").
  */
+// 注：只在双引号外判定（第 1557 行 `if (!inDoubleQuote)`）。
+//     因为双引号里 `\ ` 虽然也是转义，但 `\t`、`\n` 之类是字面反斜杠 + 字母，
+//     判起来会产生大量误报（想想 `grep "a\tb"`）。
+//     而单引号里反斜杠完全是字面量，连 escaped 都不该置 —— 所以
+//     `!inSingleQuote` 这个 guard 在这里同样必须有。
 function hasBackslashEscapedWhitespace(command: string): boolean {
   let inSingleQuote = false
   let inDoubleQuote = false

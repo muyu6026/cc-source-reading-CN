@@ -14,7 +14,16 @@
 第二行'''),
         (16, 'after', '这一行是做什么的'),
     ]
-位置表达：before = 插在该行之前；after = 插在该行之后。
+位置表达：
+    before        = 插在该行之前
+    after         = 插在该行之后
+    after_block   = 插在「该行所在的连续 // 注释块」之后（多行英文注释不会被中文劈开）
+
+自动纠正（不需要手工算行号）：
+    · after 落在 /** 开头行  → 自动挪到该块注释之后
+    · before 落在 */ 结尾行  → 自动挪到该块注释之前
+这两条是结构性的：中文插进块注释内部语法上合法，但会把英文文档注释劈成两半。
+bashPermissions.ts 一轮就犯过 14 次，check-fidelity.py 现在把它列为硬判据。
 
 用法：
     python scripts/annotate.py src/tools/BashTool/bashSecurity.ts
@@ -84,9 +93,57 @@ def main():
 
     ann = load_annotations(rel)
 
+    def comment_run_end(lineno):
+        """从 lineno 起，连续 // 行注释块的最后一行。
+
+        为什么需要它：一段英文注释常常是 5-8 行连续 //，如果在第 1 行后面插中文，
+        剩下的英文就被推到中文下面去了，「英文在上、中文在下」的对照关系会断掉。
+        after_block 把锚点自动挪到整段注释之后。
+        """
+        i = lineno
+        while i <= len(lines) and lines[i - 1].strip().startswith('//'):
+            i += 1
+        return i - 1
+
+    def block_end(lineno):
+        """若 lineno 是块注释的开头行，返回该块的结束行；否则返回 None。"""
+        s = lines[lineno - 1].strip()
+        if not s.startswith('/*') or s.endswith('*/'):
+            return None
+        for i in range(lineno + 1, len(lines) + 1):
+            if lines[i - 1].strip().endswith('*/'):
+                return i
+        return None
+
+    def block_start(lineno):
+        """若 lineno 是块注释的结尾行，返回该块的开头行；否则返回 None。"""
+        s = lines[lineno - 1].strip()
+        if not s.endswith('*/'):
+            return None
+        for i in range(lineno - 1, 0, -1):
+            t = lines[i - 1].strip()
+            if t.startswith('/*'):
+                return i if i != lineno else None
+            if t.endswith('*/'):
+                return None
+        return None
+
     before = {}
     after = {}
     for lineno, pos, text in ann:
+        if pos == 'after_block':
+            lineno = comment_run_end(lineno)
+            pos = 'after'
+        # 结构性保护：锚点落在块注释的开头行/结尾行时自动挪到块外，
+        # 否则中文会被塞进 /** */ 中间，把英文文档注释劈成两半。
+        if pos == 'after':
+            end = block_end(lineno)
+            if end is not None:
+                lineno = end
+        elif pos == 'before':
+            start = block_start(lineno)
+            if start is not None:
+                lineno = start
         if lineno < 1 or lineno > len(lines):
             raise SystemExit('行号越界: %d（文件共 %d 行）' % (lineno, len(lines)))
         target = before if pos == 'before' else after
@@ -94,13 +151,17 @@ def main():
 
     # 警告：锚点落在 /* */ 块注释内部时，中文批注会被吞进块注释，
     # 把英文块注释劈成两半，可读性很差（语法上仍合法）。
+    # 判定要点：只看「以 /* 开头」的行来开启块注释。早期版本用 `'/*' in s`，
+    # 结果被行注释里的 `Read(<dir>/**)` 骗到 —— 那个 / ** 既没有闭合的 */，
+    # 又让后面几十行全部被误判成块内（bashPermissions.ts 一轮误报 14 处）。
     in_block = []
     open_at = None
     for i, line in enumerate(lines, start=1):
         s = line.strip()
-        if open_at is None and '/*' in s and '*/' not in s:
-            open_at = i
-        elif open_at is not None and '*/' in s:
+        if open_at is None:
+            if s.startswith('/*') and not s.endswith('*/'):
+                open_at = i
+        elif s.endswith('*/') or (s.startswith('/*') and s.endswith('*/')):
             open_at = None
         if open_at is not None and open_at != i:
             in_block.append(i)

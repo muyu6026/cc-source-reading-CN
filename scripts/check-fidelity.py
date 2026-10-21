@@ -76,6 +76,31 @@ def split(lines, cjk_as_annotation=False):
     return code, comment, annotation
 
 
+def check_block_purity(lines):
+    """判据 3：块注释内部不许出现中文。
+
+    劈开英文文档注释是批注过程中最容易犯、又最难自己发现的错：
+    在 `/**` 的某一行后面插一段 `// 译：…`，语法上完全合法（块注释里的 // 只是字符），
+    但英文注释被中文从中间截断了，可读性彻底坏掉。
+    bashPermissions.ts 一轮就出现 14 处，所以这里把它做成硬判据。
+    返回违规行号列表（1 基）。
+    """
+    bad = []
+    open_at = None
+    for i, ln in enumerate(lines, start=1):
+        s = ln.strip()
+        if open_at is None:
+            if s.startswith('/*') and not s.endswith('*/'):
+                open_at = i
+            continue
+        if s.endswith('*/'):
+            open_at = None
+            continue
+        if _CJK.search(s) and not s.startswith('*'):
+            bad.append(i)
+    return bad
+
+
 def check_one(rel):
     src_path = os.path.join(SRC, rel.replace('/', os.sep))
     ann_path = os.path.join(ANN, rel.replace('/', os.sep))
@@ -84,8 +109,15 @@ def check_one(rel):
     if not os.path.exists(ann_path):
         return 'MISSING_ANN', rel, '还没有批注版'
 
+    ann_lines = read_lines(ann_path)
+    impure = check_block_purity(ann_lines)
+    if impure:
+        return 'FAIL', rel, (
+            '有中文插进了 /* */ 块注释内部，英文注释被劈开，行号: %s'
+            % ', '.join(map(str, impure[:10])))
+
     src_code, src_comment, _ = split(read_lines(src_path))
-    ann_code, ann_comment, ann_note = split(read_lines(ann_path), cjk_as_annotation=True)
+    ann_code, ann_comment, ann_note = split(ann_lines, cjk_as_annotation=True)
 
     # ── 判据 1：代码行逐行相等 ──
     if ann_code != src_code:

@@ -124,7 +124,7 @@
 | [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) | 权限判定 |
 | `src/services/tools/` | 工具执行流水线（并发 / 钩子 / 编排） |
 
-> ✍️ 中文批注版：[`Tool.ts`](annotated/src/Tool.ts)（792 → 2,013 行，按「一个工具的一生」十二步逐字段讲）· [`tools.ts`](annotated/src/tools.ts)（389 → 647 行，工具户口本）· [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)（1,143 → 1,757 行，最复杂的工具实现）· [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)（2,592 → 3,658 行，22 个 validator 的编排）
+> ✍️ 中文批注版：[`Tool.ts`](annotated/src/Tool.ts)（792 → 2,013 行，按「一个工具的一生」十二步逐字段讲）· [`tools.ts`](annotated/src/tools.ts)（389 → 647 行，工具户口本）· [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)（1,143 → 1,757 行，最复杂的工具实现）· [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)（2,592 → 3,658 行，22 个 validator 的编排）· [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts)（2,621 → 3,906 行，895 行主函数的权限裁决）
 > 前半已完成；后半（`tools.ts` 注册表 + `BashTool/` 实现）待续。
 
 **对应章节**：[04 工具系统](docs/04-工具系统.md)、[08 权限与安全](docs/08-权限与安全.md)
@@ -297,7 +297,7 @@ D:\CC泄露源码分析\
 │       ├── setup.ts
 │       ├── Tool.ts
 │       ├── tools.ts
-│       └── tools\BashTool\  BashTool.tsx · bashSecurity.ts · commandSemantics.ts
+│       └── tools\BashTool\  BashTool.tsx · bashSecurity.ts · bashPermissions.ts · commandSemantics.ts
 ├── annotated-索引与进度.md      ← 批注约定 + 进度表 + 自测题
 ├── scripts\
 │   ├── annotate.py            ← 按行号注入批注，生成 annotated/ 镜像
@@ -332,6 +332,7 @@ annotated/                        ← 只放与 source/ 同路径的文件
     └── tools/BashTool/
         ├── BashTool.tsx          ← 全 1,143 行，最复杂的工具实现
         ├── bashSecurity.ts       ← 全 2,592 行，22 个危险检测的编排
+        ├── bashPermissions.ts    ← 全 2,621 行，权限裁决（895 行主函数）
         └── commandSemantics.ts   ← 退出码语义判定表
 ```
 
@@ -360,7 +361,7 @@ source/README.md                    →  annotated/README.annotated.md
 
 **怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。跑一次就能确认没改源码、没漏括号。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步做了四个文件**（`Tool.ts` 792 行、`tools.ts` 389 行、`BashTool.tsx` 1,143 行、`bashSecurity.ts` 2,592 行，合计 4,916 行全批注），只剩 `bashPermissions.ts`（2,621 行）待补。后续步骤按学习路线逐个补。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）。下一步是第 5 步主循环。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

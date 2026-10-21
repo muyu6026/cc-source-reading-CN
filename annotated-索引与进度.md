@@ -1,6 +1,6 @@
 # 源码中文批注版 · 索引与进度
 
-> 这里放的是**原文批注版代码**：英文原注释一字不删，每段英文下方紧跟中文对照。
+> 这里放的是**原文批注版代码**：英文原注释一字不删，每段英文下方紧跟中文对照。  
 > 顺序完全按 [README 的学习路线](README.md#学习路线七步按顺序读) 走，一步一步来。
 >
 > 注：本文件放在**根目录**（不在 `annotated/` 里）。因为它属于手册自身的导航，不是源码镜像的一部分 —— `annotated/` 里只放「与 `source/` 同路径」的文件。
@@ -20,12 +20,12 @@ source/README.md                    →  annotated/README.annotated.md         �
 
 两个例外都带 `.annotated.md` 后缀，原因不同：
 
-| 例外 | 为什么改名 |
-|------|-----------|
-| `package.json.annotated.md` | JSON 里写不了注释，只能改成 md 用「原片段 + 中文说明」对照 |
-| `README.annotated.md` | 避免与手册根目录的 `README.md`（主索引）同名不同物，一眼分不清看的是哪一份 |
+| 例外                          | 为什么改名                                       |
+| --------------------------- | ------------------------------------------- |
+| `package.json.annotated.md` | JSON 里写不了注释，只能改成 md 用「原片段 + 中文说明」对照         |
+| `README.annotated.md`       | 避免与手册根目录的 `README.md`（主索引）同名不同物，一眼分不清看的是哪一份 |
 
-除这两类之外，`annotated/` 下**不应出现**任何镜像之外的文件（导航、进度、校验脚本都放外面）。
+除这两类之外，`annotated/` 下**不应出现**任何镜像之外的文件（导航、进度、校验脚本都放外面）。  
 另外：`annotated/` 不是 `source/` 的全量副本 —— `source/src` 有 1902 个文件，这里只批注学习路线走到的那些。
 
 ---
@@ -36,10 +36,10 @@ source/README.md                    →  annotated/README.annotated.md         �
 
 所以拆成两套，各管一件事：
 
-| 目录 | 用途 | 是否改动 |
-|------|------|---------|
-| `source/` | **原版**，行号基准。正文里的链接都指向它 | 永不改动 |
-| `annotated/` | **批注版**，学习时读这份 | 持续增补 |
+| 目录           | 用途                     | 是否改动 |
+| ------------ | ---------------------- | ---- |
+| `source/`    | **原版**，行号基准。正文里的链接都指向它 | 永不改动 |
+| `annotated/` | **批注版**，学习时读这份         | 持续增补 |
 
 好处：任何时候都能「左边看中文批注、右边对照原版」，两边行号不会互相污染。
 
@@ -56,12 +56,12 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 // 注：COREPACK_ENABLE_AUTO_PIN=0 的意思是「别自动往 package.json 里写 packageManager 字段」。
 ```
 
-| 标记 | 含义 |
-|------|------|
-| 原文 | 英文原注释，**一个字都不删** |
-| `// 译：` | 紧跟英文之后，是对这段英文的**直译** |
-| `// 注：` | 我额外补充的解释（原文没有这句），通常是「为什么这么写」「坑在哪」 |
-| `// ── N. xxx ──` | 段落分隔，方便在大文件里定位 |
+| 标记                | 含义                                |
+| ----------------- | --------------------------------- |
+| 原文                | 英文原注释，**一个字都不删**                  |
+| `// 译：`           | 紧跟英文之后，是对这段英文的**直译**              |
+| `// 注：`           | 我额外补充的解释（原文没有这句），通常是「为什么这么写」「坑在哪」 |
+| `// ── N. xxx ──` | 段落分隔，方便在大文件里定位                    |
 
 不支持注释的文件（`.json`）改用 `<原名>.annotated.md`，用「原片段 + 中文说明」对照。Markdown 文件（如仓库自述 `README.md` → `README.annotated.md`）直接在每段英文下方写中文。
 
@@ -76,18 +76,18 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 ## 进度总表
 
-| 学习路线的步骤 | 涉及文件 | 批注版位置 | 状态 |
-|---------------|---------|-----------|------|
-| **第 1 步** 先认门面（30 分钟） | `package.json` | [`package.json.annotated.md`](annotated/package.json.annotated.md) | ✅ 完成 |
-| | `README.md`（仓库自带的） | [`README.annotated.md`](annotated/README.annotated.md) | ✅ 完成 |
-| | `src/entrypoints/cli.tsx`（302 行，全文件） | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx) | ✅ 完成 |
-| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行） | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts) | ✅ 完成 |
-| | `src/tools/BashTool/commandSemantics.ts`（141 行） | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | ✅ 完成 |
-| **第 3 步** 读初始化流程（2 小时） | `src/setup.ts`（477 行） | [`src/setup.ts`](annotated/src/setup.ts) | ✅ 完成 |
-| **第 4 步** 读工具系统（半天）★ | `src/Tool.ts`、`src/tools.ts`、`BashTool/` | [`Tool.ts`](annotated/src/Tool.ts) ✅<br>[`tools.ts`](annotated/src/tools.ts) ✅<br>[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br>[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br>`bashPermissions` ⬜ | 🚧 主体完成 |
-| **第 5 步** 读主循环（1 天）★★ | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | — | ⬜ 待做 |
-| **第 6 步** 读服务层（半天） | `src/services/` 各模块 | — | ⬜ 待做 |
-| **第 7 步** UI 与多智能体（可选） | `src/components/`、`src/ink/`、`src/coordinator/` | — | ⬜ 待做 |
+| 学习路线的步骤                 | 涉及文件                                                                               | 批注版位置                                                                                                                                                                                       | 状态      |
+| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| **第 1 步** 先认门面（30 分钟）   | `package.json`                                                                     | [`package.json.annotated.md`](annotated/package.json.annotated.md)                                                                                                                          | ✅ 完成    |
+|                         | `README.md`（仓库自带的）                                                                 | [`README.annotated.md`](annotated/README.annotated.md)                                                                                                                                      | ✅ 完成    |
+|                         | `src/entrypoints/cli.tsx`（302 行，全文件）                                               | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx)                                                                                                                              | ✅ 完成    |
+| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行）                                                | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts)                                                                                                                      | ✅ 完成    |
+|                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                | ✅ 完成    |
+| **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                    | ✅ 完成    |
+| **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成 |
+| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | —                                                                                                                                                                                           | ⬜ 待做    |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | —                                                                                                                                                                                           | ⬜ 待做    |
+| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                           | ⬜ 待做    |
 
 ---
 
@@ -97,9 +97,9 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **Q1**：用户敲 `claude --version`，从敲下回车到看到版本号，一共加载了几个模块？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**只有 1 个** —— 就是 `cli.tsx` 自己。
+<summary>**只有 1 个** —— 就是 `cli.tsx` 自己。</summary>
 
 `cli.tsx` 第 37-42 行：只要参数正好是一个 `--version` / `-v` / `-V`，直接 `console.log` 后 `return`，连 `startupProfiler` 都还没加载。文件头注释里那句 `Fast-path for --version has zero imports beyond this file`（译：--version 这条快速路径除了本文件之外零导入）说的就是这个。
 
@@ -107,9 +107,9 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **Q2**：为什么 `cli.tsx` 里所有的 `import` 都写成 `await import(...)`，而不是文件顶部一次性导入？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**为了让「快速路径」不加载用不上的模块。**
+<summary>**为了让「快速路径」不加载用不上的模块。**</summary>
 
 `main.js` 有 789 KB、4600 行。如果顶部就 `import { main } from '../main.js'`，那么连 `claude --version` 都得先把这 789 KB 解析、求值一遍，启动要慢上千毫秒。写成动态 `await import()`，只有真正走到那一步才加载。
 
@@ -119,9 +119,9 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **Q3**：`package.json` 里 `dependencies` 是空的，那它用的 React、Ink、zod 都从哪来？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**被打包器（Bun）内联进产物了。**
+<summary>**被打包器（Bun）内联进产物了。**</summary>
 
 发布出去的是一个自包含的包，所有依赖的代码都被塞进了最终产物文件里，所以 `package.json` 不需要声明依赖。
 
@@ -137,9 +137,9 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **Q1**：用户敲 `/clear`，**哪一行**代码才真正把 `clear` 的实现加载进来？本文件里的 `load` 是什么时候执行的？
 
-<details><summary>点开看答案</summary>
+<details>
 
-加载发生在 **`src/utils/processUserInput/processSlashCommand.tsx:668`**：
+<summary>加载发生在 **`src/utils/processUserInput/processSlashCommand.tsx:668`**：</summary>
 
 ```ts
 const mod = await command.load()   // ← 到这一行才真的去读 clear.js
@@ -154,9 +154,9 @@ const result = await mod.call(args, context)
 
 **Q2**：`supportsNonInteractive: false` 具体会造成什么后果？是哪一行代码在管这件事？
 
-<details><summary>点开看答案</summary>
+<details>
 
-后果：**`-p`（headless / 管道脚本）模式下 `/clear` 根本不在命令列表里**，敲了也匹配不到。
+<summary>后果：**`-p`（headless / 管道脚本）模式下 `/clear` 根本不在命令列表里**，敲了也匹配不到。</summary>
 
 管这事的是 `src/main.tsx:2622`：
 
@@ -174,9 +174,9 @@ commands.filter(command =>
 
 **Q3**：模型跑 `grep foo x.txt` 没匹配到（退出码 1），这次工具调用算**成功**还是**失败**？那退出码 2 呢？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**退出码 1 → 算成功。** 查表命中 `grep` 条目，`isError = exitCode >= 2` → `1 >= 2` 为 false，于是不抛错，输出照常交给模型。
+<summary>**退出码 1 → 算成功。** 查表命中 `grep` 条目，`isError = exitCode >= 2` → `1 >= 2` 为 false，于是不抛错，输出照常交给模型。</summary>
 
 **退出码 2 → 算失败。**（grep 的 2 通常是正则语法错误、文件读不了这类真问题。）此时 `isError` 为 true，`BashTool.tsx:714` 会：
 
@@ -190,9 +190,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q4**：`cd /tmp && grep -r foo .` 会匹配到哪条语义？`grep foo x || echo none` 为什么会被算错？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**第一问**：`splitCommand_DEPRECATED` 按 `&&` 拆成两段 → 取**最后一段** `grep -r foo .` → 取首词 `grep` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。
+<summary>**第一问**：`splitCommand_DEPRECATED` 按 `&&` 拆成两段 → 取**最后一段** `grep -r foo .` → 取首词 `grep` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。</summary>
 
 **第二问**：`||` 的情况，最后一段是 `echo none`，于是查 `echo` → 查不到 → 走默认语义（非 0 即错）。但真实退出码是 `echo` 的 0，所以这次判断**碰巧不算错**；反过来 `grep foo x | head` 的退出码其实来自 `head`（管道最后一段），也会和直觉不同。
 
@@ -210,9 +210,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q1**：为什么 `setCwd()` 必须在 `captureHooksConfigSnapshot()` 之前？如果反过来会出什么症状？
 
-<details><summary>点开看答案</summary>
+<details>
 
-因为 hook 配置是从 **`<cwd>/.claude/settings.json`** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。
+<summary>因为 hook 配置是从 **`<cwd>/.claude/settings.json`** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。</summary>
 
 症状很隐蔽：**不报错**，只表现为"我的 hook 有时候生效、有时候不生效"，或者"在 A 项目里配的 hook 在 B 项目也触发了"。这类"顺序错了但不崩"的 bug 最难查。
 
@@ -222,9 +222,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q2**：`main.tsx:1927` 让 `setup()` 和 `getCommands()` 并行跑，因此产生过一个 bug。那个 bug 是什么、怎么修的？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**bug**：内置技能/插件的注册原先写在 `setup()` 里，但它前面有约 20ms 的 `await`（UDS socket）。而并行的 `getCommands()` 已经跑完并 **memoize** 了结果 —— 缓存里没有内置技能。等 `setup()` 走到注册那一步，命令表早就定死了。
+<summary>**bug**：内置技能/插件的注册原先写在 `setup()` 里，但它前面有约 20ms 的 `await`（UDS socket）。而并行的 `getCommands()` 已经跑完并 **memoize** 了结果 —— 缓存里没有内置技能。等 `setup()` 走到注册那一步，命令表早就定死了。</summary>
 
 **修法**：不是加锁，而是把注册**挪到并行启动点之前**（`main.tsx:1923-1926`），让它变成纯内存的数组 push（<1ms、零 IO），必然先于 `getCommands()`。
 
@@ -236,9 +236,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q3**：`void lockCurrentVersion()` 里的 `void` 到底做了什么？代价是什么？
 
-<details><summary>点开看答案</summary>
+<details>
 
-`void` **不改变任何运行时行为** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"
+<summary>`void` **不改变任何运行时行为** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"</summary>
 
 目的：让"装监听器 / 抢锁 / 预热缓存"这类工作不拖慢启动。
 
@@ -248,9 +248,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q4**：`--dangerously-skip-permissions` 会做哪些环境校验？为什么 `NODE_ENV === 'test'` 的提前返回放在校验**之后**而不是函数开头？
 
-<details><summary>点开看答案</summary>
+<details>
 
-**两道闸**：
+<summary>**两道闸**：</summary>
 
 1. **root 检查**（对所有平台）：是 root 且不在沙箱（`IS_SANDBOX` / bubblewrap 都没有）→ 直接退出。
 2. **沙箱 + 断网检查**（仅内部员工、排除 Desktop 两个入口）：必须 `isSandboxed && !hasInternet`。也就是"不在沙箱"或"能上网"都拒绝 —— 因为在沙箱里且离线时，模型乱来的破坏范围被容器和断网限制住了。
@@ -267,9 +267,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q1**：`call()` 的第 3 个参数 `canUseTool` 为什么不放进 `ToolUseContext`？
 
-<details><summary>点开看答案</summary>
+<details>
 
-因为它是**能力凭证**，不是**环境**。
+<summary>因为它是**能力凭证**，不是**环境**。</summary>
 
 实测：没有任何一个工具在自己的 `call()` 里调用它（5 个工具直接把它命名为 `_canUseTool`，下划线表示不用）。它真正的用途是**往下传** —— `AgentTool`、`SendMessageTool`、`SkillTool` 把它递给子代理的 `runAgent()`，因为子代理执行工具时也要过权限关。
 
@@ -279,9 +279,9 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 **Q2**：`description()` 和 `prompt()` 都返回"说明文本"，分别给谁看？为什么一个要收 `toolPermissionContext`？
 
-<details><summary>点开看答案</summary>
+<details>
 
-读者完全不同：
+<summary>读者完全不同：</summary>
 
 - `prompt()` → **模型**。它就是 API 请求里的 `description` 字段（`utils/api.ts:171`）。所以要长、要全、要带规则和示例。
 - `description()` → **人**。实测只有两个调用点：`hooks/useCanUseTool.tsx:56`（权限对话框"这个工具要干什么"）和 `MCPToolDetailView.tsx:70`（详情页）。所以要短、是人话、能带着**具体参数**说清后果。
@@ -306,13 +306,14 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 为什么要排除 Read？源码注释写得很直白：Read 的结果落盘，会导致 **Read → 结果文件 → 再 Read 它** 的循环，指数级放大。而 Read 本身已经用 `fileReadingLimits` 自我约束了。
 
+
 </details>
 
 **Q4**：一个工具明明返回了 `contextModifier`，却没有任何效果，而且不报错。最可能是什么原因？
 
-<details><summary>点开看答案</summary>
+<details>
 
-它的 `isConcurrencySafe()` 返回了 `true`。
+<summary>它的 `isConcurrencySafe()` 返回了 `true`。</summary>
 
 `Tool.ts:329` 那句注释是全文最容易被忽略的一句：**"contextModifier is only honored for tools that aren't concurrency safe."**
 
@@ -329,7 +330,6 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 **顺带两个读源码才看得出的问题**（不设问，直接给结论）：
 
 1. **`isDestructive` 是个事实上的死字段** —— 三个外部调用点全部写成 `tool.isDestructive?.({})`（`print.ts:1661`、`MCPToolListView.tsx:62`、`MCPToolDetailView.tsx:48`），传的是空对象；而 `ExitWorktreeTool.ts:168` 的实现是 `return input.action === 'remove'`，永远拿到 `undefined`。结果：CLI 的 MCP 列表里永远不会出现 `[destructive]` 标记。
-
 2. **这份源码不能 `tsc`** —— `Tool.ts` 依赖的 `src/types/message.ts`、`src/types/tools.ts`、`src/types/utils.ts` 在仓库里**不存在**（`types/message.ts` 被 75 个文件 import，是缺失最多的一个）。不影响阅读：全是 `import type`，打包时被整段擦除。副作用是 `DeepImmutable<T>` 的定义看不到，只能按用法推断为"递归 readonly"。
 
 ---
@@ -340,7 +340,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 **1. 四个"取工具列表"的函数，谁是谁？**
 
-`getAllBaseTools()` 是全量清单（不做过滤）；`getTools(ctx)` 在它基础上滤掉特殊工具、deny 规则、`isEnabled()` 为假的；`filterToolsByDenyRules()` 只做 deny 过滤（MCP 工具也要过）；`assembleToolPool(ctx, mcp)` 才是真正在用的"内置 + MCP 合并"。
+`getAllBaseTools()` 是全量清单（不做过滤）；`getTools(ctx)` 在它基础上滤掉特殊工具、deny 规则、`isEnabled()` 为假的；`filterToolsByDenyRules()` 只做 deny 过滤（MCP 工具也要过）；`assembleToolPool(ctx, mcp)` 才是真正在用的"内置 + MCP 合并"。  
 那 `getMergedTools()` 呢？**它是死代码，外部调用点 0 个。**
 
 **2. `feature('KAIROS')` 和 `process.env.USER_TYPE === 'ant'` 差在哪？**
@@ -356,78 +356,82 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 它不是"内部字段不方便暴露"，而是**安全边界**。一旦模型能填它，就能拿一条无害命令配一次任意文件写入，同时绕开权限检查和沙箱。所以代码用 `fullInputSchema`（含全字段），模型用 `inputSchema`（omit 掉它）——**同一份类型，两套 schema**。
 
 <details>
+
 <summary>点开看三个读源码才看得出的问题</summary>
 
 1. **`specialTools` 里有一条永远不命中** —— `SYNTHETIC_OUTPUT_TOOL_NAME` 被放进过滤集合，但它**根本不在** `getAllBaseTools()` 的清单里。过滤一个不存在的东西，无害，但说明清理时漏了一行。
-
 2. **`BashTool.userFacingName` 里藏着一次 P0 事故的修复**（源码注释 issue #21605）：`shouldUseSandbox → splitCommand → shell-quote` 每次调用都 `new RegExp`，而这个函数对历史里每条 bash 消息都在每次渲染时跑一遍。50 条消息就超过 shimmer 的 tick 间隔 → 动画中断 → 无限重试。修法不是加缓存，而是**把最便宜的判断提到最前面**（先查环境变量），让绝大多数用户根本不执行后面的重活。
-
 3. **`assembleToolPool` 为什么要分两段排序** —— 不是代码风格，是**钱**。服务端在"最后一个内置工具"之后放缓存断点，如果 MCP 工具被整体排序插进内置工具中间，断点之前的序列就变了，prompt cache 全失效，每次请求按全价计费。一个排序细节直接连着运营成本。
 
 </details>
 
 ---
 
-## 第 4 步 · `bashSecurity.ts`（2,592 行）读完了吗？四个自测问题
+## 第 4 步收尾（`bashSecurity` + `bashPermissions`）读完了吗？四个自测问题
+
+**1. 这两个 2600 行的文件，分工到底是什么？**
+
+`bashSecurity.ts` 回答「这条命令**能不能被可信地解析**」——22 个 validator 全在做同一件事：找出「检测器看到 A、bash 执行 B」的偏差。  
+`bashPermissions.ts` 回答「解析完之后**要不要放行**」——拆子命令、查规则、看路径、问用户。  
+判据只有一句话：**前者只有否决权，没有批准权**（它的 `allow` 会被降级成 `passthrough`）。
+
+**2. 为什么 allow 规则和 deny 规则用**不同**的环境变量剥离强度？**
+
+这是刻意的**有方向的不对称**，不是不一致：
+
+| 规则 | 剥离强度 | 为什么 |
+| --- | --- | --- |
+| allow | 只剥 `SAFE_ENV_VARS` 白名单 | 多剥一点就可能把 `DOCKER_HOST=evil docker ps` 认成 `docker ps` 而**自动放行** |
+| deny／ask | `stripAllLeadingEnvVars` 剥光所有赋值 | 少剥一点就可能让 `FOO=bar rm -rf /` **绕过** `Bash(rm:*)` |
+
+两种错误的代价不同（误放行 vs 误拦截），所以朝不同方向偏。很多权限系统的失败就在于对两者用了同一套归一化逻辑。
+
+**3. `pendingClassifierCheck` 为什么写成 `...(feature('BASH_CLASSIFIER') ? {...} : {})` 这种丑样子？**
+
+因为要**删得掉**。如果写成 `pendingClassifierCheck: feature(...) ? x : undefined`，属性名还在包体里，Bun 的 DCE 只能删值、删不掉键 —— 而 UI 侧判断的正是「有没有这个键」。用对象展开，整个属性连同键一起消失，这才是真正的死代码消除。  
+这个技巧和文件头那条「DCE 悬崖」是同一套知识的两面：一面是别把函数写太复杂，另一面是别把死代码写得删不掉。
+
+**4. 为什么管道分支里 `compoundCommandHasCd` 不能硬编码 `false`？**
+
+因为那是一次真实漏洞。`cd .claude && echo x > settings.json | echo done` 会走管道分段这条路，而分段路径把 `compoundCommandHasCd` 当 `false` → `pathValidation.ts:821` 那个「cd + 重定向」拦截不触发 → 重定向写进了 `.claude/settings.json`。  
+修法不是补一个参数，而是让 `commandHasAnyCd(input.command)` 从**完整命令**重新计算 —— **能被重新计算的全局事实，就不要靠参数传递。**
 
 <details>
-<summary>点开看四个问题</summary>
 
-**1. `earlyValidators` 里三个 validator 明明返回 `allow`，为什么调用方要把它降级成 `passthrough`？**
+<summary>点开看三个读源码才看得出的问题</summary>
 
-因为本函数的结论会被 `bashPermissions` 当成"安全许可"。如果它能返回 allow，那么一个误判就等于**一次自动执行**（跳过规则匹配、分类器、用户确认）。降级成 passthrough 的语义是"我这关没意见，请继续走正常权限流程"——安全检查的能力被限制成**只能否决、不能批准**。副作用：`updatedInput` 变成没人读的死数据。
-
-**2. `nonMisparsingValidators` 只有两个成员。`validateCarriageReturn` 为什么刻意不在里面？**
-
-CR 是**解析器打架**：JS 的 `\s` 包含 `\r`，bash 的 IFS 不含。所以 `TZ=UTC\recho curl evil.com` 在 validator 眼里是 `echo curl evil.com`（命中 `Bash(echo:*)` 允许规则），在 bash 眼里是 `curl evil.com`。放进 `nonMisparsingValidators` 就意味着它的 ask 只值"问一声"、用户可能点允许——而"解析器不可信"的命令不允许被允许。
-
-**3. `isSafeHeredoc` 为什么必须逐行找闭合分隔符，不能用 `[\s\S]*?`？**
-
-懒惰匹配会跳过第一个 `DELIM` 去找后面的 `DELIM)`，把中间的命令当成 body。而 bash 在**第一个**匹配行就闭合了。样本：
-
-```
-$(cat <<'EOF'
-data
-EOF
-; rm -rf /
-EOF)
-```
-
-`[\s\S]*?` 认为 body 是 `data\nEOF\n; rm -rf /`，全在 heredoc 里；bash 在第 3 行闭合，`rm -rf /` 是真命令。
-
-**4. 一条命令过了 `bashToolHasPermission`，但它不是"绝对安全"，只是"权限判定通过了"。为什么这个区别在 `BashTool` 里很要紧？**
-
-因为 `bashSecurity` 只回答"我能不能信任我对这条命令的解析"。它**不知道**用户配了什么规则、当前是什么模式、沙箱是否开启。真正的放行是后面的事，而且可能是自动放行（acceptEdits 模式下全 cwd 路径的 `mv`）。所以"安全检测通过"绝不等于"这条命令无害"——`mv ./decoy '<\n>#' ~/.ssh/id_rsa ./exfil` 就是安全检测通过、权限判定自动允许、然后私钥被移走的例子。
-
-</details>
-
-<details>
-<summary>点开看五个读源码才看得出的问题</summary>
-
-1. **两个 `_DEPRECATED` 函数有 80% 是逐字重复** —— 两个前置检查、earlyValidators 循环、19 个 validator 数组、defer 循环全部复制粘贴。改一处必须改两处，漏改不报错，只让两条路径行为不一致。判断走哪条：调用者是 async 就走 async 那个。没有任何机制能发现这种同源分歧。
-
-2. **heredoc 解析做了两遍** —— `isSafeHeredoc`（判安全）用 `line === delimiter`，`stripSafeHeredocSubstitutions`（只剥离）用 `line.startsWith(delimiter)`。同一条命令可能在一个函数里"不安全"、在另一个里"可剥离"。
-
-3. **`UNICODE_WS_RE` 的清单不完整** —— 区间到 `\u200A` 为止，所以 `\u200B`（零宽空格）、`\u200C`/`\u200D`（ZWNJ/ZWJ）都不在检测范围内。但这**不构成漏洞**：这三个字符既不是 bash 的 IFS 成员，也不是 JS 的 `\s`，两个解析器都不当分隔符，没有差异可用。知道清单不完整、也知道为什么不完整，比盲目相信清单有用。
-
-4. **`ZSH_DANGEROUS_COMMANDS` 里混了一个非命令** —— `mapfile` 不是可执行命令，是 `zmodload zsh/mapfile` 之后拿到的关联数组（赋值即写文件）。放进"base command 黑名单"里永远匹配不到。它的实际作用是**写给下一位维护者的备注**。
-
-5. **`validateEmpty` 的 allow 消息用户永远看不到** —— "Empty command is safe" 被降级成 passthrough 的 message，而 passthrough 在最终返回时又被覆盖成 "Command passed all security checks"。空命令这个结论在任何日志里都不存在。
+1. **`speculativeChecks` 这个 Map 只增不减** —— 写入点是每次 bash 工具调用（`toolExecution.ts:746`），删除点只有「需要弹窗时取出」和「清屏／压缩后整体清空」。也就是说：**自动放行的命令会把自己的 promise 永久留在 Map 里**。长会话里跑几千条命令，它就是一处只涨不落的堆占用。顺带一提，它的键只有命令字符串、没有 cwd，而分类器的输入里是带 cwd 的。
+2. **注释里有两个已经不存在的编号** —— 第 2417 行写着「这些在 step 13 已经过滤掉了」，第 2454 行写着「这和 6b 不同」。这个函数早期给每一步都编了号，后来重构删掉了大半，残留的交叉引用指向**不存在的步骤**。读到不用去找。
+3. **`GH#28784` 的本质不是权限 bug，是文案 bug** —— 弹窗上写「是的，允许读取 `<dir>/`」，用户点下去批准的却是 `python3` 执行。修法是：只要有任何子命令自己产出 ask，就不让 path 的 ask 短路返回，改为合并所有非 allow 子命令的规则建议。一句话：**弹窗文案是权限决策的一部分，用户点的是「这句话所描述的事」。**
 
 </details>
 
 ---
 
+## 第 4 步完整清单
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`Tool.ts`](annotated/src/Tool.ts) | 792 | 2,013 | 工具类型契约，逐字段讲「为什么必须有」 |
+| [`tools.ts`](annotated/src/tools.ts) | 389 | 647 | 工具注册表 + 两套条件加载 |
+| [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) | 1,143 | 1,757 | 最复杂的工具实现 |
+| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | 141 | 314 | 退出码语义判定表 |
+| [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) | 2,592 | 3,658 | 22 个 validator 的编排 |
+| [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) | 2,621 | 3,906 | 895 行主函数的权限裁决编排 |
+
+合计 **7,678 行原文**，全部逐行保真（`scripts/check-fidelity.py` 可复算）。
+
+---
+
 ## 继续往下读之前
 
-第 4 步只剩最后一个文件：[`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) —— 2,621 行，`bashToolHasPermission` 就在这儿。
+第 5 步是主循环，也是整份源码里**调用关系最绕**的一段：
 
-它和刚读完的 `bashSecurity.ts` 分工很清楚：**`bashSecurity` 回答"这条命令能不能被信任地解析"，`bashPermissions` 回答"这条命令要不要放行"**。后者会用到前者的结论（第 2085-2107 行那个 misparsing 闸门），再叠上规则匹配、沙箱判定、分类器、用户确认。
+- [`src/constants/prompts.ts`](source/src/constants/prompts.ts) —— 系统提示词怎么拼出来
+- [`src/query.ts`](source/src/query.ts) —— 那个 `while(true)` 异步生成器
+- [`src/QueryEngine.ts`](source/src/QueryEngine.ts) —— 把 query 包成可复用的引擎
+- [`src/services/api/claude.ts`](source/src/services/api/claude.ts) —— 流式响应、重试、缓存
 
-`BashTool.tsx` 里 `checkPermissions` 那一行只做转发，真正的判定全在这两个文件里。想彻底搞懂"AI 怎么安全地跑命令"，这两个必须读。
+建议先读 [03 篇](docs/03-启动流程.md) 和 [06 篇](docs/06-对话主循环与模型调用.md) 拿到骨架，再回来逐行读代码 —— 这里的控制流比第 4 步难跟，因为它是**生成器套生成器**。
 
-再往下是第 5 步（主循环）：`constants/prompts.ts`、`query.ts`、`QueryEngine.ts`、`services/api/`。
-
-告诉我「继续 bashPermissions」或「继续第 5 步」，我就接着批注。
-
-
+告诉我「继续第 5 步」，我就接着批注。
