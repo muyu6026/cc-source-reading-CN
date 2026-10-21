@@ -104,6 +104,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
+| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅ | 🚧 消息渲染主链（4/389） |
 
 ---
 
@@ -823,7 +824,7 @@ AS:  issuer = http://evil.com, token_endpoint = http://evil.com/token
 
 ## 第 7 步（多智能体）读完了吗？
 
-UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不影响理解主线。但 `ink/` 那 1.3 万行的**渲染器本身**后来补上了（见第 8 步），因为它是「多智能体产出的文字怎么变成屏幕」的另一半。
+UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影响理解主线。但 `ink/` 那 1.98 万行的**渲染器本身**后来补上了（见第 8 步），因为它是「多智能体产出的文字怎么变成屏幕」的另一半；`components/` 则到了第 9 步才回头补消息渲染主链（**实测 8.2 万行、389 个文件** —— 这个数之前一直误写成 4.2 万）。
 多智能体这半边四个文件正好是一条完整的链：
 
 | 文件 | 原文 | 批注版 | 讲什么 |
@@ -1548,6 +1549,130 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 反过来说：**注释最少的文件（`use-app.ts` / `Spacer.tsx`）恰好是没有坑的文件**。读代码时这是一个可用的信号 —— 一个 200 行的文件如果注释寥寥，通常不是「作者不爱写注释」，是「这段代码不需要解释」。
 
+## `components/` 的消息渲染主链读完了吗？七道自测题
+
+`src/ink/` 清零之后，`components/` 是这个仓库剩下最大的一块 —— 实测 **389 个文件、81,550 行**（不是之前估的「4.2 万行」，那个数字错了两倍，见本节末尾）。它不属于任何一条主干，是「产品逻辑长在渲染器上」的那一层。
+
+这一批挑了最架构性的四份：**消息从数组变成一行的完整路径**。
+
+| 文件 | 行数 | 它回答的问题 |
+| --- | --- | --- |
+| `Messages.tsx` | 834 | 七道工序：规范化 → 切边界 → 重排 → 过滤 → 分组 → 折叠 → 切片 |
+| `MessageRow.tsx` | 383 | 这一行**以后还会不会变**（决定能不能推上 scrollback） |
+| `Message.tsx` | 627 | 按消息类型 / 块类型两次分发到十四个渲染组件 |
+| `messageActions.tsx` | 450 | 键盘光标：哪些行值得停、每个键做什么、底部状态条 |
+
+**共 2,294 行原文（批注版 3,619 行）、119 处锚点。**
+
+**84 `MessageRow` 的比较器为什么要算一个布尔「我是不是最新那条 bash 输出」，而不是直接比 `latestBashOutputUUID`？**
+
+因为直接比字符串，会让**所有行**在这一项上失配：最新 bash 从 A 换成 B 时，2800 行的 `latestBashOutputUUID` prop 都从 A 变成了 B。
+
+化简成布尔之后，只有 A 和 B 两行的判定结果发生变化，其余 2798 行的 `prevIsLatestBash === nextIsLatestBash` 成立，继续往下走。
+
+同一个手法在这一批里出现三次：`lastThinkingBlockId` 也是先过一道 `hasThinkingContent(next.message)` 的门，才允许它打穿 memo。**规律是：全局值变化时，先把它折成本地判据，再比较。**
+
+**85 `Messages.tsx` 里有一个真 bug，`Date.now()` 用错了地方 —— 它是什么？**
+
+`isStreamingThinkingVisible` 的 useMemo 依赖是 `[streamingThinking]`，但函数体里读了 `Date.now()`：
+
+```
+Date.now() - streamingThinking.streamingEndedAt < 30000
+```
+
+只要 `streamingThinking` 的引用不变，这个 memo 就不重算，**30 秒的窗口永远不会自己过期**。
+
+为什么平时看不出来：流式期间 Messages 几乎每帧都在重渲染（`streamingText` 在变），但那些重渲染不会让这个 useMemo 失效；而下一轮对话通常在 30 秒内就开始了，窗口根本没机会被观察到。
+
+正确写法要么把「现在」做成一个 tick 状态，要么干脆不用 useMemo。**只要 useMemo 里读了 `Date.now()`，它就是一个会被缓存的时钟。**
+
+**86 为什么不能用 `slice(-200)` 截断？修复之后为什么锚点要同时存 uuid 和 index？**
+
+三种切法都试过，注释里记了三次事故编号：
+
+| 方案 | 怎么坏的 |
+| --- | --- |
+| `slice(-200)` | 每追加一条就从头部掉一条 → 屏幕内容整体上移 → 每轮一次全量重置（CC-941） |
+| 量化到 50 条一档 | 压缩和折叠重组也会改变 `collapsed.length` 而**不新增消息**，仍在挪（CC-1154） |
+| UUID 锚点 | 只在真的超过 CAP+STEP 时才前进（CC-1174） |
+
+而 uuid 本身也不稳定：`collapseHookSummaries` 用组里**第一条**的 uuid 当合并后的 uuid，而 `reorderMessagesInUI` 会随 tool result 到达重排 hook 的相邻关系，于是「哪条第一」会变、合并 uuid 跟着变。
+
+所以 uuid 丢了就退回存下来的 index（clamp 过）。**优先用稳定标识，标识消失时用最后已知位置兜底，且兜底绝不倒退到 0** —— 退到 0 会让渲染窗口从 ~200 条跳到全部历史，屏幕上那些已经画出去的「进行中」徽标再也不会被更新。
+
+**87 `MessageActionsSelectedContext.Provider` 放在 `MessageRow` 外面，可是 memo 会 bail out —— 内部组件怎么还能拿到新值？**
+
+这是 React context 最容易被误解的一点：**memo 拦住的是 prop 驱动的重渲染，拦不住 context 传播。**
+
+三步走：
+
+1. Provider 的 value 变 → Provider 重渲染 → 新的 row 元素传给 MessageRow
+2. MessageRow 的 memo 比较器发现 `message` 引用没变 → bail out，组件函数**不执行**
+3. 但 React 的 context 更新会**穿透** bail out 的子树，直接通知那些调了 `useContext` 的组件
+
+所以「跳过重渲染」和「拿到新值」可以同时成立。这就是注释里 "only 2 rows re-render" 的全部机制 —— 只有真正调了 `useSelectedMessageBg` 的组件更新，其余整行一个字都不重算。
+
+如果把这个状态当 prop 传，就得加进 memo 比较器，2800 行每行比一次。
+
+**88 `MESSAGE_ACTIONS` 里有两条动作的 key 都叫 `enter`，为什么不出问题？什么时候会出问题？**
+
+因为两条的 `types` 没有交集：一条管 `grouped_tool_use / collapsed_read_search / attachment / system`（翻转展开），一条管 `user`（进入编辑）。`isApplicable` 先按类型过滤，所以任何时候最多一条匹配。
+
+`useMessageActions` 里还有个 `new Set(MESSAGE_ACTIONS.map(a => a.key))` 去重 —— 不去重的话 `h['messageActions:enter']` 会被赋值两次，后一次覆盖前一次。当前**恰好无害**，因为两条的 handler 体完全一样（都是 `find(a => a.key === key && isApplicable(a, c))`）。
+
+会出问题的地方在 `MessageActionsBar`：它用 `key={a_0.key}` 渲染。如果将来加了两条同 key 且 types 有交集的动作，React 会报 duplicate key，症状是**其中一个的提示不显示**。
+
+**89 `Message.tsx` 的 switch 为什么没有兜底 default？漏了类型会怎样？**
+
+外层 switch 覆盖了 `RenderableMessage` 的全部六种类型（`progress` 在上游 `Messages.tsx` 就被过滤掉了）。TypeScript 能验证这种穷尽性，但**运行时没有兜底** —— 真漏了会返回 `undefined`，React 报「渲染返回了 undefined」。
+
+内层那个 `AssistantMessageBlock` 的 switch **有** default，而且它调 `logError`。这个差异是有意的：
+
+- 外层是**我们自己定义的类型**，穷尽性可以靠类型系统保证
+- 内层是**API 返回的块类型**，服务端随时会加新的，必须能兜住
+
+判据可以写成：**类型定义在自己手里的，靠编译器；类型定义在协议里的，靠运行时兜底。**
+
+**90 同一个判据在两个文件里各写了一遍 —— 这是这一批最值得警惕的结构**
+
+有两组：
+
+| 判据 | 一处 | 另一处 |
+| --- | --- | --- |
+| collapsed 组永不静态 | `Messages.tsx` 的 `shouldRenderStatically` 返回 false | `MessageRow.tsx` 的比较器里显式 return false |
+| 「是不是最新 bash」 | `Message.tsx` 的 `areMessagePropsEqual` | `MessageRow.tsx` 的 `areMessageRowPropsEqual` |
+
+它们必须**同时**成立才有意义：判成静态（推上 scrollback）但 memo 又允许跳过重渲染 → 时态永远停在 "Reading…"，没有任何东西会再重渲染它。
+
+这类「一个不变量，两处表达」的代码，改动时最容易只改一处。而且症状不是崩溃，是**某些行的内容再也不更新** —— 极难定位。
+
+### 这一批的三个方法论收获
+
+**一、React Compiler 的产物怎么读（第三次总结，这次是完整版）**
+
+`_c(64)` 建 64 个槽，每个 `if ($[n] !== x)` 是「上次算的一样就复用」。读法是：**删掉所有 `$[n]` 的赋值和读取，只看 `if` 条件里的真实变量，以及 else 分支里 `tX = $[M]` 对应回哪个原始表达式**。
+
+`MessageRow` 第 117-128 行那段，还原之后就是一行：
+
+```
+isActiveCollapsedGroup = isCollapsed &&
+  (hasAnyToolInProgress(msg, inProgressToolUseIDs) || (isLoading && !hasContentAfter))
+```
+
+另外 `Symbol.for("react.memo_cache_sentinel")` 作初值的槽是**永久缓存**（从不失效），用来存纯静态的 JSX。
+
+**二、「按行展开成标量」不只是可读性问题**
+
+`hasContentAfterIndex` 的注释给了一个数字：把 `renderableMessages` 数组当 prop 传给每一行，React Compiler 会把它钉在 fiber 的 memoCache 里，7 轮对话累计 1-2MB —— 而这是**每行一份**。
+
+所以「传布尔而不是传数组」在这套代码里是内存决策，不只是 API 整洁。
+
+**三、索引里的数字错了两倍，这是第四次**
+
+之前几轮一直写「`src/components/` 4.2 万行」，实测是 **81,550 行、389 个文件**。错因是早期只 `ls` 了根目录 113 个文件（24,266 行），把子目录 23 个目录（5.7 万行）漏了。
+
+这已经是第四次「既有数字是错的」（前三次：文件数 38→41、行数 4.97 万→3.89 万、锚点 829→2,010）。**报数一律脚本算，不引用上一轮的数字。**
+
 ## 继续往下读之前
 
 **第 6 步的三条主线都完整了**：
@@ -1604,13 +1729,30 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 **两个方向在这里合上**：输出侧把「一个汉字」写成两个 `int` 加一串 SGR；输入侧把「一次拖选」还原成屏幕坐标上的一个区间。中间那块共享的东西只有一样 —— `screen.ts` 的格子布局。所以选区的坐标能直接当渲染坐标用，不需要任何换算。
 
+**再往上一层（第 9 步，`components/`）**，消息主链是这样：
+
+```
+messages 数组（服务端原始）
+  └─ Messages.tsx  七道工序（规范化 → 切边界 → 重排 → 过滤 → 分组 → 折叠 → 切片）
+        ├─ 大 useMemo    只管内容：27k 条 × 6 Maps + 4 趟 filter
+        ├─ 小 useMemo    只管窗口：sliceStart / renderRange
+        └─ 每行 → MessageRow.tsx   ← 只回答一个问题：这一行以后还会变吗
+              ├─ shouldRenderStatically  → 能变吗（决定能否推上 scrollback）
+              ├─ areMessageRowPropsEqual → 要重渲染吗
+              └─ Message.tsx             两次 switch：消息类型 → 块类型
+                    └─ components/messages/ 十四个渲染组件
+                          └─ ink 的 Box / Text / RawAnsi / NoSelect
+```
+
+中间那条分界很清楚：**`Messages` 管「显示哪些」，`MessageRow` 管「还会不会变」，`Message` 管「怎么画」**。三层各自有一个 memo，各自有一个不变量。
+
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
 - [`src/ink/`](source/src/ink/) **整个目录已清零**：96 个文件、19,842 行，根目录 43 + `layout/` 4 + `termio/` 9 + `events/` 10 + `hooks/` 12 + `components/` 18。渲染器、样式层、转义解析、输入侧、交互原语，一条不缺
 - [`src/services/mcp/`](source/src/services/mcp/) 十六个小件已全部批注完（见上一节），这条线现在没有未读角落了
-- [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
+- [`src/components/`](source/src/components/)（**8.2 万行，389 个文件**）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构。已批注消息渲染主链四份（`Messages` / `MessageRow` / `Message` / `messageActions`，2,294 行），剩 385 个文件、79,256 行
 
-到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩**：147 个文件、54,977 行原文（批注版 90,791 行）、2,875 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完，输入输出两个方向也闭合了，`ink/` 一个文件不剩，界面层也已经开了头**：151 个文件、57,271 行原文（批注版 94,410 行）、2,994 处锚点。从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端 —— 反方向也从一次按键、一次拖选回到同一块屏幕缓冲；而 MCP 这条线上「连接之外的一切」（名字、闸、审批、表单、动态 header）也都补齐了，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1621,7 +1763,8 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
 - **回头重读** —— 我推荐这个。九条线都闭合了，输入输出两个方向也通了，现在重读任何一处都比第一次清楚
-- **`src/components/`**（4.2 万行，389 个文件）—— 唯一剩下的大块。具体界面组件，读它们得到的是产品逻辑而不是架构。真要读，优先 `PromptInput`（输入框那一套，和 `useInput` / `useDeclaredCursor` 直接接壤）和 `Messages`（消息渲染，接 `RawAnsi` / `Ansi` / `NoSelect`）
+- **`components/PromptInput/`**（15 个文件、5,161 行）—— 输入框那是下一块最值的。`PromptInput.tsx` 一家就 2,338 行，它和已经读完的 `useInput` / `useDeclaredCursor` / bracketed paste 直接接壤，也是全仓库唯一同时处理「多行编辑 + 光标定位 + 粘贴 + 语音 + 队列命令」的地方
+- **`components/messages/`**（19 个文件、5,509 行）—— 消息体那十四个渲染组件，是 `Message.tsx` 分发之后的目的地。`SystemTextMessage.tsx`（826 行）和 `AttachmentMessage.tsx`（535 行）最大
 - **`src/tools/` 里没批注的** —— 主线那批只读了 `BashTool` / `FileRead` 等核心几个，剩下的每个工具都是「一个 schema + 一段提示词 + 一段执行」，读起来快但收获也薄
 
 ---
