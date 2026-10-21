@@ -80,10 +80,12 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **两个自动例外**：
 
-- 内联 `sourceMappingURL`（一行几万到十六万字符的 base64）会被换成一句中文说明，校验时标成 `OK*` 而不是失败。共 4 个文件命中（`cli.tsx` / `ink.tsx` / `AgentTool.tsx` / `BashTool.tsx`）
+- 内联 `sourceMappingURL`（一行几万到十六万字符的 base64）会被换成一句中文说明，校验时标成 `OK*` 而不是失败。**当前命中 60 个文件** —— 凡是 React Compiler 编译过的 `.tsx` 基本都带这么一行，只有少数手写 `.ts` 没有。查当前名单：`python scripts/check-fidelity.py | grep 'OK\*'`
 - 原文里 CRLF 行尾的文件，批注版统一成 LF（否则会是「代码行 CRLF + 批注行 LF」的混合行尾）。git 仓库里本来就存 LF，所以这一步在 diff 上看不出变化
 
 然后跑 `python scripts/check-links.py` 检查所有 Markdown 链接（源码链接 + 文档内链）。
+
+想知道某个目录**还剩多少没批注**，跑 `python scripts/check-coverage.py`（不带参数看 `services/`）：它按子目录列出「已做/总数 + 已做行数/总行数」，并把未做的文件按行数降序排出来。本文档里所有「N/M 份」的数字都来自它，不是手数的。
 
 **总原则：只允许变多，不允许变样。**
 
@@ -101,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅<br />[`mcp/` 其余 16 个小件](annotated/src/services/mcp/) ✅ | ✅ 完成（含 16 个小件） |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅ | 🟡 5 个子目录清零<br />全目录 63/130 文件（57% 行数） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
 | **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行） | 🚧 消息主链 + 输入框 + 消息体（66/389） |
@@ -520,32 +522,178 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
-## 第 6 步（服务层）读完了吗？
+## 第 6 步（服务层）做到哪了？——5 个子目录清零，全目录 63/130
 
-第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工十五个：
+`src/services/` 是整份源码里最大的目录：**130 个文件 / 53,683 行**。
+它不是「一个模块」，而是十几个互不相干的模块挤在同一个目录名下
+（API 客户端、压缩、MCP、OAuth、LSP、遥测、语音、插件管理……）。
 
-| 文件                                                                        | 原文    | 批注版   | 讲什么                                        |
-| ------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------ |
-| [`withRetry.ts`](annotated/src/services/api/withRetry.ts)                 | 822   | 1,419 | 重试边界、退避曲线、529 白名单、无限重试模式                   |
-| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153   | 329   | 发给 API 的 `context_management` 指令（**不调模型**） |
-| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts)         | 351   | 668   | 阈值计算、四道抑制闸门、三振熔断、session memory 优先         |
-| [`compact.ts`](annotated/src/services/compact/compact.ts)                 | 1,705 | 3,628 | 摘要压缩本体、PTL 逃生舱、七类附件重建                     |
-| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts)       | 530   | 1,352 | 缓存热不热决定改不改本地内容                            |
-| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐                   |
-| [`mcp/client.ts`](annotated/src/services/mcp/client.ts)                   | 3,348 | 4,776 | 七种 transport、错误桥接、MCP 工具封装                |
-| [`mcp/config.ts`](annotated/src/services/mcp/config.ts)                   | 1,578 | 3,077 | 六种配置来源、优先级、去重、白黑名单策略                      |
-| [`compact/prompt.ts`](annotated/src/services/compact/prompt.ts)           | 374   | 723   | 压缩提示词本体，三套模板的差异与理由                         |
-| [`grouping.ts`](annotated/src/services/compact/grouping.ts)               | 63    | 202   | 按 API 轮次切刀口，以及为什么只有一个判据                     |
-| [`postCompactCleanup.ts`](annotated/src/services/compact/postCompactCleanup.ts) | 77 | 339   | 压缩后清什么、清哪一层、什么故意不清                         |
-| [`timeBasedMCConfig.ts`](annotated/src/services/compact/timeBasedMCConfig.ts) | 43 | 228   | 缓存注定要 miss 时顺手整理上下文                        |
-| [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题                                 |
-| [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件                       |
-| [`mcp/auth.ts`](annotated/src/services/mcp/auth.ts)                       | 2,465 | 4,356 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁           |
-| [`mcp/xaa.ts`](annotated/src/services/mcp/xaa.ts)                         | 511   | 812   | 两跳换票：id_token → ID-JAG → access_token、三道防混淆闸 |
-| [`mcp/xaaIdpLogin.ts`](annotated/src/services/mcp/xaaIdpLogin.ts)         | 487   | 709   | 一次浏览器弹窗、id_token 按 issuer 缓存、URL 拼接两个坑  |
-| [`mcp/useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) | 1,141 | 1,631 | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线 |
+所以这一节的进度**按子目录报，不按「第几步」报**。
+之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——
+当时全目录只做了 35 份，`services/api/` 还有 18 份没动，
+而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。
+现在这 5 个子目录是真清零了：
 
-合计 **14,312 行原文**，704 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完；MCP 这条线四段全通：`config.ts`（允不允许连）→ `client.ts`（连上怎么活）→ `auth.ts`（401 之后怎么办）→ `xaa*.ts`（不弹窗那条路怎么走），最后 `useManageMCPConnections.ts` 把它接进 UI。目录里剩下 16 个百行级小件（`utils.ts` 575、`elicitationHandler.ts` 313、`channel*.ts` 等），单独看价值不高，暂时跳过。
+| 子目录                     | 文件    | 原文行数      | 中文批注行 | 状态      |
+| ----------------------- | ----- | --------- | ----- | ------- |
+| `services/mcp/`         | 23/23 | 12,311    | 4,414 | ✅ 清零    |
+| `services/api/`         | 20/20 | 10,477    | 2,807 | ✅ 清零    |
+| `services/compact/`     | 11/11 | 3,960     | 3,407 | ✅ 清零    |
+| `services/oauth/`       | 5/5   | 1,051     | 325   | ✅ 清零    |
+| `services/tools/`       | 4/4   | 3,113     | 292   | ✅ 清零    |
+| `services/` 其余（15 个子目录 + 根目录） | 0/67  | 22,771    | —     | ⬜ 未开始   |
+| **合计**                  | **63/130** | **30,912 / 53,683（57%）** | **11,245** | 🟡 五个子目录清零 |
+
+> 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；
+> 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计 23,462」大。
+
+---
+
+### `services/api/` —— 20 份（一次请求怎么发、怎么失败、怎么记账）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`claude.ts`](annotated/src/services/api/claude.ts) | 3,419 | 4,655 | SSE 解析、缓存打点、sticky latch、三级降级 |
+| [`errors.ts`](annotated/src/services/api/errors.ts) | 1,207 | 1,467 | 错误分类、**错误转 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵 |
+| [`withRetry.ts`](annotated/src/services/api/withRetry.ts) | 822 | 1,418 | 重试边界、退避曲线、529 白名单、无限重试模式 |
+| [`logging.ts`](annotated/src/services/api/logging.ts) | 788 | 988 | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` |
+| [`filesApi.ts`](annotated/src/services/api/filesApi.ts) | 748 | 889 | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越、30 行手写并发池 |
+| [`promptCacheBreakDetection.ts`](annotated/src/services/api/promptCacheBreakDetection.ts) | 727 | 925 | 缓存为什么碎、只追 5 个前缀、`stripCacheControl`、MCP 名脱敏 |
+| [`sessionIngress.ts`](annotated/src/services/api/sessionIngress.ts) | 514 | 618 | 链式追加 + 乐观并发、409 和解、会话级串行 |
+| [`client.ts`](annotated/src/services/api/client.ts) | 389 | 583 | 四级 region 优先级、SDK logger 全走 stderr、只记布尔不记凭据 |
+| [`grove.ts`](annotated/src/services/api/grove.ts) | 357 | 491 | 三态开关、**失败不缓存否则死锁** |
+| [`referral.ts`](annotated/src/services/api/referral.ts) | 281 | 404 | 单飞存 Promise、主入口三条路径都不同步等网络 |
+| [`errorUtils.ts`](annotated/src/services/api/errorUtils.ts) | 260 | 408 | 18 个 OpenSSL 码穷举、沿 `cause` 链挖、两级判断深优先 |
+| [`dumpPrompts.ts`](annotated/src/services/api/dumpPrompts.ts) | 226 | 362 | init 块 + 增量日志、0.01ms 判断省 300ms 序列化 |
+| [`metricsOptOut.ts`](annotated/src/services/api/metricsOptOut.ts) | 159 | 276 | 两层 TTL 的职责划分、**缓存投毒**防御 |
+| [`bootstrap.ts`](annotated/src/services/api/bootstrap.ts) | 141 | 230 | 四道门、重试回调里必须重读 token |
+| [`overageCreditGrant.ts`](annotated/src/services/api/overageCreditGrant.ts) | 137 | 243 | 三个相似缓存三种过期策略 —— 因为这是钱 |
+| [`adminRequests.ts`](annotated/src/services/api/adminRequests.ts) | 119 | 187 | 可辨识联合、交叉类型而非嵌套、幂等 POST |
+| [`usage.ts`](annotated/src/services/api/usage.ts) | 63 | 117 | 三个提前返回 = 失败语义分三级 |
+| [`firstTokenDate.ts`](annotated/src/services/api/firstTokenDate.ts) | 60 | 118 | `!== undefined` 而非 `!x`（null 是有效答案）、写端校验让读端放心 |
+| [`ultrareviewQuota.ts`](annotated/src/services/api/ultrareviewQuota.ts) | 38 | 83 | `X \| null` 不给 undefined/异常、`logForDebugging` 与 `logError` 反推严重性 |
+| [`emptyUsage.ts`](annotated/src/services/api/emptyUsage.ts) | 22 | 73 | 一段注释里的 import 链自白、共享常量必须 `Readonly` |
+
+**这 20 份合起来回答一个问题**：一次 API 调用从发出到记账，中间要过哪些关。
+`client.ts` 造请求 → `claude.ts` 解流 → `withRetry.ts` 管重试 → `errors.ts` 决定
+失败长什么样 → `sessionIngress.ts` 把消息追加到会话 → `logging.ts` 记账。
+中间那些 `*.ts` 每一份都是这条链上某个具体问题的补丁。
+
+---
+
+### `services/compact/` —— 11 份（上下文快满时怎么办）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`compact.ts`](annotated/src/services/compact/compact.ts) | 1,705 | 3,628 | 摘要压缩本体、PTL 逃生舱、七类附件重建 |
+| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐 |
+| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts) | 530 | 1,352 | 缓存热不热决定改不改本地内容 |
+| [`prompt.ts`](annotated/src/services/compact/prompt.ts) | 374 | 723 | 压缩提示词本体，三套模板的差异与理由 |
+| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) | 351 | 668 | 阈值计算、四道抑制闸门、三振熔断、session memory 优先 |
+| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153 | 328 | 发给 API 的 `context_management` 指令（**不调模型**） |
+| [`postCompactCleanup.ts`](annotated/src/services/compact/postCompactCleanup.ts) | 77 | 339 | 压缩后清什么、清哪一层、什么故意不清 |
+| [`grouping.ts`](annotated/src/services/compact/grouping.ts) | 63 | 202 | 按 API 轮次切刀口，以及为什么只有一个判据 |
+| [`timeBasedMCConfig.ts`](annotated/src/services/compact/timeBasedMCConfig.ts) | 43 | 228 | 缓存注定要 miss 时顺手整理上下文 |
+| [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题 |
+| [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件 |
+
+---
+
+### `services/mcp/` —— 23 份（MCP 从「允不允许连」到「接进 UI」）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`client.ts`](annotated/src/services/mcp/client.ts) | 3,348 | 4,775 | 七种 transport、错误桥接、MCP 工具封装 |
+| [`auth.ts`](annotated/src/services/mcp/auth.ts) | 2,465 | 4,355 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁 |
+| [`config.ts`](annotated/src/services/mcp/config.ts) | 1,578 | 3,076 | 六种配置来源、优先级、去重、白黑名单策略 |
+| [`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) | 1,141 | 1,630 | 异步事件 → AppState 的适配层、16ms 批处理 |
+| [`utils.ts`](annotated/src/services/mcp/utils.ts) | 575 | 651 | 名字过滤、配置哈希、过期客户端回收、项目级 server 信任判定 |
+| [`xaa.ts`](annotated/src/services/mcp/xaa.ts) | 511 | 811 | 两跳换票：id_token → ID-JAG → access_token、三道防混淆闸 |
+| [`xaaIdpLogin.ts`](annotated/src/services/mcp/xaaIdpLogin.ts) | 487 | 708 | 一次浏览器弹窗、id_token 按 issuer 缓存、URL 拼接两个坑 |
+| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts) | 316 | 360 | 通道的六道闸 + `<channel>` 标签怎么拼 |
+| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts) | 313 | 360 | server 向人提问（表单 / 打开链接）的整条链路 |
+| [`types.ts`](annotated/src/services/mcp/types.ts) | 258 | 296 | 八种 transport 的配置 schema、连接状态机 |
+| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts) | 240 | 287 | 把审批提示发到手机，等一句 "yes tbxkq" |
+| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts) | 164 | 195 | 从 claude.ai 拉组织下发的 server 列表 |
+| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts) | 138 | 166 | 连之前先跑一条本地命令，拿动态 header |
+| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts) | 136 | 159 | 把 JSON-RPC 套进 control 信封，跨进程 |
+| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts) | 112 | 135 | 和 VSCode 扩展之间的两条 notification |
+| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts) | 106 | 132 | `mcp__server__tool` 的拼与拆 |
+| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts) | 78 | 102 | 回调端口怎么挑（含 Windows 的坑） |
+| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts) | 76 | 90 | 哪些插件被批准可以当通道 |
+| [`MCPConnectionManager.tsx`](annotated/src/services/mcp/MCPConnectionManager.tsx) | 73 | 236 | **React Compiler 编译产物读法**：`_c(6)` 缓存槽、`t0` 临时名、连 JSX 元素也缓存 |
+| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts) | 72 | 92 | 官方 MCP 名单（只用于埋点） |
+| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts) | 63 | 83 | 同进程里的一对假传输 |
+| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts) | 38 | 56 | `${VAR:-默认值}` |
+| [`normalization.ts`](annotated/src/services/mcp/normalization.ts) | 23 | 44 | 把 server 名洗成 `^[a-zA-Z0-9_-]{1,64}$`，claude.ai 前缀额外塌缩下划线 |
+
+MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts`（连上怎么活）
+→ `auth.ts`（401 之后怎么办）→ `xaa*.ts`（不弹窗那条路怎么走），
+最后 `useManageMCPConnections.ts` 把它接进 UI，`MCPConnectionManager.tsx` 把两个动作递给组件树。
+
+---
+
+### `services/oauth/` —— 5 份（登录一次，之后靠刷新）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`client.ts`](annotated/src/services/oauth/client.ts) | 566 | 744 | 第 187 行注释 = 一次「省 7M 请求/天」的优化差点让订阅类型永久丢失；refresh 扩权依赖后端 `ALLOWED_SCOPE_EXPANSIONS` |
+| [`auth-code-listener.ts`](annotated/src/services/oauth/auth-code-listener.ts) | 211 | 315 | 延迟响应（攥着 `res` 等 token 换完再补 302）、`port ?? 0`、判路径防 favicon 打断 |
+| [`index.ts`](annotated/src/services/oauth/index.ts) | 198 | 323 | 浏览器内/外两条路径赛跑收敛成一个 Promise、`skipBrowserOpen` 由「谁拥有屏幕」决定 |
+| [`getOauthProfile.ts`](annotated/src/services/oauth/getOauthProfile.ts) | 53 | 93 | 两条路对应两种凭据，头组合不能互换 |
+| [`crypto.ts`](annotated/src/services/oauth/crypto.ts) | 23 | 86 | PKCE 三块拼图，base64URL 三次替换（删 `=` 最容易漏） |
+
+---
+
+### `services/tools/` —— 4 份（工具怎么被执行）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`toolExecution.ts`](annotated/src/services/tools/toolExecution.ts) | 1,745 | 1,905 | 九道关；`500ms`/`2000ms` 两个阈值同源于「felt stuck」；`classifyToolError` 对付压缩后的类名 |
+| [`toolHooks.ts`](annotated/src/services/tools/toolHooks.ts) | 650 | 751 | #31301 重复显示 bug；**钩子 `allow` 不绕过 `settings.json` 的 deny**（inc-4788） |
+| [`StreamingToolExecutor.ts`](annotated/src/services/tools/StreamingToolExecutor.ts) | 530 | 649 | 并发 = 多个交错 pass，`status='executing'` 当互斥量；`getAbortReason` 检查顺序即优先级 |
+| [`toolOrchestration.ts`](annotated/src/services/tools/toolOrchestration.ts) | 188 | 284 | `\|\| 10` 兜 `parseInt` 的 NaN；并发批 `contextModifier` 排队后按 blocks 顺序回放 |
+
+---
+
+### `services/` 还剩 67 份 / 22,771 行，为什么先停在这
+
+剩下的不是「不重要」，而是**和主链路（一次对话怎么跑完）的耦合更弱**。
+按模块分：
+
+| 子目录 | 文件 | 行数 | 是什么 |
+| --- | --- | --- | --- |
+| （根目录 16 份） | 16 | 4,907 | `mockRateLimits.ts` 882、`voice*.ts` 1,175、`claudeAiLimits.ts` 515、`tokenEstimation.ts` 495 等散件 |
+| `analytics/` | 9 | 4,040 | 埋点：GrowthBook 灰度、事件导出器、Datadog |
+| `lsp/` | 7 | 2,460 | LSP 客户端/服务端/诊断注册表 |
+| `teamMemorySync/` | 5 | 2,167 | 团队记忆同步（含 secret 扫描） |
+| `plugins/` | 3 | 1,616 | 插件安装与 CLI 命令 |
+| `PromptSuggestion/` | 2 | 1,514 | 下一句提示词推测 |
+| `SessionMemory/` | 3 | 1,026 | 会话记忆的提取与注入 |
+| `remoteManagedSettings/` | 5 | 951 | 服务端下发的托管设置 |
+| `extractMemories/` | 2 | 769 | 从对话里抽长期记忆 |
+| `tips/` | 3 | 761 | 启动提示语注册表 |
+| `policyLimits/` | 2 | 690 | 策略限额 |
+| `settingsSync/` | 2 | 648 | 设置跨端同步 |
+| `autoDream/` | 4 | 550 | 空闲时的后台整理 |
+| `MagicDocs/` | 2 | 381 | 文档魔法填充 |
+| `AgentSummary/` | 1 | 179 | 子代理摘要 |
+| `toolUseSummary/` | 1 | 112 | 工具调用摘要 |
+
+**如果要从这堆里挑三份先读**（按「对理解主链路帮助最大」排）：
+
+1. `analytics/metadata.ts`（973 行）—— 它决定了哪些数据允许离开本机，
+   和 `api/logging.ts` 里那套 `_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 命名约束是同一件事的两端。
+2. `lsp/manager.ts`（289 行）—— 它是「工具」之外的第二条信息获取通道，
+   读完能看清 Claude Code 为什么不只靠 Bash 去拿代码结构。
+3. `SessionMemory/sessionMemory.ts`（495 行）—— `compact/sessionMemoryCompact.ts` 的上游，
+   两者合起来才是完整的「压缩前先把要点存下来」。
+
+> 这里的「还剩」清单是脚本算的（`python scripts/check-coverage.py`），
+> 目录里每多批注一份，这张表就少一行。不要再把某一节标成「✅ 完成」了 ——
+> 这个目录不存在「全部完成」的状态，只有「这一批做到哪」。
+
+### 服务层自测题（答不上来就回去重读对应文件）
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 

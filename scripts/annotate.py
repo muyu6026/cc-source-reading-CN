@@ -402,11 +402,18 @@ def main():
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     io.open(dst, 'w', encoding='utf-8', newline='\n').write('\n'.join(out))
 
-    code_lines = len(lines)
-    ann_lines = len(out) - code_lines
+    # 行数口径与 `wc -l` 对齐：split('\n') 会在文件以 \n 结尾时多出一个空串，
+    # 那个空串不是「行」，报数时不能算进去（否则文档里的「N 行」比 wc -l 大 1，
+    # 读者拿 wc -l 复算会以为批注版被改坏了）。
+    def real_len(seq):
+        return len(seq) - 1 if seq and seq[-1] == '' else len(seq)
+
+    code_lines = real_len(lines)
+    out_lines = real_len(out)
+    ann_lines = out_lines - code_lines
     print('写入 %s' % dst)
     print('  原文 %d 行 → 批注版 %d 行（插入注释 %d 行，%d 处锚点）'
-          % (code_lines, len(out), ann_lines, len(ann)))
+          % (code_lines, out_lines, ann_lines, len(ann)))
 
 
 if __name__ == '__main__':

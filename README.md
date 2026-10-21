@@ -5,6 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
+> **当前进度**：`annotated/` 已批注 **241 个源码文件 / 78,974 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **15%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
 
 ---
 
@@ -144,10 +145,10 @@
 
 | 读什么 | 学什么 | 批注版 |
 |--------|--------|--------|
-| [`src/constants/prompts.ts`](source/src/constants/prompts.ts) | 系统提示词怎么拼 | [✅ 914 → 2,042 行](annotated/src/constants/prompts.ts) |
-| [`src/query.ts`](source/src/query.ts) | 对话主循环的真身 `while(true)` | [✅ 1,729 → 3,305 行](annotated/src/query.ts) |
-| [`src/QueryEngine.ts`](source/src/QueryEngine.ts) | 查询引擎（流程编排） | [✅ 1,295 → 2,572 行](annotated/src/QueryEngine.ts) |
-| [`src/services/api/claude.ts`](source/src/services/api/claude.ts) | 真正调 API 的地方（SSE 解析 + 缓存打点 + 三级降级） | [✅ 3,419 → 4,656 行](annotated/src/services/api/claude.ts) |
+| [`src/constants/prompts.ts`](source/src/constants/prompts.ts) | 系统提示词怎么拼 | [✅ 914 → 2,041 行](annotated/src/constants/prompts.ts) |
+| [`src/query.ts`](source/src/query.ts) | 对话主循环的真身 `while(true)` | [✅ 1,729 → 3,304 行](annotated/src/query.ts) |
+| [`src/QueryEngine.ts`](source/src/QueryEngine.ts) | 查询引擎（流程编排） | [✅ 1,295 → 2,571 行](annotated/src/QueryEngine.ts) |
+| [`src/services/api/claude.ts`](source/src/services/api/claude.ts) | 真正调 API 的地方（SSE 解析 + 缓存打点 + 三级降级） | [✅ 3,419 → 4,655 行](annotated/src/services/api/claude.ts) |
 | [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 限流 | ⬜ 待批注（归入第 6 步） |
 
 **对应章节**：[05 提示词与命令](docs/05-提示词与命令.md)、[06 对话主循环与模型调用](docs/06-对话主循环与模型调用.md)
@@ -169,25 +170,48 @@
 
 | 读什么 | 学什么 | 批注版 |
 |--------|--------|--------|
-| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 529 白名单 / 无限重试 | [✅ 822 → 1,419 行](annotated/src/services/api/withRetry.ts) |
-| [`src/services/compact/apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) | 发给 API 的 `context_management` 指令 | [✅ 153 → 329 行](annotated/src/services/compact/apiMicrocompact.ts) |
-| [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts) | 什么时候压、四道抑制闸门、熔断 | [✅ 351 → 668 行](annotated/src/services/compact/autoCompact.ts) |
-| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) | 摘要压缩本体、PTL 逃生舱、七类附件重建 | [✅ 1,705 → 3,629 行](annotated/src/services/compact/compact.ts) |
-| [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts) | 三条微压缩路径、缓存编辑、时间触发 | [✅ 530 → 1,353 行](annotated/src/services/compact/microCompact.ts) |
-| [`src/services/compact/sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts) | 零调用压缩、索引对齐、两种恢复场景 | [✅ 630 → 1,518 行](annotated/src/services/compact/sessionMemoryCompact.ts) |
-| [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) | 七种 transport、错误桥接、MCP 工具封装 | [✅ 3,348 → 4,776 行](annotated/src/services/mcp/client.ts) |
+| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 529 白名单 / 无限重试 | [✅ 822 → 1,418 行](annotated/src/services/api/withRetry.ts) |
+| [`src/services/compact/apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts) | 发给 API 的 `context_management` 指令 | [✅ 153 → 328 行](annotated/src/services/compact/apiMicrocompact.ts) |
+| [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts) | 什么时候压、四道抑制闸门、熔断 | [✅ 351 → 667 行](annotated/src/services/compact/autoCompact.ts) |
+| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts) | 摘要压缩本体、PTL 逃生舱、七类附件重建 | [✅ 1,705 → 3,628 行](annotated/src/services/compact/compact.ts) |
+| [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts) | 三条微压缩路径、缓存编辑、时间触发 | [✅ 530 → 1,352 行](annotated/src/services/compact/microCompact.ts) |
+| [`src/services/compact/sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts) | 零调用压缩、索引对齐、两种恢复场景 | [✅ 630 → 1,517 行](annotated/src/services/compact/sessionMemoryCompact.ts) |
+| [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts) | 七种 transport、错误桥接、MCP 工具封装 | [✅ 3,348 → 4,775 行](annotated/src/services/mcp/client.ts) |
 | [`src/services/compact/prompt.ts`](source/src/services/compact/prompt.ts) | 压缩提示词本体：三套模板的差异与理由 | [✅ 374 → 723 行](annotated/src/services/compact/prompt.ts) |
 | [`src/services/compact/grouping.ts`](source/src/services/compact/grouping.ts) | 按 API 轮次切刀口，为什么只有一个判据 | [✅ 63 → 202 行](annotated/src/services/compact/grouping.ts) |
 | [`src/services/compact/postCompactCleanup.ts`](source/src/services/compact/postCompactCleanup.ts) | 压缩后清什么、清哪一层、什么故意不清 | [✅ 77 → 339 行](annotated/src/services/compact/postCompactCleanup.ts) |
 | [`src/services/compact/timeBasedMCConfig.ts`](source/src/services/compact/timeBasedMCConfig.ts) | 缓存注定要 miss 时顺手整理上下文 | [✅ 43 → 228 行](annotated/src/services/compact/timeBasedMCConfig.ts) |
-| [`src/services/compact/compactWarning*.ts`](source/src/services/compact/compactWarningState.ts) | 一个布尔量的时序、以及 React 隔离 | [✅ 34 → 176 行](annotated/src/services/compact/compactWarningState.ts) |
-| [`src/services/mcp/config.ts`](source/src/services/mcp/config.ts) | 六种配置来源、优先级、去重、白黑名单策略 | [✅ 1,578 → 3,077 行](annotated/src/services/mcp/config.ts) |
-| [`src/services/mcp/auth.ts`](source/src/services/mcp/auth.ts) | OAuth 全流程、XAA/SSO、step-up 补丁、跨进程刷新锁 | [✅ 2,465 → 4,356 行](annotated/src/services/mcp/auth.ts) |
-| [`src/services/mcp/xaa.ts`](source/src/services/mcp/xaa.ts) | 两跳换票（id_token → ID-JAG → access_token）、三道防混淆闸 | [✅ 511 → 812 行](annotated/src/services/mcp/xaa.ts) |
-| [`src/services/mcp/xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts) | 一次浏览器弹窗、id_token 按 issuer 缓存、OIDC 发现的两个 URL 坑 | [✅ 487 → 709 行](annotated/src/services/mcp/xaaIdpLogin.ts) |
-| [`src/services/mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts) | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线 | [✅ 1,141 → 1,631 行](annotated/src/services/mcp/useManageMCPConnections.ts) |
-| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 | ⬜ 待批注 |
-| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 登录鉴权 | ⬜ 待批注 |
+| [`src/services/compact/compactWarning*.ts`](source/src/services/compact/compactWarningState.ts) | 一个布尔量的时序、以及 React 隔离 | [✅ 18 → 71 行](annotated/src/services/compact/compactWarningState.ts) |
+| [`src/services/mcp/config.ts`](source/src/services/mcp/config.ts) | 六种配置来源、优先级、去重、白黑名单策略 | [✅ 1,578 → 3,076 行](annotated/src/services/mcp/config.ts) |
+| [`src/services/mcp/auth.ts`](source/src/services/mcp/auth.ts) | OAuth 全流程、XAA/SSO、step-up 补丁、跨进程刷新锁 | [✅ 2,465 → 4,355 行](annotated/src/services/mcp/auth.ts) |
+| [`src/services/mcp/xaa.ts`](source/src/services/mcp/xaa.ts) | 两跳换票（id_token → ID-JAG → access_token）、三道防混淆闸 | [✅ 511 → 811 行](annotated/src/services/mcp/xaa.ts) |
+| [`src/services/mcp/xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts) | 一次浏览器弹窗、id_token 按 issuer 缓存、OIDC 发现的两个 URL 坑 | [✅ 487 → 708 行](annotated/src/services/mcp/xaaIdpLogin.ts) |
+| [`src/services/mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts) | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线 | [✅ 1,141 → 1,630 行](annotated/src/services/mcp/useManageMCPConnections.ts) |
+| [`src/services/api/errors.ts`](source/src/services/api/errors.ts) | **错误怎么变成一条 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵 | [✅ 1,207 → 1,467 行](annotated/src/services/api/errors.ts) |
+| [`src/services/api/client.ts`](source/src/services/api/client.ts) | 四级 region 优先级、SDK logger 全走 stderr、凭据不出本机 | [✅ 389 → 583 行](annotated/src/services/api/client.ts) |
+| [`src/services/api/logging.ts`](source/src/services/api/logging.ts) | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` | [✅ 788 → 988 行](annotated/src/services/api/logging.ts) |
+| [`src/services/api/filesApi.ts`](source/src/services/api/filesApi.ts) | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越 | [✅ 748 → 889 行](annotated/src/services/api/filesApi.ts) |
+| [`src/services/api/promptCacheBreakDetection.ts`](source/src/services/api/promptCacheBreakDetection.ts) | 缓存为什么碎、只追 5 个前缀、MCP 名脱敏 | [✅ 727 → 925 行](annotated/src/services/api/promptCacheBreakDetection.ts) |
+| [`src/services/api/sessionIngress.ts`](source/src/services/api/sessionIngress.ts) | 链式追加 + 乐观并发 + **409 和解** | [✅ 514 → 618 行](annotated/src/services/api/sessionIngress.ts) |
+| [`src/services/tools/toolExecution.ts`](source/src/services/tools/toolExecution.ts) | 一次工具调用的九道关、两个 `felt stuck` 阈值 | [✅ 1,745 → 1,905 行](annotated/src/services/tools/toolExecution.ts) |
+| [`src/services/tools/toolHooks.ts`](source/src/services/tools/toolHooks.ts) | **钩子 `allow` 不绕过 `settings.json` 的 deny** | [✅ 650 → 751 行](annotated/src/services/tools/toolHooks.ts) |
+| [`src/services/tools/StreamingToolExecutor.ts`](source/src/services/tools/StreamingToolExecutor.ts) | 并发 = 多个交错 pass，`status='executing'` 当互斥量 | [✅ 530 → 649 行](annotated/src/services/tools/StreamingToolExecutor.ts) |
+| [`src/services/tools/toolOrchestration.ts`](source/src/services/tools/toolOrchestration.ts) | 并发批怎么分批、`contextModifier` 为什么必须按序回放 | [✅ 188 → 284 行](annotated/src/services/tools/toolOrchestration.ts) |
+| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 刷新与 5 分钟缓冲、**一次「省 7M 请求/天」的优化差点让订阅类型永久丢失** | [✅ 566 → 744 行](annotated/src/services/oauth/client.ts) |
+| [`src/services/oauth/auth-code-listener.ts`](source/src/services/oauth/auth-code-listener.ts) | 延迟响应（攥着 `res` 等 token 换完）、判路径防 favicon 打断 | [✅ 211 → 315 行](annotated/src/services/oauth/auth-code-listener.ts) |
+| [`src/services/oauth/index.ts`](source/src/services/oauth/index.ts) | 浏览器内/外两条路径赛跑收敛成一个 Promise | [✅ 198 → 323 行](annotated/src/services/oauth/index.ts) |
+| [`src/services/oauth/crypto.ts`](source/src/services/oauth/crypto.ts) | PKCE 三块拼图，base64URL 三次替换 | [✅ 23 → 86 行](annotated/src/services/oauth/crypto.ts) |
+| [`src/services/mcp/MCPConnectionManager.tsx`](source/src/services/mcp/MCPConnectionManager.tsx) | **React Compiler 编译产物怎么读**：`_c(6)` 缓存槽、`t0` 临时名 | [✅ 73 → 236 行](annotated/src/services/mcp/MCPConnectionManager.tsx) |
+| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 | ⬜ 待批注（`lsp/` 7 份 2,460 行） |
+
+> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **63 份 / 30,912 行（57%）**。
+> `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`oauth/`（5/5）、`tools/`（4/4）
+> 五个子目录**已清零**；剩 67 份集中在 `analytics/`（9）、`lsp/`（7）、`teamMemorySync/`（5）、
+> `plugins/`（3）、`remoteManagedSettings/`（5）等偏外围的模块。
+> 逐份清单和「还剩什么」的完整表格见
+> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
+> 这个目录**不存在「全部完成」的状态**，只有「这一批做到哪」——
+> 所以本节只标 🟡，不标 ✅。
 
 **对应章节**：[07 服务层详解](docs/07-服务层详解.md)、[11 上下文压缩](docs/11-上下文压缩.md)
 
@@ -202,7 +226,7 @@
 | 读什么 | 学什么 | 批注版 |
 |--------|--------|--------|
 | [`src/coordinator/coordinatorMode.ts`](source/src/coordinator/coordinatorMode.ts) | 多智能体编排的模式开关 + 协调者提示词 | [369 → 632 行](annotated/src/coordinator/coordinatorMode.ts) ✅ |
-| [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx) | 派活的十道检查、两套执行路径 | [1,397 → 2,793 行](annotated/src/tools/AgentTool/AgentTool.tsx) ✅ |
+| [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx) | 派活的十道检查、两套执行路径 | [1,398 → 2,795 行](annotated/src/tools/AgentTool/AgentTool.tsx) ✅ |
 | [`src/tools/AgentTool/prompt.ts`](source/src/tools/AgentTool/prompt.ts) | agent 清单注入策略、简报写法 | [287 → 601 行](annotated/src/tools/AgentTool/prompt.ts) ✅ |
 | [`src/tools/AgentTool/forkSubagent.ts`](source/src/tools/AgentTool/forkSubagent.ts) | fork：共享缓存的自我复制 | [210 → 559 行](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ |
 | [`src/ink/`](source/src/ink/) 渲染内核 | 终端界面怎么画（见第 8 步） | ✅ 全部 96 份 |
@@ -401,25 +425,25 @@ source/README.md                    →  annotated/README.annotated.md
 |--------|--------|--------|
 | [`src/ink/reconciler.ts`](source/src/ink/reconciler.ts) | React 19 自定义 renderer：host config 把 React 的 mutation 语义翻译成树操作 | [✅ 512 → 727 行](annotated/src/ink/reconciler.ts) |
 | [`src/ink/dom.ts`](source/src/ink/dom.ts) | 七个元素名的极简 DOM、yoga 桥、文本测量、脏标记冒泡 | [✅ 484 → 685 行](annotated/src/ink/dom.ts) |
-| [`src/ink/ink.tsx`](source/src/ink/ink.tsx) | 帧循环九阶段、双缓冲、diff 与优化、光标定位、终端模式、退出清理 | [✅ 1,722 → 2,470 行](annotated/src/ink/ink.tsx) |
+| [`src/ink/ink.tsx`](source/src/ink/ink.tsx) | 帧循环九阶段、双缓冲、diff 与优化、光标定位、终端模式、退出清理 | [✅ 1,723 → 2,471 行](annotated/src/ink/ink.tsx) |
 | [`src/ink/screen.ts`](source/src/ink/screen.ts) | 打包格子（2 个 int 装一格）、样式池用 ID 最低位当标签、宽字符四态、blit/shift/clear、两帧 diff | [✅ 1,486 → 2,167 行](annotated/src/ink/screen.ts) |
 | [`src/ink/render-node-to-output.ts`](source/src/ink/render-node-to-output.ts) | 沿树走一遍做 blit / 清空 / 重画三选一；ScrollBox 的三遍渲染与 DECSTBM 快路径 | [✅ 1,462 → 2,180 行](annotated/src/ink/render-node-to-output.ts) |
 | [`src/ink/log-update.ts`](source/src/ink/log-update.ts) | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型 | [✅ 773 → 1,193 行](annotated/src/ink/log-update.ts) |
-| [`src/ink/output.ts`](source/src/ink/output.ts) | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类、单行写入与控制字符跳过 | [✅ 798 → 1,151 行](annotated/src/ink/output.ts) |
-| [`src/ink/styles.ts`](source/src/ink/styles.ts) | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 与 diff 的语义 | [✅ 772 → 967 行](annotated/src/ink/styles.ts) |
-| [`src/ink/colorize.ts`](source/src/ink/colorize.ts) | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 | [✅ 232 → 372 行](annotated/src/ink/colorize.ts) |
-| [`src/ink/stringWidth.ts`](source/src/ink/stringWidth.ts) | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 实现的 1 vs 2 | [✅ 223 → 413 行](annotated/src/ink/stringWidth.ts) |
+| [`src/ink/output.ts`](source/src/ink/output.ts) | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类、单行写入与控制字符跳过 | [✅ 797 → 1,150 行](annotated/src/ink/output.ts) |
+| [`src/ink/styles.ts`](source/src/ink/styles.ts) | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 与 diff 的语义 | [✅ 771 → 966 行](annotated/src/ink/styles.ts) |
+| [`src/ink/colorize.ts`](source/src/ink/colorize.ts) | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 | [✅ 231 → 371 行](annotated/src/ink/colorize.ts) |
+| [`src/ink/stringWidth.ts`](source/src/ink/stringWidth.ts) | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 实现的 1 vs 2 | [✅ 222 → 412 行](annotated/src/ink/stringWidth.ts) |
 | [`src/ink/Ansi.tsx`](source/src/ink/Ansi.tsx) | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的语义降维 | [✅ 292 → 504 行](annotated/src/ink/Ansi.tsx) |
-| [`src/ink/termio/ansi.ts`](source/src/ink/termio/ansi.ts) | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽 | [✅ 76 → 150 行](annotated/src/ink/termio/ansi.ts) |
-| [`src/ink/termio/csi.ts`](source/src/ink/termio/csi.ts) | 三个字节区间（中间/参数/尾）就是 CSI 的完整语法；`csi()` 的单参数与多参数两副面孔 | [✅ 320 → 493 行](annotated/src/ink/termio/csi.ts) |
-| [`src/ink/termio/dec.ts`](source/src/ink/termio/dec.ts) | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序 | [✅ 61 → 119 行](annotated/src/ink/termio/dec.ts) |
-| [`src/ink/termio/esc.ts`](source/src/ink/termio/esc.ts) | 两字符序列；`null`（已处理无事发生）与 `unknown`（没认出来）两种「空」的差别 | [✅ 68 → 128 行](annotated/src/ink/termio/esc.ts) |
-| [`src/ink/termio/types.ts`](source/src/ink/termio/types.ts) | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计（absent / null / 值） | [✅ 237 → 424 行](annotated/src/ink/termio/types.ts) |
-| [`src/ink/termio/sgr.ts`](source/src/ink/termio/sgr.ts) | 分号与冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二 | [✅ 309 → 541 行](annotated/src/ink/termio/sgr.ts) |
-| [`src/ink/termio/tokenize.ts`](source/src/ink/termio/tokenize.ts) | 词法层：八个状态、`escape` 分支的判定顺序为什么不能重排、降级时不前移游标 | [✅ 320 → 564 行](annotated/src/ink/termio/tokenize.ts) |
-| [`src/ink/termio/parser.ts`](source/src/ink/termio/parser.ts) | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 两个默认值、只处理第一个模式 | [✅ 395 → 671 行](annotated/src/ink/termio/parser.ts) |
-| [`src/ink/termio/osc.ts`](source/src/ink/termio/osc.ts) | OSC 全家族：DCS 透传的两套约定、剪贴板三条路、内层为什么选 BEL 而不是 ST | [✅ 494 → 879 行](annotated/src/ink/termio/osc.ts) |
-| [`src/ink/termio.ts`](source/src/ink/termio.ts) | 桶文件只导出「读」的一侧，生成函数走深路径 | [✅ 43 → 83 行](annotated/src/ink/termio.ts) |
+| [`src/ink/termio/ansi.ts`](source/src/ink/termio/ansi.ts) | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽 | [✅ 75 → 149 行](annotated/src/ink/termio/ansi.ts) |
+| [`src/ink/termio/csi.ts`](source/src/ink/termio/csi.ts) | 三个字节区间（中间/参数/尾）就是 CSI 的完整语法；`csi()` 的单参数与多参数两副面孔 | [✅ 319 → 492 行](annotated/src/ink/termio/csi.ts) |
+| [`src/ink/termio/dec.ts`](source/src/ink/termio/dec.ts) | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序 | [✅ 60 → 118 行](annotated/src/ink/termio/dec.ts) |
+| [`src/ink/termio/esc.ts`](source/src/ink/termio/esc.ts) | 两字符序列；`null`（已处理无事发生）与 `unknown`（没认出来）两种「空」的差别 | [✅ 67 → 127 行](annotated/src/ink/termio/esc.ts) |
+| [`src/ink/termio/types.ts`](source/src/ink/termio/types.ts) | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计（absent / null / 值） | [✅ 236 → 423 行](annotated/src/ink/termio/types.ts) |
+| [`src/ink/termio/sgr.ts`](source/src/ink/termio/sgr.ts) | 分号与冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二 | [✅ 308 → 540 行](annotated/src/ink/termio/sgr.ts) |
+| [`src/ink/termio/tokenize.ts`](source/src/ink/termio/tokenize.ts) | 词法层：八个状态、`escape` 分支的判定顺序为什么不能重排、降级时不前移游标 | [✅ 319 → 563 行](annotated/src/ink/termio/tokenize.ts) |
+| [`src/ink/termio/parser.ts`](source/src/ink/termio/parser.ts) | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 两个默认值、只处理第一个模式 | [✅ 394 → 670 行](annotated/src/ink/termio/parser.ts) |
+| [`src/ink/termio/osc.ts`](source/src/ink/termio/osc.ts) | OSC 全家族：DCS 透传的两套约定、剪贴板三条路、内层为什么选 BEL 而不是 ST | [✅ 493 → 878 行](annotated/src/ink/termio/osc.ts) |
+| [`src/ink/termio.ts`](source/src/ink/termio.ts) | 桶文件只导出「读」的一侧，生成函数走深路径 | [✅ 42 → 82 行](annotated/src/ink/termio.ts) |
 
 上面这张表是二十一份核心。目录里另外七十五份（`layout/` 四个、`ink/` 根目录其余小件、`events/` 十个、`hooks/` 十二个、`components/` 十八个）也都批注完了 —— 其中 `components/App.tsx`（658 行，stdin 的唯一拥有者）、`ScrollBox.tsx`（237 行，绕过 React 的命令式滚动）、`events/dispatcher.ts`（234 行，捕获/冒泡两阶段）最值得看。**`src/ink/` 96 个文件、19,842 行，一份不剩。**
 
