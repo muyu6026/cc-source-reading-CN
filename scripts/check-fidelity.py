@@ -17,6 +17,7 @@
   python scripts/check-fidelity.py src/commands/clear/index.ts   # 只校验一个
 """
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,24 +37,31 @@ KNOWN_OMIT = {
 
 ANN_PREFIXES = ('// 译：', '// 注：', '// ─', '// ═')
 
+# 批注常写成「// ═══ 标题 ═══ + 若干缩进续行」的块，续行没有固定前缀。
+# 判据：批注侧含中日韩字符的注释行都算批注（原文代码里的注释是纯英文）。
+# 只对 annotated 侧启用，避免原文里万一有中文注释时被判成批注而漏检。
+_CJK = re.compile(r'[\u3400-\u4dbf\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]')
+
 
 def read_lines(path):
     with open(path, 'r', encoding='utf-8') as f:
         return [ln.rstrip('\n').rstrip() for ln in f]
 
 
-def classify(line):
+def classify(line, cjk_as_annotation=False):
     """把一个非空行分成 code / comment / annotation"""
     s = line.strip()
     if s.startswith(ANN_PREFIXES):
         return 'annotation'
     if s.startswith('//') or s.startswith('/*') or s.startswith('*'):
+        if cjk_as_annotation and _CJK.search(s):
+            return 'annotation'
         return 'comment'
     # 行尾注释也算代码行（行尾注释的变化会在注释检查里被抓到）
     return 'code'
 
 
-def split(lines):
+def split(lines, cjk_as_annotation=False):
     code, comment, annotation = [], [], []
     in_fence = False
     for ln in lines:
@@ -63,7 +71,7 @@ def split(lines):
             continue
         if in_fence or not s:
             continue
-        kind = classify(ln)
+        kind = classify(ln, cjk_as_annotation)
         {'code': code, 'comment': comment, 'annotation': annotation}[kind].append(s)
     return code, comment, annotation
 
@@ -77,7 +85,7 @@ def check_one(rel):
         return 'MISSING_ANN', rel, '还没有批注版'
 
     src_code, src_comment, _ = split(read_lines(src_path))
-    ann_code, ann_comment, ann_note = split(read_lines(ann_path))
+    ann_code, ann_comment, ann_note = split(read_lines(ann_path), cjk_as_annotation=True)
 
     # ── 判据 1：代码行逐行相等 ──
     if ann_code != src_code:
@@ -137,7 +145,7 @@ def main():
         status, name, info = check_one(rel)
         if status == 'OK':
             src_code, src_comment, _ = split(read_lines(os.path.join(SRC, rel)))
-            ann_code, ann_comment, ann_note = split(read_lines(os.path.join(ANN, rel)))
+            ann_code, ann_comment, ann_note = split(read_lines(os.path.join(ANN, rel)), cjk_as_annotation=True)
             print('  OK    %-44s 代码 %3d 行一致 · 注释 %3d 行全保留 · 中文批注 %3d 行'
                   % (name, len(src_code), len(src_comment), len(ann_note)))
         elif status == 'WARN':
