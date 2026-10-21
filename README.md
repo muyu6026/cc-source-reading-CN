@@ -178,7 +178,7 @@
 | [`src/services/compact/postCompactCleanup.ts`](source/src/services/compact/postCompactCleanup.ts) | 压缩后清什么、清哪一层、什么故意不清 | [✅ 77 → 339 行](annotated/src/services/compact/postCompactCleanup.ts) |
 | [`src/services/compact/timeBasedMCConfig.ts`](source/src/services/compact/timeBasedMCConfig.ts) | 缓存注定要 miss 时顺手整理上下文 | [✅ 43 → 228 行](annotated/src/services/compact/timeBasedMCConfig.ts) |
 | [`src/services/compact/compactWarning*.ts`](source/src/services/compact/compactWarningState.ts) | 一个布尔量的时序、以及 React 隔离 | [✅ 34 → 176 行](annotated/src/services/compact/compactWarningState.ts) |
-| [`src/services/mcp/config.ts`](source/src/services/mcp/config.ts) | 配置从哪读、企业策略 | ⬜ 待批注 |
+| [`src/services/mcp/config.ts`](source/src/services/mcp/config.ts) | 六种配置来源、优先级、去重、白黑名单策略 | [✅ 1,578 → 3,077 行](annotated/src/services/mcp/config.ts) |
 | [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 代码智能怎么接 | ⬜ 待批注 |
 | [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 登录鉴权 | ⬜ 待批注 |
 
@@ -384,7 +384,7 @@ source/README.md                    →  annotated/README.annotated.md
 
 判定「哪里在模板字符串内部」靠两个脚本各一份的**状态栈词法扫描器**（code / tpl / expr / block 四态）。它取代了最早的单个布尔量，因为那个版本会被两种写法骗过去：`${cond ? '...(with a \`subagent_type\`)...' : ''}`（模板表达式里的字符串含反引号）和块注释里的 `` `)` ``（`bashSecurity.ts` 第 472 行）。前者会**误报**（一段正常批注被判成模板内部），后者会**漏报**（真插进模板的批注被放过）—— 两种错误都让校验失去意义，所以扫描器本身也得写对。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步完成**（`withRetry.ts` 822 + `src/services/compact/` **全部 11 个文件** 4,864 + `mcp/client.ts` 3,348 = 8,130 行原文、446 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）。下一步是 `src/services/mcp/config.ts`（1,578 行），或按需做 `components/` + `ink/` 的终端 UI。
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步完成**（`withRetry.ts` 822 + `src/services/compact/` **全部 11 个文件** 4,864 + `mcp/client.ts` 3,348 + `mcp/config.ts` 1,578 = 9,708 行原文、492 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）。**主干到此为止**：压缩管线与 MCP 两条线都闭合了。剩下的 `mcp/auth.ts`、`components/` + `ink/` 的终端 UI 都是枝叶，按需再做。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

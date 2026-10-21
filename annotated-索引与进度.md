@@ -86,7 +86,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅ | ✅ 主线完成 |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 
 ---
@@ -505,7 +505,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 6 步（服务层）读完了吗？
 
-第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工十三个：
+第 6 步体量最大（服务层约 4 万行），只批注主线相关的文件，不做全量。已完工十四个：
 
 | 文件                                                                        | 原文    | 批注版   | 讲什么                                        |
 | ------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------ |
@@ -516,6 +516,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | [`microCompact.ts`](annotated/src/services/compact/microCompact.ts)       | 530   | 1,352 | 缓存热不热决定改不改本地内容                            |
 | [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐                   |
 | [`mcp/client.ts`](annotated/src/services/mcp/client.ts)                   | 3,348 | 4,776 | 七种 transport、错误桥接、MCP 工具封装                |
+| [`mcp/config.ts`](annotated/src/services/mcp/config.ts)                   | 1,578 | 3,077 | 六种配置来源、优先级、去重、白黑名单策略                      |
 | [`compact/prompt.ts`](annotated/src/services/compact/prompt.ts)           | 374   | 723   | 压缩提示词本体，三套模板的差异与理由                         |
 | [`grouping.ts`](annotated/src/services/compact/grouping.ts)               | 63    | 202   | 按 API 轮次切刀口，以及为什么只有一个判据                     |
 | [`postCompactCleanup.ts`](annotated/src/services/compact/postCompactCleanup.ts) | 77 | 339   | 压缩后清什么、清哪一层、什么故意不清                         |
@@ -523,7 +524,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题                                 |
 | [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件                       |
 
-合计 **8,130 行原文**，446 处批注锚点。压缩管线至此**没有遗漏的文件** —— `src/services/compact/` 目录全部 11 个 `.ts` 都批注完了。
+合计 **9,708 行原文**，492 处批注锚点。`src/services/compact/` 目录 11 个 `.ts` 全部批注完，MCP 这条线（`client.ts` + `config.ts`）也闭合了。
 
 **① `withRetry` 里的 `attempt` 变量承担了几个角色？**
 
@@ -628,6 +629,53 @@ SDK 会调 `client.onerror`，但**不调 `client.onclose`**。而 CC 的重连�
 设成 30 分钟就会主动制造 miss —— 大量「缓存其实还热着」的情况被误清，成本翻倍，优化变成负优化。
 
 这个特性整体也只有 43 行：一个开关、一个阈值、一个 `keepRecent`。对比 `autoCompact.ts` 的 351 行（四道闸门、三振熔断、session memory 优先）。差别在于 **`autoCompact` 不做会错，`timeBasedMC` 不做只是贵** —— 判断一个模块该多复杂，先问「不做会怎样」。
+
+**㉒ MCP 配置有六种来源，优先级是什么顺序？为什么 local 比 project 高？**
+
+`plugin < claude.ai < user < project < local`，而 enterprise 一旦存在就**独占**（此时连插件都不读）。
+
+local 比 project 高的理由：`.mcp.json`（project）会进版本控制、全组共享；local 是「我在这台机器的这个项目里自己的设置」。局部覆盖全局、个人覆盖团队 —— 这和 git 配置的层次直觉一致。
+
+注意覆盖是**按键名**的，不是按内容。项目里有个叫 `slack` 的，就完全替换用户全局那个 `slack`，即使它们连的是不同服务。
+
+**㉓ 企业策略里白名单和黑名单为什么不对称？**
+
+黑名单永远从**所有来源合并**；白名单在 `allowManagedMcpServersOnly: true` 时**只读 managed 设置**。
+
+因为两者的效果不同：加黑名单只会更严（并集更安全），没有绕过的可能；而白名单是「放宽」的机制 —— 如果用户能往白名单里加条目，他就自己给自己开了一个口子，企业限制形同虚设。
+
+原则：**收紧永远允许（合并），放宽只在受信来源（独占）。**
+
+还有一个必须分开写的判断：`undefined`（没配过）= 不限制；`[]`（空数组）= 全禁。写成 `if (!arr?.length) return true` 就会让「明确禁掉一切」变成「全放行」，而且不报错。
+
+**㉔ 为什么「禁用的服务器」不能作为去重的抑制方？**
+
+因为抑制会造出空集。用户手工配了 `slack` 但禁用了，网页端启用了 Slack 连接器 —— 如果没有 `isMcpServerDisabled(name) continue` 这条判断，禁用那个的签名会抑制掉连接器，结果两个都不跑。
+
+同一个 bug 在插件路径上还有一份：禁用插件不能在「先加载赢」的比赛里胜出，否则它会把启用的那份顶掉。所以代码里要把插件服务器先拆成 enabled / disabled 两堆，只对 enabled 做去重，事后合并回来。
+
+写抑制逻辑时先问一句：**被抑制的那个没了，还有谁在干活？** 答案是「没人」的话，这条抑制就是错的。
+
+**㉕ `doesEnterpriseMcpConfigExist` 的判据为什么是 fail-open 的？**
+
+它用 `config !== null` 判断，也就是「能否成功解析」而不是「文件是否存在」。于是文件存在但 JSON 写坏 → 判定为「不存在」→ 整个企业锁定**静默失效**，用户退回分层模式，可以自由添加服务器。
+
+预期行为应该相反：解析失败时**假定锁定生效**并报一个显眼的错误（fail-closed）。对安全相关的开关，默认值必须指向更严的一侧。
+
+另外它是全文件唯一 memoize 的函数，隐含假设是「企业配置在进程生命周期内不变」—— 没有 cache key，也没有手动失效的办法，改了文件只能重启。
+
+**㉖ MCP 服务器的启停有几种「极性」？**
+
+两种，而且方向相反：
+
+- 普通服务器 **opt-out**：出现在 `disabledMcpServers` 里 → 禁用（默认开）
+- 内置服务器（`COMPUTER_USE_MCP_SERVER_NAME`）**opt-in**：出现在 `enabledMcpServers` 里 → 启用（默认关）
+
+`isMcpServerDisabled()` 里两个 `return` 的方向正好相反（一个 `!includes`，一个 `includes`），是全文件最容易读错的地方。
+
+为什么内置那个要反过来？因为它能**操作你的电脑**（截图 / 点击 / 输入）。装了 CC 就自动获得「AI 可以控制我的鼠标」是不可接受的，所以必须显式打开。
+
+**能力的危险程度决定默认值。** 同一个系统里不同服务器用不同极性，不是技术原因，是风险期望值不同。
 
 ---
 
@@ -737,29 +785,35 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 ## 继续往下读之前
 
-**第 6 步的压缩管线现在是完整的了**：`src/services/compact/` 目录下 11 个 `.ts` 全部批注完，从「什么时候压」到「压完清什么」没有缺口。第 7 步的多智能体主线也收口了：4 个文件、2,263 行原文、133 处锚点。
+**第 6 步的两条主线都完整了**：
 
-现在整条「从用户输入到多个 AI 分工干活、再到上下文不爆」的链路都通读了：
+- **压缩管线**：`src/services/compact/` 目录下 11 个 `.ts` 全部批注完，从「什么时候压」到「压完清什么」没有缺口
+- **MCP**：`client.ts`（协议实现）+ `config.ts`（配置与策略）闭合，从「配置从哪读、允不允许连」到「连上之后怎么活下去」都通了
+
+第 7 步的多智能体主线也收口了：4 个文件、2,263 行原文、133 处锚点。
+
+现在整条链路是：
 
 ```
 cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
                                         ├─ compact 全目录（11 个文件，含压缩提示词）
                                         ├─ withRetry（发请求的失败重试）
-                                        └─ mcp/client（工具从哪来）
-                                              └─ AgentTool → coordinator / fork / 普通子 agent
-                                                    └─ runAgent（同一套 query 循环，换个身份跑）
+                                        └─ mcp/config（有哪些服务器、允不允许）
+                                              └─ mcp/client（连上之后怎么活）
+                                                    └─ AgentTool → coordinator / fork / 普通子 agent
+                                                          └─ runAgent（同一套 query 循环，换个身份跑）
 ```
 
-下一步建议是 **`mcp/config.ts`（1,578 行）** —— 它是 `client.ts` 上游唯一没读的一块，`needs-auth`、企业策略覆盖、`hasPendingMcpServers` 的源头都在那里。读完 MCP 这条线就彻底闭合。
+**主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-其余还剩的都是**枝叶**，不影响主线理解：
-
-- [`mcp/auth.ts`](source/src/services/mcp/auth.ts)（2,465 行）—— `ClaudeAuthProvider` 的实现，OAuth 全流程
+- [`mcp/auth.ts`](source/src/services/mcp/auth.ts)（2,465 行）—— `ClaudeAuthProvider` 的实现，OAuth 全流程。`client.ts` 里 `needs-auth` 状态的下游
 - [`mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)（1,141 行）—— 把 `client.ts` 的纯连接逻辑接进 React 状态
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）+ [`src/ink/`](source/src/ink/)（1.3 万行）—— 终端 UI。`ink/` 是**自己实现**的渲染器（不是官方包），核心是 `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462
 - [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-说「继续」我按 `mcp/config.ts` 往下做，想换方向直接点名。
+我的建议是**先停下来回头读一遍索引** —— 现在这条链已经完整了，从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工，再回到一次落盘，全程都能串起来。这时候重读 `query.ts` 那个 `while(true)` 状态机，会比第一次读时清楚很多。
+
+想继续的话，说模块名就行。
 
 如果只想再读一个文件，我建议 `mcp/config.ts` —— 因为 `client.ts` 里那些 `needs-auth`、企业策略覆盖、`hasPendingMcpServers` 的上游都在那里，读完这条线就彻底闭合了。
 
