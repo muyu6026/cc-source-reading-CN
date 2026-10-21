@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`compact/` 全 11 个文件](annotated/src/services/compact/) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅<br />[`mcp/config.ts`](annotated/src/services/mcp/config.ts) ✅<br />[`mcp/auth.ts`](annotated/src/services/mcp/auth.ts) ✅<br />[`mcp/xaa*.ts`](annotated/src/services/mcp/xaa.ts) ✅<br />[`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) ✅ | ✅ 完成 |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅ | ✅ 三上三下全通 |
+| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.3 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅ | ✅ 十一份全通 |
 
 ---
 
@@ -823,8 +823,8 @@ AS:  issuer = http://evil.com, token_endpoint = http://evil.com/token
 
 ## 第 7 步（多智能体）读完了吗？
 
-UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— 它们不影响理解主线。
-多智能体那半边做完了，四个文件正好是一条完整的链：
+UI 那半边（`components/` 4.2 万行的产品界面）跳过了 —— 它不影响理解主线。但 `ink/` 那 1.3 万行的**渲染器本身**后来补上了（见第 8 步），因为它是「多智能体产出的文字怎么变成屏幕」的另一半。
+多智能体这半边四个文件正好是一条完整的链：
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
@@ -927,7 +927,7 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 ## 第 8 步（终端渲染器）读完了吗？
 
-`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。六个文件、6,439 行原文，读完之后「一条用户输入 → 一屏字符」这条路是通的。
+`src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），1.3 万行。**十一份、8,756 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的，再加上这一轮的样式与颜色层，「一屏字符长什么样」也有了答案。
 
 | 文件 | 原文 | 批注版 | 讲什么 |
 | --- | --- | --- | --- |
@@ -937,8 +937,13 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 | [`screen.ts`](annotated/src/ink/screen.ts) | 1,486 | 2,167 | 打包格子（2 个 int 装一格）、样式池的位标签、宽字符四态、blit/shift/clear、两帧 diff |
 | [`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) | 1,462 | 2,180 | 沿树走一遍：blit / 清空 / 重画三选一，ScrollBox 的三遍渲染与 DECSTBM 快路径 |
 | [`log-update.ts`](annotated/src/ink/log-update.ts) | 773 | 1,193 | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型 |
+| [`output.ts`](annotated/src/ink/output.ts) | 798 | 1,151 | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类与预热缓存、单行写入 |
+| [`styles.ts`](annotated/src/ink/styles.ts) | 772 | 967 | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 的语义 |
+| [`colorize.ts`](annotated/src/ink/colorize.ts) | 232 | 372 | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 |
+| [`stringWidth.ts`](annotated/src/ink/stringWidth.ts) | 223 | 413 | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 的 1 vs 2 |
+| [`Ansi.tsx`](annotated/src/ink/Ansi.tsx) | 292 | 504 | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的降维 |
 
-合计 **6,439 行原文**，286 处批注锚点。
+合计 **8,756 行原文**，397 处批注锚点。
 
 **这个目录可以按「三加三」记**：前三份是**上半场**（React 元素 → 布局树 → 屏幕缓冲），后三份是**下半场**（屏幕缓冲 → 终端字节）。分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。
 
@@ -1050,6 +1055,63 @@ UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— �
 
 读完这条链再回头看第 1～7 步，会发现同一个模式反复出现：**凡是有「两份状态」的地方（我们的模型 vs 终端的实际、客户端预算 vs 服务端预算、设计声明的数值 vs 开发落地的数值），所有复杂度都在处理两者的偏差。**
 
+**㊾ `'x' in style` 和 `style.x !== undefined`，为什么在这里不等价？**
+
+因为 `styles.ts` 收到的 `style` 不是全量样式，是 diff。`reconciler.ts` 的 `diff()` 有一条关键行为：上一帧有、这一帧没有的键，会被写成 `{ key: undefined }` —— **键还在，值是 undefined**。
+
+于是两种写法的语义分开了：
+
+| 写法 | 含义 | 漏掉什么 |
+| --- | --- | --- |
+| `'margin' in style` | 这个键这一帧变了（新值 / 被删 / 被重置） | 什么都不漏 |
+| `style.margin !== undefined` | margin 有**新值** | 属性被移除的情况 |
+
+按后者判断的话，「把 `margin` 从 4 改回不设置」这个操作永远无法表达——屏幕会一直保留 4 格边距，而且没有任何地方报错。
+
+所以这个代码库里的约定是：**值 `undefined` 表示「重置成默认」，「不要动」的表现形式是「这个键根本不在 diff 里」。** 这个约定没有类型系统保护，只能靠读 `diff()` 的实现才知道。
+
+**㊿ 同一个终端，能力明明够却显示不出真彩色，有几种原因？**
+
+两种，而且**都不是能力问题，是探测看不见真相**：
+
+- **VS Code 系（xterm.js）** —— 从 2017 年就支持真彩色，但 `chalk` 的 `supports-color` 不认识 `TERM_PROGRAM=vscode`（它只认 `iTerm.app` 和 `Apple_Terminal`），于是退到 `-256color` 分支、`level = 2`。在这个级别下 `chalk.rgb(215,119,87)`（Claude 橙）会被映射到 6×6×6 色立方里最近的 `rgb(215,135,135)` —— 橙红变成发白的肉粉色。`colorize.ts` 的办法是：`TERM_PROGRAM === 'vscode' && level === 2` 就硬提到 3。
+- **tmux** —— 它解析真彩色 SGR **完全正确**，但往外层终端重发时，只在**外层声明了 `Tc`/`RGB` 能力**的情况下才重发。默认配置不带 `terminal-overrides ,*:Tc`，于是发出去的内容里**没有背景色序列**，深色主题下就是黑底黑字。办法是反过来：`TMUX` 存在就把 level 压到 2，让 chalk 发 256 色（tmux 会原样转发），而 `grey93`（索引 255）和 `rgb(240,240,240)` 视觉上几乎一样。
+
+两段补丁，一个向上提、一个向下压，判据都是环境变量粗判 + 已知失败模式，**没有一段是能力查询**。顺序也不能换：先 boost 再 clamp，才能让「VS Code 里套 tmux」落到 2。
+
+判 `level === 2` 而不是 `level < 3` 也是同一个道理：`level 0` 是用户明确要求不要颜色（`NO_COLOR`、`FORCE_COLOR=0`）。**修能力，不修意愿。**
+
+**51 `stringWidth` 有两个实现，为什么在 Node 下跑会坏？**
+
+（带圈数字用到 ㊿ 就没了，往下改用普通编号。）
+
+不是慢，是**算错**。以 Devanagari 的 क्ष（ka + virama + ZWJ + ssa）为例：它渲染成**一个合字字形**，但终端分配 **2 个格子**（`wcwidth` 逐个辅音求和）。
+
+- `Bun.stringWidth` 返回 **2** —— 与终端一致
+- JS fallback 按 grapheme 处理，只数第一个非零宽字符，返回 **1**
+
+而这个返回值用来**定位光标**。算成 1 的后果是：我们以为只占一格，下一个字符写到第 x+1 列，终端却已经画在第 x+2 列——从这一格开始整行错位。
+
+所以这里选的不是「Unicode 逻辑上正确的宽度」，是「**与终端实际格子分配一致的宽度**」。要对的不是 Unicode 语义，是终端的格子。这才是 `Bun.stringWidth` 在这个项目里不可替代的原因——性能只是附带。
+
+两个实现还有个隐蔽分歧：选项名不同（`ambiguousIsNarrow` vs `ambiguousAsWide: false`），默认值也不同。`stringWidth.ts` 两边都显式指定了，所以 ⚠、★ 这类 Ambiguous 字符按 1 列算；只在一个实现里指定的话，换运行时就得到不同宽度。
+
+**52 `Ansi.tsx` 是 React Compiler 的编译产物——该怎么读它？**
+
+`import { c as _c } from "react/compiler-runtime"` 就是这个标记。人写的版本已经被自动重写过了，三条映射就够：
+
+| 看到的 | 读成 |
+| --- | --- |
+| `const $ = _c(12)` | 这个组件有 12 个缓存槽 |
+| `if ($[3] !== children)` | 依赖变了才重算（= `useMemo` 的 deps） |
+| `$[3] = children` | 记下这次的值 |
+| `bb0: { … break bb0 }` | 可能提前返回（labeled block） |
+| `Symbol.for('react.early_return_sentinel')` | 区分「缓存了一个提前返回」和「槽还没填」 |
+
+最值得注意的一处：`span.props.dim = true` 是**原地修改**（副作用），而它所在的 `map` 回调只在缓存 miss 时执行。之所以没出问题，是因为 `map` 的结果也被一起缓存了——**碰巧安全**。编译器的缓存正确性依赖函数是纯的，而这里不是。
+
+如果想看人写的版本：文件末尾 `sourceMappingURL` 的 base64 里，除了映射表还内嵌了原始 TSX 全文（`sourcesContent` 字段）。解出来是 308 行，带注释、带类型。**编译后的代码能看懂逻辑，但「为什么这么写」的痕迹只在原文里**——这一步值得做。
+
 ### 这一轮修的一个判据误报
 
 `screen.ts` 的原文里有这么一行英文注释，举例时用了汉字：
@@ -1101,20 +1163,27 @@ cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
 ```
 src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测量）
                                           → ink.tsx（一帧九阶段：渲染 → diff → 写终端）
-                                                └─ render-node-to-output.ts（树 → 格子）
-                                                      └─ screen.ts（打包格子 / blit / shift / 两帧 diff）
-                                                            └─ log-update.ts（差异 → 终端字节）
+                                                └─ render-node-to-output.ts（树 → 操作队列）
+                                                      └─ output.ts（操作队列 → 屏幕格子）
+                                                            └─ screen.ts（打包格子 / blit / shift / 两帧 diff）
+                                                                  └─ log-update.ts（差异 → 终端字节）
+
+旁支（不在这条主线上，但每一步都用到）：
+  styles.ts        盒子样式 → yoga setter（量的那一侧）
+  colorize.ts      字样式 → SGR 转义序列（画的那一侧）
+  stringWidth.ts   宽度 —— dom / output / wrap 三处都调它，是整条链的尺子
+  Ansi.tsx         反方向：别人的 ANSI 字符串 → 我们的组件树
 ```
 
 **主干到此为止**。剩下的都是枝叶，不影响理解整体设计：
 
-- [`src/ink/`](source/src/ink/) 还差 30 来个百行级小件：`parse-keypress.ts`（键序列 → 事件）、`render-border.ts`（边框字符）、`selection.ts`（拖选）、`optimizer.ts`（写入合并）、`wrapAnsi.ts` 等。它们是主线的螺丝，遇到具体问题时再翻
+- [`src/ink/`](source/src/ink/) 还有二十来个百行级小件，其中三份有一点独立价值：`parse-keypress.ts`（801 行，键序列 → 事件，Kitty 协议与 bracketed paste）、`selection.ts`（917 行，跨屏幕滚动的拖选）、`render-border.ts`（231 行，边框字符怎么拼）。其余（`bidi.ts` / `hit-test.ts` / `optimizer.ts` / `wrap-text.ts` 等）都是主线的螺丝
+- [`src/ink/termio/`](source/src/ink/termio/)（2,271 行）—— 完整的终端序列解析器（CSI / SGR / OSC / DEC 各一个文件）。`Ansi.tsx` 用的就是它，想深挖「一个 ANSI 字符串怎么变成 action 流」可以从这里进
 - [`src/ink/components/`](source/src/ink/components/) + [`src/ink/hooks/`](source/src/ink/hooks/) —— 交互原语（`<Box>` / `<Text>` / `useInput` / `ScrollBox`），比 `components/` 更薄、更接近框架
 - [`src/services/mcp/`](source/src/services/mcp/) 里还有 16 个百行级小件：`utils.ts` 575、`elicitationHandler.ts` 313、`channelNotification.ts` 316、`channelPermissions.ts` 240、`types.ts` 258 等
 - [`src/components/`](source/src/components/)（4.2 万行，389 个文件）—— 具体界面组件。上层的 React 组件，读它们主要是读产品逻辑，不是读架构
-- [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
 
-到这里，**第 1 到第 8 步的主线全部走完**：41 个文件、38,850 行原文（批注版 66,677 行）、2,010 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int` 写进终端，中间没有断点了。
+到这里，**第 1 到第 8 步的主线全部走完**：46 个文件、41,163 行原文（批注版 70,081 行）、2,121 处锚点。整条链从一条用户输入到它变成 API 请求、变成工具调用、变成子 agent 分工、变成一次 MCP 远端调用，最后变成一个汉字占两个 `int`、变成带 SGR 的字节写进终端，中间没有断点了。
 
 我的建议是**现在停下来回头读一遍索引**。特别是三处「跨文件才能看懂」的地方，它们单独看都不显眼，串起来才是设计：
 
@@ -1124,9 +1193,9 @@ src/ink/reconciler.ts（React 认得终端 DOM）→ dom.ts（树 + yoga + 测�
 
 想继续的话，说模块名就行。剩下的方向按性价比排：
 
-- **UI 线**（`ink/` 渲染器）—— 5.5 万行，是最大的未读区。价值在于「终端里怎么做到像 GUI」，但和工作原理无关
-- **`xaa.ts` / `xaaIdpLogin.ts`** —— 补完 XAA 的细节，只有 998 行，但属于「知道了很好，不知道也不影响」
-- **回头重读** —— 我推荐这个
+- **回头重读** —— 我推荐这个。八条线都闭合了，现在重读任何一处都比第一次清楚
+- **UI 线剩下的** —— `src/ink/termio/`（2,271 行的终端序列解析器）+ `parse-keypress.ts` / `selection.ts`。前者是「ANSI 字符串怎么变成结构化事件」的完整实现，后者是「拖选跨滚动」这个具体难题
+- **`src/components/`**（4.2 万行）—— 具体界面。读它们得到的是产品逻辑，不是架构。性价比最低
 
 ---
 
