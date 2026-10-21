@@ -143,6 +143,111 @@ def _regex_end(line, i):
     return None
 
 
+def scan_template_spans(lines):
+    """带状态栈的模板字符串扫描，返回 [(起始行, 结束行), ...]（含单行模板）。
+
+    【为什么不能用单个布尔量 in_tpl】
+    最初的实现只有一个 in_tpl 开关：遇到反引号就翻转。这在
+    `${cond ? 'a `b` c' : ''}` 这种写法上会错得很离谱 ——
+    模板表达式里的**普通字符串**中出现反引号，被误判成模板闭合，
+    于是后面的代码被当成"模板内部"，整段误报。
+
+    prompt.ts 第 260 行正是这种写法：
+      ${forkEnabled ? '...(with a `subagent_type`), ...' : ''}
+    它让模板在第 260 行被"提前关闭"，于是 272-286 行的中文批注
+    被误判为"插在模板内部"。误报 == 真报警没有区别：一报警就要停下查。
+
+    【正确做法：状态栈】
+    栈里每层是 [状态, 起始行, 花括号深度]，状态四种：
+      code  普通代码
+      tpl   模板字符串字面量内部
+      expr  模板的 ${...} 表达式内部 —— 它按**代码**规则扫描，
+            但遇到配对的 } 要退栈
+      block 块注释 /* */ 内部 —— 里面的反引号是**文档里的字符**，
+            不是模板开启
+
+    【block 这一层是被真实文件逼出来的】
+    bashSecurity.ts 第 472 行是一条块注释续行：
+      *   whitespace + `)` for the $(cat <<'EOF'...EOF)` inline form)
+    不识别块注释的话，那个反引号会开启一个"模板"，一直延续到
+    seventy 行之后的另一个反引号才闭合 —— 中间所有中文批注全被误报。
+    """
+    spans = []
+    stack = [['code', 0, 0]]
+
+    for lineno, line in enumerate(lines, start=1):
+        i = 0
+        n = len(line)
+        while i < n:
+            cur = stack[-1]
+            ch = line[i]
+
+            if cur[0] == 'block':
+                if ch == '*' and i + 1 < n and line[i + 1] == '/':
+                    stack.pop()
+                    i += 2
+                    continue
+                i += 1
+                continue
+
+            if cur[0] == 'tpl':
+                if ch == '\\':
+                    i += 2
+                    continue
+                if ch == '`':
+                    stack.pop()
+                    spans.append((cur[1], lineno))
+                    i += 1
+                    continue
+                if ch == '$' and i + 1 < n and line[i + 1] == '{':
+                    stack.append(['expr', lineno, 0])
+                    i += 2
+                    continue
+                i += 1
+                continue
+
+            # code 或 expr —— 都按代码规则扫描
+            if ch == '\\':
+                i += 2
+                continue
+            if ch == '/' and i + 1 < n and line[i + 1] == '/':
+                break
+            if ch == '/' and i + 1 < n and line[i + 1] == '*':
+                stack.append(['block', lineno, 0])
+                i += 2
+                continue
+            if ch == '/':
+                re_end = _regex_end(line, i)
+                if re_end is not None:
+                    i = re_end + 1
+                    continue
+            if ch in ('"', "'"):
+                q = ch
+                i += 1
+                while i < n and line[i] != q:
+                    if line[i] == '\\':
+                        i += 1
+                    i += 1
+                i += 1
+                continue
+            if ch == '`':
+                stack.append(['tpl', lineno, 0])
+                i += 1
+                continue
+            if cur[0] == 'expr':
+                if ch == '{':
+                    cur[2] += 1
+                elif ch == '}':
+                    if cur[2] == 0:
+                        stack.pop()
+                    else:
+                        cur[2] -= 1
+                i += 1
+                continue
+            i += 1
+    return spans
+
+
 def check_template_purity(lines):
     """判据 4：多行模板字符串内部不许有中文注释行。
 
@@ -153,67 +258,17 @@ def check_template_purity(lines):
     getScratchpadInstructions 的返回值都是多行模板），
     而判据 1（代码行相等）对此完全无感：代码行确实一行没动。
     """
-    bad = []
-    in_tpl = False
-    for lineno, line in enumerate(lines, start=1):
-        s = line.strip()
-        if in_tpl:
-            if s.startswith('//') and _CJK.search(s):
-                bad.append(lineno)
-            # 找本行的闭合反引号（跳过转义）
-            i = 0
-            while i < len(line):
-                if line[i] == '\\':
-                    i += 2
-                    continue
-                if line[i] == '`':
-                    in_tpl = False
-                    break
-                i += 1
-            continue
-        if s.startswith('//') or s.startswith('*') or s.startswith('/*'):
-            continue
-        # 扫描本行，判断是否开启了未闭合的模板字符串
-        i = 0
-        while i < len(line):
-            ch = line[i]
-            if ch == '\\':
-                i += 2
-                continue
-            if ch == '/' and i + 1 < len(line) and line[i + 1] == '/':
-                break
-            if ch == '/':
-                re_end = _regex_end(line, i)
-                if re_end is not None:
-                    i = re_end + 1
-                    continue
-            if ch in ('"', "'"):
-                q = ch
-                i += 1
-                while i < len(line) and line[i] != q:
-                    if line[i] == '\\':
-                        i += 1
-                    i += 1
-                i += 1
-                continue
-            if ch == '`':
-                j = i + 1
-                closed = False
-                while j < len(line):
-                    if line[j] == '\\':
-                        j += 2
-                        continue
-                    if line[j] == '`':
-                        closed = True
-                        break
-                    j += 1
-                if closed:
-                    i = j + 1
-                    continue
-                in_tpl = True
-                break
-            i += 1
-    return bad
+    inside = set()
+    for s, e in scan_template_spans(lines):
+        if e > s:  # 只看多行模板
+            for k in range(s + 1, e + 1):  # 起始行的反引号之后才算内部
+                inside.add(k)
+    if not inside:
+        return []
+    return [ln for ln in sorted(inside)
+            if ln <= len(lines)
+            and lines[ln - 1].strip().startswith('//')
+            and _CJK.search(lines[ln - 1])]
 
 
 # 「表达式明显未结束」的行尾特征：赋值号、三元问号。

@@ -194,33 +194,69 @@ def main():
         getScratchpadInstructions() / computeEnvInfo() 的返回值也是，
         三处都踩了这个坑，而 check-fidelity.py 完全看不出来（代码行确实都在）。
 
-        扫描规则（简版词法）：
-          · 反引号开/闭切换 in_template
-          · 反斜杠转义跳过下一个字符（\\` 不算闭合）
-          · 进模板前遇到 // → 该行剩余部分是行注释，break
-          · 进模板前遇到引号 → 整段跳到配对引号（处理 'http://x' 里的 //）
-          · 进模板前遇到正则字面量 → 整段跳到闭合 /（处理 /[a-z`]/ 里的反引号）
-          · ${...} 内的嵌套反引号不特殊处理（实际代码里极少见）
+        【v2：改成状态栈，修掉「${...} 里出现反引号」的误判】
+
+        旧实现用一个 in_tpl 布尔量，遇到反引号就翻转。这在下面这种写法上会错：
+          ${cond ? '...(with a `subagent_type`), ...' : ''}
+        模板表达式里的**普通字符串**中出现反引号 —— 被当成模板闭合，
+        于是后面的代码全被当成"模板内部"，锚点被错误外移。
+        prompt.ts 第 260 行正是这种写法（一句英文里嵌了个参数名）。
+
+        状态栈四种状态：
+          code  普通代码
+          tpl   模板字面量内部
+          expr  模板的 ${...} 内部 —— 按代码规则扫，配对的 } 退栈
+          block 块注释 /* */ 内部 —— 里面的反引号是文档字符，不是模板开启
+        于是嵌套（模板套模板、表达式里的对象字面量）都被正确处理。
+
+        block 这一层是被 bashSecurity.ts 第 472 行逼出来的：
+          *   whitespace + `)` for the $(cat <<'EOF'...EOF)` inline form)
+        不识别块注释，那个反引号会开启一个跨七十行的"模板"，
+        把中间所有锚点当成"落在模板内部"而挪走。
         """
         spans = []
-        in_tpl = False
-        start = 0
+        stack = [['code', 0, 0]]
         for lineno, line in enumerate(lines, start=1):
             i = 0
             n = len(line)
             while i < n:
+                cur = stack[-1]
                 ch = line[i]
+
+                if cur[0] == 'block':
+                    if ch == '*' and i + 1 < n and line[i + 1] == '/':
+                        stack.pop()
+                        i += 2
+                        continue
+                    i += 1
+                    continue
+
+                if cur[0] == 'tpl':
+                    if ch == '\\':
+                        i += 2
+                        continue
+                    if ch == '`':
+                        stack.pop()
+                        spans.append((cur[1], lineno))
+                        i += 1
+                        continue
+                    if ch == '$' and i + 1 < n and line[i + 1] == '{':
+                        stack.append(['expr', lineno, 0])
+                        i += 2
+                        continue
+                    i += 1
+                    continue
+
+                # code 或 expr —— 都按代码规则扫描
                 if ch == '\\':
                     i += 2
                     continue
-                if in_tpl:
-                    if ch == '`':
-                        in_tpl = False
-                        spans.append((start, lineno))
-                    i += 1
-                    continue
                 if ch == '/' and i + 1 < n and line[i + 1] == '/':
                     break
+                if ch == '/' and i + 1 < n and line[i + 1] == '*':
+                    stack.append(['block', lineno, 0])
+                    i += 2
+                    continue
                 if ch == '/':
                     re_end = _regex_end(line, i)
                     if re_end is not None:
@@ -236,8 +272,19 @@ def main():
                     i += 1
                     continue
                 if ch == '`':
-                    in_tpl = True
-                    start = lineno
+                    stack.append(['tpl', lineno, 0])
+                    i += 1
+                    continue
+                if cur[0] == 'expr':
+                    if ch == '{':
+                        cur[2] += 1
+                    elif ch == '}':
+                        if cur[2] == 0:
+                            stack.pop()
+                        else:
+                            cur[2] -= 1
+                    i += 1
+                    continue
                 i += 1
         return spans
 

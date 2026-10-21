@@ -87,7 +87,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`withRetry.ts`](annotated/src/services/api/withRetry.ts) ✅<br />[`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) ✅<br />[`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) ✅<br />[`compact.ts`](annotated/src/services/compact/compact.ts) ✅<br />[`microCompact.ts`](annotated/src/services/compact/microCompact.ts) ✅<br />[`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) ✅<br />[`mcp/client.ts`](annotated/src/services/mcp/client.ts) ✅ | ✅ 主线完成 |
-| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | —                                                                                                                                                                                                                                                                                                           | ⬜ 待做   |
+| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 
 ---
 
@@ -583,34 +583,136 @@ SDK 会调 `client.onerror`，但**不调 `client.onclose`**。而 CC 的重连�
 
 ---
 
+## 第 7 步（多智能体）读完了吗？
+
+UI 那半边（`components/` 4.2 万行 + `ink/` 1.3 万行）跳过了 —— 它们不影响理解主线。
+多智能体那半边做完了，四个文件正好是一条完整的链：
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) | 369 | 632 | 模式开关、resume 对齐、协调者系统提示词（258 行） |
+| [`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) | 287 | 601 | agent 清单注入策略、fork 说明、简报写法 |
+| [`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) | 1,397 | 2,793 | schema 裁剪、十道检查、两套执行路径、结果话术 |
+| [`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) | 210 | 559 | 缓存共享的字节级机制、身份冲突纠正 |
+
+合计 **2,263 行原文**，133 处批注锚点。
+
+**① CC 有哪两种多智能体形态？为什么互斥？**
+
+`coordinator` 模式：一个主进程当包工头，通过 Agent 工具派活给 worker，worker 之间有消息通道（SendMessage），主进程负责综合结论并对用户说话。
+`fork` 模式：主进程把自己的完整上下文复制给子进程，子进程干完就消失，没有消息通道也没有团队概念。
+
+互斥不是因为技术限制，而是角色重叠 —— coordinator 本身就是「分工者」，再让它 fork 自己会变成一个人同时当包工头和工人。而且两者的成本模型相反：coordinator 假设「派活要重新建立上下文」，fork 假设「派活几乎免费」，混在一起模型会算错账。
+
+**② CC 的多智能体设计里，什么东西是「不可外包」的？**
+
+**理解**。协调者提示词里态度最强的一段是：
+
+> Never write "based on your findings" or "based on the research." These phrases delegate understanding to the worker instead of doing it yourself. You never hand off understanding to another worker.
+
+配套的示例给了正反两种写法：反例一句话，正例包含具体文件路径、行号、字段名、判断逻辑、验收动作。区别不在长短，在于正例证明了协调者真的读懂了。
+
+整份提示词花了大量篇幅讲「不要做什么」（不要客套、不要抢答、不要派 worker 查 worker、不要外包理解、不要盖章），因为多智能体的失败模式几乎全是**协调者偷懒**。
+
+**③ 为什么 worker 的结果要以「用户消息」的身份送达？**
+
+因为对话协议只有 user / assistant 两种角色。要让模型「收到」一条外部消息，唯一的位置就是 user 角色。代价是模型必须靠 `<task-notification>` 这个 XML 标签区分「真人在说话」和「系统在通知」—— 标签名成了语义边界。
+
+**④ agent 清单为什么不能内联在工具描述里？那个 10.2% 是什么？**
+
+因为工具 schema 在请求里位于系统提示词**之前**。agent 清单是动态的（MCP 异步连上、/reload-plugins、切权限模式都会改它），清单变一个字 → 工具 schema 变 → 它后面所有内容的缓存前缀全废。在 MCP 服务器几十秒才连上的会话里，这件事在开头几分钟内会反复发生。
+
+10.2% 是**全公司范围内「重新创建缓存」这一项开销的 10.2%**（不是 token 消耗占比，是按全价计费的那部分）。解法是把清单挪到 attachment 里（消息流末尾），工具描述从此静态。
+
+这和 `prompts.ts` 的 `SYSTEM_PROMPT_DYNAMIC_BOUNDARY`、`claude.ts` 的 `deferred_tools_delta` 是**同一个手法的第三次出现**：把会变的东西从前缀移到后缀。
+
+**⑤ 为什么 fork 子 agent 不换系统提示词？那它不会去做不该做的事吗？**
+
+因为它要**共享父的缓存**，换提示词等于把 fork 的全部价值清零。
+
+于是出现一个矛盾：子 agent 的系统提示词里写着「你应该 fork 子 agent」，而它自己就是 fork。这个矛盾无法从源头消除（改了就不共享缓存），只能在**用户消息里**用一段大写的话强行覆盖 —— `forkSubagent.ts` 第 173 行那句 `STOP. READ THIS FIRST.` 就是干这个的，规则 1 直接写 `IGNORE IT — that's for the parent. You ARE the fork.`
+
+**⑥ fork 怎么做到「所有子进程共享前缀」？**
+
+关键是所有可变内容都压到最后：
+
+```
+[...历史, assistant(全部 tool_use), user(相同占位的 tool_result..., 各自的指令)]
+                                            ↑ 全部字节相同          ↑ 唯一的不同
+```
+
+两个细节：① 父的 assistant 消息必须**完整**保留（所有 tool_use），因为 tool_use / tool_result 必须配对；② 占位符必须是同一句话（`Fork started — processing in background`），而且那句话在语义上是真的，不是为凑字节编的假话。
+
+**⑦ 为什么 fork 子进程的「路径全错」问题比想象中严重？**
+
+因为它跑在独立 worktree 里（另一个目录，同一份仓库），继承的上下文里每个路径都是父进程的。
+
+严重的地方在于**读文件不会报错** —— 父目录依然存在、文件依然可读，它会读到父进程的旧版本，基于过时内容做判断。这类问题只有合并冲突时才暴露。所以 `buildWorktreeNotice` 专门要求「改之前重读」。
+
+**⑧ `AgentTool` 为什么声明自己是「只读」且「并发安全」？**
+
+因为**派 agent 这个动作**不碰文件、不跑命令。真正的读写发生在子 agent 内部，那里每一次工具调用各自过权限。
+
+但注意「并发安全」只管派活动作，不管子 agent 之间会不会冲突 —— 两个 worker 同时改同一批文件，调度器不会拦你，那是协调者提示词的职责（写重任务一次一个）。
+
+**⑨ 同步 agent 明明会阻塞主线程，为什么还保留这条路？**
+
+因为短任务的同步有真实价值：派一个查文件的 agent，3 秒后拿到结果就能接着干。改成异步要多等一个通知轮次（说完「我去查」→ 结束轮次 → 通知到达 → 新轮次），对短任务来说那个停顿比等待更烦。
+
+这 500 行复杂度（race 循环 + 随时转后台 + 优雅关闭迭代器）全部来自「前台跑但随时可以放手」这一个需求。
+
+**⑩ 转后台时那个 `agentIterator.return(undefined)` 为什么不能省？**
+
+因为生成器的 `finally` 块里装着 MCP 连接释放、session hooks 清理、prompt cache 跟踪表摘除。直接丢弃迭代器 = 一个已启动但永不完成的异步生成器，那些资源全部泄漏，而且因为 agent 还在「跑」，看起来一切正常。
+
+它还要 race 一个 1 秒的 sleep —— MCP 清理最坏要 500ms 以上，卡住的服务器会拖住整个转后台操作，而用户按「转后台」的期望是「立刻」。
+
+**⑪ 哪些动作必须「先改状态、再做清理」？为什么？**
+
+`completeAsyncAgent` 必须在 worktree 清理和 handoff 分类之前（注释点了 issue 号 gh-20236）。因为 `TaskOutput(block=true)` 的调用方靠状态判断「能不能走了」，而后两个动作可能很慢（git status 在巨大仓库要几十秒，classify 是一次完整 API 调用）。
+
+一条通用原则：**状态转换要尽早，副作用要尽可能晚**。这个形状在本项目里反复出现（QueryEngine 的「assistant 消息不能 await」、mcp/client 的「先 reject pending 再清缓存」）。
+
+**⑫ 子 agent 什么都没说时，为什么要硬塞一句「(Subagent completed but returned no output.)」？**
+
+因为那时 tool_result 里只剩下 agentId 和 usage —— 一堆元数据，没有内容。模型看到会想「这没什么可回应的」，然后直接结束轮次，用户看到界面莫名停住。
+
+问题不在逻辑错误，而在**协议的语用层**：同样的数据，有内容时模型知道该干什么，只有元数据时模型不知道该干什么。
+
+**⑬ 为什么给 Explore / Plan 少写一段提示能省下每周十亿 token？**
+
+那段「可以用 SendMessage 继续这个 agent」的提示约 135 字符，而 Explore 每周跑 3,400 万次。135 × 34M ≈ 每周 1–2 G tok。
+
+但它成立有三个前提，缺一不可：① 这些 agent 确实不会被续用；② 遥测不依赖这段文本（走 logEvent，不解析 tool_result）；③ agentType 可能缺失（resume 老会话）。第 ② 条最容易被忽略 —— 如果遥测靠正则解析 tool_result 里的 `<usage>`，这个优化会悄悄搞坏数据管道，报错还会出现在完全无关的地方。
+
+---
+
 ## 继续往下读之前
 
-**第 6 步主线已收口**：7 个文件、7,539 行原文、393 处批注锚点。
+**第 7 步的多智能体主线已收口**：4 个文件、2,263 行原文、133 处批注锚点。
 
-服务层总共有约 4 万行，我们没有全量做 —— 只做了「主循环直接依赖」的那条链：
+现在整条「从用户输入到多个 AI 分工干活」的链路都通读了：
 
 ```
-query.ts
-  ├─ autoCompact → compact（摘要压缩）+ microCompact（微压缩）+ sessionMemoryCompact
-  ├─ apiMicrocompact（服务端压缩指令）
-  └─ mcp/client（工具来源）
-        └─ claude.ts（把工具序列化进请求）
+cli.tsx → setup.ts → QueryEngine → query.ts → claude.ts
+                                        ├─ compact 四件套（上下文不爆）
+                                        └─ AgentTool → coordinator / fork / 普通子 agent
+                                              └─ runAgent（同一套 query 循环，换个身份跑）
 ```
 
-这条链现在闭环了。剩下的服务层模块都是**枝叶**，不影响理解主干：
+第 7 步还剩两块没做，都是**枝叶**：
+
+- [`src/components/`](source/src/components/)（4.2 万行，389 个文件）+ [`src/ink/`](source/src/ink/)（1.3 万行）—— 终端 UI。`ink/` 是**自己实现**的 Ink 渲染器（不是官方包），核心是 `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462
+- [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) —— 只有 11 行，是个入口壳，真正的交互在 `components/agents/AgentsMenu.tsx`（799 行）
+
+服务层也还有一块上游没读：
 
 - [`mcp/config.ts`](source/src/services/mcp/config.ts)（1,578 行）—— 配置从哪读（`.mcp.json` / 用户级 / 项目级 / 企业策略）
 - [`mcp/auth.ts`](source/src/services/mcp/auth.ts)（2,465 行）—— `ClaudeAuthProvider` 的实现，OAuth 全流程
-- [`mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)（1,141 行）—— 把 `client.ts` 的纯连接逻辑接进 React 状态
-- `mcp/` 剩下的小文件（types 258 / utils 575 / elicitationHandler 313 / headersHelper 138 …）
 
-**第 7 步（UI 与多智能体，可选）** 是另一条线：
+如果只想再读一个文件，我建议 `mcp/config.ts` —— 因为 `client.ts` 里那些 `needs-auth`、企业策略覆盖、`hasPendingMcpServers` 的上游都在那里，读完这条线就彻底闭合了。
 
-- [`src/components/`](source/src/components/) —— Ink 渲染的终端 UI
-- [`src/ink/`](source/src/ink/) —— 自己实现的 Ink 渲染器（不是官方包）
-- [`src/coordinator/`](source/src/coordinator/) —— 多 agent 编排
-
-告诉我「继续第 7 步」我就开始，或者点名某个模块（比如先补 `mcp/config.ts`，因为它是 `client.ts` 上游唯一没读的一块）。
+告诉我「继续」我就按 `mcp/config.ts` 往下走；想换方向（比如 `ink/` 渲染器）直接点名。
 
 ---
 
@@ -631,3 +733,38 @@ query.ts
 修法：`before` 自动挪到段首、`after` 自动挪到段尾（单行注释段不产生位移）。全量重新生成后共纠正 **72 处**，其中 `bashSecurity.ts` 一个文件 42 处、`query.ts` 17 处 —— 说明这个错误在之前几轮里一直在积累，只是没人从「句子被剪断」这个角度看。
 
 顺带修了上一轮 `claude.ts` 的一处：`Options.taskBudget` 那四行英文注释被劈了（提交 `6b09281` 引入）。
+
+---
+
+## 这一轮修的工具缺陷（第四类：扫描器自己判错了）
+
+写第 7 步时，`prompt.ts` 报了一个 `check-fidelity` 失败：272-286 行的中文批注「插进了多行模板字符串内部」。
+
+查下去发现**批注位置是对的**，判错的是扫描器。它用一个布尔量 `in_tpl`，遇到反引号就翻转。而 `prompt.ts` 第 260 行有这种写法：
+
+```ts
+${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''}
+```
+
+模板**表达式**里的普通字符串中出现反引号 —— 被当成模板闭合。于是模板在第 260 行「提前结束」，后面的代码进入「模板内部」状态，一直到下一个反引号才闭合，中间所有批注全部误报。
+
+再往下查，同一类问题还有第二种形态，而且方向相反：
+
+```
+ *   whitespace + `)` for the $(cat <<'EOF'...EOF)` inline form)
+```
+
+这是 `bashSecurity.ts` 第 472 行，一条**块注释**的续行。块注释里的反引号被当成模板开启，然后一直延续到七十行之后才闭合 —— 那段里的锚点被 `annotate.py` 当成「落在模板内部」，**错误地外移了 46 行**。也就是说这个 bug 之前一直在**悄悄挪动批注位置**，而 `check-fidelity` 只报「这一段有中文」（误报），不报「批注被挪走了」。
+
+两种错误方向相反但后果一样：校验失去意义。所以两个脚本都换成了**状态栈**词法扫描器：
+
+| 状态 | 什么时候进 | 里面遇到什么会退 |
+| --- | --- | --- |
+| `code` | 栈底 | — |
+| `tpl` | 遇到反引号 | 反引号（记一次 span）；`${` 则**压入** `expr` |
+| `expr` | `tpl` 里的 `${` | 配对的 `}`（花括号计数，支持 `${{a:1}}`）；反引号则压入 `tpl` |
+| `block` | 遇到 `/*` | `*/` |
+
+改完重跑全量 24 个文件，`bashSecurity.ts` 有 46 行变化 —— 全是那批被错误外移的批注**回到了原位**（比如 `isSafeHeredoc` 的形态说明回到了函数声明之前，而不是被推到后面的 `for` 循环里）。
+
+这类 bug 的教训是：**校验工具本身也要被质疑**。当一个文件报失败而目视检查合理时，先怀疑扫描器，不要急着改批注 —— 否则会把正确的批注改错。

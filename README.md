@@ -187,15 +187,23 @@
 
 > 📁 本节源码：[`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx)
 
-| 读什么 | 学什么 |
-|--------|--------|
-| `src/components/` + `src/ink/` | 终端界面怎么画（389 个文件，很大，按需） |
-| `src/coordinator/` | 多智能体编排 |
-| [`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx) + `AgentTool` | 角色化团队 |
+| 读什么 | 学什么 | 批注版 |
+|--------|--------|--------|
+| [`src/coordinator/coordinatorMode.ts`](source/src/coordinator/coordinatorMode.ts) | 多智能体编排的模式开关 + 协调者提示词 | [369 → 632 行](annotated/src/coordinator/coordinatorMode.ts) ✅ |
+| [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx) | 派活的十道检查、两套执行路径 | [1,397 → 2,793 行](annotated/src/tools/AgentTool/AgentTool.tsx) ✅ |
+| [`src/tools/AgentTool/prompt.ts`](source/src/tools/AgentTool/prompt.ts) | agent 清单注入策略、简报写法 | [287 → 601 行](annotated/src/tools/AgentTool/prompt.ts) ✅ |
+| [`src/tools/AgentTool/forkSubagent.ts`](source/src/tools/AgentTool/forkSubagent.ts) | fork：共享缓存的自我复制 | [210 → 559 行](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ |
+| `src/components/` + `src/ink/` | 终端界面怎么画（389 个文件，很大，按需） | ⬜ 未做 |
 
 **对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)、[10 子智能体与计划模式](docs/10-子智能体与计划模式.md)
 
 **目标**：想做终端 UI 或多智能体产品时再深入。
+
+**多智能体这四份读完之后，最值得带走的三条**：
+
+1. **理解不可外包** —— 协调者提示词里最硬的一条是禁止写「based on your findings」。因为多智能体的失败模式几乎全是「协调者偷懒」：把思考推给下属、把判断推给时间、把结果推给想象。
+2. **缓存的判据是字节，不是语义** —— fork 之所以便宜，是因为它的请求前缀和父进程逐字节相同。所以它宁可继承一份「教自己 fork」的错误提示词，也不肯换掉系统提示词（换了就全废）。
+3. **动态内容一律往后放** —— agent 清单原本内联在工具描述里，成了全公司缓存创建开销的 10.2%。挪到消息流末尾之后归零。同一个手法在 `prompts.ts`（动态边界标记）和 `claude.ts`（deferred_tools_delta）里各出现一次。
 
 ---
 
@@ -214,7 +222,7 @@
    ↓
 第6步 服务层      mcp / compact / lsp / oauth            [半天]
    ↓
-第7步 UI/多智能体 components / coordinator               [可选]
+第7步 多智能体    coordinator / AgentTool / fork         [可选] ✅ 已批注
 ```
 
 ---
@@ -369,7 +377,9 @@ source/README.md                    →  annotated/README.annotated.md
 
 **怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。还有一类更隐蔽的破坏由 `annotate.py` 结构性拦截：`//` 连续注释也成段，锚点落在段中部会把一句英文从中间剪断（语法合法、注释一行不少，只是读起来断了）—— 现在 `before` 自动挪段首、`after` 自动挪段尾。
 
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步主线完成**（`withRetry.ts` 822 + `apiMicrocompact.ts` 153 + `autoCompact.ts` 351 + `compact.ts` 1,705 + `microCompact.ts` 530 + `sessionMemoryCompact.ts` 630 + `mcp/client.ts` 3,348，合计 7,539 行原文、393 处锚点）。下一步是第 7 步（UI 与多智能体，可选），或补 `mcp/config.ts`。
+判定「哪里在模板字符串内部」靠两个脚本各一份的**状态栈词法扫描器**（code / tpl / expr / block 四态）。它取代了最早的单个布尔量，因为那个版本会被两种写法骗过去：`${cond ? '...(with a \`subagent_type\`)...' : ''}`（模板表达式里的字符串含反引号）和块注释里的 `` `)` ``（`bashSecurity.ts` 第 472 行）。前者会**误报**（一段正常批注被判成模板内部），后者会**漏报**（真插进模板的批注被放过）—— 两种错误都让校验失去意义，所以扫描器本身也得写对。
+
+进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步主线完成**（`withRetry.ts` 822 + `apiMicrocompact.ts` 153 + `autoCompact.ts` 351 + `compact.ts` 1,705 + `microCompact.ts` 530 + `sessionMemoryCompact.ts` 630 + `mcp/client.ts` 3,348，合计 7,539 行原文、393 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）。下一步是 `src/services/mcp/config.ts`（1,578 行），或按需做 `components/` + `ink/` 的终端 UI。
 
 👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
 

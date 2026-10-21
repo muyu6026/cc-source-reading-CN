@@ -480,6 +480,17 @@ function validateIncompleteCommands(
  * This implementation uses LINE-BASED matching, not regex [\s\S]*?, to
  * precisely replicate bash's heredoc-closing behavior.
  */
+// 注：唯一被允许的形态就这一种。逐条拆开看它约束了什么：
+//       前缀            必须有（不能在命令名位置）
+//       $(cat <<'DELIM'  必须 cat，必须引号/转义分隔符
+//       body            字面量文本（因为分隔符被引号了，不展开）
+//       DELIM)          闭合分隔符必须独占一行
+//       后缀            可选，但过完剥离后必须全部无害
+//
+//     为什么单拎出 heredoc？因为它是唯一「看起来像注入、实际是数据」的语法。
+//     用户天天写 `git commit -m "$(cat <<'EOF' ... EOF)"`，
+//     而 `$(` 在 COMMAND_SUBSTITUTION_PATTERNS 里是一律 ask 的。
+//     不特判的话，每次多行提交信息都要弹窗。
 function isSafeHeredoc(command: string): boolean {
   if (!HEREDOC_IN_SUBSTITUTION.test(command)) return false
 
@@ -487,6 +498,9 @@ function isSafeHeredoc(command: string): boolean {
   // newlines, but bash requires the delimiter word on the same line as <<.
   // Matching across newlines could accept malformed syntax that bash rejects.
   // Handle quote variations: 'EOF', ''EOF'' (splitCommand may mangle quotes).
+// 注：`[ \t]` 而不是 `\s`。\s 包含 `\n`，但 bash 要求 heredoc 的分隔符
+//     词必须和 `<<` 在**同一行**。允许跨行匹配，就等于接受一段 bash
+//     会拒绝的语法 —— 而「我们接受、bash 拒绝」正是所有绕过的前提。
   const heredocPattern =
     /\$\(cat[ \t]*<<(-?)[ \t]*(?:'+([A-Za-z_]\w*)'+|\\([A-Za-z_]\w*))/g
   let match
@@ -518,28 +532,7 @@ function isSafeHeredoc(command: string): boolean {
   // at the FIRST line that exactly matches the delimiter. Any subsequent
   // occurrence of the delimiter is just content (or a new command). Regex
   // [\s\S]*? can skip past the first delimiter to find a later `DELIM)`
-// 注：唯一被允许的形态就这一种。逐条拆开看它约束了什么：
-//       前缀            必须有（不能在命令名位置）
-//       $(cat <<'DELIM'  必须 cat，必须引号/转义分隔符
-//       body            字面量文本（因为分隔符被引号了，不展开）
-//       DELIM)          闭合分隔符必须独占一行
-//       后缀            可选，但过完剥离后必须全部无害
-//
-//     为什么单拎出 heredoc？因为它是唯一「看起来像注入、实际是数据」的语法。
-//     用户天天写 `git commit -m "$(cat <<'EOF' ... EOF)"`，
-//     而 `$(` 在 COMMAND_SUBSTITUTION_PATTERNS 里是一律 ask 的。
-//     不特判的话，每次多行提交信息都要弹窗。
-// 注：`[ \t]` 而不是 `\s`。\s 包含 `\n`，但 bash 要求 heredoc 的分隔符
-//     词必须和 `<<` 在**同一行**。允许跨行匹配，就等于接受一段 bash
-//     会拒绝的语法 —— 而「我们接受、bash 拒绝」正是所有绕过的前提。
   // pattern, hiding injected commands between the two delimiters.
-  type VerifiedHeredoc = { start: number; end: number }
-  const verified: VerifiedHeredoc[] = []
-
-  for (const { start, operatorEnd, delimiter, isDash } of safeHeredocs) {
-    // The opening line must end immediately after the delimiter (only
-    // horizontal whitespace allowed before the newline). If there's other
-    // content (like `; rm -rf /`), this is not a simple safe heredoc.
 // 注：这里解释了为什么不用 `[\s\S]*?`。
 //
 //     正则的懒惰匹配会「跳过第一个 DELIM，去找后面某个 DELIM)」：
@@ -553,6 +546,13 @@ function isSafeHeredoc(command: string): boolean {
 //
 //     所以必须逐行扫，找到**第一个**恰好等于分隔符的行就停 —— 精确复刻
 //     bash 的行为。这也是这段代码不能换成一行正则的原因。
+  type VerifiedHeredoc = { start: number; end: number }
+  const verified: VerifiedHeredoc[] = []
+
+  for (const { start, operatorEnd, delimiter, isDash } of safeHeredocs) {
+    // The opening line must end immediately after the delimiter (only
+    // horizontal whitespace allowed before the newline). If there's other
+    // content (like `; rm -rf /`), this is not a simple safe heredoc.
     const afterOperator = command.slice(operatorEnd)
     const openLineEnd = afterOperator.indexOf('\n')
     if (openLineEnd === -1) return false // No content at all
@@ -570,13 +570,13 @@ function isSafeHeredoc(command: string): boolean {
     //   2. `DELIM)` on a line (the inline $(cat <<'EOF'\n...\nEOF) form,
     //      where bash's PST_EOFTOKEN closes both heredoc and substitution)
     // For <<-, leading tabs are stripped before matching.
-    let closingLineIdx = -1
-    let closeParenLineIdx = -1 // Line index where `)` appears
 // 注：两种合法闭合形式，都来自 bash 解析器的真实行为：
 //       1) DELIM 独占一行，`)` 在下一行行首
 //       2) DELIM) 同一行（bash 的 PST_EOFTOKEN 会同时闭合 heredoc 和替换）
 //     第 2 种是 `$(cat <<'EOF'\n...\nEOF)` 这种「右括号跟着分隔符」的写法，
 //     没有它的话，最常见的写法都会被拒。
+    let closingLineIdx = -1
+    let closeParenLineIdx = -1 // Line index where `)` appears
     let closeParenColIdx = -1 // Column index of `)` on that line
 
     for (let i = 0; i < bodyLines.length; i++) {
