@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **322 个源码文件 / 106,018 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **20%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 21/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)。
+> **当前进度**：`annotated/` 已批注 **328 个源码文件 / 107,082 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **20%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 27/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)。
 
 ---
 
@@ -130,6 +130,8 @@
 > ✍️ 中文批注版：[`Tool.ts`](annotated/src/Tool.ts)（792 → 2,013 行，按「一个工具的一生」十二步逐字段讲）· [`tools.ts`](annotated/src/tools.ts)（389 → 647 行，工具户口本）· [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)（1,143 → 1,757 行，最复杂的工具实现）· [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)（2,592 → 3,658 行，22 个 validator 的编排）· [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts)（2,621 → 3,906 行，895 行主函数的权限裁决）  
 > **文件编辑三件套也做完了**（`FileEditTool/` 全 6 份 + `FileWriteTool/` 全 3 份，2,668 → 2,735 行，65 处锚点）：[`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts)（775 → 790 行，弯引号双向翻译 / 反斜引用转义 `$&` / 先读后写）· [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts)（625 → 643 行，十个 errorCode 的校验链 / UNC 路径安全短路 / 临界区不许 await）· [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts)（434 → 445 行，整文覆盖不改写行尾 / 懒 mkdir 会造出假故障遥测）。
 > **读的那一端也做完了**（`FileReadTool/` 全 5 份，1,602 → 1,655 行，48 处锚点）：[`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts)（1,183 → 1,211 行，五道零 I/O 校验 / 去重桩省下 18% 的重复读取 / 六型输出映射 / 三级图片压缩）· [`limits.ts`](annotated/src/tools/FileReadTool/limits.ts)（92 → 97 行，字节上限与 token 上限是两道不同的闸）· [`prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts)（49 → 54 行，「必须先 Read」规矩的出处）· [`imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts)（94 → 98 行，napi/sharp 双实现）· [`UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx)（185 → 192 行，只渲染摘要不渲染内容）。
+>
+> **只读三件套收尾**（`GlobTool/` 全 3 份 + `GrepTool/` 全 3 份，1,064 → 1,124 行，60 处锚点）：[`GrepTool/GrepTool.ts`](annotated/src/tools/GrepTool/GrepTool.ts)（577 → 612 行，rg 封装全貌：旗标同名参数 / 三模式输出 / 分页协议 / 超时责任交给 rg 自己而非 AbortController）· [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts)（198 → 212 行，按名字搜索、复用 Grep 的渲染与排序语义）。两工具对外统一叫「Search」，UNC 短路与 ENOENT 补救逐字对应；细节见[索引与进度 · GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)。
 
 **对应章节**：[04 工具系统](docs/04-工具系统.md)、[08 权限与安全](docs/08-权限与安全.md)
 

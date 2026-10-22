@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（21/184）。`src/` 还剩 1,580 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（27/184）。`src/` 还剩 1,574 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 21 / 24% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 27 / 26% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,580 份没动（20% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,574 份没动（20% 行数）。
 
 ---
 
@@ -1053,6 +1053,29 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 - **macOS 截图的空格有两种**。AM/PM 前的那个空格可能是 U+0020 也可能是 U+202F（窄不换行空格），肉眼和终端里都看不出区别，但 `stat` 会直接 ENOENT。所以 ENOENT 时有一步专门「换一个空格字符重试」，重试再失败才走相似文件名 / cwd 建议。
 - **UNC 路径必须在任何文件系统操作前短路**。Windows 上对 `\\server\share` 做 `stat` 会主动发起 SMB 认证并泄露 NTLM 哈希——模型随手编一个路径就能变成凭据泄露。这条与 `Edit` / `Write` 里逐字重复，位置都在第一次碰文件之前。
+
+### GlobTool 与 GrepTool（搜索的两端）
+
+只读三件套收尾：Read 读单文件、Glob 按**名字**找、Grep 按**内容**找。这批 6 份源文件 1,064 行，批注后 1,124 行、60 处锚点。两个工具是刻意的孪生设计——对外都叫「Search」、结果渲染共用同一份实现、路径权限同走通配规则、UNC 短路与 ENOENT 补救逐字对应；分化点也都有意（Glob 的 validateInput 要求目录、Grep 允许 rg 的 PATH 直接指向文件）。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`GrepTool/GrepTool.ts`](annotated/src/tools/GrepTool/GrepTool.ts) | 577 | 612 | 35 | rg 封装全貌：旗标同名参数、三模式输出、分页协议、mtime 排序 |
+| [`GrepTool/UI.tsx`](annotated/src/tools/GrepTool/UI.tsx) | 201 | 206 | 4 | React Compiler 编译产物、三模式共用汇总组件 |
+| [`GrepTool/prompt.ts`](annotated/src/tools/GrepTool/prompt.ts) | 18 | 20 | 2 | 禁用 Bash 跑 rg 的理由、两条高频语法提示 |
+| [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts) | 198 | 212 | 14 | 名字搜索、100 字符阈值放宽、复用 Grep 渲染 |
+| [`GlobTool/UI.tsx`](annotated/src/tools/GlobTool/UI.tsx) | 63 | 67 | 4 | 借走 Grep 的渲染、对外统一叫 Search |
+| [`GlobTool/prompt.ts`](annotated/src/tools/GlobTool/prompt.ts) | 7 | 8 | 1 | 按修改时间排序的检索策略暗示 |
+
+五个最值得记的点：
+
+1. **超时责任在谁手上是语义问题，不只是实现细节**。Grep 不用 `AbortController` 做超时（会打断整个 agent 循环），而是交给 rg 自己的 `execFile` timeout——超时抛 `RipgrepTimeoutError` 向上传播，模型看到「搜索没完成」而不是「没有匹配」。这两个结果的下一步行动完全不同。
+2. **分页协议是双向的**。`appliedLimit` 只在真截断时返回（没截断还返回 limit，模型会误以为后面还有而白跑一轮 offset）；截断时结果末尾追加 `[Showing results with pagination = limit: 250, offset: 20]`。工具用「字段出现与否」跟模型对话。
+3. **截断顺序决定截断质量**。content 模式先 `head_limit` 再转相对路径（省掉对将被丢弃的行的逐行处理，宽泛 pattern 可能回 10k+ 行）；文件列表模式先按 mtime 排序再截断（留下的永远是最最近修改的，顺序反了截断就成抽奖）。
+4. **参数名直接沿用 rg 旗标**（-B/-A/-C/-n/-i），模型会 rg 就会调这个工具；但 `-n` 默认 true 与原生 rg 相反——封装在「贴近原生命令」与「对模型友好」之间选了后者（模型拿到行号才能用 Edit 精确定位）。
+5. **`--hidden` 与 VCS 排除是配套决定**。开了隐藏文件（.github/.env 正是搜索目标）就必须手动挡住 .git 噪音；插件孤儿版本目录同样排除（否则旧版本代码会混进搜索结果）。
+
+另外一个编译产物层面的观察：`GrepTool/UI.tsx` 是 React Compiler 的输出——`$[i]` 数组是手写 memo cache 槽位、`Symbol.for("react.memo_cache_sentinel")` 标记未初始化槽位。读这种代码的关键是认出「编译器把 useMemo 展开成了什么」，而不是逐行理解控制流。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
