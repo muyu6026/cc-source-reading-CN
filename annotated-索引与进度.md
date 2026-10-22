@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（63/184）。`src/` 还剩 1,538 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（72/184）。`src/` 还剩 1,529 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 63 / 42% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 72 / 45% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,538 份没动（22% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,529 份没动（22% 行数）。
 
 ---
 
@@ -1203,6 +1203,32 @@ LSPTool 把「跳转定义 / 找引用 / hover / 调用层级」这九个编辑�
 5. **空结果消息是「自我解释」的**——「No definition found. This may occur if the cursor is not on a symbol...」每种空结果都列可能原因，模型能自行决定换位置重试而不是当故障上报。这是贯穿 formatters.ts 的设计原则。
 
 另有三处工程细节：UNC 路径安全短路（与 FileEditTool 同款，防 SMB NTLM 凭据外泄）；symbolContext.ts 被迫用同步 I/O（调用方是同步 React 渲染函数），64KB 读窗加半行哨兵——填满即弃，宁缺勿错；isEnabled 跟着 LSP 连接状态走，没配服务器时工具整个消失而非运行时报错。
+
+### PowerShellTool 上：外围机制九件
+
+PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），按「外围先行」拆两批。本批做九个外围文件 1,350 行，批注后 1,472 行、59 处锚点；核心安全大文件（pathValidation、readOnlyValidation、powershellPermissions、powershellSecurity、PowerShellTool.tsx，共 7,610 行）留下一批。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`toolName.ts`](annotated/src/tools/PowerShellTool/toolName.ts) | 2 | 3 | 1 | 两行文件打破循环依赖 |
+| [`commonParameters.ts`](annotated/src/tools/PowerShellTool/commonParameters.ts) | 30 | 33 | 3 | 通用参数清单，破两大校验文件间的 import 环 |
+| [`commandSemantics.ts`](annotated/src/tools/PowerShellTool/commandSemantics.ts) | 142 | 150 | 8 | 退出码语义表：robocopy 位掩码、grep 无匹配 |
+| [`destructiveCommandWarning.ts`](annotated/src/tools/PowerShellTool/destructiveCommandWarning.ts) | 109 | 115 | 6 | 破坏性命令警告（纯信息层，不拦权限） |
+| [`gitSafety.ts`](annotated/src/tools/PowerShellTool/gitSafety.ts) | 176 | 185 | 9 | git 武器化防线：裸仓库攻击、NTFS 短名 |
+| [`UI.tsx`](annotated/src/tools/PowerShellTool/UI.tsx) | 131 | 137 | 5 | 折叠显示、进度复用 Shell 组件 |
+| [`modeValidation.ts`](annotated/src/tools/PowerShellTool/modeValidation.ts) | 404 | 419 | 15 | acceptEdits 白名单、七安全标志、双复合守卫 |
+| [`clmTypes.ts`](annotated/src/tools/PowerShellTool/clmTypes.ts) | 211 | 217 | 6 | 微软 CLM 类型白名单反向使用 |
+| [`prompt.ts`](annotated/src/tools/PowerShellTool/prompt.ts) | 145 | 151 | 6 | 版本分支指引、后台与睡眠反模式 |
+
+五个最值得记的点：
+
+1. **退出码语义是 Windows 特有难题**——PowerShell 原生 cmdlet 用终止性错误（$?）报错、退出码恒 0；外部 exe 才设 $LASTEXITCODE，且 robocopy 的退出码是位掩码（0-7 全是成功、8+ 才有失败），grep/rg/findstr 退出 1 是无匹配。diff/fc/find 三个名字因 PS 5.1 别名歧义（可能解析到 cmdlet 也可能到 exe）被刻意省略——判不了就退化到默认语义（更严）。
+2. **gitSafety 是裸仓库 HEAD 攻击的唯一防线**——pathValidation 刻意不把裸 HEAD 列入危险文件（合法同名文件误报太多），所以逃出 cwd 又落回 cwd 的路径必须在这里用真实 cwd 解析兜底。归一化链条每一步对应一种真实绕过：NTFS 逐组件尾点/尾空格（.. . 变 ..、hooks. 变 hooks）、8.3 短名（.git 变 GIT~N）、provider 前缀、盘符相对路径、unicode 横杠。
+3. **modeValidation 的守卫密度是全目录之最**——七个安全标志（子表达式/脚本块/成员调用/splatting/赋值/停止解析/可扩展字符串）任一命中即拒；两个复合守卫（cwd 漂移 TOCTOU、刚创建符号链接）都源于「校验期与运行期的路径世界不同」；非 CommandAst 元素的守卫承重三个用例，注释明说与 isReadOnlyCommand 依赖同一 accident 一起 fail safe，谁都不能单独收窄。
+4. **clmTypes 借微软的 CLM 白名单反向使用**——类型字面量不在名单就 ask，一个检查替代枚举所有危险类型（反射、命名管道、P/Invoke）。但 adsi/adsisearcher/wmi 系被刻意移除：类型转型即网络绑定（LDAP/WMI 远程查询），微软允许是因为目标用户是可信域内管理员，这里目标未经验证。
+5. **prompt 按检测版本分支**——5.1 与 pwsh 7 的语法差异（&&、三元、UTF-16 编码、2>&1 的 ErrorRecord 陷阱）分三段注入；版本未知给保守的 5.1 兼容指引。背景任务与 Start-Sleep 反模式清单与 BashTool 同款，受环境变量开关控制。
+
+另有一处纯信息层设计：destructiveCommandWarning 只产出权限对话框里的警告文案、不参与权限判定——「让用户多看一眼」与「拦下来」是两套系统；正则锚定语句起始防 git rm --force 里的 rm 误匹配，停止符只含花括号不含圆括号（圆括号是路径分组，后面的参数还是本命令的）。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
