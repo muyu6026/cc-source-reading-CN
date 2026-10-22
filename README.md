@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **328 个源码文件 / 107,082 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **20%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 27/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)。
+> **当前进度**：`annotated/` 已批注 **332 个源码文件 / 108,560 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **21%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 31/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)。
 
 ---
 
@@ -132,6 +132,8 @@
 > **读的那一端也做完了**（`FileReadTool/` 全 5 份，1,602 → 1,655 行，48 处锚点）：[`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts)（1,183 → 1,211 行，五道零 I/O 校验 / 去重桩省下 18% 的重复读取 / 六型输出映射 / 三级图片压缩）· [`limits.ts`](annotated/src/tools/FileReadTool/limits.ts)（92 → 97 行，字节上限与 token 上限是两道不同的闸）· [`prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts)（49 → 54 行，「必须先 Read」规矩的出处）· [`imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts)（94 → 98 行，napi/sharp 双实现）· [`UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx)（185 → 192 行，只渲染摘要不渲染内容）。
 >
 > **只读三件套收尾**（`GlobTool/` 全 3 份 + `GrepTool/` 全 3 份，1,064 → 1,124 行，60 处锚点）：[`GrepTool/GrepTool.ts`](annotated/src/tools/GrepTool/GrepTool.ts)（577 → 612 行，rg 封装全貌：旗标同名参数 / 三模式输出 / 分页协议 / 超时责任交给 rg 自己而非 AbortController）· [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts)（198 → 212 行，按名字搜索、复用 Grep 的渲染与排序语义）。两工具对外统一叫「Search」，UNC 短路与 ENOENT 补救逐字对应；细节见[索引与进度 · GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)。
+>
+> **技能机制也做完了**（`SkillTool/` 全 4 份，1,477 → 1,525 行，47 处锚点）：[`SkillTool/SkillTool.ts`](annotated/src/tools/SkillTool/SkillTool.ts)（1,108 → 1,140 行，inline 展开 vs fork 子代理两条执行模型 / deny→allow→白名单→ask 的权限链 / 双通道遥测 / 远端技能条件 require 防 tree-shaking 泄漏）· [`prompt.ts`](annotated/src/tools/SkillTool/prompt.ts)（241 → 250 行，技能清单占窗口 1% 预算、两级降级）。细节见[索引与进度 · SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)。
 
 **对应章节**：[04 工具系统](docs/04-工具系统.md)、[08 权限与安全](docs/08-权限与安全.md)
 

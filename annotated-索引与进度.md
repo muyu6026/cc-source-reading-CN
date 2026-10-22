@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（27/184）。`src/` 还剩 1,574 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（31/184）。`src/` 还剩 1,570 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 27 / 26% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 31 / 29% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,574 份没动（20% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,570 份没动（21% 行数）。
 
 ---
 
@@ -1076,6 +1076,28 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 5. **`--hidden` 与 VCS 排除是配套决定**。开了隐藏文件（.github/.env 正是搜索目标）就必须手动挡住 .git 噪音；插件孤儿版本目录同样排除（否则旧版本代码会混进搜索结果）。
 
 另外一个编译产物层面的观察：`GrepTool/UI.tsx` 是 React Compiler 的输出——`$[i]` 数组是手写 memo cache 槽位、`Symbol.for("react.memo_cache_sentinel")` 标记未初始化槽位。读这种代码的关键是认出「编译器把 useMemo 展开成了什么」，而不是逐行理解控制流。
+
+### SkillTool（技能 = 可调用的斜杠命令）
+
+「技能」这个工具是前面几条线的交汇点：技能清单占上下文 1% 预算（`prompt.ts` 精打细算的两级降级）、调用时或 inline 展开注入主对话、或按 frontmatter `context: 'fork'` 丢给子代理（与 AgentTool 共用 `runAgent`）、权限走 Skill 专属的 allow/deny 规则、遥测按官方/第三方分流脱敏。4 份源文件 1,477 行，批注后 1,525 行、47 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`SkillTool/SkillTool.ts`](annotated/src/tools/SkillTool/SkillTool.ts) | 1,108 | 1,140 | 32 | 三条执行路径、权限判定链、双通道遥测、远端技能加载 |
+| [`SkillTool/prompt.ts`](annotated/src/tools/SkillTool/prompt.ts) | 241 | 250 | 9 | 清单预算（1% 窗口）、两级降级、BLOCKING REQUIREMENT 约定 |
+| [`SkillTool/UI.tsx`](annotated/src/tools/SkillTool/UI.tsx) | 128 | 134 | 6 | fork 进度摘要、拒绝/错误也带进度 |
+| [`SkillTool/constants.ts`](annotated/src/tools/SkillTool/constants.ts) | 1 | 2 | 1 | 工具注册名与规则匹配的关系 |
+
+六个最值得记的点：
+
+1. **一个工具、两种执行模型、union 类型分家**——inline 把技能展开成消息注入主对话（`tool_result` 只回一句 Launching skill 回执，正文走 `newMessages` 通道）；fork 把整个 prompt 丢给子代理独立跑完，只带回最终结果（结果走 `tool_result`）。输出 schema 用 `status` 字面量在类型层面分开，消费方不用猜。
+2. **条件 require 防 tree-shaking 泄漏**——远端技能模块不能用静态 import：静态引入会连带拉进 `akiBackend.ts`，它模块顶层的 `memoize()`/`lazySchema()` 常量在 tree-shaking 后幸存、变成带副作用的初始化器。所有调用点都在 feature 守卫内，`remoteSkillModules!` 的非空断言因此成立。
+3. **权限判定是一条有序链**——deny 全名/`:*` 前缀规则 → 远端技能自动放行（但排在 deny 之后，用户显式否决永远优先）→ allow 规则 → safe-properties 白名单自动放行（30 个无害属性；`allowed-tools` 因扩大权限不在清单里）→ 默认 ask 并附两条一键建议（精确名 / 前缀通配）。方向是 fail-closed：将来给命令对象加新属性，默认需要权限。
+4. **模型覆盖必须过 `resolveSkillModelOverride`**——技能声明 `model: opus` 时要保留会话原有的 `[1m]` 长窗口后缀，否则 opus[1m] 会话跑了个 opus 技能，有效窗口从 1M 掉回 200K，autocompact 立刻误触发。
+5. **`contextModifier` 链式包装 `getAppState`**——多个 modifier 会叠着改，每个必须用 `previousGetAppState` 看到前一个的结果；直接闭包引用最外层会互相覆盖。
+6. **压缩保留登记要存「已转换」的内容**——远端技能登记进 invokedSkills 时必须存 `finalContent`（带 base directory 头和变量替换），而不是原始 markdown；存错一份，压缩恢复出来的技能就是残的。这条与本地技能经 `processSlashCommand` 的做法逐字对齐。
+
+另有两处小而精的工程判断：fork 结束后 `agentMessages.length = 0` 释放消息内存（长会话防爬升的实招）；prompt.ts 的技能清单按窗口 1% 算预算、bundled 技能描述永不截断、其余按人头均摊、均摊到不足 20 字符整体降级成只有名字——每个降级档位都打遥测。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
