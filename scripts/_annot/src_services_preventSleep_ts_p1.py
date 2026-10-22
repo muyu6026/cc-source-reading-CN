@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (21, 'after',
+     "整个模块最关键的参数组合：**5 分钟超时 + 4 分钟重启**。`caffeinate -t 300` 让子进程自己在 5 分钟后退出，外面的定时器每 4 分钟换一个新的。这不是冗余，是**自愈设计**——Node 被 `SIGKILL` 打死时（`kill -9`、OOM killer、关机脚本）不一定有机会跑清理函数，那时这个孤儿 `caffeinate` 最多再撑 5 分钟就自己消失，不会永久霸占电源断言。留 1 分钟 buffer 是给「重启动作本身耗时」的，避免两次 spawn 之间出现空窗期。"),
+    (29, 'after',
+     "`refCount` 引用计数：同一时刻可能有多个长任务在跑（一个在等 API、一个在执行 Bash），谁都不该在别人还活着的时候放行休眠。所以是「计数归 1 时启动、归 0 时停止」，而不是每次调用都 spawn 一个 `caffeinate`（那会攒出一堆进程）。"),
+    (39, 'before',
+     "只在 **0 → 1** 这一跳启动。`refCount === 1` 而不是 `> 0`：后者每次调用都会重新 spawn 一遍（虽然 `spawnCaffeinate` 内部有非空判断挡着，但重启定时器会被反复创建）。"),
+    (74, 'after',
+     "**非 macOS 整个模块是 no-op**：`spawnCaffeinate` 和 `startRestartInterval` 各自在入口判平台后静默返回。写在两个函数里而不是调用处，是为了让 `startPreventSleep`/`stopPreventSleep` 在 Windows/Linux 上也能被无条件调用——调用方不需要关心平台（引用计数照样增减，只是没有副作用）。"),
+    (91, 'after',
+     "`unref()` 是双保险的一半：重启定时器**不能**成为阻止 Node 退出的原因（否则一个后台定时器会让 CLI 永远退不干净）。另一半在 `spawnCaffeinate` 里——子进程也要 `unref()`。两个都 unref 之后，Node 的存活只由真正的工作决定。"),
+    (131, 'after',
+     "`-i` 和 `-t` 的含义值得记：`-i` 是「阻止**空闲休眠**」的断言，但**不阻止显示器休眠**（比 `-d`/`-s` 温和，屏幕该黑还黑，只是机器不睡）；`-t` 是秒级超时，也是上面说的自愈开关。`stdio: 'ignore'` 避免它的输出混进 CLI 的终端渲染。"),
+    (136, 'after',
+     "`thisProc` 快照是**竞态防护**。`error`/`exit` 回调是异步触发的，回调里如果直接写 `caffeinateProcess = null`，就可能把**后来新 spawn 的那个进程引用**清掉——于是 `killCaffeinate` 再也杀不到它，它会一直跑到 5 分钟超时。所以回调里先比对 `caffeinateProcess === thisProc`：只清自己的引用。"),
+    (159, 'after',
+     "`SIGKILL` 而不是 `SIGTERM`：`caffeinate` 收到 `SIGTERM` 不保证立刻死（它可能在处理信号），而这个调用发生在「用户已经干完活了、想马上合盖走人」的时刻，多等几百毫秒都是体感问题。杀掉它没有资源需要优雅释放。"),
+]

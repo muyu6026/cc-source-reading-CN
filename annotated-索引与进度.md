@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅<br />[`lsp/` 全 7 份](annotated/src/services/lsp/) ✅<br />[`SessionMemory/` 全 3 份](annotated/src/services/SessionMemory/) ✅<br />[`analytics/` 全 9 份](annotated/src/services/analytics/) ✅<br />[`teamMemorySync/` 全 5 份](annotated/src/services/teamMemorySync/) ✅<br />[`PromptSuggestion/` 全 2 份](annotated/src/services/PromptSuggestion/) ✅<br />[`plugins/` 全 3 份](annotated/src/services/plugins/) ✅<br />[`extractMemories/` 全 2 份](annotated/src/services/extractMemories/) ✅<br />[`tips/` 全 3 份](annotated/src/services/tips/) ✅<br />[`settingsSync/` 全 2 份](annotated/src/services/settingsSync/) ✅<br />[`autoDream/` 全 4 份](annotated/src/services/autoDream/) ✅<br />[`MagicDocs/` 全 2 份](annotated/src/services/MagicDocs/) ✅<br />[`policyLimits/` 全 2 份](annotated/src/services/policyLimits/) ✅ | 🟡 18 个子目录清零<br />全目录 122/130 文件（98% 行数） |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅<br />[`lsp/` 全 7 份](annotated/src/services/lsp/) ✅<br />[`SessionMemory/` 全 3 份](annotated/src/services/SessionMemory/) ✅<br />[`analytics/` 全 9 份](annotated/src/services/analytics/) ✅<br />[`teamMemorySync/` 全 5 份](annotated/src/services/teamMemorySync/) ✅<br />[`PromptSuggestion/` 全 2 份](annotated/src/services/PromptSuggestion/) ✅<br />[`plugins/` 全 3 份](annotated/src/services/plugins/) ✅<br />[`extractMemories/` 全 2 份](annotated/src/services/extractMemories/) ✅<br />[`tips/` 全 3 份](annotated/src/services/tips/) ✅<br />[`settingsSync/` 全 2 份](annotated/src/services/settingsSync/) ✅<br />[`autoDream/` 全 4 份](annotated/src/services/autoDream/) ✅<br />[`MagicDocs/` 全 2 份](annotated/src/services/MagicDocs/) ✅<br />[`policyLimits/` 全 2 份](annotated/src/services/policyLimits/) ✅<br />[`AgentSummary/`](annotated/src/services/AgentSummary/) + [`toolUseSummary/`](annotated/src/services/toolUseSummary/) + 根目录 6 散件 ✅ | ✅ 全目录清零<br />130/130 文件（100% 行数） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
 | **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行） | 🚧 消息主链 + 输入框 + 消息体（66/389） |
@@ -522,17 +522,18 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
-## 第 6 步（服务层）做到哪了？——18 个子目录清零，全目录 122/130
+## 第 6 步（服务层）做到哪了？——全目录清零，130/130
 
 `src/services/` 是整份源码里最大的目录：**130 个文件 / 53,683 行**。
 它不是「一个模块」，而是十几个互不相干的模块挤在同一个目录名下
 （API 客户端、压缩、MCP、OAuth、LSP、遥测、语音、插件管理……）。
+**这一目录已 100% 完成**：20 个子目录全部清零，根目录 6 份散件也已做完。
 
 所以这一节的进度**按子目录报，不按「第几步」报**。
 之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——
 当时全目录只做了 35 份，`services/api/` 还有 18 份没动，
 而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。
-现在这 18 个子目录是真清零了：
+现在连根目录散件都清零了：
 
 | 子目录                     | 文件    | 原文行数      | 中文批注行 | 状态      |
 | ----------------------- | ----- | --------- | ----- | ------- |
@@ -554,8 +555,10 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | `services/policyLimits/` | 2/2 | 690     | 27    | ✅ 清零    |
 | `services/autoDream/` | 4/4 | 550     | 33    | ✅ 清零    |
 | `services/MagicDocs/` | 2/2 | 381     | 19    | ✅ 清零    |
-| `services/` 其余（2 个子目录 + 根目录） | 10/18  | 840     | —     | ⬜ 未开始   |
-| **合计**                  | **122/130** | **52,843 / 53,683（98%）** | **13,325** | 🟡 十八个子目录清零 |
+| `services/AgentSummary/` | 1/1 | 179     | 13    | ✅ 清零    |
+| `services/toolUseSummary/` | 1/1 | 112     | 7     | ✅ 清零    |
+| `services/` 根目录 6 份散件 | 6/6 | 549     | 36    | ✅ 清零    |
+| **合计**                  | **130/130** | **53,683 / 53,683（100%）** | **13,381** | ✅ 全目录清零 |
 
 > 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；
 > 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计」大。
@@ -959,25 +962,43 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ---
 
-### `services/` 还剩 8 份 / 840 行，为什么先停在这
+### 收尾批：最后 8 份 / 840 行，`services/` 到此清零
 
-剩下的不是「不重要」，而是**和主链路（一次对话怎么跑完）的耦合更弱**。
-按模块分（`lsp/`、`SessionMemory/`、`analytics/`、`teamMemorySync/`、`PromptSuggestion/`、`plugins/`、`remoteManagedSettings/`、`extractMemories/`、`tips/`、`settingsSync/`、`autoDream/`、`MagicDocs/` 和 `policyLimits/` 已经从这张表里移走 —— 它们清零了；`voice*.ts` 三份、`vcr.ts`、`diagnosticTracking.ts`、`rateLimitMessages.ts`、`rateLimitMocking.ts` 也已做完）：
+最后一批分三块，共同点是「**和主链路耦合最弱**」（都是辅助能力，不参与一次对话的骨架）：
 
-| 子目录 | 文件 | 行数 | 是什么 |
+| 文件 | 原文 → 批注版 | 批注 | 讲什么 |
 | --- | --- | --- | --- |
-| （根目录 6 份） | 6 | 549 | `preventSleep.ts` 165、`notifier.ts` 156、`internalLogging.ts` 90、`awaySummary.ts` 74、`mcpServerApproval.tsx` 41、`claudeAiLimitsHook.ts` 23 |
-| `AgentSummary/` | 1 | 179 | 子代理摘要 |
-| `toolUseSummary/` | 1 | 112 | 工具调用摘要 |
+| [`AgentSummary/agentSummary.ts`](annotated/src/services/AgentSummary/agentSummary.ts) | 179 → 192 | 13 | 子代理的一行进度条，30 秒 fork 一次 |
+| [`toolUseSummary/toolUseSummaryGenerator.ts`](annotated/src/services/toolUseSummary/toolUseSummaryGenerator.ts) | 112 → 119 | 7 | 一批工具调用的 Haiku 短标签 |
+| [`preventSleep.ts`](annotated/src/services/preventSleep.ts) | 165 → 173 | 8 | macOS `caffeinate` 电源断言 + 自愈重启 |
+| [`notifier.ts`](annotated/src/services/notifier.ts) | 156 → 163 | 7 | 九种终端通知通道 + auto 探测 |
+| [`internalLogging.ts`](annotated/src/services/internalLogging.ts) | 90 → 95 | 5 | `[ANT-ONLY]` 内部埋点（k8s namespace / 容器 ID） |
+| [`awaySummary.ts`](annotated/src/services/awaySummary.ts) | 74 → 80 | 6 | 「离开回来」卡片的一句话回顾 |
+| [`mcpServerApproval.tsx`](annotated/src/services/mcpServerApproval.tsx) | 41 → 46 | 4 | 项目级 MCP server 的批准弹窗 |
+| [`claudeAiLimitsHook.ts`](annotated/src/services/claudeAiLimitsHook.ts) | 23 → 27 | 4 | `claudeAiLimits` 的 React 薄壳 |
 
-**如果要从这堆里挑两份先读**（按「对理解主链路帮助最大」排）：
+四个最值得记的点：
 
-1. `AgentSummary/` + `toolUseSummary/`（179 + 112 = 291 行）—— 两个「摘要器」，一个给子代理的输出做摘要、一个给工具调用做摘要。它们和 `extractMemories`/`autoDream`/`MagicDocs` 用的是同一套 fork 手法，但目的是**压缩上下文**而不是持久化，可以对照看「fork 出来干活的四种目的」。
-2. 根目录剩余 6 个小散件（549 行）—— 每个都只讲一件事，适合当「主链路的补丁」扫读：`preventSleep`（跑长任务时阻止休眠）、`notifier`（终端转义序列发通知）、`awaySummary`（离开回来后的补白）、`internalLogging`、`mcpServerApproval`、`claudeAiLimitsHook`。
+1. **两个摘要器是「fork 四用法」的最后一格**。`extractMemories` 抽记忆、`autoDream` 整理记忆、`MagicDocs` 维护文档，`AgentSummary`/`toolUseSummary` 则是**纯压缩**：产物不落盘，只给人看。`agentSummary` 的 prompt 是全仓 few-shot 写得最细的一处——4 个 Good、4 个 Bad，每个 Bad 都标注失败类型（过去时 / 太含糊 / 太长 / 说了分支名）。
+2. **拒绝工具不能靠 `tools: []`**。`agentSummary` 用 `canUseTool` 回调拒绝，注释写明原因：`tools` 数组是 **prompt cache key 的一部分**，清空它等于让主线程刚建好的缓存作废。同理那个文件里**绝不设 `maxOutputTokens`**——它会夹紧 `budget_tokens`，导致 thinking 配置不匹配，缓存失效。这是所有「蹭主线程缓存」的功能都要遵守的两条铁律。
+3. **`caffeinate` 的 5 分钟超时 + 4 分钟重启是自愈设计**。Node 被 `SIGKILL` 打死时来不及跑清理函数，孤儿 `caffeinate` 最多再撑 5 分钟就自己退出，不会永久霸占电源断言。另外 `error`/`exit` 回调里必须比对 `thisProc` 快照——否则旧进程的 exit 事件会把新进程的引用清掉，之后再也杀不到它。
+4. **`notifier` 的返回值是「实际用了哪种方式」而不是布尔**。九种通道 + `auto` 探测，每次上报遥测时同时带「配置要求的通道」和「实际生效的通道」——这条数据专门用来发现「配了但不生效」（比如配了 kitty 却跑在 tmux 里）。
 
-> 这里的「还剩」清单是脚本算的（`python scripts/check-coverage.py`），
-> 目录里每多批注一份，这张表就少一行。不要再把某一节标成「✅ 完成」了 ——
-> 这个目录不存在「全部完成」的状态，只有「这一批做到哪」。
+`internalLogging.ts` 是这批里的异类：三个导出全部以 `process.env.USER_TYPE !== 'ant'` 开头，开源构建里等于死代码。但它留在 bundle 里，说明这层门是**运行时判断而非编译期删除**。
+
+### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
+
+`services/` 已清零，`src/` 还剩 1,594 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+
+| 目录 | 规模 | 为什么是下一步 |
+| --- | --- | --- |
+| `src/tools/` | 184 份 / 50,863 行（已做 7） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
+| `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
+| `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
+
+> 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,594 份没动（19% 行数）。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 

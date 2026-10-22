@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **300 个源码文件 / 100,905 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **19%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了18-个子目录清零全目录-122130)。
+> **当前进度**：`annotated/` 已批注 **308 个源码文件 / 101,745 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **19%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)。
 
 ---
 
@@ -226,14 +226,12 @@
 | [`src/services/analytics/config.ts`](source/src/services/analytics/config.ts) | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript） | [✅ 38 → 59 行](annotated/src/services/analytics/config.ts) |
 | [`src/services/analytics/sinkKillswitch.ts`](source/src/services/analytics/sinkKillswitch.ts) | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈） | [✅ 25 → 42 行](annotated/src/services/analytics/sinkKillswitch.ts) |
 
-> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **122 份 / 52,843 行（98%）**。
+> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行，已 100% 批注完成**。
 > `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`lsp/`（7/7）、`oauth/`（5/5）、
-> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）、`teamMemorySync/`（5/5）、`PromptSuggestion/`（2/2）、`plugins/`（3/3）、`remoteManagedSettings/`（5/5）、`extractMemories/`（2/2）、`tips/`（3/3）、`settingsSync/`（2/2）、`autoDream/`（4/4）、`MagicDocs/`（2/2）、`policyLimits/`（2/2）十八个子目录**已清零**，`voice*.ts` 三份、`vcr.ts`、`diagnosticTracking.ts`、`rateLimitMessages.ts`、`rateLimitMocking.ts` 也已完成；剩 8 份集中在
-> `AgentSummary/`、`toolUseSummary/` 与根目录 6 个小散件。
-> 逐份清单和「还剩什么」的完整表格见
-> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了18-个子目录清零全目录-122130)。
-> 这个目录**不存在「全部完成」的状态**，只有「这一批做到哪」——
-> 所以本节只标 🟡，不标 ✅。
+> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）、`teamMemorySync/`（5/5）、`PromptSuggestion/`（2/2）、`plugins/`（3/3）、`remoteManagedSettings/`（5/5）、`extractMemories/`（2/2）、`tips/`（3/3）、`settingsSync/`（2/2）、`autoDream/`（4/4）、`MagicDocs/`（2/2）、`policyLimits/`（2/2）、`AgentSummary/`（1/1）、`toolUseSummary/`（1/1）**二十个子目录全部清零**，根目录 **6 份散件**（`voice*.ts` 3 份、`vcr.ts`、`diagnosticTracking.ts`、`rateLimitMessages.ts`、`rateLimitMocking.ts`、`preventSleep.ts`、`notifier.ts`、`awaySummary.ts`、`internalLogging.ts`、`mcpServerApproval.tsx`、`claudeAiLimitsHook.ts`）也已完成。
+> 逐份清单与「接下来读什么」见
+> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)。
+> `services/` 清零**不等于全仓完成**——`src/` 还有 1,594 份没动（按行数 19%）。
 
 **对应章节**：[07 服务层详解](docs/07-服务层详解.md)、[11 上下文压缩](docs/11-上下文压缩.md)
 
