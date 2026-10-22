@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（31/184）。`src/` 还剩 1,570 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（45/184）。`src/` 还剩 1,556 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 31 / 29% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 45 / 33% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,570 份没动（21% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,556 份没动（21% 行数）。
 
 ---
 
@@ -1098,6 +1098,39 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 6. **压缩保留登记要存「已转换」的内容**——远端技能登记进 invokedSkills 时必须存 `finalContent`（带 base directory 头和变量替换），而不是原始 markdown；存错一份，压缩恢复出来的技能就是残的。这条与本地技能经 `processSlashCommand` 的做法逐字对齐。
 
 另有两处小而精的工程判断：fork 结束后 `agentMessages.length = 0` 释放消息内存（长会话防爬升的实招）；prompt.ts 的技能清单按窗口 1% 算预算、bundled 技能描述永不截断、其余按人头均摊、均摊到不足 20 字符整体降级成只有名字——每个降级档位都打遥测。
+
+### 交互与杂项五工具（AskUserQuestion / REPL / McpAuth / NotebookEdit / Brief）
+
+第 21 批收的是五个「小而各有绝活」的工具：问用户要答案的、把原语工具藏进 REPL 的、给未认证 MCP 服务器当替身的、改 Jupyter 的、以及助手模式下模型对用户说话的唯一通道。14 份源文件 1,809 行，批注后 2,075 行、132 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`AskUserQuestionTool/AskUserQuestionTool.tsx`](annotated/src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx) | 266 | 310 | 44 | schema 体系、preview 校验、channels 禁用、call 不问人 |
+| [`AskUserQuestionTool/prompt.ts`](annotated/src/tools/AskUserQuestionTool/prompt.ts) | 44 | 51 | 7 | 主提示词、preview 两版补丁、chip 宽度 |
+| [`REPLTool/constants.ts`](annotated/src/tools/REPLTool/constants.ts) | 46 | 57 | 10 | REPL 模式开关判定、REPL_ONLY_TOOLS 藏原语清单 |
+| [`REPLTool/primitiveTools.ts`](annotated/src/tools/REPLTool/primitiveTools.ts) | 39 | 47 | 8 | 惰性 getter 防 TDZ、绕开 getAllBaseTools 的原因 |
+| [`McpAuthTool/McpAuthTool.ts`](annotated/src/tools/McpAuthTool/McpAuthTool.ts) | 215 | 250 | 35 | 伪工具替身、OAuth 后台续段、Promise.race 静默认证 |
+| [`NotebookEditTool/NotebookEditTool.ts`](annotated/src/tools/NotebookEditTool/NotebookEditTool.ts) | 490 | 544 | 54 | 错误码链、非记忆化 jsonParse、readFileState 去重联动 |
+| [`NotebookEditTool/UI.tsx`](annotated/src/tools/NotebookEditTool/UI.tsx) | 93 | 103 | 10 | 结果渲染、错误降级 |
+| [`NotebookEditTool/prompt.ts`](annotated/src/tools/NotebookEditTool/prompt.ts) | 3 | 5 | 2 | 文案里的 cell_number 历史包袱 |
+| [`NotebookEditTool/constants.ts`](annotated/src/tools/NotebookEditTool/constants.ts) | 2 | 4 | 2 | 工具名单独成文件防 import 环 |
+| [`BriefTool/BriefTool.ts`](annotated/src/tools/BriefTool/BriefTool.ts) | 204 | 229 | 25 | 资格/激活双闸、DCE 正向守卫、resume 兼容 schema |
+| [`BriefTool/upload.ts`](annotated/src/tools/BriefTool/upload.ts) | 174 | 203 | 29 | 附件上传、base URL 三级回退、全路径 best-effort |
+| [`BriefTool/attachments.ts`](annotated/src/tools/BriefTool/attachments.ts) | 110 | 126 | 16 | 动态 import 保 tree-shaking、串行 stat 并行上传 |
+| [`BriefTool/UI.tsx`](annotated/src/tools/BriefTool/UI.tsx) | 101 | 114 | 13 | 三种渲染模式、无工具外壳 |
+| [`BriefTool/prompt.ts`](annotated/src/tools/BriefTool/prompt.ts) | 22 | 32 | 10 | 「答案写进 message」话术、助手模式提示词段 |
+
+七个最值得记的点：
+
+1. **AskUserQuestionTool 的 `call()` 不问任何人**——answers 在权限交互阶段已被 UI 组件回填进 input，`call` 只是把数据打包回传。整个工具的「交互」发生在 `checkPermissions` 的 ask 行为里，这也是 `requiresUserInteraction: true` 的实际含义。
+2. **REPL 模式靠藏工具逼批量操作**——`REPL_ONLY_TOOLS`（Read/Write/Edit/Glob/Grep/Bash/NotebookEdit/Agent）对模型隐藏，只能进 REPL VM 组合调用，一次执行顶过去八次工具往返。开关判定要区分 ant 交互 CLI（默认开）与 SDK（默认关），因为 `USER_TYPE` 是构建期常量，不查 `ENTRYPOINT` 会污染所有 SDK 子进程。
+3. **McpAuthTool 是「伪工具替身」模式**——未认证的服务器顶一个 `mcp__<server>__authenticate` 占位工具，模型借此知道服务器存在并代用户发起 OAuth；认证完成后真实工具经前缀替换写回 appState，同前缀的伪工具被一并清掉。`Promise.race` 处理静默认证（XAA 带 IdP 缓存令牌时整个流程先于 URL 完成）。
+4. **NotebookEditTool 的 jsonParse 必须「非记忆化」**——`safeParseJSON` 按内容字符串缓存并返回共享引用，而 call 阶段会原地改 notebook（splice、改 source）；用记忆化版本等于毒化缓存，污染 validateInput 和后续同内容调用。写后还要以 `offset: undefined` 更新 readFileState，否则同一毫秒内的 Read→NotebookEdit→Read 会被 file_unchanged 桩顶掉。
+5. **同一目标（非桥构建剔除 Brief 上传链）三种 DCE 手法**——`BriefTool.ts` 用正向 ternary feature 守卫（负向 if-return 剔不掉 GB 门字符串）、`attachments.ts` 用守卫内动态 `import('./upload.js')`（静态 import 会强制模块级求值）、`isBriefEnabled` 顶层重复 feature 检查（跨函数组合会破坏 Bun 常量折叠）。三处注释都在讲「为什么这么写才能被删干净」。
+6. **Brief 的输出 schema 全字段可选是 resume 兼容要求**——旧会话重放时原样回放历史输出，attachments/sentAt 设为必填会把恢复到旧版本的会话直接崩掉。类型上的不完美是兼容性的代价，注释明说「不是偷懒」。
+7. **upload.ts 的 base URL 三级回退是一个真实事故教训**——staging 令牌打到 api.anthropic.com 会 401 → 静默跳过 → web 查看器只看到没有 file_uuid 的死卡片。子进程宿主传的 `ANTHROPIC_BASE_URL` 必须参与回退，否则 getOauthConfig 的 staging 判定条件（USE_STAGING_OAUTH）在宿主那里根本没人设。
+
+另有两处顺手可记：AskUserQuestionTool 在 `--channels` 模式下整体禁用（用户在 Telegram/Discord 上，多选对话框会永远没人答）；NotebookEditTool 的 prompt 文案还在说 `cell_number` 0-indexed——schema 早已改成 `cell_id` 字符串定位，文档滞后于实现的一手标本。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 

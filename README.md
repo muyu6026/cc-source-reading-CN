@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **332 个源码文件 / 108,560 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **21%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 31/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)。
+> **当前进度**：`annotated/` 已批注 **346 个源码文件 / 110,369 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **21%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 45/184，文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)，交互与杂项五工具见 [AskUserQuestion / REPL / McpAuth / NotebookEdit / Brief](annotated-索引与进度.md#交互与杂项五工具askuserquestion--repl--mcpauth--notebookedit--brief)。
 
 ---
 
