@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（72/184）。`src/` 还剩 1,529 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（77/184）。`src/` 还剩 1,524 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 72 / 45% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 77 / 60% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,529 份没动（22% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,524 份没动（24% 行数）。
 
 ---
 
@@ -1229,6 +1229,30 @@ PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），
 5. **prompt 按检测版本分支**——5.1 与 pwsh 7 的语法差异（&&、三元、UTF-16 编码、2>&1 的 ErrorRecord 陷阱）分三段注入；版本未知给保守的 5.1 兼容指引。背景任务与 Start-Sleep 反模式清单与 BashTool 同款，受环境变量开关控制。
 
 另有一处纯信息层设计：destructiveCommandWarning 只产出权限对话框里的警告文案、不参与权限判定——「让用户多看一眼」与「拦下来」是两套系统；正则锚定语句起始防 git rm --force 里的 rm 误匹配，停止符只含花括号不含圆括号（圆括号是路径分组，后面的参数还是本命令的）。
+
+### PowerShellTool 下：安全核心五文件（目录 14/14 清零）
+
+本批把剩下的五个核心文件做完：pathValidation（2,049）、readOnlyValidation（1,823）、powershellPermissions（1,648）、powershellSecurity（1,090）、PowerShellTool.tsx（1,001），共 7,610 行 → 批注版 7,808 行、196 处锚点。至此 PowerShellTool 全目录 14/14、8,961 行清零。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`pathValidation.ts`](annotated/src/tools/PowerShellTool/pathValidation.ts) | 2,049 | 2,083 | 34 | 参数户口本 + 六层路径闸门 + cd 复合守卫 |
+| [`readOnlyValidation.ts`](annotated/src/tools/PowerShellTool/readOnlyValidation.ts) | 1,823 | 1,862 | 39 | 只读白名单（每条移除注释都是事故）+ 外命令共享校验 |
+| [`powershellPermissions.ts`](annotated/src/tools/PowerShellTool/powershellPermissions.ts) | 1,648 | 1,693 | 45 | 权限主流程：收集后归约 + git 武器化四连守卫 |
+| [`powershellSecurity.ts`](annotated/src/tools/PowerShellTool/powershellSecurity.ts) | 1,090 | 1,122 | 32 | 23 项 AST 安全检查，另类参数前缀归一 |
+| [`PowerShellTool.tsx`](annotated/src/tools/PowerShellTool/PowerShellTool.tsx) | 1,001 | 1,048 | 46 | 工具定义、执行循环、后台化与落盘 |
+
+七个最值得记的点：
+
+1. **收集后归约（collect-then-reduce）是权限层的结构性修复**——过去每个检查都 `return ask`，早一步的 ask 会盖住晚一步的 deny（Get-Process; Invoke-Expression evil 在 ask(Get-Process:*)+deny(iex:*) 下弹了对话框 deny 就永不触发）。现在所有后置检查把决定 push 进同一个数组，一次归约按 deny > ask > allow 收口——「ask 掩盖 deny」这个 bug 类从此写不出来。解析失败路径还有一套切片兜底：2000 字符填充能逼 valid=false，以前 deny(iex:*) 跟着失效。
+2. **pathValidation 的「参数户口本」终结打地鼠**——每类 cmdlet 声明 pathParams/knownSwitches/knownValueParams 三张表，任何不在表里的 -Param 直接判不可验证；未知参数的冒号绑定值也塞进 paths[]，让 deny 至少有机会命中。六层闸门（反引号/:: provider/UNC/变量展开/非文件系统 provider/通配符）每层都是「静态不可验证 → ask」加 deny 猜测兜底。
+3. **cd 复合守卫是 CWD 去同步集群的总闸**——Set-Location 改变后续语句的解析基准而校验器按陈旧 cwd，攻击面覆盖读写两侧（Set-Location ./.claude; Set-Content ./settings.json 写的是 Claude 权限配置）。注释里还留了「模拟 cwd 穿过语句链」被否掉的完整理由（Push/Pop 栈语义、条件语句、New-PSDrive 任意根）。
+4. **readOnlyValidation 的白名单是一份漏洞面考古层**——Select-Xml/Test-Json（XXE 与 $ref 外链）、Get-Command/Get-Help（管道输入绕过参数级回调触发模块 autoload）、Get-WmiObject（Win32_PingStatus 枚举即发 ICMP）、Get-Clipboard（剪贴板泄密）逐条移除，每条注释都是 PoC。Format-*/Select-Object 一族从「名字过滤的安全输出」升级为「带 argLeaksValue 参数校验」——calculated-property 哈希表是通用漏洞面。
+5. **powershellSecurity 的 23 项检查全部 AST 化且被 PoC 驱动**——动态命令名白名单 StringConstant（denylist 动态类型太脆）；另类参数前缀（/、en-dash、em-dash、horizontal bar）先归一再查缩写，Start-Process foo –Verb RunAs 曾绕过；ForEach-Object -MemberName / -FilePath / New-Object -ComObject 三个「树里看不见执行原语」的向量各有一条专检；解析失败直接 ask 是安全默认。
+6. **PowerShellTool.tsx 是与 BashTool 逐行对齐的工程细节合集**——预检失败返回 code 0 让 call() 优雅呈现 stderr（但 git 跟踪要跳过这个哨兵，否则把没跑过的命令记成成功）；大输出落盘放在抛出之后（否则失败命令留下孤儿文件）；后台化竞态（命令在下一个轮询 tick 前完成）要剥 backgroundTaskId、重建 outputFilePath、抑制冗余通知；15 秒 assistant 阻塞预算 + unref()。
+7. **危险删除硬 deny 在主循环和嵌套循环各查一遍**——if ($true) { Remove-Item / } 走 nestedCommands，少了第二轮就把 deny 降级成 ask；且先查用户原样输入的路径再查 realpath 后的（realpathSync 会把 / 变成 C:\、把 /var 变成 /private/var，恰好破坏字符串比较）。
+
+另有两处流程账：readOnlyValidation 有 4 个锚点原本落在英文注释段中部，被注入脚本自动外移到段边界（358→355、389→386、661→658、1441→1444）；另有一条批注因 CJK 占比 11.7% 低于校验脚本 15% 计数门限被算成普通注释，改写文案后对齐（39/39）。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
