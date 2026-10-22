@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（45/184）。`src/` 还剩 1,556 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（53/184）。`src/` 还剩 1,548 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 45 / 33% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 53 / 36% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,556 份没动（21% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,548 份没动（21% 行数）。
 
 ---
 
@@ -1131,6 +1131,34 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 7. **upload.ts 的 base URL 三级回退是一个真实事故教训**——staging 令牌打到 api.anthropic.com 会 401 → 静默跳过 → web 查看器只看到没有 file_uuid 的死卡片。子进程宿主传的 `ANTHROPIC_BASE_URL` 必须参与回退，否则 getOauthConfig 的 staging 判定条件（USE_STAGING_OAUTH）在宿主那里根本没人设。
 
 另有两处顺手可记：AskUserQuestionTool 在 `--channels` 模式下整体禁用（用户在 Telegram/Discord 上，多选对话框会永远没人答）；NotebookEditTool 的 prompt 文案还在说 `cell_number` 0-indexed——schema 早已改成 `cell_id` 字符串定位，文档滞后于实现的一手标本。
+
+### 网络两件套（WebFetch / WebSearch）
+
+联网能力的两端：WebFetch 是「抓页面 → 转 markdown → 让 Haiku 按用户 prompt 提炼 → 只回提炼结果」的管道，WebSearch 则是「一次 API 调用、服务端自动搜索、本地只负责解析流」的包装。8 份源文件 1,702 行，批注后 1,903 行、106 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`WebFetchTool/utils.ts`](annotated/src/tools/WebFetchTool/utils.ts) | 530 | 606 | 41 | 双缓存、重定向防护、http 升级、二进制落盘、Haiku 管道 |
+| [`WebFetchTool/WebFetchTool.ts`](annotated/src/tools/WebFetchTool/WebFetchTool.ts) | 318 | 351 | 20 | 权限四关顺序、跨域重定向转述、prompt cache 抖动教训 |
+| [`WebFetchTool/preapproved.ts`](annotated/src/tools/WebFetchTool/preapproved.ts) | 166 | 177 | 10 | 130+ 免审批文档站、host/path 两级查找、段边界匹配 |
+| [`WebFetchTool/UI.tsx`](annotated/src/tools/WebFetchTool/UI.tsx) | 72 | 78 | 4 | 结果行只显示大小与状态码 |
+| [`WebFetchTool/prompt.ts`](annotated/src/tools/WebFetchTool/prompt.ts) | 46 | 56 | 5 | 版权准则双档（预批准域鼓励摘录 / 非预批准引文 ≤125 字符） |
+| [`WebSearchTool/WebSearchTool.ts`](annotated/src/tools/WebSearchTool/WebSearchTool.ts) | 435 | 485 | 25 | 服务端 web_search 工具注入、流式猜词、结果块状态机 |
+| [`WebSearchTool/UI.tsx`](annotated/src/tools/WebSearchTool/UI.tsx) | 101 | 111 | 5 | 进度分流（猜到的词 / 收到的结果数） |
+| [`WebSearchTool/prompt.ts`](annotated/src/tools/WebSearchTool/prompt.ts) | 34 | 39 | 2 | Sources 硬性要求、当前年月注入 |
+
+八个最值得记的点：
+
+1. **WebFetch 的产出不是网页，是 Haiku 的读后感**——抓取 → Turndown 转 markdown → 截断到 10 万字符 → `queryHaiku` 按用户 prompt 提炼 → 工具结果只有提炼文本。唯一例外：预批准域 + `text/markdown` + 不超长时跳过小模型直返原文（官方文档站的内容本来就是给模型读的）。
+2. **重定向有三层防护，最狠的一层是防挂死**——① `isPermittedRedirect` 只许加/去 `www.` 和同源改路径；② axios `maxRedirects: 0` + 手动递归跟进（PSR 明令禁止自动跟随，防开放重定向漏洞）；③ 同域跳数上限 10——没有它，恶意服务器返回重定向环时每跳都重置 60 秒超时，工具会挂到用户手动中断。跨域重定向则完全不跟，转述给模型让它带新 URL 重新审批。
+3. **工具描述抖动打爆 prompt cache 的真实事故**——prompt() 顶部那段「认证 URL 必挂」警告曾按 ToolSearch 是否在工具列表里动态增删，而 ToolSearch 启用与否随 MCP 工具数阈值漂移；每次抖动 = SDK query() 之间两次缓存 miss。修法是永远无条件携带。缓存键里有什么，就别动态改什么。
+4. **双缓存各司其职**——`URL_CACHE`（15 分钟 / 50MB，键=原始 URL 而非升级或重定向后的）管页面正文；`DOMAIN_CHECK_CACHE`（5 分钟，按主机名）管域预检，且只缓存 allowed——blocked 和 failed 下次重查，黑名单可能随时变化。
+5. **两处内存细节**——拿到 axios 响应后主动把 `response.data` 置 null 释放 ArrayBuffer 引用，让 GC 在 Turndown 构建 3-5 倍于 HTML 的 DOM 树之前回收最多 10MB；turndown+domino 约 1.4MB 常驻堆用惰性单例推迟到第一次抓 HTML 才加载。
+6. **preapproved 清单的沙箱隔离是刻意的**——免审批只覆盖 WebFetch 的纯 GET；沙箱网络限制故意不继承这份清单，因为 huggingface/kaggle/nuget 这类域允许文件上传，放开任意网络访问等于数据外带通道。路径前缀条目（github.com/anthropics）还强制段边界匹配，`/anthropics` 匹配不到 `/anthropics-evil/malware`。
+7. **WebSearch 是服务端工具，不是本地实现**——`extraToolSchemas` 注入 `web_search_20250305`（`max_uses: 8`，一次调用内最多自动搜 8 次），搜索发生在 Anthropic 服务端；本地消费流式事件：用正则从 `input_json_delta` 增量里抠出已完整的 query 字段发进度（用户能在结果回来前看到实际搜索词），结果块按 `[text] (server_tool_use + web_search_tool_result + text)*` 的状态机归整。
+8. **`extractSearchText` 返回空串是个原则声明**——结果 UI 只显示「Did N searches in Xs」一行 chrome，results 内容从不上屏；若让全文搜索启发式去索引字符串项，搜到的全是幻影命中。搜索层索引什么，由 UI 展示什么决定。
+
+另有一处口径提示：`isEnabled` 按提供商分档——firstParty 恒开、foundry 恒开（只发已支持的模型）、vertex 仅 Claude 4.0+ 系列、其余关；prompt.ts 每次调用注入当前「月份 年份」，逼模型搜最近信息时带上正确年份。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
