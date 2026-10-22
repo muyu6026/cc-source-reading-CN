@@ -75,6 +75,14 @@ def classify(line, cjk_as_annotation=False):
     """把一个非空行分成 code / comment / annotation"""
     s = line.strip()
     if s.startswith(ANN_PREFIXES):
+        # ANN_PREFIXES 里的 `// ─` / `// ═` 会撞上源码自带的同款英文分节符
+        # （Anthropic 风格，如 `// ── Search materialized marketplaces ──`）。
+        # 批注侧若不看 CJK 占比就把它们算成「中文批注」，总数会被虚高 —— 全仓
+        # 170 个文件、约 688 行（pluginOperations.ts 一个文件就虚高 6 行）。
+        # `// 译：` / `// 注：` 必然带中文，同样过得了 _mostly_cjk 门限。
+        # 原文侧保持旧行为，避免判据 2 变严而引入新 FAIL。
+        if cjk_as_annotation and not _mostly_cjk(s):
+            return 'comment'
         return 'annotation'
     if s.startswith('//') or s.startswith('/*') or s.startswith('*'):
         if cjk_as_annotation and _mostly_cjk(s):
