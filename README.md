@@ -5,6 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
+> **当前进度**：`annotated/` 已批注 **251 个源码文件 / 82,460 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **16%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
 
 ---
 
@@ -190,9 +191,40 @@
 | [`src/services/mcp/xaa.ts`](source/src/services/mcp/xaa.ts)                                           | 两跳换票（id_token → ID-JAG → access_token）、三道防混淆闸 | [✅ 511 → 812 行](annotated/src/services/mcp/xaa.ts)                         |
 | [`src/services/mcp/xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts)                           | 一次浏览器弹窗、id_token 按 issuer 缓存、OIDC 发现的两个 URL 坑 | [✅ 487 → 709 行](annotated/src/services/mcp/xaaIdpLogin.ts)                 |
 | [`src/services/mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)   | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线    | [✅ 1,141 → 1,631 行](annotated/src/services/mcp/useManageMCPConnections.ts) |
-| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts)                                   | 代码智能怎么接                                       | ⬜ 待批注                                                                      |
-| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts)                                 | 登录鉴权                                          | ⬜ 待批注                                                                      |
+| [`src/services/api/errors.ts`](source/src/services/api/errors.ts) | **错误怎么变成一条 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵 | [✅ 1,207 → 1,467 行](annotated/src/services/api/errors.ts) |
+| [`src/services/api/client.ts`](source/src/services/api/client.ts) | 四级 region 优先级、SDK logger 全走 stderr、凭据不出本机 | [✅ 389 → 583 行](annotated/src/services/api/client.ts) |
+| [`src/services/api/logging.ts`](source/src/services/api/logging.ts) | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` | [✅ 788 → 988 行](annotated/src/services/api/logging.ts) |
+| [`src/services/api/filesApi.ts`](source/src/services/api/filesApi.ts) | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越 | [✅ 748 → 889 行](annotated/src/services/api/filesApi.ts) |
+| [`src/services/api/promptCacheBreakDetection.ts`](source/src/services/api/promptCacheBreakDetection.ts) | 缓存为什么碎、只追 5 个前缀、MCP 名脱敏 | [✅ 727 → 925 行](annotated/src/services/api/promptCacheBreakDetection.ts) |
+| [`src/services/api/sessionIngress.ts`](source/src/services/api/sessionIngress.ts) | 链式追加 + 乐观并发 + **409 和解** | [✅ 514 → 618 行](annotated/src/services/api/sessionIngress.ts) |
+| [`src/services/tools/toolExecution.ts`](source/src/services/tools/toolExecution.ts) | 一次工具调用的九道关、两个 `felt stuck` 阈值 | [✅ 1,745 → 1,905 行](annotated/src/services/tools/toolExecution.ts) |
+| [`src/services/tools/toolHooks.ts`](source/src/services/tools/toolHooks.ts) | **钩子 `allow` 不绕过 `settings.json` 的 deny** | [✅ 650 → 751 行](annotated/src/services/tools/toolHooks.ts) |
+| [`src/services/tools/StreamingToolExecutor.ts`](source/src/services/tools/StreamingToolExecutor.ts) | 并发 = 多个交错 pass，`status='executing'` 当互斥量 | [✅ 530 → 649 行](annotated/src/services/tools/StreamingToolExecutor.ts) |
+| [`src/services/tools/toolOrchestration.ts`](source/src/services/tools/toolOrchestration.ts) | 并发批怎么分批、`contextModifier` 为什么必须按序回放 | [✅ 188 → 284 行](annotated/src/services/tools/toolOrchestration.ts) |
+| [`src/services/lsp/LSPClient.ts`](source/src/services/lsp/LSPClient.ts) | **`spawn()` 返回 ≠ 启动成功**（ENOENT 是异步事件） | [✅ 447 → 653 行](annotated/src/services/lsp/LSPClient.ts) |
+| [`src/services/lsp/LSPServerManager.ts`](source/src/services/lsp/LSPServerManager.ts) | 三张 Map 对应三种问题；声明不支持、server 照样发请求 | [✅ 420 → 583 行](annotated/src/services/lsp/LSPServerManager.ts) |
+| [`src/services/lsp/LSPServerInstance.ts`](source/src/services/lsp/LSPServerInstance.ts) | `-32801 ContentModified` 可重试、僵尸状态、129KB 延迟加载 | [✅ 511 → 672 行](annotated/src/services/lsp/LSPServerInstance.ts) |
+| [`src/services/lsp/LSPDiagnosticRegistry.ts`](source/src/services/lsp/LSPDiagnosticRegistry.ts) | 跨轮去重靠 LRU(500)；「先标记再删」必须放在可能失败的步骤之后 | [✅ 386 → 521 行](annotated/src/services/lsp/LSPDiagnosticRegistry.ts) |
+| [`src/services/lsp/passiveFeedback.ts`](source/src/services/lsp/passiveFeedback.ts) | 缺失 severity 默认 `Error`（漏报比误报贵） | [✅ 328 → 465 行](annotated/src/services/lsp/passiveFeedback.ts) |
+| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 四态 + generation counter；issue #15521：memoize + 早期调用 + 缺刷新路径 | [✅ 289 → 417 行](annotated/src/services/lsp/manager.ts) |
+| [`src/services/lsp/config.ts`](source/src/services/lsp/config.ts) | 「LSP 只能通过插件配置」= 安全边界 | [✅ 79 → 140 行](annotated/src/services/lsp/config.ts) |
+| [`src/services/SessionMemory/sessionMemory.ts`](source/src/services/SessionMemory/sessionMemory.ts) | 后台子代理记笔记；**读文件必须发生在隔离 context** | [✅ 495 → 747 行](annotated/src/services/SessionMemory/sessionMemory.ts) |
+| [`src/services/SessionMemory/prompts.ts`](source/src/services/SessionMemory/prompts.ts) | 模板斜体行是给模型看的字段说明；「不许改」说三遍 | [✅ 324 → 482 行](annotated/src/services/SessionMemory/prompts.ts) |
+| [`src/services/SessionMemory/sessionMemoryUtils.ts`](source/src/services/SessionMemory/sessionMemoryUtils.ts) | 15s 等待上限 / 60s 判僵死；阈值用增量而非绝对值 | [✅ 207 → 319 行](annotated/src/services/SessionMemory/sessionMemoryUtils.ts) |
+| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 刷新与 5 分钟缓冲、**一次「省 7M 请求/天」的优化差点让订阅类型永久丢失** | [✅ 566 → 744 行](annotated/src/services/oauth/client.ts) |
+| [`src/services/oauth/auth-code-listener.ts`](source/src/services/oauth/auth-code-listener.ts) | 延迟响应（攥着 `res` 等 token 换完）、判路径防 favicon 打断 | [✅ 211 → 315 行](annotated/src/services/oauth/auth-code-listener.ts) |
+| [`src/services/oauth/index.ts`](source/src/services/oauth/index.ts) | 浏览器内/外两条路径赛跑收敛成一个 Promise | [✅ 198 → 323 行](annotated/src/services/oauth/index.ts) |
+| [`src/services/oauth/crypto.ts`](source/src/services/oauth/crypto.ts) | PKCE 三块拼图，base64URL 三次替换 | [✅ 23 → 86 行](annotated/src/services/oauth/crypto.ts) |
+| [`src/services/mcp/MCPConnectionManager.tsx`](source/src/services/mcp/MCPConnectionManager.tsx) | **React Compiler 编译产物怎么读**：`_c(6)` 缓存槽、`t0` 临时名 | [✅ 73 → 236 行](annotated/src/services/mcp/MCPConnectionManager.tsx) |
 
+> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **73 份 / 34,398 行（64%）**。
+> `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`lsp/`（7/7）、`oauth/`（5/5）、
+> `tools/`（4/4）、`SessionMemory/`（3/3）七个子目录**已清零**；剩 57 份集中在 `analytics/`（9）、
+> `teamMemorySync/`（5）、`remoteManagedSettings/`（5）、`plugins/`（3）等偏外围的模块。
+> 逐份清单和「还剩什么」的完整表格见
+> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
+> 这个目录**不存在「全部完成」的状态**，只有「这一批做到哪」——
+> 所以本节只标 🟡，不标 ✅。
 
 **对应章节**：[07 服务层详解](docs/07-服务层详解.md)、[11 上下文压缩](docs/11-上下文压缩.md)
 

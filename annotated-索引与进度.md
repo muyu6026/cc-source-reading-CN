@@ -532,20 +532,22 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——
 当时全目录只做了 35 份，`services/api/` 还有 18 份没动，
 而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。
-现在这 5 个子目录是真清零了：
+现在这 7 个子目录是真清零了：
 
 | 子目录                     | 文件    | 原文行数      | 中文批注行 | 状态      |
 | ----------------------- | ----- | --------- | ----- | ------- |
 | `services/mcp/`         | 23/23 | 12,311    | 4,414 | ✅ 清零    |
 | `services/api/`         | 20/20 | 10,477    | 2,807 | ✅ 清零    |
 | `services/compact/`     | 11/11 | 3,960     | 3,407 | ✅ 清零    |
+| `services/lsp/`         | 7/7   | 2,460     | 642   | ✅ 清零    |
 | `services/oauth/`       | 5/5   | 1,051     | 325   | ✅ 清零    |
 | `services/tools/`       | 4/4   | 3,113     | 292   | ✅ 清零    |
-| `services/` 其余（15 个子目录 + 根目录） | 0/67  | 22,771    | —     | ⬜ 未开始   |
-| **合计**                  | **63/130** | **30,912 / 53,683（57%）** | **11,245** | 🟡 五个子目录清零 |
+| `services/SessionMemory/` | 3/3 | 1,026     | 312   | ✅ 清零    |
+| `services/` 其余（13 个子目录 + 根目录） | 0/57  | 19,285    | —     | ⬜ 未开始   |
+| **合计**                  | **73/130** | **34,398 / 53,683（64%）** | **12,199** | 🟡 七个子目录清零 |
 
 > 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；
-> 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计 23,462」大。
+> 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计」大。
 
 ---
 
@@ -656,20 +658,51 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ---
 
-### `services/` 还剩 67 份 / 22,771 行，为什么先停在这
+### `services/lsp/` —— 7 份（从配置到诊断的完整链路）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`LSPServerInstance.ts`](annotated/src/services/lsp/LSPServerInstance.ts) | 511 | 672 | `-32801 ContentModified` 是可重试错误；duck typing 判错误码（依赖树里有两个版本的 `vscode-jsonrpc`）；`require()` 只为推迟 129KB；僵尸状态 |
+| [`LSPClient.ts`](annotated/src/services/lsp/LSPClient.ts) | 447 | 653 | **`spawn()` 返回 ≠ 启动成功**（ENOENT 是异步事件）；`isStopping` 一个布尔守四个入口；`stop` 里必须 `removeAllListeners` |
+| [`LSPServerManager.ts`](annotated/src/services/lsp/LSPServerManager.ts) | 420 | 583 | 三张 Map 对应三种问题（生命周期 / 路由 / 协议同步）；声明不支持、server 照样发请求；`version: 1` 恒不变的已知不规范 |
+| [`LSPDiagnosticRegistry.ts`](annotated/src/services/lsp/LSPDiagnosticRegistry.ts) | 386 | 521 | 跨轮去重靠 LRU(500)；「先标记已投递再删 pending」必须放在可能失败的去重**之后** |
+| [`passiveFeedback.ts`](annotated/src/services/lsp/passiveFeedback.ts) | 328 | 465 | 缺失 severity 默认 `Error`（漏报比误报贵），而 registry 里默认 `Hint`（排序用）——同一个「未知」在两个语境选相反默认值 |
+| [`manager.ts`](annotated/src/services/lsp/manager.ts) | 289 | 417 | 四态 + generation counter（过期 promise 不许改状态）；issue #15521：memoize + 早期调用 + 缺刷新路径 |
+| [`config.ts`](annotated/src/services/lsp/config.ts) | 79 | 140 | 「LSP 只能通过插件配置」= **安全边界**（配置里有 `command`，等于任意进程执行） |
+
+读这条线的顺序：`config.ts`（谁能配）→ `manager.ts`（什么时候起）→
+`LSPServerManager.ts`（按扩展名路由 + 文件同步）→ `LSPServerInstance.ts`（状态机 + 重试）→
+`LSPClient.ts`（子进程 + JSON-RPC）→ `passiveFeedback.ts`（诊断怎么回来）→
+`LSPDiagnosticRegistry.ts`（诊断怎么等到下一轮）。
+
+---
+
+### `services/SessionMemory/` —— 3 份（后台子代理替你记笔记）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`sessionMemory.ts`](annotated/src/services/SessionMemory/sessionMemory.ts) | 495 | 747 | 两处 `_CACHED_MAY_BE_STALE`；用 uuid 而非下标定位起点；token 阈值是永远必需的节流阀；**读文件必须发生在隔离 context**；`canUseTool` 削到「只能改这一个文件」 |
+| [`prompts.ts`](annotated/src/services/SessionMemory/prompts.ts) | 324 | 482 | 模板斜体行是给模型看的字段说明；「不许改斜体行」说三遍；单次 `replace` 防 `$` 反向引用；代码硬截断是「prompt 不可全信」的兜底 |
+| [`sessionMemoryUtils.ts`](annotated/src/services/SessionMemory/sessionMemoryUtils.ts) | 207 | 319 | 15s 等待上限 / 60s 判僵死；阈值用**增量**而非绝对值（否则恒真） |
+
+一句话串起来：`sessionMemoryUtils` 存状态和阈值 → `prompts` 决定「让模型改哪里、改多少」
+→ `sessionMemory` 在合适的时机派一个 forked 子代理去改那一个文件。
+它是 `compact/sessionMemoryCompact.ts` 的上游。
+
+---
+
+### `services/` 还剩 57 份 / 19,285 行，为什么先停在这
 
 剩下的不是「不重要」，而是**和主链路（一次对话怎么跑完）的耦合更弱**。
-按模块分：
+按模块分（`lsp/` 和 `SessionMemory/` 已经从这张表里移走 —— 它们清零了）：
 
 | 子目录 | 文件 | 行数 | 是什么 |
 | --- | --- | --- | --- |
-| （根目录 16 份） | 16 | 4,907 | `mockRateLimits.ts` 882、`voice*.ts` 1,175、`claudeAiLimits.ts` 515、`tokenEstimation.ts` 495 等散件 |
+| （根目录 16 份） | 16 | 4,907 | `mockRateLimits.ts` 882、`voice*.ts` 1,175、`claudeAiLimits.ts` 515、`tokenEstimation.ts` 495、`vcr.ts` 406 等散件 |
 | `analytics/` | 9 | 4,040 | 埋点：GrowthBook 灰度、事件导出器、Datadog |
-| `lsp/` | 7 | 2,460 | LSP 客户端/服务端/诊断注册表 |
 | `teamMemorySync/` | 5 | 2,167 | 团队记忆同步（含 secret 扫描） |
 | `plugins/` | 3 | 1,616 | 插件安装与 CLI 命令 |
 | `PromptSuggestion/` | 2 | 1,514 | 下一句提示词推测 |
-| `SessionMemory/` | 3 | 1,026 | 会话记忆的提取与注入 |
 | `remoteManagedSettings/` | 5 | 951 | 服务端下发的托管设置 |
 | `extractMemories/` | 2 | 769 | 从对话里抽长期记忆 |
 | `tips/` | 3 | 761 | 启动提示语注册表 |
@@ -684,10 +717,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 1. `analytics/metadata.ts`（973 行）—— 它决定了哪些数据允许离开本机，
    和 `api/logging.ts` 里那套 `_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 命名约束是同一件事的两端。
-2. `lsp/manager.ts`（289 行）—— 它是「工具」之外的第二条信息获取通道，
-   读完能看清 Claude Code 为什么不只靠 Bash 去拿代码结构。
-3. `SessionMemory/sessionMemory.ts`（495 行）—— `compact/sessionMemoryCompact.ts` 的上游，
-   两者合起来才是完整的「压缩前先把要点存下来」。
+2. `analytics/growthbook.ts`（1,155 行）—— 所有 `_CACHED_MAY_BE_STALE` 的来源。
+   读完能看清「远端开关怎么下发、怎么落盘、为什么可以读到旧值」这一整套。
+3. `tokenEstimation.ts`（495 行）—— 压缩阈值、session memory 阈值、成本估算全靠它。
+   它是「所有跟 token 有关的魔法数字」的地基，比看起来重要。
 
 > 这里的「还剩」清单是脚本算的（`python scripts/check-coverage.py`），
 > 目录里每多批注一份，这张表就少一行。不要再把某一节标成「✅ 完成」了 ——
