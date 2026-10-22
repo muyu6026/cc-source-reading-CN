@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **279 个源码文件 / 94,894 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **18%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了13-个子目录清零全目录-101130)。
+> **当前进度**：`annotated/` 已批注 **280 个源码文件 / 95,409 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **18%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了13-个子目录清零全目录-102130)。
 
 ---
 
@@ -226,12 +226,12 @@
 | [`src/services/analytics/config.ts`](source/src/services/analytics/config.ts) | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript） | [✅ 38 → 59 行](annotated/src/services/analytics/config.ts) |
 | [`src/services/analytics/sinkKillswitch.ts`](source/src/services/analytics/sinkKillswitch.ts) | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈） | [✅ 25 → 42 行](annotated/src/services/analytics/sinkKillswitch.ts) |
 
-> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **101 份 / 46,832 行（87%）**。
+> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **102 份 / 47,347 行（88%）**。
 > `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`lsp/`（7/7）、`oauth/`（5/5）、
-> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）、`teamMemorySync/`（5/5）、`PromptSuggestion/`（2/2）、`plugins/`（3/3）、`remoteManagedSettings/`（5/5）、`extractMemories/`（2/2）十三个子目录**已清零**；剩 29 份集中在
+> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）、`teamMemorySync/`（5/5）、`PromptSuggestion/`（2/2）、`plugins/`（3/3）、`remoteManagedSettings/`（5/5）、`extractMemories/`（2/2）十三个子目录**已清零**；剩 28 份集中在
 > `tips/`（3）等偏外围的模块（含根目录散件）。
 > 逐份清单和「还剩什么」的完整表格见
-> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了13-个子目录清零全目录-101130)。
+> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了13-个子目录清零全目录-102130)。
 > 这个目录**不存在「全部完成」的状态**，只有「这一批做到哪」——
 > 所以本节只标 🟡，不标 ✅。
 
