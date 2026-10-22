@@ -992,13 +992,43 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（已做 7） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 16**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,594 份没动（19% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,585 份没动（20% 行数）。
+
+---
+
+### FileEditTool 与 FileWriteTool
+
+工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts) | 775 | 790 | 15 | 引号/空白归一化、patch 生成、脱敏还原 |
+| [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts) | 625 | 643 | 18 | 十个 errorCode 的校验链、原子写入 |
+| [`FileEditTool/UI.tsx`](annotated/src/tools/FileEditTool/UI.tsx) | 289 | 295 | 5 | 动词选择、错误降级、拒绝时的 diff |
+| [`FileEditTool/types.ts`](annotated/src/tools/FileEditTool/types.ts) | 85 | 89 | 4 | schema 契约、`z.output` vs `z.input` |
+| [`FileEditTool/prompt.ts`](annotated/src/tools/FileEditTool/prompt.ts) | 28 | 32 | 4 | 「必须先 Read」写进描述 |
+| [`FileEditTool/constants.ts`](annotated/src/tools/FileEditTool/constants.ts) | 11 | 13 | 2 | 叶子模块断依赖环 |
+| [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts) | 434 | 445 | 11 | 整文覆盖、不改写行尾 |
+| [`FileWriteTool/UI.tsx`](annotated/src/tools/FileWriteTool/UI.tsx) | 405 | 410 | 4 | 只显示前 10 行、`EOL` 不用 `os.EOL` |
+| [`FileWriteTool/prompt.ts`](annotated/src/tools/FileWriteTool/prompt.ts) | 18 | 20 | 2 | 「既有文件才要求先读」+ 优先用 Edit |
+
+四个最值得记的点：
+
+1. **`Edit` 的本质是一台双向翻译机**。模型打不出弯引号（API 会把它们规范化成直引号），但真实文件里到处是弯引号。所以匹配前把两边都归一成直引号，命中后返回**文件里的原文片段**（不是模型给的串），写回时再按文件的风格把新串的引号转回弯的。`findActualString` + `preserveQuoteStyle` 这一对就是全部机关。少了后一半，改完的句子会一半弯一半直。
+2. **所有 `replace` 都必须传函数而不是字符串**。`String.replace(str, str)` 会把 `$&`、`$1`、`$$` 当反向引用解释——而模型写的 `new_string` 里完全可能有 `$&`（它在改 shell 脚本或正则）。`utils.ts` 的 `applyEditToFile` 和 `MagicDocs/prompts.ts` 的 `substituteVariables` 踩的是同一个坑，两处都用 `() => replace` 绕开。
+3. **从「检查文件没被改过」到「写盘」之间不许有 `await`**。`FileEditTool.call()` 里那句注释写得很硬：中间任何一次 yield 都会让两个并发编辑各自通过陈旧检查、后写的覆盖先写的。所以读文件用的是同步版 `readFileSyncWithMetadata`，看着别扭但是刻意的；`mkdir` 也必须提到临界区外面。
+4. **`Edit` 保留行尾，`Write` 不保留——这是两个相反的决定**。`Edit` 传给 `writeTextContent` 的是读到的 `encoding` + `lineEndings`（局部补丁应融入文件既有风格）；`Write` 固定传 `'LF'` 且注释解释了一次真实事故：曾经「沿用旧文件行尾 / 用 ripgrep 采样仓库风格」，结果在 Linux 上覆盖 CRLF 文件时把 bash 脚本写进了 `\r`，采样还容易被 cwd 里的二进制污染。整文覆盖时，模型给什么就写什么。
+
+另外两个细节值得单独看：
+
+- **UNC 路径的安全短路**在两个工具里逐字重复，位置都在**第一次碰文件系统之前**：Windows 上对 `\\server\share` 做 `stat` 会触发 SMB 认证并泄露 NTLM 哈希。之所以不抽成公共函数，是因为它是「顺序敏感」的补丁，抽出去反而容易被后人挪到 `stat` 之后。
+- **`FileWriteTool` 的 `if (oldContent)`** 用真值判断，所以「已存在的空文件」会走 create 分支（`structuredPatch: []`、`originalFile: null`）。这算已知的粗糙处，但对 UI 更友好——批注里特意标了「不要当 bug 修成 `!== null`」，否则会得到一个空 patch 的 update，界面上是一片空白。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 

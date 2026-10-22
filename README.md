@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **308 个源码文件 / 101,745 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **19%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)。
+> **当前进度**：`annotated/` 已批注 **317 个源码文件 / 104,415 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **20%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；`src/tools/` 已做到 16/184，文件编辑三件套的细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool)。
 
 ---
 
@@ -128,7 +128,7 @@
 | `src/services/tools/`                                                                   | 工具执行流水线（并发 / 钩子 / 编排）    |
 
 > ✍️ 中文批注版：[`Tool.ts`](annotated/src/Tool.ts)（792 → 2,013 行，按「一个工具的一生」十二步逐字段讲）· [`tools.ts`](annotated/src/tools.ts)（389 → 647 行，工具户口本）· [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)（1,143 → 1,757 行，最复杂的工具实现）· [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)（2,592 → 3,658 行，22 个 validator 的编排）· [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts)（2,621 → 3,906 行，895 行主函数的权限裁决）  
-> 前半已完成；后半（`tools.ts` 注册表 + `BashTool/` 实现）待续。
+> **文件编辑三件套也做完了**（`FileEditTool/` 全 6 份 + `FileWriteTool/` 全 3 份，2,668 → 2,735 行，65 处锚点）：[`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts)（775 → 790 行，弯引号双向翻译 / 反斜引用转义 `$&` / 先读后写）· [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts)（625 → 643 行，十个 errorCode 的校验链 / UNC 路径安全短路 / 临界区不许 await）· [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts)（434 → 445 行，整文覆盖不改写行尾 / 懒 mkdir 会造出假故障遥测）。
 
 **对应章节**：[04 工具系统](docs/04-工具系统.md)、[08 权限与安全](docs/08-权限与安全.md)
 
