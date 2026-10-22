@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (5, 'after',
+     "模块定位：给 voice_stream 端点准备**领域词表**（Deepgram 的 \"keywords\" boosting），让 STT 正确识别编程术语、项目名、分支名这类「不说出来就必错」的词。纯本地拼接，**没有任何模型调用**。"),
+    (31, 'after',
+     "14 个全局词，挑词有三条明确规则（注释写了）：① 只收 Deepgram 不加提示就**稳定听错**的词（MCP、symlink、grep、regex、localhost、codebase、TypeScript、JSON、OAuth、webhook、gRPC、dotfiles、subagent、worktree）；② \"Claude\" 和 \"Anthropic\" 不收——服务端已有基础词表，重复加只是浪费配额；③ 不收「没人会按拼写念出来」的词，比如 stdout（人会说 \"standard out\"），加了反而干扰。"),
+    (46, 'after',
+     "splitIdentifier 把任意标识符拆成单词：先在小写→大写边界插空格（camelCase / PascalCase），再按 `-`、`_`、`.`、`/`、空白切分（kebab / snake / 路径）。**只保留 3–20 字符**的片段——2 字符以内（`a`、`io`）作为关键词纯属噪声，超过 20 字符的也不像有人会念。"),
+    (51, 'after',
+     "fileNameWords：取 basename、去掉扩展名，再走同一套拆词——所以 `voiceStreamSTT.ts` 会贡献 voice / Stream / STT 三个候选词。"),
+    (55, 'after',
+     "50 个的硬上限，对应 STT 服务端对 keyterms 数量的容忍度；超出部分被截断，所以下面的添加顺序就是**优先级顺序**。"),
+    (81, 'after',
+     "项目根目录名作为**整词**加入，而不是拆开：注释给了真实场景——用户会说 \"claude CLI internal\" 这样的整句，保留完整 basename 让 boosting 按短语匹配，不管中间是空格还是连字符。限定 3–50 字符；`getProjectRoot()` 在状态未初始化时会抛，catch 掉当没有即可（词表缺一项不影响可用性）。"),
+    (93, 'after',
+     "git 分支按标识符拆词：`feat/voice-keyterms` → feat / voice / keyterms 三个词——用户口述时通常只说其中一段（\"在 voice keyterms 分支上\"）。不在 git 仓库里时 getBranch 会失败，catch 掉跳过。"),
+    (103, 'after',
+     "最近文件只扫到「填满剩余槽位」为止（size 到 MAX 就 break），不是全量遍历——这个函数在每次按键开录时都会跑，文件集合可能很大。最后 `slice(0, MAX)` 是第二道保险。返回顺序即优先级：全局词 → 项目名 → 分支词 → 文件名，因为 Set 保插入序。"),
+]
