@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/` 还剩 1,594 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（21/184）。`src/` 还剩 1,580 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 16**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 21 / 24% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,585 份没动（20% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,580 份没动（20% 行数）。
 
 ---
 
@@ -1029,6 +1029,30 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 - **UNC 路径的安全短路**在两个工具里逐字重复，位置都在**第一次碰文件系统之前**：Windows 上对 `\\server\share` 做 `stat` 会触发 SMB 认证并泄露 NTLM 哈希。之所以不抽成公共函数，是因为它是「顺序敏感」的补丁，抽出去反而容易被后人挪到 `stat` 之后。
 - **`FileWriteTool` 的 `if (oldContent)`** 用真值判断，所以「已存在的空文件」会走 create 分支（`structuredPatch: []`、`originalFile: null`）。这算已知的粗糙处，但对 UI 更友好——批注里特意标了「不要当 bug 修成 `!== null`」，否则会得到一个空 patch 的 update，界面上是一片空白。
+
+### FileReadTool（读的那一端）
+
+写完写的一端，紧接着读的一端。`Read` 是整个系统里**调用量最大的工具**，也是 `Edit` / `Write` 那条「必须先 Read」规矩的执行者——规矩写在 `prompt.ts` 的模板里，校验落在 `FileEditTool` 里，而「什么算读过」这件事由这里写进 `readFileState`。5 份源文件 1,602 行，批注后 1,655 行、48 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts) | 1,183 | 1,211 | 28 | 五道零 I/O 校验、去重桩、六型输出映射、三级图片压缩 |
+| [`FileReadTool/limits.ts`](annotated/src/tools/FileReadTool/limits.ts) | 92 | 97 | 5 | 两个上限（字节 / token）与优先级 env > GrowthBook > 默认 |
+| [`FileReadTool/prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts) | 49 | 54 | 5 | 模板三段插值、offset 指令两套文案 |
+| [`FileReadTool/imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts) | 94 | 98 | 4 | napi / sharp 双实现、ESM-CJS interop |
+| [`FileReadTool/UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx) | 185 | 192 | 6 | 只渲染摘要、agent 输出文件特殊处理 |
+
+四个最值得记的点：
+
+1. **`validateInput` 里一行 I/O 都没有，这是刻意的架构约束**。五道检查（pages 格式 → deny 规则 → UNC 短路 → 二进制扩展名 → 设备文件）全是纯字符串和内存查询，所以它能在**用户还没授权**的阶段安全跑完。所有 `stat` / `read` 都推迟到 `call()`。这不是巧合，是把「校验」和「执行」按授权边界切开的结果。
+2. **去重桩是一笔算得很清楚的账**。约 18% 的 Read 调用是「同一文件、同一范围」的碰撞（最多占舰队 `cache_creation` 的 2.64%），因为上一次的 `tool_result` 还在上下文里。所以默认返回一句「内容没变，去引用之前那次」而不是重发全文。但去重前必须确认状态来自 **Read**（`offset !== undefined`）——`Edit` / `Write` 存进去的条目 mtime 是编辑之后的，拿它去重会告诉模型「没变，去看之前那次」，而那次读到的是编辑前的旧代码。
+3. **两个上限管的是两件不同的事**。`maxSizeBytes`（256KB）卡**整个文件大小**、成本一次 `stat`、读之前抛；`maxTokens`（25,000）卡**实际输出 token**、成本一次 API 往返、读之后抛。`limits.ts` 的文件头注释里还记了一次被回退的实验：把「显式给了 limit 却超字节上限」改成截断而不是抛错——工具错误率降了，但平均 token 涨了，因为抛错只花约 100 字节，截断要花满 25K。
+4. **PDF 的内容不走 `tool_result`**。`tool_result` 里只有一行 `PDF file read: xxx (1.2MB)` 的元数据，真正的 PDF 通过 `newMessages` 里的 `document` block 附上去；抽页成图（`parts`）同理，图片在 `newMessages` 里。这是「工具结果」和「附件消息」两种承载方式的区别，也是为什么 `mapToolResultToToolResultBlockParam` 的六个分支里有一半只返回一句话。
+
+另外两处值得单独看的平台坑：
+
+- **macOS 截图的空格有两种**。AM/PM 前的那个空格可能是 U+0020 也可能是 U+202F（窄不换行空格），肉眼和终端里都看不出区别，但 `stat` 会直接 ENOENT。所以 ENOENT 时有一步专门「换一个空格字符重试」，重试再失败才走相似文件名 / cwd 建议。
+- **UNC 路径必须在任何文件系统操作前短路**。Windows 上对 `\\server\share` 做 `stat` 会主动发起 SMB 认证并泄露 NTLM 哈希——模型随手编一个路径就能变成凭据泄露。这条与 `Edit` / `Write` 里逐字重复，位置都在第一次碰文件之前。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
