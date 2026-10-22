@@ -1,0 +1,155 @@
+/**
+ * Facade for rate limit header processing
+ * This isolates mock logic from production code
+ */
+// 模块定位：**门面（facade）**，不是实现。整个 `/mock-limits` 的能力（19 种场景、头生成、快模式冷却）全在 `mockRateLimits.ts` 里，那个文件带 `[ANT-ONLY]` 标记、只在内部构建里生效。生产代码只 import 这一个文件，于是**删掉 mock 模块时，生产侧要改的只有这一处 import**——这就是文件头那句「isolates mock logic from production code」的实际含义。
+
+import { APIError } from '@anthropic-ai/sdk'
+import {
+  applyMockHeaders,
+  checkMockFastModeRateLimit,
+  getMockHeaderless429Message,
+  getMockHeaders,
+  isMockFastModeRateLimitScenario,
+  shouldProcessMockLimits,
+} from './mockRateLimits.js'
+
+/**
+ * Process headers, applying mocks if /mock-limits command is active
+ */
+export function processRateLimitHeaders(
+  headers: globalThis.Headers,
+): globalThis.Headers {
+  // Only apply mocks for Ant employees using /mock-limits command
+  if (shouldProcessMockLimits()) {
+    return applyMockHeaders(headers)
+  }
+  return headers
+}
+// `processRateLimitHeaders` 只有一条分支：mock 开着就替换整套头，否则**原样返回同一个对象**（不拷贝、不遍历）。限流头处理在每个响应上都会走一遍，所以这里刻意做到零开销。
+
+/**
+ * Check if we should process rate limits (either real subscriber or /mock-limits command)
+ */
+export function shouldProcessRateLimits(isSubscriber: boolean): boolean {
+  return isSubscriber || shouldProcessMockLimits()
+}
+// `shouldProcessRateLimits` 把「真订阅者 **或** mock 模式」合成一个判断，调用方只问一次就行。注意 `isSubscriber` 由调用方传进来——这个门面不自己去查认证状态，保持无状态、好测。
+
+/**
+ * Check if mock rate limits should throw a 429 error
+ * Returns the error to throw, or null if no error should be thrown
+ * @param currentModel The model being used for the current request
+ * @param isFastModeActive Whether fast mode is currently active (for fast-mode-only mocks)
+ */
+export function checkMockRateLimitError(
+  currentModel: string,
+  isFastModeActive?: boolean,
+): APIError | null {
+  if (!shouldProcessMockLimits()) {
+    return null
+  }
+// 非 mock 模式立刻返回 `null`，后面所有逻辑都不用执行。所以这个函数在生产构建里等价于「返回 null」——它被插在请求路径上但几乎零成本。
+
+  const headerlessMessage = getMockHeaderless429Message()
+  if (headerlessMessage) {
+    return new APIError(
+      429,
+      { error: { type: 'rate_limit_error', message: headerlessMessage } },
+      headerlessMessage,
+      // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
+      new globalThis.Headers(),
+    )
+  }
+// `getMockHeaderless429Message` 模拟的是**完全没有 ratelimit 头**的 429：真实世界里这种情况意味着「服务端拦了你，但没告诉你是哪条限额」。这条路径优先级最高，因为它连 mock 头都没有，后面所有按头判断的逻辑都无从谈起。
+
+  const mockHeaders = getMockHeaders()
+  if (!mockHeaders) {
+    return null
+  }
+
+  // Check if we should throw a 429 error
+  // Only throw if:
+  // 1. Status is rejected AND
+  // 2. Either no overage headers OR overage is also rejected
+  // 3. For Opus-specific limits, only throw if actually using an Opus model
+  const status = mockHeaders['anthropic-ratelimit-unified-status']
+  const overageStatus =
+    mockHeaders['anthropic-ratelimit-unified-overage-status']
+  const rateLimitType =
+    mockHeaders['anthropic-ratelimit-unified-representative-claim']
+
+  // Check if this is an Opus-specific rate limit
+  const isOpusLimit = rateLimitType === 'seven_day_opus'
+
+  // Check if current model is an Opus model (handles all variants including aliases)
+  const isUsingOpus = currentModel.includes('opus')
+
+  // For Opus limits, only throw 429 if actually using Opus
+  // This simulates the real API behavior where fallback to Sonnet succeeds
+  if (isOpusLimit && !isUsingOpus) {
+    return null
+  }
+// 这是整个文件最值得读的一段：**Opus 限额只在使用 Opus 模型时才抛 429**。两个细节——① 判断用 `currentModel.includes('opus')` 而不是精确匹配，因为模型名有别名和变体（`claude-opus-4-1`、带日期的快照名等）；② 语义上这是在复刻真实 API 的**局部限额**行为：Opus 额度打满时回落到 Sonnet 依然能跑通，如果 mock 无条件抛 429，测出来的就是「全局限额」这种现实中不存在的场景。mock 的价值在于**如实复现**，不在于让错误更容易触发。
+
+  // Check for mock fast mode rate limits (handles expiry, countdown, etc.)
+  if (isMockFastModeRateLimitScenario()) {
+    const fastModeHeaders = checkMockFastModeRateLimit(isFastModeActive)
+    if (fastModeHeaders === null) {
+      return null
+    }
+    // Create a mock 429 error with the fast mode headers
+    const error = new APIError(
+      429,
+      { error: { type: 'rate_limit_error', message: 'Rate limit exceeded' } },
+      'Rate limit exceeded',
+      // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
+      new globalThis.Headers(
+        Object.entries(fastModeHeaders).filter(([_, v]) => v !== undefined) as [
+          string,
+          string,
+        ][],
+      ),
+    )
+    return error
+  }
+// 快模式（fast mode）单独一支，因为它的限额有**冷却倒计时**：`checkMockFastModeRateLimit` 内部处理过期判断，返回 `null` 就表示「模拟的冷却已经过去了」——此时不该再抛 429，否则场景设了 30 秒冷却，实际会永远拦住。这也解释了为什么它要在通用 `shouldThrow429` 判断之前处理。
+
+  const shouldThrow429 =
+    status === 'rejected' && (!overageStatus || overageStatus === 'rejected')
+// `shouldThrow429` 的三个条件缺一不可：`status === 'rejected'` **且**（没有 overage 头 **或** overage 也 rejected）。第二半最容易漏——订阅打满但宽松额度还能用时，真实 API 是**放行**的，只会带你进入 overage；此时若只判 status 就抛 429，mock 出来的行为与线上完全相反。
+
+  if (shouldThrow429) {
+    // Create a mock 429 error with the appropriate headers
+    const error = new APIError(
+      429,
+      { error: { type: 'rate_limit_error', message: 'Rate limit exceeded' } },
+      'Rate limit exceeded',
+      // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
+      new globalThis.Headers(
+        Object.entries(mockHeaders).filter(([_, v]) => v !== undefined) as [
+          string,
+          string,
+        ][],
+      ),
+    )
+    return error
+  }
+
+  return null
+}
+// 注意函数在这里返回 `null`，语义是「**这个请求不该被拦**」，而不是「出错了」。调用方必须把 `null` 当成正常路径处理——所以这个函数的签名是 `APIError | null` 而不是 `throws`。
+
+/**
+ * Check if this is a mock 429 error that shouldn't be retried
+ */
+export function isMockRateLimitError(error: APIError): boolean {
+  return shouldProcessMockLimits() && error.status === 429
+}
+// `isMockRateLimitError` 是给**重试逻辑**用的：mock 造出来的 429 绝不能被自动重试吃掉，否则用户点一次 `/mock-limits` 之后要等几轮重试才看到效果，而且重试会污染错误计数。它只判 `status === 429` 就够——因为整段逻辑被 `shouldProcessMockLimits()` 罩着，非 mock 环境永远返回 false。
+
+/**
+ * Check if /mock-limits command is currently active (for UI purposes)
+ */
+export { shouldProcessMockLimits }
+// 把 `shouldProcessMockLimits` 原样再导出一次，纯粹是给 UI 层用的（判断要不要显示 mock 状态标记），避免 UI 直接 import `mockRateLimits.ts`。**门面的边界要守住**：一旦有第二个文件直接依赖实现模块，这层隔离就名存实亡了。
