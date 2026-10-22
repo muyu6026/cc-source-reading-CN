@@ -5,7 +5,7 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **251 个源码文件 / 82,460 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **16%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
+> **当前进度**：`annotated/` 已批注 **260 个源码文件 / 86,500 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **16%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/` 的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了8-个子目录清零全目录-82130)。
 
 ---
 
@@ -216,13 +216,22 @@
 | [`src/services/oauth/index.ts`](source/src/services/oauth/index.ts) | 浏览器内/外两条路径赛跑收敛成一个 Promise | [✅ 198 → 323 行](annotated/src/services/oauth/index.ts) |
 | [`src/services/oauth/crypto.ts`](source/src/services/oauth/crypto.ts) | PKCE 三块拼图，base64URL 三次替换 | [✅ 23 → 86 行](annotated/src/services/oauth/crypto.ts) |
 | [`src/services/mcp/MCPConnectionManager.tsx`](source/src/services/mcp/MCPConnectionManager.tsx) | **React Compiler 编译产物怎么读**：`_c(6)` 缓存槽、`t0` 临时名 | [✅ 73 → 236 行](annotated/src/services/mcp/MCPConnectionManager.tsx) |
+| [`src/services/analytics/growthbook.ts`](source/src/services/analytics/growthbook.ts) | **引擎**：`processRemoteEvalPayload` 的 `{}` 真值判据（漏检查会让所有开关集体黑屏）；`syncRemoteEvalToDisk` 只在成功路径调用（超时投毒结构上不可能）；`checkGate_CACHED_OR_BLOCKING` 的 stale-while-false-blocking；整文件 `@deprecated` 记录从 Statsig 迁到 GrowthBook | [✅ 1,155 → 1,240 行](annotated/src/services/analytics/growthbook.ts) |
+| [`src/services/analytics/metadata.ts`](source/src/services/analytics/metadata.ts) | 所有遥测字段的单一事实来源；`to1PEventFormat` 用 proto 生成类型让「漏字段」从运行时 bug 变编译错误；`account_id` 故意省略只填 UUID | [✅ 973 → 1,045 行](annotated/src/services/analytics/metadata.ts) |
+| [`src/services/analytics/firstPartyEventLoggingExporter.ts`](source/src/services/analytics/firstPartyEventLoggingExporter.ts) | 跨进程重启的失败事件恢复（BATCH_UUID+sessionId 隔离）；二次方退避（base*attempts²）；401 退化为无 auth 重试；`_PROTO_*` hoist 到 proto 字段后再防御性 strip | [✅ 806 → 880 行](annotated/src/services/analytics/firstPartyEventLoggingExporter.ts) |
+| [`src/services/analytics/firstPartyEventLogger.ts`](source/src/services/analytics/firstPartyEventLogger.ts) | OTel logs SDK；自建独立 LoggerProvider 不与客户遥测混；`reinitialize` 三步走（null→forceFlush→swap）的事件丢失安全 | [✅ 449 → 512 行](annotated/src/services/analytics/firstPartyEventLogger.ts) |
+| [`src/services/analytics/datadog.ts`](source/src/services/analytics/datadog.ts) | pub 公开 token 写死在客户端（只写不读）；44 事件白名单 + 二次基数归一（mcp→mcp / 罕见模型→other）；`getUserBucket` 用 sha256 mod 30 代替真实 user id 计数 | [✅ 307 → 364 行](annotated/src/services/analytics/datadog.ts) |
+| [`src/services/analytics/index.ts`](source/src/services/analytics/index.ts) | 零依赖防循环；`AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 用命名做 lint；`eventQueue` + `queueMicrotask` 先消费后连接，不阻塞启动 | [✅ 173 → 210 行](annotated/src/services/analytics/index.ts) |
+| [`src/services/analytics/sink.ts`](source/src/services/analytics/sink.ts) | 路由中枢；`shouldTrackDatadog` 三层回退（killswitch→模块态→跨 session 磁盘缓存）；`stripProtoFields` 只在非 1P 后端前调一次守 PII 边界 | [✅ 114 → 146 行](annotated/src/services/analytics/sink.ts) |
+| [`src/services/analytics/config.ts`](source/src/services/analytics/config.ts) | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript） | [✅ 38 → 59 行](annotated/src/services/analytics/config.ts) |
+| [`src/services/analytics/sinkKillswitch.ts`](source/src/services/analytics/sinkKillswitch.ts) | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈） | [✅ 25 → 42 行](annotated/src/services/analytics/sinkKillswitch.ts) |
 
-> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **73 份 / 34,398 行（64%）**。
+> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行**，已批注 **82 份 / 38,438 行（71%）**。
 > `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`lsp/`（7/7）、`oauth/`（5/5）、
-> `tools/`（4/4）、`SessionMemory/`（3/3）七个子目录**已清零**；剩 57 份集中在 `analytics/`（9）、
+> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）八个子目录**已清零**；剩 48 份集中在 `teamMemorySync/`（5）、
 > `teamMemorySync/`（5）、`remoteManagedSettings/`（5）、`plugins/`（3）等偏外围的模块。
 > 逐份清单和「还剩什么」的完整表格见
-> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了5-个子目录清零全目录-63130)。
+> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了8-个子目录清零全目录-82130)。
 > 这个目录**不存在「全部完成」的状态**，只有「这一批做到哪」——
 > 所以本节只标 🟡，不标 ✅。
 
