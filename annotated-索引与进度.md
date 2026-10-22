@@ -103,7 +103,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 | **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
 | **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
 | **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
-| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅<br />[`lsp/` 全 7 份](annotated/src/services/lsp/) ✅<br />[`SessionMemory/` 全 3 份](annotated/src/services/SessionMemory/) ✅<br />[`analytics/` 全 9 份](annotated/src/services/analytics/) ✅ | 🟡 8 个子目录清零<br />全目录 82/130 文件（71% 行数） |
+| **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅<br />[`lsp/` 全 7 份](annotated/src/services/lsp/) ✅<br />[`SessionMemory/` 全 3 份](annotated/src/services/SessionMemory/) ✅<br />[`analytics/` 全 9 份](annotated/src/services/analytics/) ✅<br />[`teamMemorySync/` 全 5 份](annotated/src/services/teamMemorySync/) ✅ | 🟡 9 个子目录清零<br />全目录 87/130 文件（75% 行数） |
 | **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
 | **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
 | **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行） | 🚧 消息主链 + 输入框 + 消息体（66/389） |
@@ -522,7 +522,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ---
 
-## 第 6 步（服务层）做到哪了？——8 个子目录清零，全目录 82/130
+## 第 6 步（服务层）做到哪了？——9 个子目录清零，全目录 87/130
 
 `src/services/` 是整份源码里最大的目录：**130 个文件 / 53,683 行**。
 它不是「一个模块」，而是十几个互不相干的模块挤在同一个目录名下
@@ -532,7 +532,7 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——
 当时全目录只做了 35 份，`services/api/` 还有 18 份没动，
 而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。
-现在这 8 个子目录是真清零了：
+现在这 9 个子目录是真清零了：
 
 | 子目录                     | 文件    | 原文行数      | 中文批注行 | 状态      |
 | ----------------------- | ----- | --------- | ----- | ------- |
@@ -544,8 +544,9 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 | `services/tools/`       | 4/4   | 3,113     | 292   | ✅ 清零    |
 | `services/SessionMemory/` | 3/3 | 1,026     | 312   | ✅ 清零    |
 | `services/analytics/`    | 9/9   | 4,040     | 436   | ✅ 清零    |
-| `services/` 其余（12 个子目录 + 根目录） | 0/48  | 15,245    | —     | ⬜ 未开始   |
-| **合计**                  | **82/130** | **38,438 / 53,683（71%）** | **12,635** | 🟡 八个子目录清零 |
+| `services/teamMemorySync/` | 5/5 | 2,167     | 266   | ✅ 清零    |
+| `services/` 其余（12 个子目录 + 根目录） | 0/43  | 13,078    | —     | ⬜ 未开始   |
+| **合计**                  | **87/130** | **40,605 / 53,683（75%）** | **12,901** | 🟡 九个子目录清零 |
 
 > 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；
 > 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计」大。
@@ -713,15 +714,30 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ---
 
-### `services/` 还剩 48 份 / 15,245 行，为什么先停在这
+### `services/teamMemorySync/` —— 5 份（多设备 / 多成员之间怎么同步记忆和设置）
+
+| 文件 | 原文 | 批注版 | 讲什么 |
+| --- | --- | --- | --- |
+| [`index.ts`](annotated/src/services/teamMemorySync/index.ts) | 1,256 | 1,386 | 本地文件 ↔ 服务器 API 双向同步；三个 HTTP 接口（拉全量 / 拉校验和探针 / 推 upsert）；delta 按字节贪心装箱；乐观锁 + 412 冲突重试（local-wins） |
+| [`watcher.ts`](annotated/src/services/teamMemorySync/watcher.ts) | 387 | 440 | 后台 `fs.watch` 守护（不依赖 chokidar，避免 kqueue fd 泄漏）；2 秒防抖；永久失败护栏 `pushSuppressedReason` 防无限重试 |
+| [`secretScanner.ts`](annotated/src/services/teamMemorySync/secretScanner.ts) | 324 | 359 | gitleaks 高置信度规则子集；`scanForSecrets` 整文件跳过、`redactSecrets` 命中替 `[REDACTED]`；匹配文本绝不返回 |
+| [`types.ts`](annotated/src/services/teamMemorySync/types.ts) | 156 | 188 | Zod v4 数据契约（`TeamMemoryDataSchema` / 各步结果类型）；`z.infer` 派生类型 |
+| [`teamMemSecretGuard.ts`](annotated/src/services/teamMemorySync/teamMemSecretGuard.ts) | 44 | 57 | 写入前第一道闸门 `checkTeamMemSecrets`；惰性 `require` 只在 `TEAMMEM` feature 开启时加载依赖 |
+
+读这条线的顺序：`types.ts`（数据契约长什么样）→ `index.ts`（同步主流程：拉 / 算 delta / 推 / 冲突重试）→ `watcher.ts`（后台怎么感知文件变化并触发同步）→ `secretScanner.ts` + `teamMemSecretGuard.ts`（上传前怎么把密钥挡在门外）。
+
+一句话串起来：`index.ts` 负责「跟服务器对账、只传变了的那部分」，乐观锁保证并发编辑不互相覆盖；`watcher.ts` 把本地改动实时推进同步队列；`secretScanner.ts` 决定「哪些内容因为像密钥而根本不许同步」。它的隔离粒度是 **git remote 哈希**—— 同一 org 的成员按 remote 共享团队记忆，不同仓库互不串。
+
+---
+
+### `services/` 还剩 43 份 / 13,078 行，为什么先停在这
 
 剩下的不是「不重要」，而是**和主链路（一次对话怎么跑完）的耦合更弱**。
-按模块分（`lsp/`、`SessionMemory/` 和 `analytics/` 已经从这张表里移走 —— 它们清零了）：
+按模块分（`lsp/`、`SessionMemory/`、`analytics/` 和 `teamMemorySync/` 已经从这张表里移走 —— 它们清零了）：
 
 | 子目录 | 文件 | 行数 | 是什么 |
 | --- | --- | --- | --- |
 | （根目录 16 份） | 16 | 4,907 | `mockRateLimits.ts` 882、`voice*.ts` 1,175、`claudeAiLimits.ts` 515、`tokenEstimation.ts` 495、`vcr.ts` 406 等散件 |
-| `teamMemorySync/` | 5 | 2,167 | 团队记忆同步（含 secret 扫描） |
 | `plugins/` | 3 | 1,616 | 插件安装与 CLI 命令 |
 | `PromptSuggestion/` | 2 | 1,514 | 下一句提示词推测 |
 | `remoteManagedSettings/` | 5 | 951 | 服务端下发的托管设置 |
@@ -736,12 +752,12 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 **如果要从这堆里挑三份先读**（按「对理解主链路帮助最大」排）：
 
-1. `teamMemorySync/`（5 份，2,167 行）—— 团队记忆同步，含 secret 扫描。`services/` 里体量最大的未做块之一，
-   读完能看清「多设备 / 多成员之间怎么把记忆和设置同步、哪些字段会被扫成 secret 而拒绝同步」。
-2. `PromptSuggestion/`（2 份，1,514 行）—— 下一句提示词推测。
+1. `PromptSuggestion/`（2 份，1,514 行）—— 下一句提示词推测。
    它决定了 REPL 空闲时弹出的「你可以说……」建议，是「主动式 UX」的实现，代码量不小但耦合弱。
-3. `tokenEstimation.ts`（495 行，根目录）—— 压缩阈值、session memory 阈值、成本估算全靠它。
+2. `tokenEstimation.ts`（495 行，根目录）—— 压缩阈值、session memory 阈值、成本估算全靠它。
    它是「所有跟 token 有关的魔法数字」的地基，比看起来重要。
+3. `plugins/`（3 份，1,616 行）—— 插件安装与 CLI 命令。
+   `pluginOperations.ts` 单文件 1,088 行，是「用户装的扩展怎么被下载、校验、加载、卸载」的事实来源。
 
 > 这里的「还剩」清单是脚本算的（`python scripts/check-coverage.py`），
 > 目录里每多批注一份，这张表就少一行。不要再把某一节标成「✅ 完成」了 ——
