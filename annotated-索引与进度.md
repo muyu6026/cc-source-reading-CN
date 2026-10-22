@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（57/184）。`src/` 还剩 1,544 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（63/184）。`src/` 还剩 1,538 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 57 / 38% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 63 / 42% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,544 份没动（22% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,538 份没动（22% 行数）。
 
 ---
 
@@ -1180,6 +1180,29 @@ MCP 工具的本地端一半是「模板」——MCPTool.ts 只有 77 行，name
 5. **MCPTool.ts 本身是个空壳**——passthrough schema（MCP 工具自带 schema）、checkPermissions 直接 passthrough（权限走服务器级 allowlist 流程）、call 返回空串——所有真实行为在 mcpClient.ts 克隆模板时覆盖。10 万字符的结果上限是所有 MCP 工具的统一护栏。
 
 另有两处小账：非交互模式下输入值截到 80 字符、超 1 万 token 的大响应在 UI 顶部加警告（文案「this can fill up context quickly」是说给人听的，模型那份由 maxResultSizeChars 在别处管）；trySlackSendCompact 先做字符串包含快检再 parse——非 Slack 输出零成本退出，频道标签优先取工具输入里的可读名字而非内部 ID。
+
+### LSPTool：编辑器级代码智能的 CLI 移植
+
+LSPTool 把「跳转定义 / 找引用 / hover / 调用层级」这九个编辑器操作暴露给模型。6 份源文件 2,006 行，批注后 2,050 行、42 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`LSPTool/LSPTool.ts`](annotated/src/tools/LSPTool/LSPTool.ts) | 860 | 874 | 14 | 主流程：初始化等待、didOpen、两段式调用层级、gitignore 过滤 |
+| [`LSPTool/formatters.ts`](annotated/src/tools/LSPTool/formatters.ts) | 592 | 603 | 11 | URI 归一、按文件分组、SymbolKind 映射、空结果的自我解释 |
+| [`LSPTool/UI.tsx`](annotated/src/tools/LSPTool/UI.tsx) | 228 | 237 | 8 | 折叠摘要协议、header 里显示光标处符号名 |
+| [`LSPTool/schemas.ts`](annotated/src/tools/LSPTool/schemas.ts) | 215 | 218 | 3 | 判别联合（真校验）与普通 strictObject（兼容壳）的双 schema |
+| [`LSPTool/symbolContext.ts`](annotated/src/tools/LSPTool/symbolContext.ts) | 90 | 94 | 4 | 同步 I/O 提取光标处符号、64KB 读窗、半行哨兵 |
+| [`LSPTool/prompt.ts`](annotated/src/tools/LSPTool/prompt.ts) | 21 | 23 | 2 | 给模型的操作手册：九操作 + 1-based 约定 |
+
+五个最值得记的点：
+
+1. **双 schema 是「框架限制」与「错误质量」的和解**——工具框架不支持判别联合，所以工具壳用普通 strictObject；validateInput 里再用 schemas.ts 的判别联合重跑一遍，按 operation 分支给出精确报错。同样的手法 NotebookEditTool 也用过，这是第二次出现。
+2. **坐标换算是全局约定**——模型与用户说 1-based（编辑器习惯），LSP 协议是 0-based，进站出站各减/加一次。所有格式化输出再转回 1-based 展示。prompt.ts 里明说 1-based，模型不需要知道协议细节。
+3. **incoming/outgoing 两段式替模型省一轮调用**——LSP 把调用层级拆成 prepare + calls 两个方法，工具在 call() 里自动串行：先 prepare 拿 CallHierarchyItem，取第一个 item 请求真正的调用列表。模型一次调用拿到最终答案。
+4. **结果统一过 git check-ignore 过滤**——findReferences 等四种位置结果按 50 路径一批跑 git check-ignore（5 秒超时），node_modules 里的第三方引用被静默剔除；退出码 128（非 git 仓库）静默跳过，不报错。
+5. **空结果消息是「自我解释」的**——「No definition found. This may occur if the cursor is not on a symbol...」每种空结果都列可能原因，模型能自行决定换位置重试而不是当故障上报。这是贯穿 formatters.ts 的设计原则。
+
+另有三处工程细节：UNC 路径安全短路（与 FileEditTool 同款，防 SMB NTLM 凭据外泄）；symbolContext.ts 被迫用同步 I/O（调用方是同步 React 渲染函数），64KB 读窗加半行哨兵——填满即弃，宁缺勿错；isEnabled 跟着 LSP 连接状态走，没配服务器时工具整个消失而非运行时报错。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
