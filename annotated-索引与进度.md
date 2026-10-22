@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（53/184）。`src/` 还剩 1,548 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（57/184）。`src/` 还剩 1,544 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 53 / 36% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 57 / 38% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,548 份没动（21% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,544 份没动（22% 行数）。
 
 ---
 
@@ -1159,6 +1159,27 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 8. **`extractSearchText` 返回空串是个原则声明**——结果 UI 只显示「Did N searches in Xs」一行 chrome，results 内容从不上屏；若让全文搜索启发式去索引字符串项，搜到的全是幻影命中。搜索层索引什么，由 UI 展示什么决定。
 
 另有一处口径提示：`isEnabled` 按提供商分档——firstParty 恒开、foundry 恒开（只发已支持的模型）、vertex 仅 Claude 4.0+ 系列、其余关；prompt.ts 每次调用注入当前「月份 年份」，逼模型搜最近信息时带上正确年份。
+
+### MCPTool：模板工具与折叠名单
+
+MCP 工具的本地端一半是「模板」——MCPTool.ts 只有 77 行，name/description/prompt/call 全部标注 Overridden in mcpClient.ts，运行时按每个服务器克隆覆盖；另一半是纯数据——classifyForCollapse.ts 的 604 行里约 570 行是两份手工维护的工具名名单。4 份源文件 1,087 行，批注后 1,117 行、29 处锚点。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`MCPTool/classifyForCollapse.ts`](annotated/src/tools/MCPTool/classifyForCollapse.ts) | 604 | 610 | 6 | 约 30 家服务器的搜索/读取名单、camelCase 归一化、保守不折叠 |
+| [`MCPTool/UI.tsx`](annotated/src/tools/MCPTool/UI.tsx) | 403 | 421 | 17 | 三策略渲染级联、React Compiler 产物、Slack 特判 |
+| [`MCPTool/MCPTool.ts`](annotated/src/tools/MCPTool/MCPTool.ts) | 77 | 82 | 5 | 模板工具、passthrough schema、10 万字符统一上限 |
+| [`MCPTool/prompt.ts`](annotated/src/tools/MCPTool/prompt.ts) | 3 | 4 | 1 | 空串占位，真实文案在 mcpClient.ts 动态覆盖 |
+
+五个最值得记的点：
+
+1. **匹配只看工具名，不看服务器名**——托管服务器的名字不稳定（slack 与 claude_ai_Slack 是同一个），工具名才是跨安装稳定的键；normalize 把 camelCase/kebab 统一成 snake_case，Notion 的 search、MongoDB 的 find 这类极短名字也直接命中。
+2. **保守是硬原则**——名单里没有的工具一律不折叠；READ_TOOLS 全是 get_/list_/read_ 前缀的读取动作，kubectl_apply/delete 这种有副作用的绝不出现在名单里。没有条目也是一种记录：Git 和 PagerDuty 在注释里明说「没有搜索动词」。
+3. **Set 去重暴露了策略的代价**——search_docs（Sentry 与 Supabase）、find_projects（Sentry 与 Todoist）各自出现两次：跨服务器的同名工具无法区分。这是「按名匹配、免维护」换来的盲区，由「不认识就不折叠」兜底。
+4. **UI 渲染是三条策略的级联**——① JSON 里有一个主导字符串载荷（超 200 字符或含换行）就拆出来正经换行显示（专治 Slack 的 {"messages":"line1\nline2..."} 被 pretty-print 转义成字面 \n 的问题）；② 否则是小而平的对象（≤12 键、≤5,000 字符）就平铺成对齐的 k:v；③ 都不行退回 pretty-print 截断。三策略共享一个 parseJsonEntries 入口（空串/超长/非对象/键数越界五连守卫），两个大字符串无法判定谁是主载荷时宁可整体放弃也不猜。
+5. **MCPTool.ts 本身是个空壳**——passthrough schema（MCP 工具自带 schema）、checkPermissions 直接 passthrough（权限走服务器级 allowlist 流程）、call 返回空串——所有真实行为在 mcpClient.ts 克隆模板时覆盖。10 万字符的结果上限是所有 MCP 工具的统一护栏。
+
+另有两处小账：非交互模式下输入值截到 80 字符、超 1 万 token 的大响应在 UI 顶部加警告（文案「this can fill up context quickly」是说给人听的，模型那份由 maxResultSizeChars 在别处管）；trySlackSendCompact 先做字符串包含快检再 parse——非 Slack 输出零成本退出，频道标签优先取工具输入里的可读名字而非内部 ID。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
