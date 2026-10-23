@@ -1105,19 +1105,47 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 12 批生效）；check-fidelity 一次通过（490 文件 0 失败）；check-links 810+93 全 0 失效。
 
+### 输入与补全八件套（第 35 批，8 份 4,060 行）
+
+`src/hooks/` 根目录的第一批，一次做齐「用户敲键盘到提交」之间的全部机制。八个文件一条链：**索引地基 → 三源合一 → 补全总线 → 文本编辑内核 → 三个输入模式**。
+
+| 文件 | 行数 | 角色 |
+| --- | --- | --- |
+| `fileSuggestions.ts` | 811 | @ 文件补全的索引层：git ls-files 优先 / ripgrep 兜底、签名跳过重建、5s 节流地板、后台合入未跟踪文件 |
+| `unifiedSuggestions.ts` | 202 | 文件 / MCP 资源 / subagent 三源合一：nucleo 与 Fuse 双引擎混排 |
+| `useTypeahead.tsx` | 1,385 | 补全总线：七类补全的优先级编排 + 五类 stale 丢弃 + ghost text 双模 |
+| `useTextInput.ts` | 529 | 文本编辑内核：emacs 键位 + kill ring + SSH/DEL 卫生 |
+| `useVimInput.ts` | 316 | vim 模式层：INSERT/NORMAL 状态机 + dot-repeat + operators 依赖注入 |
+| `useHistorySearch.ts` | 303 | Ctrl-R 历史反查：AsyncGenerator 逐行读 + 现场快照还原 |
+| `usePasteHandler.ts` | 285 | 粘贴卫生：bracketed paste 检测 + 多图路径切分 + 同步镜像 ref |
+| `useArrowKeyHistory.tsx` | 229 | 方向键翻历史：分块读盘 + 并发加载合并 + 草稿保全 |
+
+核心设计（这八个文件回答「一次击键从 stdin 到提交经历了什么」）：
+
+1. **`useTypeahead` 的优先级链即搜索语义**：中段 slash 命令（ghost text 优先，清下拉）→ bash 历史 ghost text → @队友（先于 @文件，防冲突；bash 模式跳过）→ #slack 频道 → /add-dir 目录 → /resume 自定义标题 → slash 命令列表 → @文件/路径 → shell 补全。每一类命中即 return。五类异步源各配一个 latest ref 做陈旧丢弃——慢查询回来时输入已经变了，结果直接扔。
+2. **ghost text 的双模设计**：prompt 模式的中段命令补全用同步 useMemo（消一帧闪烁——useState+useEffect 的 effect 在渲染后跑）；bash 模式的历史补全必须异步（要读历史文件）所以用 useState。effectiveGhostText 合并两者，render 层还多一道 insertPosition === offset 的比对防陈旧。
+3. **`fileSuggestions` 的索引经济学**：git ls-files 读 index 立即返回（tracked），未跟踪文件后台拉再合入；pathListSignature 每 500 个路径采一个做内容指纹（length|first|last 采样会漏中部重命名），签名不变就跳过 nucleo 重建——打字期间的每次击键不再触发全量重建；.git/index mtime 变化才突破 5s 节流地板立即刷新（未跟踪文件不动 index，靠地板捡）。冷启动 await 完整构建（~120ms 里每 4ms 让出事件循环，用户能继续打字），构建中查询拿部分结果，完成信号触发重搜升级。
+4. **nucleo 与 Fuse 的混排巧合**：两套引擎都是「0-1 分、越低越好」，所以文件（nucleo）与非文件（Fuse）的分数能进同一个池子排序——这是「@ 一个字符同时搜文件和 agent」体验的核心。Fuse 权重 name/agentType 3 > displayText 2 > server/description 1，threshold 0.6 放宽粗筛。
+5. **`useTextInput` 的无状态渲染模型**：cursor 每次从 value+columns+offset 重建，输入处理全是「旧 cursor → 新 cursor」函数变换；kill ring 四件套（append/prepend 两种入环）+ yank-pop 精确切除；SSH/tmux 的 \x7f 双事件（#1853）和尾 \r 合并 Enter 都是真实环境的卫生处理。
+6. **`useVimInput` 的 expectsMotion 状态机**：backspace/delete 只在期待动作的状态（idle/count/operator/operatorCount）映射成 h/x——字面量状态（replace/find）映射会把 r+Backspace 变成「替换成 h」。replayLastChange 的九种变更类型分派是 dot-repeat 完整性的检查单。
+7. **两处同步镜像 ref 的 race 修复**（本批的模式亮点）：`usePasteHandler` 的 pastePendingRef——粘贴与击键同一 stdin chunk 时两次调用在同一个 React batch 里跑，第二次读到陈旧 timeoutId 会走直通路径，那个键是 Enter 就提交旧输入丢粘贴；`useArrowKeyHistory` 的 historyIndexRef——React state 异步更新，快速连按读 state 会丢键。都是「batch 内同步可见 vs commit 后异步可见」的经典分野。
+8. **恒假条件又添一处标本**：useTypeahead 行 495 `"production" !== 'test'`——与 services 层、AgentTool/UI.tsx 同款的环境替换事故，意图书载测试分支实际永不执行。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 13 批生效）；check-fidelity 一次通过（498 文件 0 失败，useTypeahead/useArrowKeyHistory 的 sourcemap 按惯例 OK* 省略）；check-links 810+94 全 0 失效。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 5/104）。`src/` 还剩 1,412 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 13/104）。`src/` 还剩 1,404 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 5**，toolPermission 全清） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 83 份（16,491 行，输入/语音/轮询等 use* 钩子）+ notifs 16 份（1,355 行，通知类） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 13**，toolPermission 全清 + 输入补全八件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 75 份（12,431 行：useVoice 1,144 / useInboxPoller 969 / useReplBridge 723 / useVirtualScroll 721 / useVoiceIntegration 677 / useRemoteSession 605 / useDiffInIDE 379 / useSearchInput 364 / useSwarmPermissionPoller 330 / useManagePlugins 304 / useCancelRequest 276 等）+ notifs 16 份（1,355 行，通知类） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,412 份没动（28.4% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,404 份没动（29.2% 行数）。
 
 ---
 
