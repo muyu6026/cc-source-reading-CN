@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (3, 'after_block', r'''文件定位：全仓库权限决策的遥测单入口。所有批准/拒绝都流经 logPermissionDecision()，扇出到 Statsig 分析事件、OTel 遥测、代码编辑计数器三路。设计原则：批准按来源分独立事件名（漏斗分析用），拒绝共用一个事件名、靠 metadata 字段区分。'''),
+    (33, 'after', r'''CODE_EDITING_TOOLS：Edit/Write/NotebookEdit 三个改代码的工具有专属 OTel 计数器（带语言维度），因为「用户允许多少次 AI 改代码」是独立的产品指标。'''),
+    (35, 'before', r'''isCodeEditingTool：列表成员判断，热路径上避免重复建 Set。'''),
+    (41, 'before', r'''buildCodeEditToolAttributes：给代码编辑决策的 OTel 计数器加语言维度。'''),
+    (65, 'after', r'''语言从文件路径推：先 inputSchema.safeParse（输入形状不可信，不能直接 as），再过 tool.getPath 拿路径，最后 getLanguageName 是异步的——但调用方用 void .then 消费，不阻塞权限决策本身。'''),
+    (68, 'before', r'''sourceToString：结构化来源拍平成字符串标签。'''),
+    (89, 'after', r'''classifier 来源要 BASH_CLASSIFIER 或 TRANSCRIPT_CLASSIFIER 至少开一个才显示为 classifier，否则落 default 变 unknown——没开的功能不该在遥测里留数据，这是有意的静默。'''),
+    (91, 'before', r'''baseMetadata：所有事件共享的元数据底座。'''),
+    (104, 'after', r'''waitMs 条件展开：只有真提示过用户才带等待时间。自动放行（config 白名单、classifier）没有等待，带上 undefined 会污染等待时长的分位数统计。'''),
+    (107, 'before', r'''logApprovalEvent：批准侧事件分发。'''),
+    (149, 'after', r'''批准六分支：config（白名单自动放）/classifier/user_permanent/user_temporary/hook。永久 vs 临时是漏斗的关键一跳——临时批准意味着用户被打断得更频繁，这个区分直接指导默认权限集的调整。'''),
+    (152, 'before', r'''logRejectionEvent：拒绝侧事件分发。'''),
+    (176, 'after', r'''拒绝只两个事件名（config/prompt），hook 与 user 用 isHook / hasFeedback 字段分。拒绝的维度刻意做少：拒绝的「为什么」已经在回给模型的 message 里，遥测只需要知道「谁拒的、有没有附反馈」。'''),
+    (181, 'before', r'''logPermissionDecision：单入口本体，被各 permission handler 在每次批准/拒绝后调用。'''),
+    (235, 'after', r'''四路扇出：① 分析事件（按来源分名）② 代码编辑 OTel 计数器（异步 void .then，带语言维度）③ toolUseContext.toolDecisions Map——按 toolUseID 存下「当时是被谁放的、什么时候」，下游代码可回溯 ④ OTel tool_decision 事件。等待时长在这里才算（有起始时间戳才减，没有就是 undefined）。'''),
+]

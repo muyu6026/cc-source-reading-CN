@@ -1082,19 +1082,42 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 11 批生效）；check-fidelity 一次通过（485 文件 0 失败，UI.tsx 的 sourcemap 按惯例 OK* 省略）；check-links 793+92 全 0 失效。
 
+### toolPermission：权限交互的五方竞速（第 34 批，5 份 1,386 行）
+
+这是 `src/hooks/` 的第一个子目录，也是整个权限体系里最接近「用户按下允许键」的一层。五个文件一条链：**上下文工厂 → 遥测单入口 → 三种角色处理器**。
+
+| 文件 | 行数 | 角色 |
+| --- | --- | --- |
+| `toolPermission/PermissionContext.ts` | 388 | 一次工具调用的权限上下文工厂：来源判别联合、队列桥、`createResolveOnce` 幂等锁 |
+| `toolPermission/permissionLogging.ts` | 238 | 遥测单入口：批准分事件名、拒绝分字段，扇出 Statsig/OTel/代码计数器三路 |
+| `toolPermission/handlers/interactiveHandler.ts` | 536 | 主 agent 路径：本地用户 / CCR bridge / channel 中继 / hook / classifier **五方竞速** |
+| `toolPermission/handlers/swarmWorkerHandler.ts` | 159 | worker 路径：请求经 mailbox 转 leader 决定，worker 挂起等回信 |
+| `toolPermission/handlers/coordinatorHandler.ts` | 65 | coordinator 路径：自动化检查顺序 await 完，剩下的才问人 |
+
+核心设计（读完这五个文件就能回答「一次权限请求到底经历什么」）：
+
+1. **`handleInteractivePermission` 不返回 Promise**——它往确认队列挂一个带回调的条目，由五个竞速方中先到的那方 `resolve()` 调用方持有的外层 Promise。本地用户、claude.ai bridge、手机 channel、PermissionRequest 钩子、bash 分类器，五方都可能成为答案，**互斥靠 `claim()`**：原子 check-and-mark，异步回调里先 claim 再 await，关掉「检查通过」与「真正 resolve」之间的窗口。
+2. **每个赢家都要清理所有其他方的残留**：bridge 赢了要 `cancelRequest` 通知 CCR 撤对话框（否则网页 UI 留着陈旧提示对着一个已在执行的工具）；channel 赢了也要撤 bridge；本地赢了 `channelUnsubscribe?.()` 六处调用点一个不能少（这个包装还修死闭包——以前只删 Map 条目，abort 监听挂到会话结束）。
+3. **`createResolveOnce` 是两态分离**：`delivered`（值送没送）与 `claimed`（有没有人认领过）。`isResolved()` 报的是「有人认领」而不是「值送达」——`recheckPermission` 靠这个区分「曾经有人应答但还在飞行中」，所以重查后必须用 `claim()` 而非 `isResolved()`。
+4. **三种 worker 角色的分流是有意不同的**：主 agent 五方 race；swarm worker 没有用户可 race，分类器改成 `await` 串行，然后 mailbox 转 leader（先注册回调再发送——leader 秒回时回调必须已就位）；coordinator 把 hooks（快、本地）和 classifier（慢、推理）顺序 await，返回 null 落对话框时靠 `awaitAutomatedChecksBeforeDialog` 布尔参数告诉 interactiveHandler「钩子已跑过，别重复」——两个 handler 之间的隐式契约。
+5. **遥测的漏斗设计**：批准按来源分六个独立事件名（config / classifier / user_permanent / user_temporary / hook），永久 vs 临时是关键一跳——临时批准多意味着用户被打断频繁，直接指导默认权限集调整；拒绝只两个事件名，hook 与 user 靠 `isHook`/`hasFeedback` 字段分。`toolUseContext.toolDecisions` Map 按 toolUseID 存下「当时被谁放的、什么时候」，供下游回溯。
+6. **几个「今天已是死代码但刻意留着」的标本**：channel 的 `requiresUserInteraction` 守卫（三个需要交互的工具在配了 channel 时 `isEnabled()` 返回 false，根本到不了这）；classifier 双 feature 门（`BASH_CLASSIFIER`/`TRANSCRIPT_CLASSIFIER` 任一没开，classifier 来源在遥测里静默变 unknown——没开的功能不留数据）。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 12 批生效）；check-fidelity 一次通过（490 文件 0 失败）；check-links 810+93 全 0 失效。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 与 `src/tools/` 均已清零（tools 184/184，50,863 行全做完）。`src/` 还剩 1,417 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 5/104）。`src/` 还剩 1,412 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 5**，toolPermission 全清） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 83 份（16,491 行，输入/语音/轮询等 use* 钩子）+ notifs 16 份（1,355 行，通知类） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,417 份没动（28% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,412 份没动（28.4% 行数）。
 
 ---
 
