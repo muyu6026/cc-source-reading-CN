@@ -1158,20 +1158,37 @@ hooks 根目录第四组：虚拟滚动、IDE diff、搜索输入、swarm 权限
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 15 批生效）；check-fidelity 首轮 5 文件 FAIL——全部是 `after_block` 误用于 `/** */` 块注释（该模式只推进连续 `//` 行，遇非 `//` 行回退一行，中文落进块内），统一改为 `after` 锚在 `/**` 开头行（自动外移到块后）；复验又踩 useCancelRequest 三处多行 const 首行锚点（规矩 7 复犯），挪到语句结束行后 0 失败；5 处外移均为人眼确认（全部落在函数签名前，位置正确）。
 
+### 任务管理与远程缝合十件套（第 38 批，10 份 2,302 行）
+
+hooks 根目录第五组：队友树导航、任务列表单例 store、远程历史分页、全局快捷键、两种远程会话、tasks mode 发动机、回合 diff、权限总入口、LSP 推荐。hooks 到 34/104（74% 行数）。
+
+1. **`useBackgroundTaskNavigation.ts`（251 行，31 锚点）**——Shift+↑/↓ 的队友树导航。索引空间 -1..n 是一张设计图：-1 = leader，0..n-1 = 队友，n = 「隐藏」行（收起树用），down/up 的回绕不对称（down 越 maxIdx 回 -1，up 在 -1 回 maxIdx）。useEffect 的 clamp/reset 双条件防开机误清（prevCount>0 才重置）；正在查看已完成队友时只清索引、保留 viewing-agent 模式——用户还要靠 Esc 自己退。Esc 的两栖语义靠两个 abortController 分工：running → currentWorkAbortController 只停当前轮（队友活着），非 running → 退查看。文件末尾又是 useInput → KeyboardEvent 的向后兼容桥（与 useSearchInput 同款，REPL 尚未接线）。
+2. **`useTasksV2.ts`（250 行，31 锚点）**——TodoV2 的单例 store。为什么是单例：REPL/Spinner/Footer 多处消费同一份列表，per-hook fs.watch 会被 Spinner 的每轮挂载打成 churn。useSyncExternalStore 契约 + 稳定数组引用（Object.is 命中才重渲染）；懒启动 + 订阅计数归零才 #stop、缓存保留防闪空；三层事件源（fs.watch / onTasksUpdated 进程内总线 / 5s 兜底轮询——且只在有未完成任务时才排，全完成时空转轮纯属白烧 CPU）；5s 隐藏定时器带 taskListId 防跨队误 reset + 到点后二次确认「仍全部 completed 且非空」才 resetTaskList；禁用路径的 NOOP 三件套保引用恒定。
+3. **`useAssistantHistory.ts`（250 行，26 锚点）**——viewer 模式的历史惰性分页。游标三态（undefined 首页未拉 / null 已到底 / string = before_id）；稳定 UUID 哨兵是虚拟滚动友好设计——loading/failed/start 三种文案原地 mutate 同一 item，不是删除+插入；滚动锚点用 getFreshScrollHeight 直读 Yoga 拿 commit 后真实高度差补偿视口；fill-viewport 自链用 `<=` 而非 `<`（ScrollBox 内容壳 flexGrow:1，内容永远不低于视口，只有「还没有可滚余量」时才继续拉），10 页预算防全被过滤时无限链；拉取失败不回消游标——哨兵换 failed 文案，下次上滚重试同一页。
+4. **`useGlobalKeybindings.tsx`（249 行，24 锚点）**——全局快捷键注册组件。注册顺序即触发顺序（子组件先注册先触发、再冒泡），Esc 仲裁全靠 isActive 门控：搜索栏「打开」是模式态独占 Esc，只是「导航中」不是模式，Esc 直接退 transcript（与 less 的 q 一致）——没这层门控子父两个 handler 会在同一次 Esc 上双发。ctrl+o 藏着 GB kill-switch 逃生舱：isBriefOnly 可能因开关晚于持久化而卡死成空白视图，此时先清卡死状态再正常切。ctrl+shift+b 是非对称闸门（OFF 永远允许——进来的键必须能出去）；ctrl+l forceRedraw 治外部清屏后 Ink 差分引擎「未变化格子不重画」的死角；运行时 require 破模块循环；feature() 作为编译期常量做条件调钩子（biome 特批）。
+5. **`useSSHSession.ts`（241 行，25 锚点）**——SSH 远程会话钩子，与 useDirectConnect 是姊妹文件（同四件套接口、同 REPL 接线），但生命周期相反：ssh 进程和 auth proxy 在启动期 main.tsx 就建好交进来，本钩子只负责接线。stream-json 模式每轮重发 system/init，只放行第一条；权限四回调里 recheck 在远程是空转（本地缓存不了远端判定逻辑）；isConnectedRef 供断开文案分流（从未连上 = 失败，连上又断 = 正常结束）；stderr 展示有策略（连接前必看、连接后仅非 0 退出码，否则 --verbose 噪声淹没真错误）；终局 gracefulShutdown(1, 'other')。
+6. **`useDirectConnect.ts`（229 行，22 锚点）**——WebSocket 版远程会话，与上一份对照读最能看出「同接口两种传输」的差异点：effect 内自建 manager（SSH 版是外部交入）；onAllow 多带 updatedInput——用户可能在弹窗里改过参数（如权限建议追加的路径），要原样回传远端；WS 断了没有本地回退，两条路都 gracefulShutdown(1)。
+7. **`useTaskListWatcher.ts`（221 行，24 锚点）**——tasks mode 的发动机。ref 中转 props 的真实动机写在注释里：isLoading 每轮翻转会让 effect 逐轮 close()+watch()，而这正是 Bun PathWatcherManager 死锁的触发条件（oven-sh/bun#27469）——所以清理只允许在 taskListId 变化或卸载时发生。claimTask 是文件锁语义的原子抢占，抢失败安静等下次事件；提交被拒要主动释放 claim（owner 置 undefined），否则任务永远卡在「有人认领没人干」；「转空闲排一次检查」是依赖剃掉后显式补回的补偿效应；1s 去抖 vs useTasksV2 的 50ms——这里等的是人建任务，不是自己刚写完文件。
+8. **`useTurnDiffs.ts`（213 行，23 锚点）**——从消息流提取按回合的 diff。useMemo 内做增量累计（lastProcessedIndex 游标，同批消息重复渲染不重算）；回退检测：用户 rewound 对话后消息变短，全量缓存作废重来；tool_result 也是 user 型消息（API 结构如此），靠 toolUseResult 字段甄别不当新回合；新建文件没有 structuredPatch，合成一个「全是 +」的假 hunk（oldStart/oldLines 为 0）让 diff 视图无需特判；Map 按路径聚合同文件多次编辑，stats 全量重算不增量维护。
+9. **`useCanUseTool.tsx`（204 行，27 锚点）**——权限判定总入口，React Compiler 产物（_c(3) 槽位 + memo sentinel，锚点避开 JSX 区）。核心不变式：权限判定永远以 resolve 收场——AbortError/APIUserAbortError 是用户取消只记调试日志，其余进 logError，两者都 cancelAndAbort，异常绝不让 Promise 悬挂（否则工具调用永远卡在等待权限）。ask 三岔：coordinator 自动化检查（awaitAutomatedChecksBeforeDialog 门下）→ swarm worker 代答 → speculative classifier 2 秒竞速（有结果+命中规则+高置信三条件全中才免弹窗，命中后 consume 预跑结果并存档）；auto-mode 的批准与拒绝双向留痕（批准存 setYoloClassifierApproval，拒绝进 autoModeDenials 账本 + 立即通知）；deny 只 resolve(result) 不回传 updatedInput。
+10. **`useLspPluginRecommendation.tsx`（194 行，28 锚点）**——LSP 插件推荐，同样 React Compiler 产物。推荐触发三保险：会话级一次性格子 + checkedFilesRef 差分（同文件只送一次匹配）+ tryResolve 基座互斥；28 秒阈值对应菜单 30 秒自动消失——超时被 dismiss 的计 ignored count 降温，用户真点的 no 不计（明确负反馈走 never 永久拉黑）；四选一响应用带标签的 switch 汇到同一收尾；useAppState 选择器编译期拆成独立函数，窄订阅只取 fileHistory.trackedFiles。
+
+流程账：预检三断言一次通过（261 锚点）、零合并错误（硬规矩连续第 16 批生效）；check-fidelity 首轮 1 文件 FAIL——useTurnDiffs 锚点 (125,'after') 落在多行表达式 `const isToolResult =` 首行中间（把注释行 124 数成了 125，规矩 7 的新变体：多行语句的首行同样会劈开表达式），挪到 124 后复验 0 失败；两条 ⟳ 自动挪位均为 `//` 注释段中部 → 段尾（useGlobalKeybindings 99→101、useTaskListWatcher 42→46），人眼确认落点正确；check-links 0 失效。
+
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 24/104）。`src/` 还剩 1,393 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 34/104）。`src/` 还剩 1,383 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 24**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 64 份（5,939 行：useBackgroundTaskNavigation 251 / useTasksV2 250 / useAssistantHistory 250 / useGlobalKeybindings 249 / useSSHSession 241 / useDirectConnect 229 / useTaskListWatcher 221 / useTurnDiffs 213 / useCanUseTool 204 / useLspPluginRecommendation 194 等）+ notifs 16 份（1,355 行，通知类） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 34**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 54 份（3,637 行：useSessionBackgrounding 158 / useIdeSelection 150 / useScheduledTasks 139 / useIssueFlagBanner 133 / useInputBuffer 132 / useClaudeCodeHintRecommendation 129 / useAwaySummary 125 / useLogMessages 119 / useDiffData 110 / useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 等）+ notifs 16 份（1,355 行，通知类） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,393 份没动（30.4% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,383 份没动（30.9% 行数）。
 
 ---
 
