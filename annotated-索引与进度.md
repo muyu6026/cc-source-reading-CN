@@ -1043,19 +1043,58 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 10 批生效）；三处 FAIL——readOnlyValidation 数据文件里误置了两条 pathValidation 的锚点（1220/1263，写串了文件）+ 一条锚在 9 行文档块中部（1583），pathValidation 的 (27,'after') 劈开多行 type 声明，prompt.ts 的 (228,'after') 劈开多行三元赋值；全部修正后复验全过。
 
+### AgentTool 下半：跑起来的 agent 全机制（`AgentTool/` 20/20 全清，**tools 184/184 全清**）
+
+17 个文件 4,889 行 → 批注版 5,123 行、308 处锚点。这一批做完，`src/tools/` 整个目录清零——工具层从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」全齐了。
+
+| 文件 | 原文行 | 锚点 | 看点 |
+| --- | --- | --- | --- |
+| [`runAgent.ts`](annotated/src/tools/AgentTool/runAgent.ts) | 973 | 57 | subagent 一次运行的完整生命周期：权限覆盖优先级、上下文瘦身、提示缓存三处设计 |
+| [`UI.tsx`](annotated/src/tools/AgentTool/UI.tsx) | 872 | 46 | React Compiler 产物（`_c(N)` memo cache）；进度折叠、condensed mode、分组渲染 |
+| [`loadAgentsDir.ts`](annotated/src/tools/AgentTool/loadAgentsDir.ts) | 755 | 42 | 四种 agent 来源的解析与覆盖优先级；frontmatter 全字段白名单校验 |
+| [`agentToolUtils.ts`](annotated/src/tools/AgentTool/agentToolUtils.ts) | 686 | 49 | 工具过滤链、通配符解析、后台生命周期驱动器、handoff 分类器 |
+| [`resumeAgent.ts`](annotated/src/tools/AgentTool/resumeAgent.ts) | 265 | 20 | 从磁盘 transcript 恢复 agent：三层消息清洗 + worktree 续命 |
+| [`built-in/claudeCodeGuideAgent.ts`](annotated/src/tools/AgentTool/built-in/claudeCodeGuideAgent.ts) | 205 | 13 | 文档向导：五段用户配置注入 + 3P 反馈导流 |
+| [`agentMemorySnapshot.ts`](annotated/src/tools/AgentTool/agentMemorySnapshot.ts) | 197 | 18 | 快照三动作（initialize/replace/markSynced）与同步标记机制 |
+| [`built-in/verificationAgent.ts`](annotated/src/tools/AgentTool/built-in/verificationAgent.ts) | 152 | 7 | 「反自欺手册」提示词 + criticalSystemReminder 重注入保活 |
+| [`agentMemory.ts`](annotated/src/tools/AgentTool/agentMemory.ts) | 177 | 12 | 三档 memory scope 路由 + isAgentMemoryPath 的 normalize 防穿越 |
+| [`built-in/statuslineSetup.ts`](annotated/src/tools/AgentTool/built-in/statuslineSetup.ts) | 144 | 3 | PS1→statusLine 转换 + stdin JSON 全字段契约 |
+| [`agentDisplay.ts`](annotated/src/tools/AgentTool/agentDisplay.ts) | 104 | 9 | /agents 命令的覆盖标注与 worktree 去重 |
+| [`built-in/planAgent.ts`](annotated/src/tools/AgentTool/built-in/planAgent.ts) | 92 | 4 | 四步流程 + Critical Files 输出契约 |
+| [`built-in/exploreAgent.ts`](annotated/src/tools/AgentTool/built-in/exploreAgent.ts) | 83 | 6 | READ-ONLY 七禁 + MIN_QUERIES=3 防摸鱼 |
+| [`builtInAgents.ts`](annotated/src/tools/AgentTool/builtInAgents.ts) | 72 | 10 | 内置清单的环境门控拼装 |
+| [`agentColorManager.ts`](annotated/src/tools/AgentTool/agentColorManager.ts) | 66 | 3 | 八色专用色板 + satisfies 编译期约束 |
+| [`built-in/generalPurposeAgent.ts`](annotated/src/tools/AgentTool/built-in/generalPurposeAgent.ts) | 34 | 6 | 「别镀金也别半吊子」+ 绝不主动建文件/文档 |
+| [`constants.ts`](annotated/src/tools/AgentTool/constants.ts) | 12 | 3 | Task→Agent 线名兼容 + one-shot 尾 trailer 省 token |
+
+值得记住的十个设计：
+
+1. **权限覆盖的安全优先级**（runAgent）。agent 自己定义的 permissionMode 压不过父级的 bypassPermissions / acceptEdits / auto——用户显式选择和更宽松的父模式永远优先，agent 定义不能偷偷放宽。allowedTools 整体替换 session 规则防父级审批透传，但 cliArg 规则（SDK `--allowedTools`）必须保留。
+2. **上下文瘦身是 token 经济学**（runAgent）。Explore/Plan 这类只读 agent 剔掉 CLAUDE.md（省 ~5-15 Gtok/周 × 34M 次 spawn）和 parent-session-start 的 gitStatus（最多 40KB 且标注 stale）；kill-switch `tengu_slim_subagent_claudemd` 默认开。
+3. **提示缓存三处设计**（runAgent + forkSubagent）。常规 subagent 禁 thinkingConfig 省输出 token，fork 子却要继承父配置保前缀一致；fork 的系统提示穿「已渲染字节」而不是重调用 getSystemPrompt()（GrowthBook cold→warm 会发散撑爆 cache）；fork 子的 tool_result 全用同一占位符，只有 directive 文本块因子而异。
+4. **覆盖优先级的排序即语义**（loadAgentsDir + agentDisplay）。built-in → plugin → user → project → flag → managed，managed（企业策略）最后写所以压过用户自己的配置。注意 agentDisplay 的展示顺序是另一套（built-in 垫底）——「谁赢」和「怎么排」是两个问题。
+5. **frontmatter 校验全白名单 + 宽松失败**（loadAgentsDir）。background 只认 'true'/true、memory scope 三选一、isolation 的 'remote' 仅 ant 构建、color 必须在八色内——非法值一律记日志丢弃不抛错（认不出的配置不擅自启用行为）；memory 启用自动补 Write/Edit/Read 三件套。
+6. **工具过滤链的顺序有讲究**（agentToolUtils）。MCP 特例 → plan 特例 → 全禁表 → 自定义禁表 → 异步白名单——先特例后禁表，plan 模式的 agent 才能同时绕过两张表拿到 ExitPlanMode。异步 agent 白名单制 + in-process 队友两个例外（spawn 同步子代理 + 任务工具协作）。
+7. **后台生命周期的状态转换不被装饰阻塞**（agentToolUtils，gh-20236）。completeAsyncAgent 先置完成态让 TaskOutput 立即解锁，分类（API 调用）和 worktree（git exec）可能 hang，只能做通知装饰；kill 分支同样先转状态再清理——git hang 也挡不住解锁。
+8. **resume 的消息必须 API 合法**（resumeAgent）。三层清洗：去没有结果的 tool_use → 去孤立 thinking 块 → 去空白 assistant；resume 后 bump worktree mtime 防 stale 清理误删（#22355）；fork resume 的父系统提示造不出来直接抛错——凑一个假的比没有更糟。
+9. **验证 agent 的提示词是反自欺设计**（verificationAgent）。点名两种失败模式（verification avoidance / 被前 80% 诱惑）；PASS 步骤没有 Command run 块就是 skip；调用方会抽查命令重跑；VERDICT 行是给调用方解析的字面量，靠 criticalSystemReminder 每轮重注入保活（长提示词会被淹没）。
+10. **React Compiler 产物的读法**（UI.tsx）。`_c(N)` memo cache + `Symbol.for("react.memo_cache_sentinel")` + t0/t1/t2 解构重命名——跳过 cache 机制直接看 JSX 结构；进度视图的三个细节：condensed mode 行数估算（在途工具 × 9 + 7）、hiddenToolUseCount 只数工具调用（与 Done (N tool uses) 口径对齐）、分组后可能空列表的 Initializing… 兜底。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 11 批生效）；check-fidelity 一次通过（485 文件 0 失败，UI.tsx 的 sourcemap 按惯例 OK* 省略）；check-links 793+92 全 0 失效。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已做 167/184。`src/` 还剩 1,435 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 与 `src/tools/` 均已清零（tools 184/184，50,863 行全做完）。`src/` 还剩 1,417 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 167 / 90% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半。只剩 AgentTool（17 份 / 4,889 行，含 runAgent 973 / UI 872 / loadAgentsDir 755 / agentToolUtils 686 / built-in 五个子代理） |
+| `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,435 份没动（27% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,417 份没动（28% 行数）。
 
 ---
 

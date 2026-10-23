@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (19, 'after', r'''两个文档地图 URL：Claude Code docs map（code.claude.com）+ Claude platform llms.txt（platform.claude.com）——后者同时覆盖 Agent SDK 和 Claude API 三域（注释明说 SDK 文档就在 API 文档站里）。'''),
+    (21, 'after', r'''CLAUDE_CODE_GUIDE_AGENT_TYPE：类型名常量（builtInAgents.ts 按它做非 SDK 入口门控）。'''),
+    (23, 'before', r'''getClaudeCodeGuideBasePrompt：文档向导的基础提示词。'''),
+    (28, 'after', r'''localSearchHint embedded 分支同前两个 agent——本地文件搜索在 ant 构建里走 Bash 的 find/grep。'''),
+    (87, 'after', r'''基础提示词要点：三域专长（Claude Code CLI / Agent SDK / Claude API）；工作法七步——判域 → WebFetch 抓对应 docs map → 从地图挑最相关 URL → 抓具体文档页 → 基于官方文档给可执行建议 → docs 没覆盖才 WebSearch → 顺带用本地搜索引用项目的 CLAUDE.md/.claude。铁律：官方文档优先于猜测、回答带确切 URL、主动建议相关命令/快捷键。'''),
+    (89, 'before', r'''getFeedbackGuideline：按部署形态给不同的反馈导流。'''),
+    (96, 'after', r'''3P 服务（Bedrock/Vertex/Foundry）的 /feedback 命令不可用——引流到 MACRO.ISSUES_EXPLAINER（一处宏替换，跟着部署文档走）；一方服务才让用 /feedback 报 feature request/bug。'''),
+    (100, 'after', r'''whenToUse 里的 IMPORTANT：spawn 新 claude-code-guide 前先查有没有在跑或刚完成的实例，能通过 SEND_MESSAGE 续话就别新开——文档问答是高频轻活，复用比新建省一整轮系统提示。'''),
+    (116, 'after', r'''tools 双形态：embedded 构建（无 Glob/Grep）用 Bash + Read + 双 Web；否则 Glob + Grep + Read + 双 Web。双 Web 是刚需——这个 agent 的知识全在线上文档里。'''),
+    (120, 'after', r'''model 'haiku'（文档问答轻活，求快求省）；permissionMode 'dontAsk'——抓网页+读本地文件都不需要用户审批，别为查文档弹窗。'''),
+    (121, 'before', r'''getSystemPrompt 是动态的（收 toolUseContext）——要把用户当前配置注入提示，让 agent 回答时能建议「你已经有 X 了」。'''),
+    (180, 'after', r'''五段上下文注入：自定义技能 / 自定义 agent（排除 built-in，只列用户自己配的）/ MCP 服务器 / 插件技能 / settings.json 全文。settings 那段带 eslint-disable no-restricted-syntax——这是给人看的 UI 输出不是 tool_result，不受该规则限（注释写明了理由）。任何一段非空就拼 User's Current Configuration 尾段，叮嘱 agent 回答时结合已配功能主动建议。'''),
+    (205, 'after', r'''无任何上下文时返回基础提示 + feedback 导语——不拼空段落。'''),
+]
