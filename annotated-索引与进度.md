@@ -1145,19 +1145,33 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 14 批生效）；check-fidelity 一次通过（503 文件 0 失败，useVoiceIntegration/useReplBridge 的 sourcemap 按惯例 OK* 省略）；check-links 810+95 全 0 失效。
 
+### 交互与插件管理六件套（第 37 批，6 份 2,374 行）
+
+hooks 根目录第四组：虚拟滚动、IDE diff、搜索输入、swarm 权限轮询、插件管理、取消键仲裁。hooks 到 24/104（62% 行数）。
+
+1. **`useVirtualScroll.ts`（721 行，36 锚点）**——消息列表虚拟化，本批信息密度最高的一份。ScrollBox 输出层裁剪之外，这个 hook 把 fiber/Yoga 分配也管起来：DEFAULT_ESTIMATE 故意取低（高估露白、低估只多挂几条）；scrollTop 按 40 行分档做 useSyncExternalStore 快照（滚轮每格 3-5 tick 不全触发 commit）；listOrigin 从 topSpacer 的 Yoga computedTop 读（不剪偏移，tmux resize 高度变化也不漂移）；sticky 折进快照符号位；span 封顶治 pendingDelta 死亡螺旋；useDeferredValue 只延迟范围增长（收缩廉价）；最终按视口位置修剪远端保 fiber 数 O(viewport)（PageUp 连打曾 +270MB RSS）；clamp 用 deferred 范围而非立即范围（否则 drain 帧落在 spacer 里白闪）；h=0 用 getComputedWidth 区分「Yoga 没跑」与「真空消息」。
+2. **`useDiffInIDE.ts`（379 行，23 锚点）**——IDE diff 接进权限流。6 位 sha 拼 tab 名防同文件多次 diff 互覆；computeEditsFromContents 必须用 unformatted patch（否则把 IDE 里的格式改动吃进二次编辑）；保存/关闭/拒绝三种 RPC 结果各有语义，未知结果一律抛「Not accepted」；cleanup 幂等闸门（abort/beforeExit/catch 三处触发）；WSL 三条件路径转换。
+3. **`useSearchInput.ts`（364 行，18 锚点）**——less/vim 式搜索输入框。Esc 两种人格（onCancel 直调 vs 先清空再退出两段式）；空 query Backspace = less「删掉 /」惯例；kill ring 三兄弟（k 删到尾 append / u 删到头 prepend / w 删词 prepend）+ yank-pop 精确切除；ctrl+g 借 less 取消键；特殊键黑名单防 PageUp 泄漏字面文本；文件尾是 useInput → handleKeyDown 的向后兼容桥（11 个调用点未迁移）。
+4. **`useSwarmPermissionPoller.ts`（330 行，11 锚点）**——worker 权限接收端。模块级双注册表（普通 + 沙箱）跨渲染存活；「先删后调」幂等闸门（回调内可能同步触发新工具调用）；permissionUpdates 逐条 zod 校验（队友进程可能是旧版本）；三个提前退出保 IO 经济（非 worker / 并发中 / 无待定）。
+5. **`useManagePlugins.ts`（304 行，9 锚点）**——插件 Layer-3 初始加载。MCP 计数必须在 setAppState 前算（LoadedPlugin.mcpServers 是后填缓存槽，与指标竞态）；errors 合并而非覆盖 + type+source 去重键（LSP 错误不丢、Doctor UI 不重复）；needsRefresh 只提示不自动刷新（旧自动刷新有 stale-cache bug 且不含 MCP/agents，刷新一律走 /reload-plugins）。
+6. **`useCancelRequest.ts`（276 行，14 锚点）**——三个停止键的仲裁。Esc 优先级：活动任务 > 弹队列；bash 模式空输入时 Esc 让位给模式退出；Ctrl+C 绝不能认领空闲主提示符（挡复制选择和双击退出）；Ctrl+X Ctrl+K 两段式杀后台 agent（3 秒窗口、快捷键显示尊重改键）；killAgents handler 必须 always-active——ctrl+x 是 chord 前缀，isActive:false 会把 ctrl+k 泄漏给 readline kill-line，闸门只能做在 handler 内部。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 15 批生效）；check-fidelity 首轮 5 文件 FAIL——全部是 `after_block` 误用于 `/** */` 块注释（该模式只推进连续 `//` 行，遇非 `//` 行回退一行，中文落进块内），统一改为 `after` 锚在 `/**` 开头行（自动外移到块后）；复验又踩 useCancelRequest 三处多行 const 首行锚点（规矩 7 复犯），挪到语句结束行后 0 失败；5 处外移均为人眼确认（全部落在函数签名前，位置正确）。
+
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 18/104）。`src/` 还剩 1,399 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 24/104）。`src/` 还剩 1,393 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 18**，toolPermission 5 + 输入补全八件套 + 通信远程五件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 70 份（12,431-4,118=8,313 行：useVirtualScroll 721 / useDiffInIDE 379 / useSearchInput 364 / useSwarmPermissionPoller 330 / useManagePlugins 304 / useCancelRequest 276 / useBackgroundTaskNavigation 251 等）+ notifs 16 份（1,355 行，通知类） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 24**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 64 份（5,939 行：useBackgroundTaskNavigation 251 / useTasksV2 250 / useAssistantHistory 250 / useGlobalKeybindings 249 / useSSHSession 241 / useDirectConnect 229 / useTaskListWatcher 221 / useTurnDiffs 213 / useCanUseTool 204 / useLspPluginRecommendation 194 等）+ notifs 16 份（1,355 行，通知类） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,399 份没动（30% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,393 份没动（30.4% 行数）。
 
 ---
 

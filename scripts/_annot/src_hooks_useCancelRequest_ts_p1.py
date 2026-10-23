@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'after', r'''【文件定位】Esc / Ctrl+C / Ctrl+X Ctrl+K 三个「停止」键的统一仲裁者。渲染 null，纯注册 keybinding handler。三个按键的语义分工是理解这个文件的钥匙：Esc 中断当前轮次，Ctrl+C 更强（teammate 视图下连后台 agent 一起杀），Ctrl+X Ctrl+K 两段式专杀后台 agent。'''),
+    (38, 'after', r'''两段式确认窗口：3 秒内第二按才真杀。杀所有后台 agent 是破坏性操作，防误触。'''),
+    (97, 'after', r'''优先级 1：有活动任务在跑就先取消它——压过队列管理，「随时能打断 Claude」是硬承诺。注意 setToolUseConfirmQueue(() => []) 顺手清掉待确认的权限对话框：任务都没了，对话框没有存在意义。'''),
+    (105, 'after', r'''优先级 2：Claude 空闲时弹队列（popCommandFromQueue）。队列里的下一条命令是用户提前输入的，Esc = 撤回最后排的那条。'''),
+    (129, 'after', r'''isContextActive 是「这个 handler 该不该说话」的总闸：Transcript/HistorySearch/Help 各有自己的 Esc 处理；overlay（ModelPicker 等）自己注册；本地 JSX 命令（/model、/btw）自管输入；vim INSERT 模式下 Esc 是退出插入态不是取消。'''),
+    (135, 'after', r'''特殊模式空输入时 Esc 让位给 PromptInput 的「退出模式」——bash/background 模式下 Esc 应该是离开该模式，而不是取消请求。只对 Esc 生效，Ctrl+C 永远取消。'''),
+    (154, 'after', r'''isEscapeActive = 上下文激活 + 确实有东西可取消/弹 + 不在特殊模式空输入 + 没在队友视图。最后一条：看队友 transcript 时 Esc 归 useBackgroundTaskNavigation 管。'''),
+    (162, 'after', r'''isCtrlCActive 注释交代了一个关键 negative case：主提示符空闲时绝不能认领 ctrl+c——那会挡住复制选择（copy-selection）和双击退出。所以 Ctrl+C 的活动条件比 Esc 多一条 isViewingTeammate。'''),
+    (172, 'after', r'''killAllAgentsAndNotify 共享杀路径：从 store 直读（避免陈旧闭包）→ 过滤 running 的 local_agent → killAllRunningAgentTasks → 逐个 markAgentsNotified（抑制每个 agent 各自的完成通知）→ emitTaskTerminatedSdk 发 SDK 事件 → 汇总成一条模型可见通知（单数/复数两种文案）。返回 false = 什么都没杀，调用方据此区分「已处理」和「无操作」。'''),
+    (200, 'after', r'''handleInterrupt：teammate 视图下先杀全部 agent 再退视图；主线程下只在有东西可取消时走 handleCancel。注释点明设计意图：从主提示符杀 agent 必须是有意手势（chat:killAgents），不是取消轮次的副作用。'''),
+    (230, 'after', r'''没有运行中的 agent 时第一按直接提示「No background agents running」——不进入确认窗口，避免用户按完第一按再按一次却什么都不发生的困惑。'''),
+    (241, 'after', r'''窗口内第二按：清零计时器、撤确认通知、clearCommandQueue（队列里的命令也一并作废——杀 agent 是「全部停下」语义）、走共享杀路径。'''),
+    (254, 'after', r'''第一按：显示「再按一次 <快捷键> 停止后台 agent」，timeoutMs 与确认窗口等长——提示消失的时间点就是窗口关闭的时间点，视觉与语义同步。快捷键显示走 getShortcutDisplay（尊重用户改键）。'''),
+    (268, 'after', r'''chat:killAgents 必须保持 always-active：ctrl+x 作为 chord 前缀无论 isActive 都会被消费（ctrl+x ctrl+e 永远活着），这里设 isActive:false 会把 ctrl+k 泄漏给 readline 的 kill-line。所以闸门做在 handler 内部（hasRunningAgents 检查），不做在 isActive 上。'''),
+]
