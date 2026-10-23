@@ -1133,19 +1133,31 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 13 批生效）；check-fidelity 一次通过（498 文件 0 失败，useTypeahead/useArrowKeyHistory 的 sourcemap 按惯例 OK* 省略）；check-links 810+94 全 0 失效。
 
+### 通信与远程五件套（第 36 批，5 份 4,118 行）
+
+「输入端怎么把物理动作变成语义」的第二层：语音、队友邮箱、远程控制三条对外通道。至此 hooks 根目录输入/补全/通信三组已做，hooks 到 18/104（49% 行数）。
+
+1. **`useVoice.ts`（1,144 行，41 锚点）**——按住说话的完整生命周期。终端没有 keyup 事件可听，松键判定全靠 auto-repeat 间隔（200ms 超时 + 600ms fallback 兜「轻点」）；双代际 ref（sessionGen 管会话、attemptGen 管会话内重连）让僵尸 WS 污染不了新会话；~1% 会话会撞上「粘性坏 CE pod」（收音频零转写，anthropics/anthropic#287008），six-condition 门 + 250ms 退避重放整场音频自救一次；焦点模式是另一套生命周期（焦点拉会话、失焦收、5s 静默拆）。
+2. **`useInboxPoller.ts`（969 行，39 锚点）**——队友邮箱轮询总线。九路消息分拣（权限请求/响应 ×2、沙箱 ×2、关机 ×2、团队权限、模式设置、计划批准）+ leader/worker 两侧路由；两个安全设计值得记：计划批准只认 `from === 'team-lead'`（队友之间可伪造批准）；`markRead` 卡在「送达或可靠入队」之后，崩溃丢消息的窗口为零。tmux worker 的权限请求塞进标准 ToolUseConfirmQueue，和白进程内队友共用同一套工具专属 UI。
+3. **`useVoiceIntegration.tsx`（677 行，41 锚点）**——语音与文本输入框的缝合层。裸字符绑定（空格）的 activate-vs-type 二义性用 5 连击阈值拆解，前两发放行进输入框当正常打字；激活分支刻意排在预热分支之前——同一 tick 里两个 strip 调用会读到陈旧的 inputValueRef；`lastSetInputRef` 是唯一能正确处理「空前缀+空后缀」的写入守卫（startsWith('') 会真空通过）。matchesKeyboardEvent 是 onKeyDown 迁移（#23524）的适配层。
+4. **`useReplBridge.tsx`（723 行，35 锚点）**——远程控制桥（claude.ai 手机/网页端）。会话级保险丝：连续 3 次 init 失败后本会话不再尝试——Datadog 2026-03-08 最卡的客户端一天打 2,879 个 401，占该路由 401 总量的 17%；system/init 里 tools/mcpClients/plugins 三个字段打码（MCP 前缀泄漏集成清单、插件路径泄漏用户名和项目结构、CCR v2 会把消息持久化进 Spanner）；权限模式设置的 policy guards 必须排在 transitionPermissionMode 之前——后者内部的 auto-gate 是带 setAutoModeActive(true) 副作用的防御性 throw，逃逸即 3-way invariant 违反 + 服务端杀 WS。
+5. **`useRemoteSession.ts`（605 行，33 锚点）**——REPL 接远端 CCR 会话。回声过滤用有界环形（50）而不是 delete-on-match：同一个 POST 会被服务器广播 + worker 写路径回声两次；超时清除必须排在回声过滤之前——自己 POST 的回声就是慢速 agent 的心跳；清 in-progress tool_use ID 必须读原始 sdkMessage（非 viewerOnly 模式下转换后是 ignored，5.2x RSS 斜率的来源）；viewerOnly 模式的转换选项——BriefTool 的 tool_use 块渲染为空，内容全在 tool_result。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 14 批生效）；check-fidelity 一次通过（503 文件 0 失败，useVoiceIntegration/useReplBridge 的 sourcemap 按惯例 OK* 省略）；check-links 810+95 全 0 失效。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 13/104）。`src/` 还剩 1,404 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 18/104）。`src/` 还剩 1,399 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 13**，toolPermission 全清 + 输入补全八件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 75 份（12,431 行：useVoice 1,144 / useInboxPoller 969 / useReplBridge 723 / useVirtualScroll 721 / useVoiceIntegration 677 / useRemoteSession 605 / useDiffInIDE 379 / useSearchInput 364 / useSwarmPermissionPoller 330 / useManagePlugins 304 / useCancelRequest 276 等）+ notifs 16 份（1,355 行，通知类） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 18**，toolPermission 5 + 输入补全八件套 + 通信远程五件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 70 份（12,431-4,118=8,313 行：useVirtualScroll 721 / useDiffInIDE 379 / useSearchInput 364 / useSwarmPermissionPoller 330 / useManagePlugins 304 / useCancelRequest 276 / useBackgroundTaskNavigation 251 等）+ notifs 16 份（1,355 行，通知类） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,404 份没动（29.2% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,399 份没动（30% 行数）。
 
 ---
 
