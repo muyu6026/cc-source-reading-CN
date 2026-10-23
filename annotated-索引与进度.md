@@ -986,19 +986,40 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 `internalLogging.ts` 是这批里的异类：三个导出全部以 `process.env.USER_TYPE !== 'ant'` 开头，开源构建里等于死代码。但它留在 bundle 里，说明这层门是**运行时判断而非编译期删除**。
 
+### 队友 spawn 共享模块 + git 埋点（`shared/` 2/2 全清，tools 到 153/184）
+
+`spawnMultiAgent.ts`（1,093 行）+ `gitOperationTracking.ts`（277 行），共 2 文件 1,370 行 → 批注版 1,436 行、66 处锚点。这两个文件都不属于任何具体工具：前者是「造一个队友」的完整逻辑（TeammateTool 抽出来给 AgentTool 复用），后者是跨 shell 的 git 操作埋点（Bash 和 PowerShell 共用）。
+
+| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
+| --- | --- | --- | --- | --- |
+| [`spawnMultiAgent.ts`](annotated/src/tools/shared/spawnMultiAgent.ts) | 1,093 | 1,135 | 42 | 三条 spawn 路径、身份走 CLI 参数、不传父对话 |
+| [`gitOperationTracking.ts`](annotated/src/tools/shared/gitOperationTracking.ts) | 277 | 301 | 24 | 容忍 git 全局选项的正则、push 进度在 stderr、curl 建 PR 三条件 |
+
+七个值得记的点：
+
+1. **三条 spawn 路径一个路由器**。`handleSpawn` 先看 `isInProcessEnabled()`（进程内），否则预探测 pane 后端（tmux/iTerm2 split-pane），探测失败且 auto 模式才静默回退进程内——用户显式配了 `teammateMode: 'tmux'` 就让错误抛出去看安装指引。`markInProcessFallback()` 把回落写回状态，banner 不再显示错误的 tmux attach 命令。
+2. **spawn 命令不带 prompt**。队友二进制起来后，首条指令经 mailbox 投递（`writeToMailbox` from TEAM_LEAD_NAME），inbox poller 捡起来当第一轮提交——进程内队友则相反，prompt 直接由 `startInProcessTeammate` 给，双发会产生两条欢迎语（注释明说 Do NOT）。
+3. **清空 messages 是全文件最重要的注释**。传给队友的 toolUseContext 刻意 `messages: []`：父对话会钉住整个会话历史，`/clear` 和 auto-compact 都救不回来；队友自己经 inProcessRunner 的 allMessages 建历史。
+4. **身份四件套走 CLI 参数而非环境变量**。`--agent-id/--agent-name/--team-name/--agent-color`（注释明说 replaces CLAUDE_CODE_* env vars）；`sanitizeAgentName` 防 `@`——agentId 格式是 name@teamName；`formatAgentId` 确定性生成，同名同队幂等。
+5. **权限继承的安全优先级**。`buildInheritedCliFlags` 里 `plan_mode_required` 压过 `bypassPermissions`：plan 队友天生不继承跳过权限的 flag。auto 模式反而要传给队友——让它的分类器同样自动放行。
+6. **git 埋点的正则容忍真实世界的脏命令**。`gitCmdRe` 容忍 `git -c commit.gpgsign=false commit`（签名失败后重试的形态）；push 的 ref 更新写 **stderr**，所以检测函数必须收 stdout+stderr 拼接串；merge/rebase 要命令 + 输出双重确认（`git merge --abort` 不算合并）。
+7. **埋点失败不能拖垮主流程**。`getCommitCounter()?.add(1)` 可选链——计数器没初始化就静默跳过；`trackGitOperations` 第一道门是 exitCode !== 0 直接返回。建 PR 后关联会话用双层动态 import 规避循环依赖，sessionId 过模板字面量类型断言（UUID 形态才链）。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 9 批生效）；一处 FAIL——`gitOperationTracking.ts` 文件级批注锚在第 4 行，那是 9 行文档块注释的中部续行（spawnMultiAgent 的块正好 4 行收尾所以那边自动外移成功，两边块长不同），中文被塞进块内，挪到 `*/` 行后过验；spawnMultiAgent 一处提示（before 落在块注释结尾行、自动前移到块前）为人眼确认通顺。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已做 151/184。`src/` 还剩 1,450 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已做 153/184。`src/` 还剩 1,448 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 151 / 76% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 153 / 79% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半。只剩 BashTool（14 份 / 5,917 行）和 AgentTool（17 份 / 4,889 行）两个大目录 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,450 份没动（26% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,448 份没动（26% 行数）。
 
 ---
 
