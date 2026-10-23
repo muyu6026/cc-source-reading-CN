@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (18, 'after', r'''文件级 NOTE：excludedCommands 是**用户便利功能，不是安全边界**。能绕过它不是安全 bug——沙箱权限系统（会弹窗问用户）才是真正的控制。'''),
+    (21, 'after', r'''containsExcludedCommand 两级检查：ant 动态配置（GrowthBook 远程下发的禁用命令）+ 用户 settings 配置。'''),
+    (23, 'after', r'''ant 用户的禁用命令从 GrowthBook 特性 tengu_sandbox_disabled_commands 动态取——可以在不发版的情况下全局拉黑某个命令。'''),
+    (37, 'after', r'''动态配置解析失败时静默跳过（catch 里不抛）——渲染工具消息路径不能因为配置格式错误而崩。'''),
+    (45, 'after', r'''注释说明了为什么吞异常：命令解析失败（畸形 bash）时当作「未排除」，交给后续校验处理，防止渲染路径崩溃。'''),
+    (52, 'after', r'''用户配置从 settings.sandbox.excludedCommands 取。'''),
+    (60, 'after', r'''复合命令必须拆开逐段匹配：`docker ps && curl evil.com` 不能因为第一段命中排除模式就整条逃出沙箱。'''),
+    (64, 'after', r'''拆命令失败退化成「整条当一个子命令」——fail-open 到后续检查。'''),
+    (73, 'after', r'''env 前缀和 wrapper 也要剥掉再匹配：`FOO=bar bazel ...` 和 `timeout 30 bazel ...` 都要能命中 `bazel:*` 模式。注释同时点明 && 拆分已经覆盖了 `export FOO=bar && bazel` 的形态，BINARY_HIJACK_VARS 在这里只是启发式。'''),
+    (78, 'after', r'''不动点迭代：反复应用「剥 env」和「剥 wrapper」直到没有新候选——处理 `timeout 300 FOO=bar bazel run` 这种交替嵌套，单趟组合会漏。与 filterRulesByContentsMatchingInput 同一思路。'''),
+    (82, 'after', r'''candidates + seen 的工作集算法：每轮处理上一轮新增的候选，直到稳定。'''),
+    (103, 'after', r'''三种规则类型逐候选匹配：prefix（前缀 + 词边界）、exact（全等）、wildcard（通配符）。'''),
+    (130, 'after', r'''shouldUseSandbox 是总决策：沙箱没启用 → 不进沙箱；显式禁用且策略允许 → 不进；无命令 → 不进；命中排除命令 → 不进；其余进。'''),
+    (135, 'after', r'''dangerouslyDisableSandbox 要与 areUnsandboxedCommandsAllowed 策略**同时**满足才放行——用户单方面请求不能突破策略（对应 prompt.ts 里「策略禁用时任何情况都必须沙箱内运行」）。'''),
+]

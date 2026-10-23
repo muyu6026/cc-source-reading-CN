@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (18, 'after', r'''CommandIdentityCheckers 是注入的两个身份判定函数（cd/git）——从 bashPermissions.ts 传进来，避免循环依赖。'''),
+    (23, 'after', r'''segmentedCommandPermissionResult 处理管道分段命令的权限聚合：每段单独过完整权限系统，再按 deny > ask > allow 汇总。'''),
+    (31, 'after', r'''一条命令里多个 cd → ask（「一次说清」原则：连串目录切换人容易看漏）。'''),
+    (49, 'after', r'''跨管道段的 cd+git 检测。`cd sub && echo | git status` 每段单独看都不触发 cd+git 检查（bashPermissions.ts 里的检查只在一个复合命令内生效），但攻击成立：cd 进恶意目录，git 从管道另一端执行。每段还可能自己是复合命令，所以先拆子命令再扫。'''),
+    (84, 'after', r'''segmentResults 用 Map 缓存每段结果——同一段可能被多个检查引用，且最终 decisionReason 要把全部结果带上。'''),
+    (98, 'after', r'''先全部评估完再找 deny：不能遇到第一个 deny 就返回，decisionReason 需要完整的 subcommandResults。'''),
+    (111, 'after', r'''deny 的 decisionReason 类型是 subcommandResults——把每段的判定依据全带給用户/日志。'''),
+    (118, 'after', r'''全 allow 才整体 allow；任何一段 ask 就整体 ask。'''),
+    (133, 'after', r'''建议从各段收集：ask 段的 suggestions 汇总到顶层，用户一次批准全部受益。'''),
+    (158, 'after', r'''buildSegmentWithoutRedirections：剥掉输出重定向再送去权限检查——否则 `echo x > foo.txt` 的 foo.txt 会被当成命令名。ParsedCommand 保留原始引号。'''),
+    (166, 'after', r'''没有 > 就跳过解析的快路径。'''),
+    (176, 'after', r'''checkCommandOperatorPermissions 优先用预解析的 AST root（上游已 tree-sitter 解析过），没有才现解析。PARSE_ABORTED 是解析超限的哨兵，与 null 区分。'''),
+    (204, 'after', r'''bashToolCheckCommandOperatorPermissions 两步：① 危险复合命令（子shell/命令组）→ ask 且不给建议（这种结构给规则也放不了）；② 有管道 → 分段处理。'''),
+    (216, 'after', r'''子shell (...) 和命令组 {...} 不可静态拆分，直接 ask。消息优先用 bashCommandIsSafeAsync 的具体原因。'''),
+    (242, 'after', r'''管道检测用 ParsedCommand.getPipeSegments（保留引号语义）。'''),
+    (245, 'after', r'''单段（无管道）直接 passthrough，交给常规流程。'''),
+]

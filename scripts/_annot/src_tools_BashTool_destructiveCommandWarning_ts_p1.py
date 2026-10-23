@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'after', r'''破坏性命令警告表。**纯展示**：只往权限弹窗里加一行提示，不影响权限判定和自动放行——判定由 pathValidation/bashSecurity 等负责。'''),
+    (12, 'after', r'''DESTRUCTIVE_PATTERNS 三组：git 数据丢失、git 安全绕过、文件删除、数据库、基础设施。'''),
+    (14, 'after', r'''git reset --hard：可能丢弃未提交改动。'''),
+    (19, 'after', r'''git push --force / --force-with-lease / -f：[^;&|\n]* 把匹配限制在同一条命令内（不跨管道/分号/换行）。'''),
+    (23, 'after', r'''git clean -f 的负向前查：带 -n/--dry-run 的 clean 是演习不破坏，不算。'''),
+    (28, 'after', r'''git checkout . / git restore .：丢弃全部工作区改动（root 形式，句点后必须是命令结尾或分隔符）。'''),
+    (36, 'after', r'''git stash drop/clear：暂存记录永久删除。'''),
+    (40, 'after', r'''git branch -D：强制删分支（未合并的提交会丢）。-D 后面必须跟空白（防止误伤 -DD 之类）。'''),
+    (46, 'after', r'''安全绕过组：--no-verify 跳过 hook；--amend 重写最后一条 commit。'''),
+    (55, 'after', r'''rm 组注释：危险路径的删除已由 checkDangerousRemovalPaths 管，这里只做「递归/强制」特征提示。两个正则分别覆盖 -rf 和 -fr 的排列。'''),
+    (61, 'after', r'''纯 -r（无 -f）也提示——递归删除本身就是大动作。'''),
+    (71, 'after', r'''SQL：DROP/TRUNCATE TABLE|DATABASE|SCHEMA；DELETE FROM 表名后跟结束符（防误伤 "DELETE FROM users_backup" 之类子串匹配——虽然 \w+ 已经兜了一层）。'''),
+    (80, 'after', r'''基础设施：kubectl delete、terraform destroy。'''),
+    (91, 'after', r'''getDestructiveCommandWarning 返回第一条命中的警告（顺序即优先级）。'''),
+]

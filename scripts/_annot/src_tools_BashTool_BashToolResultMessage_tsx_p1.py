@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (16, 'after', r'''「Shell cwd was reset to <path>」警告从 stderr 里单独抠出来高亮显示，不当错误输出。正则要匹配行首或换行后的位置。'''),
+    (20, 'after', r'''extractSandboxViolations：<sandbox_violations> 标签段从 stderr 剥离（标签内容在 UI 层另有呈现，不混在错误流里）。'''),
+    (27, 'after', r'''sandbox_violations 是非贪婪匹配——一段 stderr 里可能有多组标签。'''),
+    (41, 'after', r'''extractCwdResetWarning：把 cwd 重置警告从 stderr 摘出来，返回「干净 stderr + 警告」两件套。'''),
+    (57, 'after', r'''replace 用同一个正则——整行（含前面的换行）一起替换掉，不留下空行。'''),
+    (66, 'after', r'''BashToolResultMessage 是 React Compiler 编译后的产物（_c(34) 缓存槽 + t0/t1 中间变量 + bb0 标签块），源码逻辑要透过编译形态看。'''),
+    (90, 'after', r'''两个提取串行执行：先剥 sandbox violations，再剥 cwd 警告。'''),
+    (100, 'after', r'''isImage 早退：图片输出不显示 stdout 文本，只显示占位提示 [Image data detected and sent to Claude]。'''),
+    (111, 'after', r'''正常路径：stdout / stderr 各自一个 OutputLine（stderr 带 isError 样式）；空则不渲染。'''),
+    (147, 'after', r'''cwd 重置警告用 dimColor 单独一行显示在输出区之后。'''),
+    (155, 'after', r'''「无输出」的三级文案：后台任务显示 Running in the background + ↓ manage 快捷键提示；其次 returnCodeInterpretation（如「exit 0 但无输出」的解释）；最后 noOutputExpected 时 Done、否则 (No output)。'''),
+    (168, 'after', r'''timeoutMs 存在时挂 ShellTimeDisplay 显示耗时。'''),
+    (176, 'after', r'''最终组装：Box column 里依次排 stdout、stderr、cwd 警告、无输出提示、耗时。'''),
+]
