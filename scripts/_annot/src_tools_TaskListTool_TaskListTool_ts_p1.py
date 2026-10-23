@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (13, 'after', r'''空 strictObject：列任务不需要任何参数，全部任务一次给全。'''),
+    (28, 'after', r'''输出是摘要形态：没有 description——那是 TaskGet 的活，列表只负责「有什么、谁在做、被什么堵」。'''),
+    (31, 'after', r'''Output 与 outputSchema 严格同构。'''),
+    (52, 'after', r'''shouldDefer: true。'''),
+    (55, 'after', r'''isTodoV2Enabled() 门控，四件套统一开关。'''),
+    (61, 'after', r'''isReadOnly: true —— 纯读。'''),
+    (63, 'after', r'''renderToolUseMessage 返回 null，同样只在任务面板可见。'''),
+    (70, 'after', r'''metadata._internal 过滤：teammate 注册的后台任务等系统内部条目不混进用户可见列表。'''),
+    (75, 'after', r'''resolvedTaskIds 预计算 completed 集合——O(n) 建索引，避免下面每条任务再扫一遍全表。'''),
+    (83, 'after', r'''blockedBy 过滤掉已完成项：「被已完成任务堵住」不是堵，显示出来只会误导模型去催一个早已完事的任务。'''),
+    (89, 'after', r'''返回加工后的 tasks 数组。'''),
+    (98, 'after', r'''空列表文案 'No tasks found'——不是错误，正常 tool_result。'''),
+    (108, 'after', r'''单行紧凑格式：`#id [status] subject (owner) [blocked by ...]`，owner 和 blocked 按需追加。'''),
+]

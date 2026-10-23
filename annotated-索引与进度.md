@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已做 135/184。`src/` 还剩 1,466 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已做 151/184。`src/` 还剩 1,450 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 135 / 74% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 151 / 76% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,466 份没动（25% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,450 份没动（26% 行数）。
 
 ---
 
@@ -1385,6 +1385,41 @@ ConfigTool（5 份）、TaskOutputTool（2 份）、TaskUpdateTool（3 份）、
 7. **HTTP 状态码是数据不是异常**——RemoteTriggerTool 用 validateStatus: () => true 让 4xx/5xx 一律放行，连同响应体原样交给模型解读；axios 默认抛异常会把「API 说你不配」变成「工具崩了」，模型失去自救信息。
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 7 批生效）；RemoteTriggerTool/prompt.ts 一处 FAIL——锚点落在跨行赋值中间行（`export const DESCRIPTION =` 与字符串字面量分居两行），批注把语句劈开，挪到赋值结束行后过验；8 处 `⟳` 外移均为人眼确认通顺（prompt 模板尾部分区摘要自带定位词）。
+
+### 任务管理四件套 + 杂项五份（八个目录 16/16 全清，tools 到 151/184）
+
+TaskCreate / TaskGet / TaskList / TaskStop 四个目录 12 份，外加 SyntheticOutputTool、TestingPermissionTool、根目录 utils.ts、SleepTool/prompt.ts，共 16 文件 988 行 → 批注版 1,116 行、126 处锚点。这批把「任务系统」的模型侧闭合：建、查、列、停四件事加一个测试钉子，`src/tools/` 只剩 BashTool（14 份）、AgentTool（17 份）、shared（2 份）三个大目录。
+
+| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
+| --- | --- | --- | --- | --- |
+| [`TaskCreateTool.ts`](annotated/src/tools/TaskCreateTool/TaskCreateTool.ts) | 138 | 156 | 18 | 先写后验 + 钩子拦截回滚、任意 metadata |
+| [`prompt.ts`](annotated/src/tools/TaskCreateTool/prompt.ts) | 56 | 61 | 5 | 队友模式两段插话、先 TaskList 再建防重复 |
+| [`constants.ts`](annotated/src/tools/TaskCreateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TaskGetTool.ts`](annotated/src/tools/TaskGetTool/TaskGetTool.ts) | 128 | 142 | 14 | 任务不存在回 null 不报错、六字段全量 |
+| [`prompt.ts`](annotated/src/tools/TaskGetTool/prompt.ts) | 24 | 29 | 5 | 动手前先查 blockedBy |
+| [`constants.ts`](annotated/src/tools/TaskGetTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TaskListTool.ts`](annotated/src/tools/TaskListTool/TaskListTool.ts) | 116 | 129 | 13 | 摘要形态、已完成阻塞项过滤、`_internal` 隐身 |
+| [`prompt.ts`](annotated/src/tools/TaskListTool/prompt.ts) | 49 | 55 | 6 | 按 ID 从小到大认领、三元两分支同文案的残留 |
+| [`constants.ts`](annotated/src/tools/TaskListTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TaskStopTool.ts`](annotated/src/tools/TaskStopTool/TaskStopTool.ts) | 131 | 146 | 15 | KillShell 别名兼容、errorCode 1/3 分工、validateInput 全过才放行 |
+| [`UI.tsx`](annotated/src/tools/TaskStopTool/UI.tsx) | 41 | 50 | 8 | 双重截断、恒假的 USER_TYPE 判断 |
+| [`prompt.ts`](annotated/src/tools/TaskStopTool/prompt.ts) | 8 | 10 | 2 | 名字与 DESCRIPTION 同文件导出的异类布局 |
+| [`SyntheticOutputTool.ts`](annotated/src/tools/SyntheticOutputTool/SyntheticOutputTool.ts) | 163 | 182 | 19 | WeakMap 身份缓存、Ajv 先验 schema 再 compile、双文案安全异常 |
+| [`TestingPermissionTool.tsx`](annotated/src/tools/testing/TestingPermissionTool.tsx) | 74 | 82 | 7 | 恒 ask 的测试钉子、恒假的 isEnabled |
+| [`utils.ts`](annotated/src/tools/utils.ts) | 40 | 46 | 6 | sourceToolUseID 打标签防「运行中」重复渲染 |
+| [`SleepTool/prompt.ts`](annotated/src/tools/SleepTool/prompt.ts) | 17 | 22 | 5 | TICK_TAG 插值、API 调用代价写进 prompt |
+
+七个值得记的点：
+
+1. **四件套是同一骨架的四次实例化**。lazySchema + buildTool + shouldDefer + isConcurrencySafe 完全一致，差异只在 call 里干什么。isEnabled 全部挂在 isTodoV2Enabled() 上——Todo v2 没开时整套一起隐身，老会话不受影响。读一个就懂全部四个，这也是「框架把重复部分吃掉」的直观样本。
+2. **Create 是「先写后验」的标准范本**。createTask 落盘 → 钩子逐个 yield → 有 blockingError 就 deleteTask 回滚再抛。补偿动作紧贴写入点，不在存储里留半条任务；错误信息合并成一条，模型一次看到全部拦截理由。
+3. **「不存在」与「状态不对」是两种错误**。TaskStopTool 的 validateInput 用 errorCode 分开计分：缺参/不存在是 1，存在但不在 running 是 3。调用方（和遥测）能区分「打错 ID」与「停一个已停的」——混成一个码，日志里两类事永远分不开。
+4. **TaskList 的两处过滤是「别让模型看见噪音」**。metadata._internal 的系统任务不进列表；blockedBy 里已完成的项先剔掉。「被已完成任务堵住」不是堵，显示出来只会诱导模型去催一个早已完事的任务。
+5. **StructuredOutput 的双层结构**。模板版工具（call 原样回传、checkPermissions 恒 allow）+ 工厂版（Ajv 编译进闭包、校验不过抛 TelemetrySafeError）。工厂用 WeakMap 按 schema 对象身份缓存：工作流脚本 80 次调用只编译 1 次，110ms → 4ms；success 和 error 都进缓存，坏 schema 不会每次重复编译。
+6. **两处恒假条件是泄漏构建的「环境替换事故」标本**。TaskStopTool/UI.tsx 的 `"external" === 'ant'` 与 TestingPermissionTool 的 `"production" === 'test'`——process.env 在打包时被替换成字面量，与比较目标永远不相等，分支被砌死。TaskStop 那处影响仅是「ant 用户不渲染」失效；TestingPermission 那处更微妙：isEnabled 恒 false，工具在开源构建里根本不会注册，测试钉子只在原始构建里有效。
+7. **SleepTool 把经济账写进 prompt**。每次唤醒花一次 API 调用、缓存 5 分钟过期——这是少数「让模型自己看着办」的取舍说明，不写的话模型会睡过头或者睡太碎。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 8 批生效）；一处 FAIL——SyntheticOutputTool.ts 的工厂函数说明锚在 `*/` 行上，`after` 落在块注释结尾行不在自动外移规则内（只认 `/**` 开头行），中文被塞进 `/* */` 内部，挪到函数签名结束行后过验；prompt 模板内部锚点照例外移到段尾，均为人眼确认通顺。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 

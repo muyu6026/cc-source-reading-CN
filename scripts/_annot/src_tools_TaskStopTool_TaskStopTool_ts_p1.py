@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (8, 'after', r'''注意 DESCRIPTION 与 TASK_STOP_TOOL_NAME 都从 prompt.ts 导出——与另外三件套（constants.ts 管名字）的布局不同，这里是历史遗留的分工。'''),
+    (16, 'after', r'''shell_id 是已废弃 KillShell 的兼容参数：老 transcript 回放和 SDK 用户还在传它。'''),
+    (18, 'after', r'''两个参数都可选、语义等价——「至少给一个」的校验放在 validateInput 里做，schema 层不设 required。'''),
+    (34, 'after', r'''输出四字段：message 给人看，task_id/task_type 给程序用，command 记录停掉的是什么。'''),
+    (44, 'after', r'''aliases: ['KillShell'] —— 工具曾用名。老会话的 transcript 里存的是 KillShell，回放时按别名匹配才不会断档。'''),
+    (46, 'after', r'''userFacingName 对 ant 内部用户返回空串——同一把工具，对外显示 'Stop Task'。'''),
+    (59, 'after', r'''分类器输入兜底链 task_id ?? shell_id ?? ''：兼容期两条入口都要过分类器。'''),
+    (68, 'after', r'''一个 ID 都没给：errorCode 1（参数缺失）。'''),
+    (79, 'after', r'''ID 不存在也是 errorCode 1——validateInput 只查 AppState 内存表，不碰存储。'''),
+    (87, 'after', r'''存在但不在 running：errorCode 3。错误码把「不存在」和「状态不对」分开，调用方能区分处理。'''),
+    (90, 'after', r'''三项校验全过才放行——这个工具杀掉的是真实后台进程，宁可错杀验证不可错放。'''),
+    (103, 'after', r'''tool_result 用 jsonStringify 整体序列化 output，不挑字段——resume 回放时靠这个还原完整结构。'''),
+    (106, 'after', r'''两个 render 函数直接从 UI.tsx 导入，工具文件不碰渲染细节。'''),
+    (120, 'after', r'''stopTask 是真正干活的（在 tasks/stopTask.ts）： abortController 终止 + 任务表状态更新都在那里。'''),
+    (129, 'after', r'''返回四件套与 outputSchema 对齐；message 里带上 command，用户能看到「停掉的到底是哪条命令」。'''),
+]

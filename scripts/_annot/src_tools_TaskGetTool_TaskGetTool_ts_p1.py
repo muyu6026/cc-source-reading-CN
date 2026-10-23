@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (11, 'after', r'''TaskGet 是任务系统的「读单条」入口：输入只有 taskId，输出把任务的完整字段摊开。'''),
+    (15, 'after', r'''strictObject 只收一个 taskId——刻意不做「按 subject 模糊查」，那应该是 TaskList 的职责。'''),
+    (31, 'after', r'''task 可空：任务不存在时返回 task: null 而不是抛错，让模型自己决定下一步（重建 or 报错）。'''),
+    (36, 'after', r'''Output 与 outputSchema 严格同构，z.infer 推导，避免两处定义漂移。'''),
+    (57, 'after', r'''shouldDefer: true —— 读操作更没理由阻塞主循环。'''),
+    (60, 'after', r'''同样挂在 isTodoV2Enabled() 上，与 TaskCreate 同开同关。'''),
+    (64, 'after', r'''isReadOnly: true —— 纯读，权限系统直接放行，不进分类器。'''),
+    (69, 'after', r'''分类器输入是 taskId：一次「看任务」调用没有任何副作用可判。'''),
+    (76, 'after', r'''getTask(taskListId, taskId)：taskListId 从会话级存储取，模型感知不到「列表」这个概念。'''),
+    (83, 'after', r'''找不到任务走 null 分支——注意这里没有 is_error，tool_result 正常返回，由文案层说明情况。'''),
+    (97, 'after', r'''命中时六个字段全量返回：description 是重头，status/blocks/blockedBy 供依赖判断。'''),
+    (106, 'after', r''''Task not found' 文案层翻 null：给模型的是一句人话，不是空 content。'''),
+    (113, 'after', r'''结果渲染成三行固定格式：标题 / 状态 / 描述。'''),
+    (120, 'after', r'''Blocked by / Blocks 两行只在非空时追加——空依赖不占行，保持输出紧凑。'''),
+]
