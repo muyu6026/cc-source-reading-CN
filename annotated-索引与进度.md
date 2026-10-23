@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（77/184）。`src/` 还剩 1,524 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已开工（88/184）。`src/` 还剩 1,513 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 77 / 60% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 88 / 62% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,524 份没动（24% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,513 份没动（24% 行数）。
 
 ---
 
@@ -1253,6 +1253,34 @@ PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），
 7. **危险删除硬 deny 在主循环和嵌套循环各查一遍**——if ($true) { Remove-Item / } 走 nestedCommands，少了第二轮就把 deny 降级成 ask；且先查用户原样输入的路径再查 realpath 后的（realpathSync 会把 / 变成 C:\、把 /var 变成 /private/var，恰好破坏字符串比较）。
 
 另有两处流程账：readOnlyValidation 有 4 个锚点原本落在英文注释段中部，被注入脚本自动外移到段边界（358→355、389→386、661→658、1441→1444）；另有一条批注因 CJK 占比 11.7% 低于校验脚本 15% 计数门限被算成普通注释，改写文案后对齐（39/39）。
+
+### 计划模式与待办三件套（三个目录 11/11 全清）
+
+EnterPlanModeTool（4 份）、ExitPlanModeTool（4 份）、TodoWriteTool（3 份），共 11 文件 1,236 行 → 批注版 1,303 行、65 处锚点。计划模式是「进—出—跟踪」三段式：EnterPlanMode 开门、ExitPlanModeV2 收口、TodoWrite 在门里跟踪进度。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`EnterPlanModeTool.ts`](annotated/src/tools/EnterPlanModeTool/EnterPlanModeTool.ts) | 126 | 136 | 10 | 空参数 schema、agent 上下文禁用、权限上下文两连改 |
+| [`prompt.ts`](annotated/src/tools/EnterPlanModeTool/prompt.ts) | 170 | 174 | 4 | 两套人格话术按 USER_TYPE 分流 |
+| [`UI.tsx`](annotated/src/tools/EnterPlanModeTool/UI.tsx) | 33 | 38 | 4 | 进入/结果/拒绝三消息 |
+| [`constants.ts`](annotated/src/tools/EnterPlanModeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`ExitPlanModeV2Tool.ts`](annotated/src/tools/ExitPlanModeTool/ExitPlanModeV2Tool.ts) | 493 | 515 | 22 | 出口主流程：编辑回写、mailbox 审批、熔断防御、模式复原 |
+| [`UI.tsx`](annotated/src/tools/ExitPlanModeTool/UI.tsx) | 82 | 89 | 6 | 结果消息三态（空/等队长/已批准） |
+| [`prompt.ts`](annotated/src/tools/ExitPlanModeTool/prompt.ts) | 29 | 31 | 2 | 外部 stub 提示词（剔除 Ant-only 段） |
+| [`constants.ts`](annotated/src/tools/ExitPlanModeTool/constants.ts) | 2 | 4 | 2 | V1/V2 两个导出同值 |
+| [`TodoWriteTool.ts`](annotated/src/tools/TodoWriteTool/TodoWriteTool.ts) | 115 | 126 | 11 | 清单状态机 + 验证提醒 nudge |
+| [`prompt.ts`](annotated/src/tools/TodoWriteTool/prompt.ts) | 184 | 186 | 2 | 用法指南大模板 |
+| [`constants.ts`](annotated/src/tools/TodoWriteTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+
+七个最值得记的点：
+
+1. **计划模式的入口与出口必须成对设防**——--channels 模式下 ExitPlanMode 的审批对话框没人看得见（用户在 Telegram/Discord），EnterPlanMode 的 isEnabled 于是同一把闸刀整体禁用。注释原话「plan mode isn't a trap the model can enter but never leave」：只禁一边，模型就会进得去出不来。这是功能开关设计里少见的「对称性论证」。
+2. **ExitPlanMode 是全仓交互姿态最密的工具**——teammate 走 mailbox 等队长审批（异步）、非 teammate 走本地 ask 对话框（同步）、子代理批准后只需回个 ok。同一工具三种交互形态，全靠 isTeammate()/isPlanModeRequired()/agentId 三个查询分流，call() 里没有一处 if-else 是偶然写的。
+3. **CCR web UI 编辑计划的回写链路**——用户在权限对话框里改计划，经 permissionResult.updatedInput 回传；queryHelpers.ts 全量替换 finalInput，不编辑时传 {}，于是窄化判据只能是 typeof plan === string。编辑落盘后 persistFileSnapshotIfRemote 必须再调一次：api.ts 那次快照跑在 normalizeToolInput（权限前），拍到的是旧计划——快照时序是远程协作的隐藏接缝。
+4. **退出计划模式是权限集合的对称复原，不是模式回滚**——恢复 auto 前先问闸门开没开（熔断器开着就降级 default 并通知，否则 ExitPlanMode 成了绕过熔断的侧门）；auto 状态以 isAutoModeActive() 为权威（prePlanMode 中途已过期）；恢复非 auto 时把进计划前剥掉的危险规则还原，恢复 auto 则保持剥离。
+5. **计划全文总是回显进 tool_result**——Ultraplan CCR 流程的 extractApprovedPlan() 要解析 tool_result 才能把计划喂给本地 CLI；用户编辑过的计划打「edited by user」标签，模型必须知道方案被改过，否则按记忆里的旧版实施。
+6. **TodoWrite 的 allDone 清空是上下文经济学**——全部完成的清单落 state 时置空数组（脚手架不是档案），但 data.newTodos 仍返回完整终态供遥测/UI 用；todoKey 取 agentId ?? sessionId，子代理各持独立清单——多 agent 进度隔离的最小实现。
+7. **verificationNudge 把「防跳步骤」做成结构性机制**——主线程收尾 3+ 项清单且无一项匹配 /verif/i 时，tool_result 追加「必须 spawn 验证 agent，不能靠在总结里列 caveats 自评 PARTIAL」。触发点卡在「最后一项关闭、循环即将退出」的精确时刻——统计上跳步骤就发生在那里。growthbook + 特性双闸门控制，nudge 文案把自评漏洞直接堵死。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
