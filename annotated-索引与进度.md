@@ -1235,19 +1235,37 @@ hooks 根目录行数前十清零（root 49/83）。这一批是「快捷键 / �
 流程账：预检四断言一次通过（50 锚点）、零合并错误（硬规矩连续第 19 批生效）；annotate.py 零 ⟳ 外移（7 处 `/**` 行 after 锚自动挪到块后，落点人眼确认在 import/语句之前，未劈开英文）；check-fidelity 555 文件 0 失败；check-links 0 失效。
 
 
+### 根目录 @提及/队列/队友视图等十件套（第 42 批，10 份 638 行）
+
+hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 / Chrome 扩展 prompt / IDE 自动集成 / 命令队列处理 / 超时通知 / 队友视图自动退出 / 双按检测 / 技能变更 / 占位渲染 / Chrome 扩展通知」类钩子，偏向 IDE 集成与命令队列驱动。hooks 到 80/104（82% 行数）。
+
+1. **`useIdeAtMentioned.ts`（76 行，6 锚点）**——IDE @提及通知。直接往 IDE 的 MCP client 注册 at_mentioned 处理器（不走 React state）；ideClientRef 闭包守卫（旧 client 回调丢弃防误投）；MCP 行号 0-based→UI 1-based 的 +1 对齐；不写 cleanup（MCP client 自管生命周期）。
+2. **`usePromptsFromClaudeInChrome.tsx`（71 行，5 锚点，React Compiler 产物）**——Chrome 扩展 prompt 监听 + 权限模式同步。prompt 通知走 JSON-RPC notifications/message 用 zod 校验；双职责（入队成用户提示 + 把本地模式翻成扩展的 skip_all_permission_checks/ask）。
+3. **`useIDEIntegration.tsx`（70 行，5 锚点，React Compiler 产物）**——IDE 自动集成。props 被编译重命名为 t0；多路触发自动连接（config/flag/终端/SSE 端口/待装扩展/env 真值 + env 非假熔断）；按 URL 前缀区分 ws-ide / sse-ide；委托 initializeIdeIntegration。
+4. **`useQueueProcessor.ts`（68 行，4 锚点）**——统一命令队列出队驱动。优先级 now>next>later；三个触发条件（无 query / 队列非空 / 无本地 JSX UI 阻塞）；两处 useSyncExternalStore（query 守卫 + 队列）绕过 React context 延迟；预订（reservation）所有权移交 handlePromptSubmit 的同步链。
+5. **`useNotifyAfterTimeout.ts`（65 行，4 锚点）**——超时桌面通知。阈值 6s；跳过测试环境 + 要求确实空闲；交互打点已移到 App.tsx 的 processKeysInBatch（避免 stdin 监听抢输入丢字符）；effect 内必须立即重置交互时间（否则渲染后才打点会误触发）。
+6. **`useTeammateViewAutoExit.ts`（63 行，4 锚点）**——队友视图自动退出。只选被查看的那条 task（防任何队友流式更新重渲染）；被查看任务消失要用原始 task 而非 teammate 收窄值（local_agent 收窄成 undefined 会误踢）；killed/failed/error/非运行态触发退出，local_agent 全落空不踢。
+7. **`useDoublePress.ts`（62 行，4 锚点）**——双按检测器。窗口 800ms；返回稳定 useCallback 封装状态机；双按两要件（≤窗口且 timeoutRef 未清）。
+8. **`useSkillsChange.ts`（62 行，4 锚点）**——命令列表保鲜。两类触发：技能文件变更（全量清缓存+重扫磁盘）与 GrowthBook 刷新（只清 memo）；分别订阅 skillChangeDetector 与 onGrowthBookRefresh。
+9. **`renderPlaceholder.ts`（51 行，3 锚点，纯 helper 非 hook）**——占位符渲染。纯函数算出应显示占位串与是否显示；语音录制态只显光标不显文字；反显光标只在输入框+终端都聚焦时出现。
+10. **`useChromeExtensionNotification.tsx`（50 行，4 锚点，含 sourcemap）**——Chrome 扩展通知。--chrome/--no-chrome/默认三态；壳 hook 把 compute 委托给 useStartupNotification 基座；`if (true && ...)` 的 `true &&` 是 feature flag 移除后的恒真残留（值得清理）；扩展未装且非 Homespace 弹安装提示。
+
+流程账：预检四断言一次通过（43 锚点）、零合并错误（硬规矩连续第 20 批生效）；annotate.py 良性 ⟳ 外移 9 处（我的 `after` 锚落在 `//` 注释段首行，自动挪到段尾，落点人眼确认在代码之前，未劈开英文）；首轮 1 FAIL——useDoublePress 锚点 (33,'after') 落在多行表达式 `const isDoublePress =` 首行中间（规矩 7 变体：多行语句首行同性质），挪到 35 后复验 0 失败；check-links 0 失效。
+
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 70/104）。`src/` 还剩 1,347 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 80/104）。`src/` 还剩 1,337 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 70**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 34 份（1,321 行：useIdeAtMentioned 76 / useTeleportResume 已做 / useQueueProcessor 68 / useNotifyAfterTimeout 65 / useTeammateViewAutoExit 63 / useSkillsChange 62 / useDoublePress 62 / usePromptsFromClaudeInChrome 71 / useIDEIntegration 70 等） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 80**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 24 份（683 行：useOfficialMarketplaceNotification 48 / useDeferredHookMessages 46 / useMergedTools 44 / useIdeLogging 41 / useMemoryUsage 39 / useElapsedTime 37 / useMinDisplayTime 35 / useMainLoopModel 34 / useBlink 34 / useUpdateNotification 34 等） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,347 份没动（31.6% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,337 份没动（31.7% 行数）。
 
 ---
 
