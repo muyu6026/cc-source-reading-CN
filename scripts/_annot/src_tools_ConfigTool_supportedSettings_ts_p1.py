@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (15, 'after', r'''SettingConfig 注册表条目：source 决定存哪（global=~/.claude.json / settings=项目 settings.json），type 限 string/boolean，path 默认按点号拆分。'''),
+    (22, 'after', r'''三个钩子位把差异消化在注册表里：validateOnWrite（写前异步校验）/ formatOnRead（读时展示转换）/ appStateKey（写后同步哪个 UI 状态）。'''),
+    (29, 'before', r'''SUPPORTED_SETTINGS 是单一事实源——工具本体的 isSupported、getPath、prompt 生成、UI 全从这张表推导，加配置只改这里。'''),
+    (34, 'after', r'''theme 的候选值随特性变：AUTO_THEME 开时用 THEME_SETTINGS（含 auto），否则 THEME_NAMES——候选集跟着构建特性走。'''),
+    (90, 'after', r'''model 是唯一 source='settings' 且带 appStateKey 的字符串配置（mainLoopModel），另有动态 options 与写前校验两个特权。'''),
+    (95, 'after', r'''getOptions 的 try/catch 兜底：模型列表拉取失败时回落 sonnet/opus/haiku 三件套——prompt 生成不因依赖挂掉而崩。'''),
+    (105, 'after', r'''formatOnRead 把内部 null 翻译成 default：null 在本系统表示「跟随默认」，直接显示 null 会误导模型以为要设成空。'''),
+    (113, 'after', r'''permissions.defaultMode 用点号 key + 无 path：getPath 按 split('.') 拆成两层。候选值里 auto 模式只在 TRANSCRIPT_CLASSIFIER 特性开时才出现。'''),
+    (134, 'after', r'''ant 内部账号专属的 classifierPermissionsEnabled——USER_TYPE 环境变量决定注册项，普通用户的配置表里根本不存在这个 key。'''),
+    (144, 'after', r'''条件展开注册：VOICE_MODE / BRIDGE_MODE / KAIROS 三个特性各带一批配置项，特性不开时连 key 都不注册——isSupported 天然拒绝。'''),
+    (188, 'after', r'''isSupported 就是一句 key in——注册表之外的 key 一律未知，工具本体靠它把住第一道闸。'''),
+    (200, 'after', r'''getOptionsForSetting 优先静态 options，回退动态 getOptions()——每调一次真算一次（model 候选可能随账号状态变）。'''),
+    (208, 'after', r'''getPath：无显式 path 时按点号拆分。permissions.defaultMode 这类嵌套配置全靠这条约定工作。'''),
+]

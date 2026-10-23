@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已做 122/184。`src/` 还剩 1,479 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已做 135/184。`src/` 还剩 1,466 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 122 / 70% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 135 / 74% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,479 份没动（25% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,466 份没动（25% 行数）。
 
 ---
 
@@ -1353,6 +1353,38 @@ EnterWorktreeTool（4 份）、ExitWorktreeTool（4 份）、ListMcpResourcesToo
 8. **TeamDelete 的失败是数据不是异常**——有活跃队员时返回 success: false + 队员名单 + 「先 requestShutdown」的指路，而不是抛错；模型读到结构化结果才知道下一步干什么，读到异常只会以为工具坏了。UI 侧恒返回 null：批量 shutdown 的汇总消息已经覆盖了「队散了」，再弹一条工具结果行是噪音。入站 inbox 无论有没有队都清——不收尾的队列会在下一个队的上下文里幽灵送达。
 
 流程账：本批 22 个数据文件零合并错误（硬规矩连续第 6 批生效）；预检三断言一次通过；`⟳` 外移 4 处均为模板起始行（位号不变）与英文注释段中部（TeamCreateTool.ts 182→183，保护机制）；ReadMcpResourceTool.ts 两条批注因英文专名占比过高（3.2% / 14.8%）低于 CJK 15% 计数门限，改写文案后对齐 12/12——这是该门限第二次踩到，写短批注时英文专名别超过约八成。
+
+### 配置 / 任务输出 / 任务更新 / 远程触发（四个目录 13/13 全清）
+
+ConfigTool（5 份）、TaskOutputTool（2 份）、TaskUpdateTool（3 份）、RemoteTriggerTool（3 份），共 13 文件 2,069 行 → 批注版 2,234 行、120 处锚点。这批是 tools 层的「管理面」：配置工具自己也是注册表驱动的，任务三件套把 V1 待办与 V2 任务系统缝在一起，远程触发则是 token 永不落 shell 的 API 代理。
+
+| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
+| --- | --- | --- | --- | --- |
+| [`ConfigTool.ts`](annotated/src/tools/ConfigTool/ConfigTool.ts) | 467 | 490 | 23 | 读 allow / 写 ask、default 撤销覆盖、双存储分叉、遥测类型标记 |
+| [`supportedSettings.ts`](annotated/src/tools/ConfigTool/supportedSettings.ts) | 211 | 224 | 13 | 注册表单一事实源、特性开关条件注册、model 动态候选与兜底 |
+| [`prompt.ts`](annotated/src/tools/ConfigTool/prompt.ts) | 93 | 98 | 5 | prompt 从注册表现算、model 单独成节、kill-switch 期隐藏 |
+| [`UI.tsx`](annotated/src/tools/ConfigTool/UI.tsx) | 38 | 42 | 3 | 读写二分显示、三分支结果渲染 |
+| [`constants.ts`](annotated/src/tools/ConfigTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TaskOutputTool.tsx`](annotated/src/tools/TaskOutputTool/TaskOutputTool.tsx) | 584 | 611 | 26 | 官方弃用、三种任务统一输出、磁盘 symlink 陷阱、轮询等待 |
+| [`constants.ts`](annotated/src/tools/TaskOutputTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TaskUpdateTool.ts`](annotated/src/tools/TaskUpdateTool/TaskUpdateTool.ts) | 406 | 432 | 26 | 字段 diff、hooks 拦完成、mailbox 指派、结构化防跳验证 |
+| [`prompt.ts`](annotated/src/tools/TaskUpdateTool/prompt.ts) | 77 | 83 | 6 | 完成判据、状态机、改前先 TaskGet |
+| [`constants.ts`](annotated/src/tools/TaskUpdateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`RemoteTriggerTool.ts`](annotated/src/tools/RemoteTriggerTool/RemoteTriggerTool.ts) | 161 | 172 | 11 | 五动作 REST 映射、validateStatus 放行、beta 版本戳 |
+| [`UI.tsx`](annotated/src/tools/RemoteTriggerTool/UI.tsx) | 17 | 19 | 2 | 状态码 + 行数，内容不渲染 |
+| [`prompt.ts`](annotated/src/tools/RemoteTriggerTool/prompt.ts) | 15 | 17 | 2 | curl 替身、token 进程内注入 |
+
+七个值得记的点：
+
+1. **「设为默认」的正确实现是「撤销覆盖」**——ConfigTool 的 remoteControlAtStartup 收到 default 时删 key 而非写入字面量，平台感知的默认值重新接管。把特殊值当数据写进去，后面每个读取方都要多认一种字面量。
+2. **写盘后要手动 notifyChange**——settingsChangeDetector 是文件监听驱动，程序内写盘不触发文件事件；语音开关写完不通知，useVoiceEnabled 读到的是旧缓存。「改了存储」与「通知了缓存」是两回事。
+3. **kill-switch 的三层待遇**——编译期 feature 注册、运行期 GrowthBook 复核、prompt 生成期整体隐藏。三层各管一段：注册表里有（旧会话不崩）、实际不可用（不误导模型）、prompt 里看不见（不诱导尝试）。
+4. **磁盘 symlink 陷阱**——本地 agent 的磁盘输出是 symlink 到完整会话 transcript（每轮消息+工具调用全在里面），TaskOutputTool 优先用内存 cleanResult；无脑读磁盘会把几万 token 噪声灌进上下文。
+5. **「任务不存在」不是错误**——TaskUpdateTool 的失败结果不带 is_error：任务列表可能已被清理，这是良性状况。标成错误会触发 StreamingToolExecutor 的兄弟工具连锁取消，一次查询失败炸掉整批并行调用。
+6. **防跳验证的触发点是算出来的**——VERIFICATION_AGENT 特性 + hive_evidence 开关 + 主线程（无 agentId）+ 刚 completed + 全清单 ≥3 项且无 /verif/i 匹配，五条件同时命中才追加 nudge；触发点卡在「最后一项关闭、循环即将退出」的精确时刻，因为统计上跳步骤就发生在那里。
+7. **HTTP 状态码是数据不是异常**——RemoteTriggerTool 用 validateStatus: () => true 让 4xx/5xx 一律放行，连同响应体原样交给模型解读；axios 默认抛异常会把「API 说你不配」变成「工具崩了」，模型失去自救信息。
+
+流程账：预检三断言一次通过、零合并错误（硬规矩连续第 7 批生效）；RemoteTriggerTool/prompt.ts 一处 FAIL——锚点落在跨行赋值中间行（`export const DESCRIPTION =` 与字符串字面量分居两行），批注把语句劈开，挪到赋值结束行后过验；8 处 `⟳` 外移均为人眼确认通顺（prompt 模板尾部分区摘要自带定位词）。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
