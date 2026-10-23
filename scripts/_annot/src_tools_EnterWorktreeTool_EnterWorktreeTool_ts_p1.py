@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (21, 'after', '''UI 渲染函数从同目录 UI.tsx 导入——工具实现与终端展示分离，主文件只留数据流。'''),
+    (23, 'before', '''inputSchema 用 lazySchema 包住（懒加载，避免启动时为所有工具付 schema 构建成本）；name 字段的校验不在 schema 层写字面正则，而是 superRefine 里调 validateWorktreeSlug 抛错转 issue——校验规则单点定义，schema 与运行时报错文案永远一致。'''),
+    (52, 'before', '''EnterWorktreeTool：会话中途创建 git worktree 并整体切进去。与 BashTool 的 cd 不同，这是进程级 chdir + 全局 cwd 状态一起换。'''),
+    (71, 'before', '''shouldDefer: true —— 不进默认工具集，按需延迟加载（见 ToolSearchTool 的六级判定链）。'''),
+    (77, 'before', '''call() 主流程。'''),
+    (79, 'before', '''第一道闸：本会话已经建过 worktree 就拒绝——一个会话同时只在一个 worktree 里，嵌套 worktree 的退出路径会变成迷宫。'''),
+    (84, 'before', '''findCanonicalGitRoot 把当前目录解析回主仓库根：如果用户已经在某个 worktree 里，git worktree add 必须在主仓库执行，否则会建出「worktree 的 worktree」。解析成功且与当前不同就 chdir 过去。'''),
+    (90, 'after', '''slug 三选一：用户给的 name、否则 getPlanSlug()（复用计划文件名）。命名规则在 schema 描述里写明：每段只允许字母数字点下划线连字符、总长 64。'''),
+    (97, 'after', '''setOriginalCwd(getCwd()) 这里存的是 **worktree 路径**而不是进 worktree 前的目录——这是有意的（state.ts getProjectRoot 注释），退出时的语义是「回到创建 worktree 时所在的地方」，与 --worktree 启动路径保持同构。'''),
+    (102, 'after', '''三连清缓存：系统提示词段落、CLAUDE.md 记忆文件、plans 目录 memo——全部依赖 cwd，换了目录不清就会读到旧仓库的内容。'''),
+    (104, 'before', '''tengu_worktree_created 遥测带 mid_session: true，与启动时 --worktree 建的是同事件不同来源，看板能分开统计。'''),
+    (112, 'before', '''返回数据里的 message 同时说给模型和人听：告知 ExitWorktree 可中途离开、会话退出时也会被提示 keep/remove——两条退出路径都交代清楚，模型不会以为卡在里面。'''),
+    (120, 'before', '''mapToolResultToToolResultBlockParam 只把 message 字符串放进 tool_result——路径和分支名已经写在 message 里，再序列化一遍 data 是浪费 context。'''),
+]

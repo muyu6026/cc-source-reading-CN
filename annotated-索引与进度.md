@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已过半（100/184）。`src/` 还剩 1,501 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已做 122/184。`src/` 还剩 1,479 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 100 / 67% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 122 / 70% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,501 份没动（24% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,479 份没动（25% 行数）。
 
 ---
 
@@ -1311,6 +1311,48 @@ SendMessageTool（4 份）、ScheduleCronTool（5 份）、ToolSearchTool（3 �
 6. **「一年内无匹配」是语法合法、日历非法的专属关卡**——2 月 30 日能过表达式解析但永远不触发；这道检查把它拦在创建时（错误码 2），配合 MAX_JOBS=50 上限与 teammate durable 禁令（防悬空 agentId 孤儿），构成创建期的四道预检。
 7. **isDeferredTool 的六级判定链顺序即优先级**——alwaysLoad 退出优先（MCP 靠它整类退出延迟）→ MCP 默认延迟 → ToolSearch 自己永不延迟（递归悖论）→ fork 模式下 Agent 退出（第一轮就要能派子代理）→ Brief/SendUserFile 退出（通信主通道的可见性契约不能让模型先搜一轮）→ 兜底 shouldDefer。每一级都有注释说明「为什么这条必须在这个位置」。
 8. **ToolSearch 返回的不是文本是「工具定义句柄」**——matches 以 tool_reference 块下发，客户端据此把完整 schema 展开进上下文；注释明说 Bedrock/Vertex 可能不支持客户端展开，`as unknown as` 强转正是为跨提供商格式差异兜底。零命中时附带 pending_mcp_servers，把「搜索失败」重框定为「服务器还在连，稍后再试」——模型学会等待而非乱换查询词。
+
+### 隔离与协作六件套：worktree / MCP 资源 / team（六个目录 22/22 全清）
+
+EnterWorktreeTool（4 份）、ExitWorktreeTool（4 份）、ListMcpResourcesTool（3 份）、ReadMcpResourceTool（3 份）、TeamCreateTool（4 份）、TeamDeleteTool（4 份），共 22 文件 1,484 行 → 批注版 1,613 行、128 处锚点。三条主线：worktree 是「换一个目录继续活」，MCP 资源是「服务器手里的数据面」，team 是「多代理协作的户口本」。
+
+| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
+| --- | --- | --- | --- | --- |
+| [`EnterWorktreeTool.ts`](annotated/src/tools/EnterWorktreeTool/EnterWorktreeTool.ts) | 127 | 140 | 13 | 会话级 chdir、解析回主仓库根、三连清 cwd 缓存 |
+| [`prompt.ts`](annotated/src/tools/EnterWorktreeTool/prompt.ts) | 30 | 33 | 3 | 只在用户明说 worktree 时用；hooks 兜非 git 仓库 |
+| [`UI.tsx`](annotated/src/tools/EnterWorktreeTool/UI.tsx) | 20 | 22 | 2 | 分支名加粗、路径置灰 |
+| [`constants.ts`](annotated/src/tools/EnterWorktreeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`ExitWorktreeTool.ts`](annotated/src/tools/ExitWorktreeTool/ExitWorktreeTool.ts) | 329 | 351 | 22 | fail-closed 数账、逆运算边界、errorCode 1/2/3 |
+| [`prompt.ts`](annotated/src/tools/ExitWorktreeTool/prompt.ts) | 32 | 35 | 3 | scope 闸 + no-op 语义 + discard 确认协议 |
+| [`UI.tsx`](annotated/src/tools/ExitWorktreeTool/UI.tsx) | 25 | 27 | 2 | Kept/Removed 标签分支 |
+| [`constants.ts`](annotated/src/tools/ExitWorktreeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`ListMcpResourcesTool.ts`](annotated/src/tools/ListMcpResourcesTool/ListMcpResourcesTool.ts) | 123 | 132 | 9 | LRU 三层缓存策略、单服务器失败不拖垮整体 |
+| [`UI.tsx`](annotated/src/tools/ListMcpResourcesTool/UI.tsx) | 29 | 33 | 4 | eslint 豁免：给人看的 UI 不守 tool_result 规则 |
+| [`prompt.ts`](annotated/src/tools/ListMcpResourcesTool/prompt.ts) | 20 | 24 | 4 | DESCRIPTION + PROMPT + 名字三合一 |
+| [`ReadMcpResourceTool.ts`](annotated/src/tools/ReadMcpResourceTool/ReadMcpResourceTool.ts) | 158 | 170 | 12 | blob 拦截落盘换路径、三步前置检查 |
+| [`UI.tsx`](annotated/src/tools/ReadMcpResourceTool/UI.tsx) | 37 | 43 | 5 | 半截输入返回 null 不渲染 |
+| [`prompt.ts`](annotated/src/tools/ReadMcpResourceTool/prompt.ts) | 16 | 18 | 2 | 双必填参数手册 |
+| [`TeamCreateTool.ts`](annotated/src/tools/TeamCreateTool/TeamCreateTool.ts) | 240 | 260 | 20 | 确定性队长 ID、Team=TaskList、gh-32730 清理登记 |
+| [`prompt.ts`](annotated/src/tools/TeamCreateTool/prompt.ts) | 113 | 116 | 3 | 全仓最长工具提示词：七步协作协议 |
+| [`UI.tsx`](annotated/src/tools/TeamCreateTool/UI.tsx) | 6 | 7 | 1 | 一行 create team 文案 |
+| [`constants.ts`](annotated/src/tools/TeamCreateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`TeamDeleteTool.ts`](annotated/src/tools/TeamDeleteTool/TeamDeleteTool.ts) | 139 | 153 | 14 | 活跃成员挡拆、恒清 inbox、幂等成功 |
+| [`UI.tsx`](annotated/src/tools/TeamDeleteTool/UI.tsx) | 20 | 23 | 3 | 恒返回 null——批量 shutdown 消息已覆盖 |
+| [`prompt.ts`](annotated/src/tools/TeamDeleteTool/prompt.ts) | 16 | 18 | 2 | 先关人再删队的前置条件 |
+| [`constants.ts`](annotated/src/tools/TeamDeleteTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+
+八个最值得记的点：
+
+1. **countWorktreeChanges 的 null 是安全语义不是错误码**——git 命令非零退出、或有工作区却无基线提交（hook 建的 worktree 包着 git）时返回 null，注释原话「callers that use this as a safety gate must treat null as unknown, assume unsafe (fail-closed)」。静悄悄返回 0/0 会让 cleanupWorktree 销毁真实工作——**数不出账就等于有账**，这是删除类工具的标准姿态。
+2. **退出是进入的逆运算，但只逆自己改过的**——restoreSessionToOriginalCwd 逐项对照 EnterWorktreeTool.call() 的改动：setCwd/setOriginalCwd 必改，projectRoot 与 hooks 快照只在「启动时 --worktree 真的设过」时才复原（`projectRootIsWorktree = getProjectRoot() === getOriginalCwd()` 判定）。无条件复原会把项目身份挪到用户随便 cd 过的目录——对称性是有条件的对称。
+3. **worktree 的 scope 闸只认本会话**——getCurrentWorktreeSession() 仅 EnterWorktree（createWorktreeForSession）在本会话跑过才非空；手敲 git worktree add 建的、上个会话建的，一律不碰，在范围外调用是明示「no filesystem changes were made」的 no-op。工具的自知之明：**知道自己管什么，比知道自己会什么更重要**。
+4. **校验与执行之间的账要数两遍**——validateInput 时数一次（安全闸门，决定放不放行），call() 里再数一次（遥测与结果消息，反映最新状态）。两次数出不同值完全可能：中间隔着用户审批对话框。安全决策用旧账（宁可严），呈现用新账（宁可准）。
+5. **MCP 资源的缓存三层各司其职**——fetchResourcesForClient 按服务器名 LRU 缓存且启动预热；onclose 与 resources/list_changed 通知双通道失效，所以不会读到过期清单；ensureConnectedClient 健康时 memoize 命中零成本，掉线后返回新连接让重捞成功。并行捞取时单个服务器失败只 log 不抛——部分结果好过整体失败。
+6. **blob 拦截是 context 卫生的硬线**——base64 原样进 context，一张图烧掉几万 token。ReadMcpResourceTool 解码后把原始字节按 mime 落盘、content 里只留路径和一句说明；保存失败也降级成一条文本消息而不是把 base64 泄进上下文。
+7. **TeamCreate 的三个「不变量」设计**——队长 ID 确定性（formatAgentId(TEAM_LEAD_NAME, teamName)，队友凭队名就能推出地址）；Team = TaskList（建队即建任务目录并重置编号，setLeaderTeamName 是关键一跳，不设它队长写的任务会落进会话目录、与队友按队名找的目录错开）；会话清理登记（gh-32730：没有 registerTeamForSessionCleanup 时忘删的队会把目录永久留在磁盘上）。另有一段「故意的不设置」：不给队长设 CLAUDE_CODE_AGENT_ID——设了 isTeammate() 会对队长返回 true，inbox 轮询跟着错乱。
+8. **TeamDelete 的失败是数据不是异常**——有活跃队员时返回 success: false + 队员名单 + 「先 requestShutdown」的指路，而不是抛错；模型读到结构化结果才知道下一步干什么，读到异常只会以为工具坏了。UI 侧恒返回 null：批量 shutdown 的汇总消息已经覆盖了「队散了」，再弹一条工具结果行是噪音。入站 inbox 无论有没有队都清——不收尾的队列会在下一个队的上下文里幽灵送达。
+
+流程账：本批 22 个数据文件零合并错误（硬规矩连续第 6 批生效）；预检三断言一次通过；`⟳` 外移 4 处均为模板起始行（位号不变）与英文注释段中部（TeamCreateTool.ts 182→183，保护机制）；ReadMcpResourceTool.ts 两条批注因英文专名占比过高（3.2% / 14.8%）低于 CJK 15% 计数门限，改写文案后对齐 12/12——这是该门限第二次踩到，写短批注时英文专名别超过约八成。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 

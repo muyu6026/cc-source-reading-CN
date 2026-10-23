@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (21, 'before', '''inputSchema 是**空的 strictObject**——TeamDelete 不接收任何参数，队名从会话的 teamContext 里取。空 schema 也是 schema：挡住模型瞎传参。'''),
+    (32, 'before', '''TeamDeleteTool：解散团队并清扫目录，与 TeamCreateTool 成对。'''),
+    (46, 'before', '''isEnabled 同样挂在 swarm 特性开关上。'''),
+    (71, 'before', '''call() 主流程。'''),
+    (76, 'before', '''队名来自 AppState.teamContext——不是参数。'''),
+    (80, 'after', '''数活跃成员前先把队长滤掉：队长自己不算「在干活的队员」，否则永远删不掉队。'''),
+    (87, 'after', '''isActive !== false 的判法：undefined（从未标记）算活跃，只有显式 false（跑完回合或崩了）算闲。宁可按活跃挡着，也不错放一个还在跑的队员被清扫。'''),
+    (89, 'before', '''有活跃队员就**返回 success: false 而不抛错**——这是给模型读的结构化结果，附上队员名单并指路 requestShutdown 先 gracefully 关人。抛异常会让模型以为工具坏了；返回数据它才知道下一步该干什么。'''),
+    (101, 'before', '''cleanupTeamDirectories：删团队目录与任务目录（具体见 utils/swarm/teamHelpers）。'''),
+    (103, 'after', '''unregisterTeamForSessionCleanup：从会话清理清单里划掉——已经手动删过了，gracefulShutdown 时不要再删第二次（重复删会报 ENOENT 噪音）。'''),
+    (105, 'after', '''颜色分配表和队长队名一起清——新队从零开始，不继承上一队的颜色映射和任务目录指向。'''),
+    (111, 'before', '''tengu_team_deleted 遥测，team_name 同样过 AnalyticsMetadata 标记类型。'''),
+    (118, 'before', '''无论有没有队都执行：清 teamContext + 清空 inbox 队列。没收尾的入站消息不清掉，会在下一个队的上下文里幽灵送达。'''),
+    (129, 'before', '''返回消息分两种：真删了队 vs 本来就没有队——后者也是 success: true（幂等），文案明说「无可清理」。'''),
+]
