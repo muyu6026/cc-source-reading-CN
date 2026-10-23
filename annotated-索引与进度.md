@@ -988,17 +988,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/` 已清零，`src/tools/` 已开工（88/184）。`src/` 还剩 1,513 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/` 已清零，`src/tools/` 已过半（100/184）。`src/` 还剩 1,501 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**已做 88 / 62% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
+| `src/tools/` | 184 份 / 50,863 行（**已做 100 / 67% 行数**） | 工具的实际实现。服务层只讲「怎么发请求」，工具层讲「一次工具调用具体干什么」，是主链路的另一半 |
 | `src/hooks/` | 104 份 / 19,232 行 | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口 |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,513 份没动（24% 行数）。
+> **`services/` 清零 ≠ 全仓完成**——全仓还有 1,501 份没动（24% 行数）。
 
 ---
 
@@ -1281,6 +1281,36 @@ EnterPlanModeTool（4 份）、ExitPlanModeTool（4 份）、TodoWriteTool（3 �
 5. **计划全文总是回显进 tool_result**——Ultraplan CCR 流程的 extractApprovedPlan() 要解析 tool_result 才能把计划喂给本地 CLI；用户编辑过的计划打「edited by user」标签，模型必须知道方案被改过，否则按记忆里的旧版实施。
 6. **TodoWrite 的 allDone 清空是上下文经济学**——全部完成的清单落 state 时置空数组（脚手架不是档案），但 data.newTodos 仍返回完整终态供遥测/UI 用；todoKey 取 agentId ?? sessionId，子代理各持独立清单——多 agent 进度隔离的最小实现。
 7. **verificationNudge 把「防跳步骤」做成结构性机制**——主线程收尾 3+ 项清单且无一项匹配 /verif/i 时，tool_result 追加「必须 spawn 验证 agent，不能靠在总结里列 caveats 自评 PARTIAL」。触发点卡在「最后一项关闭、循环即将退出」的精确时刻——统计上跳步骤就发生在那里。growthbook + 特性双闸门控制，nudge 文案把自评漏洞直接堵死。
+
+### 协作与调度三件套（三个目录 12/12 全清，tools 破百）
+
+SendMessageTool（4 份）、ScheduleCronTool（5 份）、ToolSearchTool（3 份），共 12 文件 2,136 行 → 批注版 2,229 行、95 处锚点。三者的共同点：都是「模型对自己和他人时间的调度」——发消息（横向协作）、定时任务（纵向调度）、搜工具（上下文预算调度）。至此 `src/tools/` 已完成 100/184、67% 行数。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`SendMessageTool.ts`](annotated/src/tools/SendMessageTool/SendMessageTool.ts) | 917 | 942 | 25 | agent 间协议：三种结构化消息 + 四层路由 + 跨机注入防护 |
+| [`prompt.ts`](annotated/src/tools/SendMessageTool/prompt.ts) | 49 | 51 | 2 | 「纯文本输出不可见」契约 + 回消息抄 from |
+| [`UI.tsx`](annotated/src/tools/SendMessageTool/UI.tsx) | 31 | 34 | 3 | 审批类消息才显形，其余静默 |
+| [`constants.ts`](annotated/src/tools/SendMessageTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`CronCreateTool.ts`](annotated/src/tools/ScheduleCronTool/CronCreateTool.ts) | 157 | 168 | 11 | 四道预检 + kill switch 折损 + 错峰指引 |
+| [`CronListTool.ts`](annotated/src/tools/ScheduleCronTool/CronListTool.ts) | 97 | 102 | 5 | 队友只看自己的，队长看全部 |
+| [`CronDeleteTool.ts`](annotated/src/tools/ScheduleCronTool/CronDeleteTool.ts) | 95 | 100 | 5 | 删除权限与可见性两层同语义 |
+| [`prompt.ts`](annotated/src/tools/ScheduleCronTool/prompt.ts) | 135 | 144 | 9 | 双层开关 + 整点错峰 + 抖动诚实告知 |
+| [`UI.tsx`](annotated/src/tools/ScheduleCronTool/UI.tsx) | 60 | 66 | 5 | 三个工具的渲染函数 |
+| [`ToolSearchTool.ts`](annotated/src/tools/ToolSearchTool/ToolSearchTool.ts) | 471 | 492 | 21 | 延迟加载体系：缓存键 + 词根评分 + tool_reference 下发 |
+| [`prompt.ts`](annotated/src/tools/ToolSearchTool/prompt.ts) | 121 | 128 | 7 | isDeferredTool 六级判定链 + 延迟加载机制说明 |
+| [`constants.ts`](annotated/src/tools/ToolSearchTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+
+八个最值得记的点：
+
+1. **跨机消息是对 bypass 免疫的**——bridge: 目标（Remote Control 对端，可能另一台机器）的 checkPermissions 带 safetyCheck 级 decisionReason 且 classifierApprovable: false：注释明说这条必须在 bypassPermissions（步骤 1g）与 auto 模式白名单之前拦截。跨机 prompt injection 是唯一被允许「绕过绕过模式」的通信路径——Anthropic 服务器中转意味着消息内容来自不完全受信的源。
+2. **call() 里重检 bridge 活性**——checkPermissions 阻塞在用户审批上可能数分钟，期间 bridge 随时可断；不重检就会发出 from=unknown 的孤儿消息。validateInput 的那次检查在时间维度上已经失效——「校验—执行」间隔越长，越要在执行点复检外部状态。
+3. **给已停止的代理发消息 = 唤醒而非报错**——running 的进 queuePendingMessage（下轮送达），stopped 的自动 resumeAgentBackground 后台拉起并把消息当 prompt，任务被逐出状态的走磁盘 transcript 恢复。三种降级路径覆盖了子代理的完整生命周期，「发消息」这个动作的语义因此是「保证对方最终读到」。
+4. **cron 的 kill switch 只折损能力、不动 schema**——effectiveDurable = durable && isDurableCronEnabled()，开关中途翻转时模型看到的 schema 与文案分秒不变（不会吃到校验错误），只在执行时静默降级，且返回的 durable 字段是折损后的真值。注释原话「schema stays stable so the model sees no validation errors when the gate flips mid-session」。
+5. **「避开整点」是全仓最独特的运维意识**——全世界说「9 点」的用户都生成 `0 9`，请求会在同一瞬间砸到 API；提示词明确要求近似时间需求错开几分钟（「57 8」而非「0 9」），并诚实告知调度器的抖动行为（循环最多晚 10% 周期、上限 15 分钟；整点一次性任务最多早 90 秒）。把内部行为告知模型，它才能给用户合理预期。
+6. **「一年内无匹配」是语法合法、日历非法的专属关卡**——2 月 30 日能过表达式解析但永远不触发；这道检查把它拦在创建时（错误码 2），配合 MAX_JOBS=50 上限与 teammate durable 禁令（防悬空 agentId 孤儿），构成创建期的四道预检。
+7. **isDeferredTool 的六级判定链顺序即优先级**——alwaysLoad 退出优先（MCP 靠它整类退出延迟）→ MCP 默认延迟 → ToolSearch 自己永不延迟（递归悖论）→ fork 模式下 Agent 退出（第一轮就要能派子代理）→ Brief/SendUserFile 退出（通信主通道的可见性契约不能让模型先搜一轮）→ 兜底 shouldDefer。每一级都有注释说明「为什么这条必须在这个位置」。
+8. **ToolSearch 返回的不是文本是「工具定义句柄」**——matches 以 tool_reference 块下发，客户端据此把完整 schema 展开进上下文；注释明说 Bedrock/Vertex 可能不支持客户端展开，`as unknown as` 强转正是为跨提供商格式差异兜底。零命中时附带 pending_mcp_servers，把「搜索失败」重框定为「服务器还在连，稍后再试」——模型学会等待而非乱换查询词。
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
