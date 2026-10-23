@@ -1199,19 +1199,37 @@ hooks/notifs 整目录清零（16/16）。这一层是「启动/状态变更类�
 流程账：预检四断言一次通过（98 锚点）、零合并错误（硬规矩连续第 17 批生效）；annotate.py 零 ⟳ 外移（块注释锚点全部正确落在 `/**` 开头行）；check-fidelity 535 文件 0 失败；check-links 0 失效。
 
 
+### 根目录输入/会话/选区等十件套（第 40 批，10 份 1,372 行）
+
+hooks 根目录行数前十清零（root 39/83）。这一批是「输入/会话生命周期/选区/记录」类钩子，零散但都挂在主链路的关键节点上：提示建议、后台会话、IDE 选区、定时任务、issue 反馈、输入缓冲、插件 hint、失焦摘要、消息落盘、diff 获取。hooks 到 60/104（74% 行数）。
+
+1. **`usePromptSuggestion.ts`（177 行，7 锚点）**——输入提示建议。建议文本仅在「助手未响应且输入框为空」时显示；markShown 把 shownAt 判断放进 setAppState 回调内避免依赖无限循环；logOutcomeAtSubmission 判定接受（Tab 或输入恰好等于建议）并带相似度/耗时遥测；ant 环境才上报完整文本（PII 门控）。
+2. **`useSessionBackgrounding.ts`（158 行，7 锚点）**——Ctrl+B 把会话挂后台 / 把前台任务重新挂起。handleBackgroundSession 区分「重新挂起前台任务」与「发起后台查询」；useEffect 同步前台任务的消息与 loading 到主视图，仅消息数变化才回写（避免冗余渲染）；运行中任务把 abort 控制权交给前台任务自身，使 Escape 能中止后台任务。
+3. **`useIdeSelection.ts`（150 行，6 锚点）**——经 MCP 通知直接注册 IDE 选区监听。IDE client 变化把 undefined 归一化 null 防误重置；选中行数 = 末行-首行+1，末字符在行首（character===0）不计入；闭包守卫（currentIDERef !== 当前 client 则丢弃过期通知）防旧 client 回调污染新 client。
+4. **`useScheduledTasks.ts`（139 行，7 锚点）**——cron 调度器的 REPL 封装。isLoadingRef 避免闭包捕获过期值；runtime gate 在 effect 内检查而非调用点（保证 hook 无条件挂载，rules-of-hooks 要求）；enqueueForLead 系统生成 isMeta + WORKLOAD_CRON 低 QoS；onFireTask 按 agentId 路由队友 cron，队友消失则清理孤儿 cron；isKilled 每 tick 轮询提供会话中段实时关闭。
+5. **`useIssueFlagBanner.ts`（133 行，9 锚点）**——ant 内部环境的「反馈问题」提示条。isSessionContainerCompatible 扫描 assistant 工具调用，mcp__ 工具或危险外部命令（curl/ssh/docker/aws/git push 等）一律判不兼容；hasFrictionSignal 从末尾向前找最近 user 消息用正则判摩擦；阈值（≥3 次提交 + 30min 冷却）+ useMemo 缓存 O(messages) 扫描（每次按键都跑但打字时 messages 稳定）。
+6. **`useInputBuffer.ts`（132 行，6 锚点）**——输入撤销缓冲。pushToBuffer 合并快速变更（debounce）+ 截断未来（撤销后再输入即新分支）+ 去重 + 限长；undo 回退 currentIndex 到上一条；canUndo 至少 2 条且不在首条。
+7. **`useClaudeCodeHintRecommendation.tsx`（129 行，8 锚点，React Compiler 产物）**——`<claude-code-hint />` 标签驱动的插件安装提示（show-once）。复用 usePluginRecommendationBase；tryResolve 异步解析，成功标记本会话已展示并清理 pending（防竞态）；handleResponse 三路：yes→安装 / disable→永久关闭推荐 / no→仅清理。
+8. **`useAwaySummary.ts`（125 行，7 锚点）**——终端失焦满 5 分钟追加「while you were away」摘要。双门控（编译期 feature + 运行时 GB）；generate 先中止在途再生成，文本非空且未中止才插入；回合进行中定时器触发则等回合结束（仍失焦）再补发；unknown 焦点态为 no-op。
+9. **`useLogMessages.ts`（119 行，8 锚点）**——把消息增量记录到 transcript。lastRecordedLengthRef 只传新尾部（避免每次 setMessages 都 O(n) 重扫）；firstMessageUuidRef 检测 compaction/clear（长度无法区分压缩后数组变长）；callSeq 防 stale 异步 .then 覆盖同步更新；sync-walk 仅在增量/首渲染/同头收缩三种安全情况更新 parent hint。
+10. **`useDiffData.ts`（110 行，6 锚点）**——按需获取 git diff（stats + hunks）。挂载并行拉取两份数据；cancelled 防卸载后 setState；useMemo 识别 large（在 perFileStats 但不在 hunks）/ truncated（超 400 行上限）/ binary / untracked。
+
+流程账：预检四断言一次通过（71 锚点）、零合并错误（硬规矩连续第 18 批生效）；annotate.py 仅 1 处 ⟳（useIdeSelection 锚点误落 `//` 注释段中部，自动挪到段边界——落点经人眼确认在语句边界，未劈开英文）；check-fidelity 545 文件 0 失败；check-links 0 失效。
+
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 50/104）。`src/` 还剩 1,367 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 60/104）。`src/` 还剩 1,357 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 50**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 54 份（3,637 行：useSessionBackgrounding 158 / useIdeSelection 150 / useScheduledTasks 139 / useIssueFlagBanner 133 / useInputBuffer 132 / useClaudeCodeHintRecommendation 129 / useAwaySummary 125 / useLogMessages 119 / useDiffData 110 / useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 等） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 60**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 44 份（2,265 行：useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 / useCopyOnSelect 98 / useExitOnCtrlCD 95 / useTeleportResume 85 / useApiKeyVerification 84 / useSwarmInitialization 81 / useClipboardImageHint 77 等） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,367 份没动（31.1% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,357 份没动（31.4% 行数）。
 
 ---
 
