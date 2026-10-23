@@ -1175,20 +1175,43 @@ hooks 根目录第五组：队友树导航、任务列表单例 store、远程�
 
 流程账：预检三断言一次通过（261 锚点）、零合并错误（硬规矩连续第 16 批生效）；check-fidelity 首轮 1 文件 FAIL——useTurnDiffs 锚点 (125,'after') 落在多行表达式 `const isToolResult =` 首行中间（把注释行 124 数成了 125，规矩 7 的新变体：多行语句的首行同样会劈开表达式），挪到 124 后复验 0 失败；两条 ⟳ 自动挪位均为 `//` 注释段中部 → 段尾（useGlobalKeybindings 99→101、useTaskListWatcher 42→46），人眼确认落点正确；check-links 0 失效。
 
+### 通知系统全目录（第 39 批，notifs 16 份 1,355 行）
+
+hooks/notifs 整目录清零（16/16）。这一层是「启动/状态变更类通知」的统一收口：一半文件是 React Compiler 产物（useEffect + memo 槽位的固定形态），一半是纯源（useStartupNotification 基座 + 数据驱动表）。hooks 到 50/104（74% 行数）。
+
+1. **`useStartupNotification.ts`（41 行，7 锚点）**——**先读这个，它是本目录的基座**。把 10+ 个 notifs 钩子各自手写的「远程门控 + 一次性 ref」收成一个：compute 只跑首次 effect，返回 null / 单条 / 数组三种形态同步异步通吃（Promise.resolve 包装统一时序），异常全走 logError 不冒泡。computeRef 每轮同步赋值而依赖数组不含 compute——调用方传新函数不会导致重跑。
+2. **`useIDEStatusIndicator.tsx`（186 行，8 锚点）**——IDE 状态五态互斥分流（连接/选区/JetBrains/安装失败/首次提示）。四个 effect 各管一条通知，条件不满足就 removeNotification 的清理模式；提示上限双保险（会话 ref + 全局 config 计数）；setTimeout 用参数透传而非闭包捕获（3 秒后闭包里的引用可能过期）。
+3. **`useFastModeNotification.tsx`（162 行，8 锚点）**——fast mode 四类事件（组织开关/超额拒绝/冷却开始/结束）。冷却开始与结束用 invalidates 互斥键保证同一时刻只有一条；两个订阅在 cleanup 成对退订。
+4. **`useLspInitializationNotification.tsx`（143 行，7 锚点）**——LSP 轮询式错误通知。manager 整体失败即永久停表（setShouldPoll(false)）；去重键 = 来源 + 文案的 Set 跨渲染存活；错误同时写 appState.plugins.errors 供 /doctor。
+5. **`usePluginInstallationStatus.tsx`（128 行，6 锚点）**——插件安装失败汇总。源码里连续两道完全相同的 `if (totalFailed === 0) return`（第二处永假，冗余防御标本）；计数经 useMemo 化保 effect 依赖引用稳定。
+6. **`useRateLimitWarningNotification.tsx`（114 行，7 锚点）**——超额提示（一次性 state 标记）+ 限流警告（文案 ref 去重）双轨；team/enterprise 默认不弹超额，除非有独立计费权。
+7. **`useTeammateShutdownNotification.ts`（78 行，7 锚点）**——队友生命周期批量通知。fold() 机制：同 key 新事件不堆叠而是解析旧文案数量 +1 重新生成（「3 agents spawned」）；seen Set 保证同一任务只报一次。
+8. **`useSettingsErrors.tsx`（69 行，7 锚点）**——设置错误通知，60s 长停留（比其他通知长得多——要留时间给用户去 /doctor 修）。
+9. **`useCanSwitchToExistingSubscription.tsx`（60 行，7 锚点）**——API key 用户反查 oauth profile 提示切订阅登录；全局最多 3 次，且先行落盘计数再展示。
+10. **`useAutoModeUnavailableNotification.ts`（56 行，6 锚点）**——shift-tab 轮播绕过 auto 槽位时的一次性提示。prevModeRef 记忆上次模式才能识别「绕了一圈回来」；feature() 编译期常量条件（有意死代码消除，非恒假条件事故）。
+11. **`useModelMigrationNotifications.tsx`（52 行，6 锚点）**——数据驱动的迁移通知表：每项读自己的 config 时间戳，3s 内写入 = 本次启动刚迁移；新迁移只需加一条表项。
+12. **`useMcpConnectivityStatus.tsx`（88 行，5 锚点）**——MCP 四路连通性分流（本地失败/claude.ai 失败/各自待授权）；IDE 类与 claudeai-proxy 走专门判据；从未连通的 claude.ai 服务不报「断开」噪音。
+13. **`usePluginAutoupdateNotification.tsx`（83 行，5 锚点）**——插件自动更新提示；文案折叠 ≤2 列名、更多只报数量。
+14. **`useDeprecationWarningNotification.tsx`（44 行，4 锚点）**——模型弃用警告，ref 去重 + 切回非弃用版本时清跟踪。
+15. **`useNpmDeprecationNotification.tsx`（25 行，4 锚点）**——npm 安装方式弃用，三处短路（bundled/关闭检查/development）。
+16. **`useInstallMessages.tsx`（26 行，4 锚点）**——安装自检消息按类型映射优先级（error/userAction → high，path/alias → medium）。
+
+流程账：预检四断言一次通过（98 锚点）、零合并错误（硬规矩连续第 17 批生效）；annotate.py 零 ⟳ 外移（块注释锚点全部正确落在 `/**` 开头行）；check-fidelity 535 文件 0 失败；check-links 0 失效。
+
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/` 均已清零（tools 184/184，hooks 34/104）。`src/` 还剩 1,383 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 50/104）。`src/` 还剩 1,367 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 34**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。剩下根目录 54 份（3,637 行：useSessionBackgrounding 158 / useIdeSelection 150 / useScheduledTasks 139 / useIssueFlagBanner 133 / useInputBuffer 132 / useClaudeCodeHintRecommendation 129 / useAwaySummary 125 / useLogMessages 119 / useDiffData 110 / useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 等）+ notifs 16 份（1,355 行，通知类） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 50**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 54 份（3,637 行：useSessionBackgrounding 158 / useIdeSelection 150 / useScheduledTasks 139 / useIssueFlagBanner 133 / useInputBuffer 132 / useClaudeCodeHintRecommendation 129 / useAwaySummary 125 / useLogMessages 119 / useDiffData 110 / useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 等） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,383 份没动（30.9% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,367 份没动（31.1% 行数）。
 
 ---
 
