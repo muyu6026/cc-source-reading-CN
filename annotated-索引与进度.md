@@ -1217,19 +1217,37 @@ hooks 根目录行数前十清零（root 39/83）。这一批是「输入/会话
 流程账：预检四断言一次通过（71 锚点）、零合并错误（硬规矩连续第 18 批生效）；annotate.py 仅 1 处 ⟳（useIdeSelection 锚点误落 `//` 注释段中部，自动挪到段边界——落点经人眼确认在语句边界，未劈开英文）；check-fidelity 545 文件 0 失败；check-links 0 失效。
 
 
+### 根目录快捷键/退出/剪贴板等十件套（第 41 批，10 份 944 行）
+
+hooks 根目录行数前十清零（root 49/83）。这一批是「快捷键 / 退出 / 剪贴板自动复制 / 远程会话恢复 / API key 验证 / swarm 初始化」类钩子，多与全局交互与初始化链路相关。hooks 到 70/104（79% 行数）。
+
+1. **`useCommandKeybindings.tsx`（108 行，7 锚点，React Compiler 产物）**——命令行 keybinding 处理器。从配置读 command:* 动作注册 handler，触发提交对应 slash 命令（立即执行不清除输入）；bb0 块处理 keybindingContext 缺失兜底（空 Set）；memo 化 map（slice(8) 去 command: 前缀）；门控 `isActive && !isModalOverlayActive` 防模态里误触。
+2. **`usePrStatus.ts`（107 行，6 锚点）**——PR 评审状态轮询。三参数（60s 间隔 / 60min 空闲停表 / 慢 GH>4s 永久禁用）；用 getLastInteractionTime 判空闲；fetch 后比较 number+reviewState 防无谓重渲染；effect 按 lastFetchRef 排下一次避免回合边界重 spawn gh。
+3. **`useSkillImprovementSurvey.ts`（106 行，4 锚点）**——技能改进调研弹窗。suggestion 走 ref 即使清空 AppState 仍显示；新建议首现记 appeared 事件；`_PROTO_skill_name` 走特权 BQ 列（明文 skill 名不进 additional_metadata 防泄露）；dismissed 仅关，否则 applySkillImprovement 追加 system 消息。
+4. **`usePluginRecommendationBase.tsx`（105 行，6 锚点，React Compiler 产物）**——插件推荐共享状态机。gate 链（remote / 已有 recommendation / isCheckingRef 在飞）三闸都过才 resolve；返回 {recommendation, clearRecommendation, tryResolve}；installPluginAndNotify 查→装→成功/失败通知。
+5. **`useCopyOnSelect.ts`（99 行，5 锚点）**——选区自动复制（仿 iTerm2）。四态状态机（isDragging / !has / 已 copied / 最终 copy）；onCopied 经 ref 读避免 effect 重订阅；默认开启因 macOS cmd+c 被终端 Edit>Copy 拦截；useSelectionBgColor 把主题 selectionBg 注入 Ink StylePool 替代 SGR-7 反显。
+6. **`useExitOnCtrlCD.ts`（96 行，6 锚点）**——ctrl+c/d 退出双按机制。注入 useKeybindingsHook 避免 import 循环；exitFn = onExit ?? exit；ctrl+c 与 ctrl+d 各一个 double-press；handleInterrupt 先让 feature 经 onInterrupt 处理（返回 true 短路）；isActive 关避免嵌入 TextInput 时父子 handler 双发。
+7. **`useTeleportResume.tsx`（85 行，4 锚点，React Compiler 产物）**——远程会话恢复。resumeSession 闭包 logEvent→teleportResumeCodeSession→setTeleportedSessionInfo；catch 归一化 TeleportOperationError（isOperationError 区分操作错误与普通错误）；返回五元组。
+8. **`useApiKeyVerification.ts`（85 行，3 锚点）**——API key 验证。初始五态（loading/valid/invalid/missing/error）；apiKeyHelper 配置但未执行（security：防 trust dialog 前经 settings.json 触发 RCE）；verify 先 warm 缓存再读全源，API 报错仍标 error 但记录 error 供展示。
+9. **`useSwarmInitialization.ts`（82 行，4 锚点）**——swarm 初始化。条件加载以便 DCE；resume 从转录首消息读 teamName/agentName 重建 context + 从 team file 取 agentId 初始化 hooks；fresh 从 getDynamicTeamContext 初始化。
+10. **`useClipboardImageHint.ts`（78 行，5 锚点）**——剪贴板图片提示。仅 unfocused→focused 转变触发（lastFocusedRef 跟踪）；1s 防抖 + 30s 冷却；hasImageInClipboard（async osascript）命中发 8s 提示（含 paste 快捷键显示）。
+
+流程账：预检四断言一次通过（50 锚点）、零合并错误（硬规矩连续第 19 批生效）；annotate.py 零 ⟳ 外移（7 处 `/**` 行 after 锚自动挪到块后，落点人眼确认在 import/语句之前，未劈开英文）；check-fidelity 555 文件 0 失败；check-links 0 失效。
+
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 60/104）。`src/` 还剩 1,357 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 70/104）。`src/` 还剩 1,347 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 60**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 44 份（2,265 行：useCommandKeybindings 108 / usePrStatus 106 / useSkillImprovementSurvey 105 / usePluginRecommendationBase 105 / useCopyOnSelect 98 / useExitOnCtrlCD 95 / useTeleportResume 85 / useApiKeyVerification 84 / useSwarmInitialization 81 / useClipboardImageHint 77 等） |
+| `src/hooks/` | 104 份 / 19,232 行（**已做 70**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 34 份（1,321 行：useIdeAtMentioned 76 / useTeleportResume 已做 / useQueueProcessor 68 / useNotifyAfterTimeout 65 / useTeammateViewAutoExit 63 / useSkillsChange 62 / useDoublePress 62 / usePromptsFromClaudeInChrome 71 / useIDEIntegration 70 等） |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,357 份没动（31.4% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,347 份没动（31.6% 行数）。
 
 ---
 
