@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 51 批（2026-10-26）：utils 四个环境入口 ide + permissions + claudemd + analyzeContext
+- 状态：完成并推送，commit `aabb1f9`。
+- 本批：`src/utils/ide.ts`（1,494→1,540 行，46 锚点）、`src/utils/permissions/permissions.ts`（1,486→1,532 行，45 锚点）、`src/utils/claudemd.ts`（1,479→1,530 行，51 锚点）、`src/utils/analyzeContext.ts`（1,382→1,428 行，46 锚点）。合计 4 文件 5,841 行 / 188 锚点。
+- 进度：全仓 **613/1902 文件 / 222,295 行 / 43.3%**；`src/utils/` 24/564（剩 540 份），hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 613 份 0 失败；check-links 834 源码链接 + 111 内链 0 失效；annotate.py 四次零 `⟳`，四份数据文件预检一次通过。
+- 下一批目标（按行数降序）：`utils/bash/commands.ts` 1,339 → `utils/mcpbHandler.ts` 968 → `utils/commitAttribution.ts` 961 → `utils/loadPluginCommands.ts` 946 → `utils/permissionSync.ts` 928。
+- 注：第 50 批（`a72e53c`，5 文件 7,628 行 336 锚点，inProcessRunner / permissionSetup / Cursor / worktree / yoloClassifier）执行时未写本记忆，仅存于 README 与索引。
+
+### 本批经验（下次先看）
+- **英文引号仍在犯（第三次）**：`claudemd.ts` 锚点 1195 写了一句带英文双引号的正文，预检第 5 条拦下。写数据文件时正文里**不要出现任何英文引号字符**，一律「」。
+- **索引/README 本批开工时是干净的**，未再现外部回写（前两批连续出现过两次）。但惯例不变：`git status --short` 若有未提交改动的索引，先语义比对再决定还原。
+- 本批 4 份文件都是「环境入口」类（找编辑器 / 判权限 / 装指令 / 量窗口），共同判据是「显式声明压过隐式推导」，串起来读效率最高。
+
 ## 第 49 批（2026-10-26）：utils 路径判据 + 原生安装器 + 插件 schema
 - 状态：完成并推送，commit `74329a0`。
 - 本批：`src/utils/permissions/filesystem.ts`（1,777→1,837 行，60 锚点）、`src/utils/nativeInstaller/installer.ts`（1,708→1,764 行，56 锚点）、`src/utils/plugins/schemas.ts`（1,681→1,735 行，54 锚点）。合计 3 文件 5,166 行 / 170 锚点。
