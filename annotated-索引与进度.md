@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,298 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,293 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 15**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas，45,378 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,600 行档，往下继续 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 20**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier，53,006 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,500 行档；下一批按行数降序取 sandbox-adapter(985)/mcpbHandler(968)/commitAttribution(961)/loadPluginCommands(946)/permissionSync(928) |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,298 份没动（40.7% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,293 份没动（42% 行数）。
 
 ---
 
@@ -1499,6 +1499,56 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：**锚点选行要落在「块闭合处」而不是「块内最后一条语句」**。`installer.ts` 原写 666（`return false`，在 if 内部）应改 667（if 的闭合括号）；1690 是空行，实际语句在 1689。这两个都是「语义看着对、插入位置错一层」的典型。
 
 流程账：预检三份全过（170 锚点，一次通过）；`annotate.py` 零 `⟳`；`check-fidelity.py` 604 份 0 失败；`check-links.py` 822 条源码链接 + 108 条内链，0 失效。
+
+### utils 第九梯队：进程内队友运行器、权限初始化、终端光标、worktree 与 YOLO 分类器（第 50 批，5 份 7,628 行，336 锚点）
+
+`inProcessRunner.ts` 负责把队友真正跑起来（AsyncLocalStorage 上下文 + runAgent 主循环 + 权限轮询），`yoloClassifier.ts` 与 `permissionSetup.ts` 负责 auto 模式下「这次动作该不该拦」的判断与模式切换，`Cursor.ts` 是终端输入框的光标与字素原语，`worktree.ts` 则是把这一切隔离进独立 git worktree 的底层机制。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/swarm/inProcessRunner.ts`](annotated/src/utils/swarm/inProcessRunner.ts) | 1,552 | 1,601 | 49 | 进程内队友运行器：AsyncLocalStorage 上下文、runAgent 主循环、队友权限轮询、计划模式状态协调 |
+| [`utils/permissions/permissionSetup.ts`](annotated/src/utils/permissions/permissionSetup.ts) | 1,532 | 1,599 | 67 | 权限模式初始化与切换：auto 模式危险规则剥离、YOLO 分类器装配、计划模式状态协调 |
+| [`utils/Cursor.ts`](annotated/src/utils/Cursor.ts) | 1,530 | 1,592 | 62 | 终端光标与文本编辑原语：Unicode 归一化、字素簇边界、kill ring、可视换行对齐 |
+| [`utils/worktree.ts`](annotated/src/utils/worktree.ts) | 1,519 | 1,596 | 77 | git worktree 隔离：slug 校验、创建与快速恢复、符号链接大目录、钩子、过期清理、tmux 快速路径 |
+| [`utils/permissions/yoloClassifier.ts`](annotated/src/utils/permissions/yoloClassifier.ts) | 1,495 | 1,576 | 81 | auto 模式 YOLO 安全分类器：系统提示拼装、转录压缩、两阶段 XML 分类、工具调用分类 |
+
+**`inProcessRunner.ts` 的四个要点**：
+
+1. **队友运行靠 AsyncLocalStorage 传上下文，不靠参数透传**。runAgent 主循环里大量状态（当前权限上下文、遥测、紧凑模式标志）都挂在 ALS 上，队友 spawn 时继承，避免一层层往下塞。
+2. **权限轮询是 fire-and-forget 的后台循环**，每 500 毫秒一次，只更新「当前队友能否用某工具」的快照；真正裁决仍在 canUseTool 里，轮询只是把「半路被用户改了设置」这类变化尽快反映出来。
+3. **计划模式状态协调是收敛点**：当 auto 模式的前提（比如没开 bypass）被破坏时，这里负责把状态压回安全侧。
+4. **`⟳` 提示本身不是错误**：本文件有 6 个锚点原本落在 `//` 注释段中部，annotate.py 自动挪到段边界，避免把一句英文注释从中间劈开。
+
+**`permissionSetup.ts` 的四个要点**：
+
+1. **auto 模式的危险规则剥离是单向的**：来自 Bash 权限配置里「对 auto 模式危险」的规则在切到 auto 时直接丢弃，绝不能被用户的 allow 列表悄悄加回来。
+2. **YOLO 分类器不是唯一裁决者**：setup 负责把「分类器可用吗、用外部还是内部模板、PowerShell 要不要纳入」这些开关装配好，分类结果再交给 canUseTool 收口。
+3. **多行 `const` 的锚点必须落在声明收尾行**：初版把注释放到了 `const fromUsesClassifier =` 首行，被 check-fidelity 判为「劈开未结束的多行表达式」，挪到 `||` 链收尾行后复验通过。
+4. **计划模式与 auto 模式是两个正交维度**：setup 里的状态机显式区分「当前是 plan 还是 auto」，避免一个开关误伤另一个的判定。
+
+**`Cursor.ts` 的三个要点**：
+
+1. **所有光标操作建立在 NFC 归一化文本之上**，组合字符与 CJK 宽度都按归一化后计算，保证跨平台显示一致。
+2. **字素边界用 Intl.Segmenter**，正确处理 CJK（每字一词）与空格分词语言；图片引用块 `[Image #N]` 整体跳过，避免 Ctrl+W 留下半截块。
+3. **换行测量与字素、词边界惰性计算并缓存**，MeasuredText 只在真正需要时算，长输入不重复开销。
+
+**`worktree.ts` 的四个要点**：
+
+1. **slug 校验同步抛错，且跑在任何副作用之前**：path.join 会把 `..` 归一化掉，所以 `../../../target` 这类穿越必须先在字符串层面拦死。
+2. **嵌套 slug 拍平成 `user+feature` 是单射映射**：既规避 git 引用的 D/F 冲突，又保证「分支名」与「目录名」两处都安全。
+3. **快速恢复只读 `.git` 指针文件**，跳过 fetch 与创建，避免每次 resume 都卡在凭据提示上；新建才需要拉基础分支并 add。
+4. **过期清理保守失败（fail-closed）**：只碰瞬时图案 slug、跳过当前会话、git status 不干净或有无推送提交就跳过，绝不误删用户命名的 worktree。
+
+**`yoloClassifier.ts` 的四个要点**：
+
+1. **两套实现共用同一提示拼装**：XML 两阶段与 tool_use 分类都从 `buildYoloSystemPrompt` 拿系统提示，区别只在输出格式（`<block>` 标签 vs 结构化工具调用）。
+2. **转录压缩是防提示词注入的关键**：只保留用户文本与助手 tool_use 块（剔除助手自由文本，防被精心构造来影响分类），并用 JSON 转义天然防伪造。
+3. **两阶段 XML 分类：阶段一低 max_tokens 逼即时 yes/no，放行即返回；拦下才升阶段二做带推理的复审**，降低误拦；alwaysOnThinking 模型无法关思考时留 token 余量防截断。
+4. **所有失败路径默认拦截（shouldBlock: true）**：API 出错、提示过长、解析失败都按安全处理，区分「主动拦截」与「分类器不可用」靠 `unavailable` 标志。
+
+踩坑：本批数据文件初版漏写 `_p1` 后缀（`scripts/_annot/src_utils_*.py` 而非 `_p1.py`），而 `annotate.py` 按 `<slug>_p*.py` 定位数据，预检直接报「找不到批注数据」；补上 `_p1` 后预检通过。另有两个锚点落进多行 `const` 声明中部（`ANTHROPIC_PERMISSIONS_TEMPLATE`、`classifierType`）被 check-fidelity 拦下，分别挪到三元收尾行与 `? :` 链末行后复验 0 失败。
+
+流程账：预检五份全过（336 锚点，一次通过）；`annotate.py` 良性 `⟳` 外移 12 处（inProcessRunner 6 + permissionSetup 4 + worktree 2，均为 `//` 注释段自动归并，非模板串）；首轮 `check-fidelity.py` 2 处失败（多行 `const` 被劈开），修锚点后 5 份 0 失败；`check-links.py` 825 条源码链接 + 109 条内链，0 失效。
 
 ---
 
