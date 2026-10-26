@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,266 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,254 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 47**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation，82,504 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；下一批接 800 行档：words(800)/sessionStoragePortable(793)/fsOperations(770)/swarm/backends/TmuxBackend(764)/toolSearch(756)… |
+| `src/utils/` | 564 份 / 180,487 行（**已做 59**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor，91,246 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 600–640 行档：theme(639)/plugins/mcpPluginIntegration(634)/doctorDiagnostic(625)/model/model(618)/handlePromptSubmit(610)… |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,279 份没动（约 45% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,254 份没动（约 50% 行数）。
 
 ---
 
@@ -1652,6 +1652,38 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`stats.ts` 初版有 3 个锚点落在多行表达式首行（`const peakActivityDay =`、`const totalDays =`、`return {`），直接触发 fidelity 硬规则 #5「不劈开未结束的多行表达式」报 FAIL；已分别下移到对象闭合行（352→367、566→571、580→587）后归零。其余文件 `annotate.py` 仅有良性 `⟳`（`//` 注释段中部锚点被挪到段边界，如 teleport.tsx 931→936、collapseReadSearch.ts 148→151），无模板字符串内锚点、无块注释内中文告警；teleport.tsx / instrumentation.ts 末行 base64 sourceMappingURL 按惯例省略（fidelity 标 `OK*`）。
 
 流程账：预检十三份全过（529 锚点，一次通过）；`annotate.py` 十三次，仅良性 `⟳`（`//` 段边界挪动），无 `⚠` 块注释内中文告警；`check-fidelity.py` 636 份 0 失败；`check-links.py` 源码链接 844 条 + 内链 112 条，0 失效。
+
+---
+
+### utils 第 54 批：800 行档余下巨兽 + 分叉/团队/搜索/计算机操控底座（第 54 批，12 份 8,742 行，347 锚点）
+
+十二份继续按行数降序吃 utils 里 800 行档余下的五巨兽（words / sessionStoragePortable / fsOperations / swarm 的 TmuxBackend / toolSearch），并顺手把 660–730 行档的 heredoc / api / gitFilesystem / forkedAgent / teamHelpers / ripgrep / computerUse-executor 一并做了。主题横跨「随机命名 / 会话存储 / 文件系统 / 多智能体运行与协作 / 工具搜索 / heredoc 安全 / API schema / git 文件系统 / 分叉智能体 / ripgrep 搜索 / 计算机操控执行器」。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/words.ts`](annotated/src/utils/words.ts) | 800 | 821 | 21 | 随机词 slug 生成器：形容词-动词-名词三段式，给计划 ID 等产出可读名 |
+| [`utils/sessionStoragePortable.ts`](annotated/src/utils/sessionStoragePortable.ts) | 793 | 829 | 36 | 可移植会话存储工具集：UUID 校验 / JSON 字段抽取 / 首提示提取 / 头尾分块读写 / 路径消毒 / swarm 工作树 |
+| [`utils/fsOperations.ts`](annotated/src/utils/fsOperations.ts) | 770 | 794 | 24 | 文件系统操作封装：安全路径解析 / 符号链接权限 / 区间读取 / tail / 倒序读行 |
+| [`utils/swarm/backends/TmuxBackend.ts`](annotated/src/utils/swarm/backends/TmuxBackend.ts) | 764 | 793 | 29 | swarm 的 tmux 后端：user/swarm 双会话运行 / 窗格创建隐藏与重排 / 自注册 |
+| [`utils/toolSearch.ts`](annotated/src/utils/toolSearch.ts) | 756 | 784 | 28 | 工具搜索模式：模型是否支持工具引用 / 自动阈值 / 已发现工具差异计算 |
+| [`utils/bash/heredoc.ts`](annotated/src/utils/bash/heredoc.ts) | 733 | 766 | 33 | heredoc 提取与还原：防命令走私的多处安全校验 |
+| [`utils/api.ts`](annotated/src/utils/api.ts) | 718 | 740 | 22 | 工具 → API schema 转换与上下文归一化：系统 / 用户上下文拼装 / 输入归一 |
+| [`utils/git/gitFilesystem.ts`](annotated/src/utils/git/gitFilesystem.ts) | 699 | 734 | 35 | git 文件系统层：ref 解析 / 分支缓存 / 工作树 / 浅克隆检测 |
+| [`utils/forkedAgent.ts`](annotated/src/utils/forkedAgent.ts) | 689 | 713 | 24 | 分叉智能体查询循环：缓存安全参数 / 隔离上下文 / 用量上报 |
+| [`utils/swarm/teamHelpers.ts`](annotated/src/utils/swarm/teamHelpers.ts) | 683 | 712 | 29 | 团队本地状态读写与清理：config.json / 成员模式 / 工作树销毁 |
+| [`utils/ripgrep.ts`](annotated/src/utils/ripgrep.ts) | 679 | 710 | 31 | ripgrep 搜索后端封装：三模式 / 超时 / 重试 / 流式 / 错误分级 |
+| [`utils/computerUse/executor.ts`](annotated/src/utils/computerUse/executor.ts) | 658 | 693 | 35 | computer-use CLI 执行器：鼠标 / 键盘 / 截图 / 应用管理 |
+
+**几个值得记住的点**：
+
+1. **`sessionStoragePortable.ts` 与 `sessionStorage.ts`（第 44 批已做）是姊妹篇**：前者是「不依赖日志/实验/特性开关」的纯 Node 可移植版，被 CLI 与 VS Code 扩展共享；抽取首条用户提示时跳过的 `SKIP_FIRST_PROMPT_PATTERN` 专门过滤系统/钩子/中断类消息，避免把噪声当首提示。
+2. **`forkedAgent.ts` 的精髓是「缓存安全参数」**：分叉智能体必须与父智能体共享 system/tool/model/messages 前缀才能命中 Anthropic 提示词缓存；`maxOutputTokens` 会顺带改 `budget_tokens` 而失效缓存，所以只在不需要共享时才设。
+3. **`gitFilesystem.ts` 是把 git 当成「只读文件系统」用的安全层**：`resolveGitDir` / `isSafeRefName` / `isValidGitSha` / `getCachedBranch` 把 ref 解析、分支缓存、工作树、浅克隆检测全部收口，供上层安全地按 commit 读文件。
+4. **`computerUse/executor.ts` 是 macOS 专属的计算机操控执行器**：封装 Rust/enigo 输入与 Swift 截图两套原生模块，并刻意与 Cowork 参考实现保持若干 CLI 差异（无点击穿透、终端作替代宿主、剪贴板走 pbcopy/pbpaste）。
+
+踩坑：四处锚点初版落在多行表达式首行（`const uuidRegex =` / `const SKIP_FIRST_PROMPT_PATTERN =` 在 sessionStoragePortable.ts，`const cacheKey =` 在 api.ts，`const HEREDOC_START_PATTERN =` 在 heredoc.ts），直接触发 fidelity 硬规则 #5「不劈开未结束的多行表达式」报 FAIL；已分别下移到正则/三元闭合行（24 / 124 / 150 / 71）后归零；`executor.ts` 初版有一锚点落进 `scroll` 的 `/** */` 块注释内（触发 fidelity 块注释纯净判据），已挪到函数声明行（600）修复。其余文件 `annotate.py` 仅有良性 `⟳`（`//` 注释段中部锚点被挪到段边界，如 heredoc.ts 442→453、forkedAgent.ts 520→523、ripgrep.ts 47→48 与 382→383），无模板字符串内锚点告警；`⚠` 块注释内中文告警已清零。
+
+流程账：预检十二份全过（347 锚点，一次通过）；`annotate.py` 十二次，仅良性 `⟳`（`//` 段边界挪动），`⚠` 块注释内中文告警已清零；`check-fidelity.py` 648 份 0 失败；`check-links.py` 源码链接 857 条 + 内链 113 条，0 失效。
 
 ---
 
