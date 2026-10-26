@@ -1,8 +1,0 @@
-批注 utils 路径判据、原生安装器与插件 schema（第49批，3文件5,166行，170锚点，全仓604/1902文件40.7%）
-
-- src/utils/permissions/filesystem.ts：1777行→1837行，60锚点（路径级权限判定：读写两条有序检查链/规则根解析/gitignore模式匹配/危险路径清单/内部路径白名单）
-- src/utils/nativeInstaller/installer.ts：1708行→1764行，56锚点（原生安装器：目录分层/版本锁/原子落盘/Windows复制与回滚/旧版本清理/npm卸载兜底）
-- src/utils/plugins/schemas.ts：1681行→1735行，54锚点（插件与市场schema：冒名防护/manifest全字段/市场源九种形态/已安装记录V1到V2）
-- 恢复索引文档：外部编辑器重排回写导致退回第47批状态，规范化比对确认零新增后还原HEAD
-- 校验：check-fidelity 604份0失败，check-links 825源码链接+109内链0失效
-- 进度：604/1902文件、208,826/513,237行、40.7%；utils 15/564

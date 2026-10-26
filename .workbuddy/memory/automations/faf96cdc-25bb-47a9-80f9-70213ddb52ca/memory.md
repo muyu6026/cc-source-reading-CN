@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 49 批（2026-10-26）：utils 路径判据 + 原生安装器 + 插件 schema
+- 状态：完成并推送，commit `74329a0`。
+- 本批：`src/utils/permissions/filesystem.ts`（1,777→1,837 行，60 锚点）、`src/utils/nativeInstaller/installer.ts`（1,708→1,764 行，56 锚点）、`src/utils/plugins/schemas.ts`（1,681→1,735 行，54 锚点）。合计 3 文件 5,166 行 / 170 锚点。
+- 进度：全仓 **604/1902 文件 / 208,826 行 / 40.7%**；`src/utils/` 15/564（剩 549 份），hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 604 份 0 失败；check-links 825 源码链接 + 109 内链 0 失效；annotate.py 零 `⟳`，三份数据文件预检一次通过。
+- 下一批目标（按行数降序）：`utils/swarm/inProcessRunner.ts` 1,552 → `utils/permissions/permissionSetup.ts` 1,532 → `utils/Cursor.ts` 1,530 → `utils/worktree.ts` 1,519。
+
+### 本批两条硬经验（下次必须先看）
+- **索引再次被外部回写（连续第二批）**：开工时该文件退回第 47 批状态（丢第 48 批小节、39.7% 退成 38.6%、`<summary>` 包裹、删空行）。说明有常驻进程在写它。固定处置：`git diff -w` 粗查 → 规范化比对（去反斜杠 + 去空白 + 分隔线归一）确认零新增 → 备份 `/tmp` → `git checkout` 还原 HEAD。**开工第一步就要做，别等写完批注才发现。**
+- **锚点落在「块闭合行」而非「块内最后一条语句」**：`return false` 之后还有一层 `}`，锚在 `return` 上会把批注塞进 if 内部；空行更要注意（installer 原写 1690 是空行，实际语句在 1689）。写完数据文件后一定打印「锚点行 strip 内容」逐条核。
+
 ## 第 48 批（2026-10-26）：utils 只读白名单 + 配置层 + 另一种 shell 解析
 - 状态：完成并推送，commit `6f4dc57`。
 - 本批：`src/utils/shell/readOnlyCommandValidation.ts`（1,893→1,959 行，66 锚点）、`src/utils/config.ts`（1,817→1,873 行，49 锚点）、`src/utils/powershell/parser.ts`（1,804→1,876 行，58 锚点）。合计 3 文件 5,514 行 / 173 锚点。
