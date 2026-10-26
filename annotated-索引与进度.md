@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,301 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,298 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 12**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser，40,212 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,800 行档，往下继续 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 15**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas，45,378 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,600 行档，往下继续 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,301 份没动（39.7% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,298 份没动（40.7% 行数）。
 
 ---
 
@@ -1459,6 +1459,46 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑（第二类）：**锚点落在多行模板字符串内部会被自动外移到同一行**。PS1 脚本是 250 行的模板常量，原本给内部 12 个函数各写了锚点，`template_shift` 会把这些全部挪到脚本结束行——12 条批注堆在一处。正确做法是只留「段首」与「段尾」两条总述，把内部细节合并进正文。
 
 流程账：预检三份全过（173 锚点）；`annotate.py` 仅 1 次无害 `⟳`（模板起始行 before 原地）；`check-fidelity.py` 601 份 0 失败；`check-links.py` 819 条源码链接 + 107 条内链，0 失效。
+
+---
+
+### utils 第八梯队：路径权限判据、原生安装器与插件 schema（第 49 批，3 份 5,166 行，170 锚点）
+
+`permissions/filesystem.ts`（1,777 行）、`nativeInstaller/installer.ts`（1,708 行）、`plugins/schemas.ts`（1,681 行）。三份的共同点是「判据本身」：文件能不能写、装的东西能不能用、配置算不算合法——都不是业务逻辑，而是把模糊的人类意图钉成可执行的规则。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/permissions/filesystem.ts`](annotated/src/utils/permissions/filesystem.ts) | 1,777 | 1,837 | 60 | 路径级权限判定：读/写两条有序检查链、规则根解析、gitignore 模式匹配、危险路径清单、内部路径白名单 |
+| [`utils/nativeInstaller/installer.ts`](annotated/src/utils/nativeInstaller/installer.ts) | 1,708 | 1,764 | 56 | 原生安装器：目录分层、版本锁、原子落盘、Windows 复制与回滚、旧版本清理、npm 卸载兜底 |
+| [`utils/plugins/schemas.ts`](annotated/src/utils/plugins/schemas.ts) | 1,681 | 1,735 | 54 | 插件与市场 schema：冒名防护、manifest 全字段、市场源九种形态、已安装记录 V1→V2 |
+
+**`filesystem.ts` 的五个要点**：
+
+1. **显式规则优先于一切隐式推导**。读链顺序是 UNC → 可疑路径模式 → 读禁止 → 读询问 → 编辑隐含读 → 工作目录 → 内部路径 → 读允许 → 问。读禁止与读询问**必须**排在「编辑权限隐含读权限」之前，否则「同目录给了编辑权限」会把一条显式禁止悄悄覆盖掉。
+2. **每个「路径在目录内」判定前都要 `normalize`**，而且不是防御性冗余——注释里逐个举了绕过样例（`scratchpad/../../../etc/passwd`、`plans/x/../../../etc/passwd.md`）。
+3. **危险清单分两级**：十个文件名（shell 启动脚本、git 配置、MCP 配置、自身配置）与四个目录（`.git`、`.vscode`、`.idea`、`.claude`）。目录按**路径段**比较而非子串；中间留了一个 `.claude/worktrees` 特例（结构性路径，不是用户配置目录），只跳过那一个段。
+4. **Windows 特有攻击面是检测而非规范化**。ADS 冒号、8.3 短名、长路径前缀、尾部点与空格、DOS 设备名、三个以上连续点、UNC——注释用整整一屏解释为什么不走规范化：短名规范化依赖文件已存在、规范化与访问之间有 TOCTOU、还要处理一堆路径格式。结论是模式检测更可预测，并要求改动前先找 AppSec。
+5. **打包技能目录的 per-process nonce 是承重结构**。uid、版本号、技能名、文件键全是公开信息，只有 nonce 是秘密；没有它，本地攻击者可在共享临时目录预建整棵树（粘滞位只阻止删除不阻止创建），再把中间目录换成符号链接——而该子树在**读白名单**里，替换内容等于向上下文注入。
+
+**`installer.ts` 的四个要点**：
+
+1. **原子安装 = 复制到安装目录旁边的临时文件 + rename**。不能直接从暂存目录 rename：缓存与数据目录常是不同挂载点，跨设备 rename 报 EXDEV。只有同目录 rename 才是原子的。
+2. **锁的目的是「别删我」**。清理旧版本前要算三份保护名单：当前进程的可执行文件、符号链接指向的版本、**任何进程持有活跃锁的版本**。PID 锁能立刻发现崩溃进程，mtime 锁只能等超时；两处超时常量必须一致，否则会出现「运行中进程的锁被判成陈旧」。
+3. **Windows 没有符号链接可用，只能复制**，于是更新要先改名旧文件再复制新文件，复制失败必须回滚，回滚失败要**优先报回滚错误**（用户已经没法用了）。删不掉旧 exe 是正常现象，留给下次启动清理。
+4. **单飞守卫是被事故逼出来的**：自动更新组件随浮层切换重挂载，「正在更新」标志活不过重挂载，每次重挂载就再下一次几百兆的二进制，某次会话内存缓冲涨到 91GB。修法是把状态提到模块级，并保证成功与失败都清空。
+
+**`schemas.ts` 的四个要点**：
+
+1. **冒名防护分两层且必须分两层**：名字层拦白名单外的官方名冒用 + 非 ASCII（同形字）+ 三种冒名词序；来源层要求保留名只能来自官方 GitHub 组织。单看任一层都能被绕过。
+2. **宽松与严格的分界是按「谁的错」画的**：manifest 顶层未知字段静默丢弃（作者可能加自定义字段，报错会让插件装不上），嵌套的严格对象（用户配置、渠道、LSP）仍 strict（那里的多余键更像拼写错误）。市场条目也必须宽松——数组里一条报错会让整个市场的插件全部不可用。
+3. **共享 schema 是防漂移手段**：settings 这一路先写盘再跑完整校验，两套校验若不一致就会在缓存里留下孤儿文件；所以市场名校验做成单一 schema 给两处共用，漂移变成不可能。
+4. **前向兼容靠「允许但忽略」**：依赖引用允许带版本后缀与对象形态，但 transform 时静默剥掉——未来客户端加版本约束时，旧客户端不会因为 schema 校验失败而拒绝整个插件。
+
+踩坑：**开工时 `annotated-索引与进度.md` 又一次被外部编辑器重排回写**，内容退回第 47 批状态（丢第 48 批小节、39.7% 退回 38.6%、`<summary>` 包裹、删空行）。按上一批的经验做规范化语义比对（去反斜杠 + 去空白 + 分隔线归一）确认零新增后 `git checkout` 还原 HEAD，重排版备份在 `/tmp/索引-外部回写-第48批后.md`。
+
+踩坑：**锚点选行要落在「块闭合处」而不是「块内最后一条语句」**。`installer.ts` 原写 666（`return false`，在 if 内部）应改 667（if 的闭合括号）；1690 是空行，实际语句在 1689。这两个都是「语义看着对、插入位置错一层」的典型。
+
+流程账：预检三份全过（170 锚点，一次通过）；`annotate.py` 零 `⟳`；`check-fidelity.py` 604 份 0 失败；`check-links.py` 822 条源码链接 + 108 条内链，0 失效。
 
 ---
 
