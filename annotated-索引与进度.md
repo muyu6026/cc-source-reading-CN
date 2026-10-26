@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,307 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,304 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 6**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader，27,374 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 3,300 行档，往下继续 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 9**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth，34,698 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 2,000 行档，往下继续 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,307 份没动（37.2% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,304 份没动（38.6% 行数）。
 
 ---
 
@@ -1381,6 +1381,44 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`annotated-索引与进度.md` 在批 44 提交后被外部编辑器重排回写（表格对齐 + `<summary>` 补包裹 + 反斜杠转义），把批 45 的进度数字倒退回批 44 状态、丢失第 45 批小节、还有一个字符损坏成 HTML 实体（`错` → `&#x9519;`）。经规范化比对确认零新增内容后恢复 HEAD 版本，重排版备份在 `/tmp`。
 
 流程账：预检两份一次通过（326 锚点）；`annotate.py` 零 `⟳`；`check-fidelity.py` 595 份 0 失败；`check-links.py` 814 条源码链接 + 105 条内链，0 失效。
+
+---
+
+### utils 第六梯队：ast、marketplaceManager 与 auth（第 47 批，3 份 7,324 行，321 锚点）
+
+`bash/ast.ts`（2,679 行）、`plugins/marketplaceManager.ts`（2,643 行）、`auth.ts`（2,002 行）。三份都在 `bashParser` 与 `pluginLoader` 的下游：一个把语法树变成可信 argv，一个管市场的落盘与对账，一个管凭证从哪来、什么时候刷新。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/bash/ast.ts`](annotated/src/utils/bash/ast.ts) | 2,679 | 2,783 | 104 | AST 安全分析：白名单遍历、作用域传播、argv 后置语义检查 |
+| [`utils/plugins/marketplaceManager.ts`](annotated/src/utils/plugins/marketplaceManager.ts) | 2,643 | 2,746 | 103 | 市场管理器：意图层/状态层、种子同步、git 与 URL 缓存、对账刷新 |
+| [`utils/auth.ts`](annotated/src/utils/auth.ts) | 2,002 | 2,116 | 114 | 凭证层：八种 token 来源、apiKeyHelper 的 SWR、OAuth 跨进程刷新锁 |
+
+**`ast.ts` 的五个要点**：
+
+1. **安全性质来自白名单，不来自黑名单**。`DANGEROUS_TYPES` 明说不求完备，真正兜底的是 `walkArgument` / `walkCommand` 的 `default: return tooComplex(child)`——没显式处理的节点类型一律判复杂。解析中止（超时/节点预算/panic）也必须 fail-closed，历史上把它与「模块未加载」混为一谈，回落到缺 `EVAL_LIKE_BUILTINS` 的旧路径，`trap`/`enable`/`hash` 在 `Bash(*)` 下泄漏了。
+2. **变量作用域不能线性流过 `||` / `|` / `&`**。这三种分隔符后面设的变量要么可能没执行、要么在子 shell 里，线性传递会造成「省略 flag」攻击：`true || FLAG=--dry-run && cmd $FLAG` 在 bash 里 cmd 不带 dry-run，而我们的 argv 反而看起来更安全。做法是入口快照、遇这三种重置；`&&` 与 `;` 是顺序执行，正常传递。
+3. **placeholder 与真实值的分界线**。已追踪的字面变量**直接返回真实值**（`VAR=/etc && rm $VAR` 必须让路径校验看到 `/etc`）；非常量值当裸参数一律拒绝，只在字符串内给占位符；而「纯占位符字符串」（`"$(cmd)"`）也要拒——否则 `cd "$(echo /etc)"` 会通过校验却在运行时进 `/etc`。
+4. **`.text` 会在必要时从 argv 重建**。原文含「美元符加标识符」或含换行时重建：前者因为 `SUB=push && git $SUB --force` 的原文匹配不上 `git push:*` 拒绝规则；后者因为行续接在原文里可见、在 argv 里已折叠，下游剥离包装命令时会卡住。
+5. **后置语义检查专治「分词没问题、名字有问题」**。剥包装器（`time`/`nohup`/`timeout`/`nice`/`env`/`stdbuf`）时遇到不认识的 flag 一律 fail-closed（`timeout -k 5 10 eval` 曾让 eval 逃过检查）；`timeout .5` 这种 libc 浮点写法也要认；数组下标在 `-v`/`-a`/算术比较/`read` 位置参数四类位置会被 bash 算术求值，单引号也拦不住。
+
+**`marketplaceManager.ts` 的四个要点**：
+
+1. **意图层与状态层分开**。settings 里的 `extraKnownMarketplaces` 是用户声明，`known_marketplaces.json` 是运行时产物；回写意图必须写到**声明它的那个** settings 源，否则会在低优先级层造出重复条目。读配置有两个版本，`Safe` 版只许用在只读路径——读失败返回空对象，接着写回会把损坏文件整个覆盖，用户其余条目永久消失。
+2. **两个方向都做越界校验**。重命名缓存前确认最终路径严格位于缓存目录之下（恶意清单用 `..` 或 `.` 作名字时既不能删到外面、也不能删缓存目录本身）；清理旧 installLocation 与刷新远程源之前也校验——历史上配置损坏（Windows 路径在 WSL 读、字面波浪号、手改）曾指向用户项目目录，git 会以那里为工作目录、pull 失败还会 rm（gh-32793、gh-32661）。
+3. **种子目录 = 管理员地盘**。注册时种子赢、多种子先到先得、`autoUpdate` 强制 false、安装位置按运行时目录重算（多阶段 Docker 挂载点会漂移）；删除/刷新/改自动更新一律报错并指引「找管理员」或「禁用具体插件」，因为下次启动会被覆盖回去。
+4. **稀疏检出的三个迁移只有两个能就地做**。全量→稀疏、稀疏 A→稀疏 B 直接重设规则；稀疏→全量必须**返回非零让上层重克隆**，因为在部分克隆上执行 `sparse-checkout disable` 会触发把所有 blob 惰性拉一遍。
+
+**`auth.ts` 的四个要点**：
+
+1. **托管上下文不许回落用户配置**。远程容器与桌面端由平台带 OAuth 启动，若读用户终端的 apiKeyHelper / API key，会在 key 过期或异组织时全线失败。ssh 远程更极端：只看占位令牌存不存在，远端的设置绝不能参与判断，否则请求头与代理注入的身份不匹配。
+2. **apiKeyHelper 是 stale-while-revalidate + 世代号**。过期时先返回旧值、后台刷新；后台失败**不用哨兵覆盖可用旧值**，只更新时间戳避免雪崩；清缓存递增 epoch，在途旧任务写回前比对 epoch 丢弃自己。失败哨兵用空格而非 null——null 会让调用方回落到 OAuth，等于悄悄换身份。
+3. **跨进程令牌失效是真实 bug**（带 issue 编号）。A 终端登录修好自己，B 终端登录会让服务端吊销 A 的令牌，而 A 的记忆化缓存永不重读 → 无限重登。解法是每次取令牌前比对凭证文件 mtime。401 处理先看钥匙串里是否已被别人换过，同一个失败令牌的并发 401 还要去重（不去重时同步钥匙串读取能阻塞渲染帧 800ms 以上）。
+4. **刷新必须跨进程加锁 + 双重检查**。抢不到锁就退避重试（带随机抖动错开），拿到锁后再查一次（等锁期间别人可能已刷好），刷新成功前后各清一次缓存，最后在 finally 里释放锁。订阅用户刷新时**省略作用域**，让服务端能在不重登的前提下扩权。
+
+踩坑：`ast.ts` 与 `marketplaceManager.ts` 的数据文件都被预检拦了一轮——批注里引用 shell 字面量（`"$(cmd)"`、`env "FOO=bar"`、`\-n`）会带英文双引号与反斜杠。全部改成「引号包裹的 XX」「转义写法的 -n」这类中文表述后通过。这条已是第二次踩到（批 45 bashParser），以后写数据文件时直接不用引号字符。
+
+流程账：预检三份一次通过（321 锚点，其中 `ast.ts` 两轮修引号、`marketplaceManager` 一轮）；`annotate.py` 零 `⟳`；`check-fidelity.py` 598 份 0 失败；`check-links.py` 816 条源码链接 + 106 条内链，0 失效。
 
 ---
 
