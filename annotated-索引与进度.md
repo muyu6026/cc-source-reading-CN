@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,289 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,279 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 24**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext，58,847 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,300 行档；下一批按行数降序取 bash/commands(1339)/mcpbHandler(968)/commitAttribution(961)/loadPluginCommands(946)/permissionSync(928) |
+| `src/utils/` | 564 份 / 180,487 行（**已做 34**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin，68,328 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,300 行档；下一批按行数降序取前 10 大文件：bash/commands(1339)/installedPluginsManager(1268)/teleport(1226)/teammateMailbox(1183)/settings/types(1148)/perfettoTracing(1120)/fileHistory(1115)/collapseReadSearch(1109)/stats(1061)/toolResultStorage(1040)**（注：本批按既定计划吃掉 903–1015 行档，即缺份排名 11–20，下一批才接 1339 起的前 10）** |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,289 份没动（43.3% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,279 份没动（约 45% 行数）。
 
 ---
 
@@ -1594,6 +1594,33 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`claudemd.ts` 的锚点 1195 文本里写了一句带英文双引号的 `避免"有指令但没内容"的空壳`，预检直接拦下（第 5 条硬规矩），改成「」后通过。这是本仓第三次因引号被拦，写数据文件时**正文里不要出现任何英文引号字符**这条已经稳了。
 
 流程账：预检四份全过（188 锚点，一次通过）；`annotate.py` 四次零 `⟳`；`check-fidelity.py` 613 份 0 失败；`check-links.py` 830 条源码链接 + 110 条内链，0 失效。
+
+### utils 第 52 批：设置、沙箱、插件与 git 基础工具（第 52 批，10 份 9,481 行，280 锚点）
+
+十份分散在 utils 各处的「工具基础设施」：设置装载、沙箱适配、插件下载与命令加载、提交归因、swarm 权限同步、遥测会话追踪、git 根定位与工作树安全校验、斜杠命令分发、插件校验器。没有统一主题，但都是上层反复依赖的底座。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/settings/settings.ts`](annotated/src/utils/settings/settings.ts) | 1,015 | 1,043 | 28 | 设置加载/合并/策略来源/写回/自动模式配置 |
+| [`utils/sandbox/sandbox-adapter.ts`](annotated/src/utils/sandbox/sandbox-adapter.ts) | 985 | 1,018 | 33 | 沙箱适配器（内置 SECURITY 块，H1 漏洞修复） |
+| [`utils/plugins/mcpbHandler.ts`](annotated/src/utils/plugins/mcpbHandler.ts) | 968 | 991 | 23 | MCPB 下载/解压/缓存/用户配置分流（H1 #3617646 修复） |
+| [`utils/commitAttribution.ts`](annotated/src/utils/commitAttribution.ts) | 961 | 994 | 33 | 提交归因系统（谁改了哪段代码） |
+| [`utils/plugins/loadPluginCommands.ts`](annotated/src/utils/plugins/loadPluginCommands.ts) | 946 | 963 | 17 | 插件命令/技能加载与分发 |
+| [`utils/swarm/permissionSync.ts`](annotated/src/utils/swarm/permissionSync.ts) | 928 | 957 | 29 | swarm 权限同步（文件式 + 邮箱式两条链路） |
+| [`utils/telemetry/sessionTracing.ts`](annotated/src/utils/telemetry/sessionTracing.ts) | 927 | 958 | 31 | OpenTelemetry 会话追踪：interaction/llm/tool/hook span |
+| [`utils/git.ts`](annotated/src/utils/git.ts) | 926 | 957 | 31 | git 根定位/worktree 安全校验/issue 状态保留 |
+| [`utils/processUserInput/processSlashCommand.tsx`](annotated/src/utils/processUserInput/processSlashCommand.tsx) | 922 | 953 | 31 | 斜杠命令分发：fork 子代理 / 本地 / 提示词三路 |
+| [`utils/plugins/validatePlugin.ts`](annotated/src/utils/plugins/validatePlugin.ts) | 903 | 928 | 25 | `claude plugin validate` 校验器（manifest/frontmatter/hooks） |
+
+**几个值得记住的点**：
+
+1. **`git.ts` 的 worktree 安全校验是沙箱逃逸的命脉**：克隆下来的仓库里 `.git` 文件与 `commondir` 都攻击者可控，不校验就会被诱导借用受害者的信任目录、绕过信任对话框执行 `.claude/settings.json` 钩子。`resolveCanonicalRoot` 用「worktreeGitDir 必须是 `<commonDir>/worktrees/` 直接子目录」+「`<worktreeGitDir>/gitdir` 必须指回 `<gitRoot>/.git`」两步缺一不可的校验挡住；`isCurrentDirectoryBareGitRepo` 则防 cwd 被伪装成裸仓库触发钩子。
+2. **`sandbox-adapter.ts` 与 `mcpbHandler.ts` 都内置 SECURITY 块**：前者挡沙箱内命令越权、后者挡用户配置被污染（mcpbHandler 对应 H1 #3617646 的下载/解压/缓存校验修复）——读这两份时 SECURITY 块要逐字对照，它们是「为什么这么写」的权威注解。
+3. **`processSlashCommand.tsx` 的 `context:fork` 分支**是「后台定时任务」与「同步技能」的分水岭：KAIROS 开启时后台 fire-and-forget 用独立的 abortController，N 个定时任务并行而非串行，结果以隐藏 isMeta 提示回队；否则同步跑并带进度 UI。
+
+踩坑：本批无预检 FAIL、无 `⟳` 外移、无块注释内中文告警；`processSlashCommand.tsx` 末行 base64 sourceMappingURL 按惯例省略（fidelity 标 `OK*`）。**进度口径提示**：实测 `check-coverage.py src/utils` 现在显示缺份前 10 从 `bash/commands.ts`(1339) 起，本批按既定计划吃掉 903–1015 行档（即缺份排名 11–20），下一批应直接接 1339 起的前 10 大文件，而不是继续 903 档。
+
+流程账：预检十份全过（280 锚点，一次通过）；`annotate.py` 十次零 `⟳`；`check-fidelity.py` 623 份 0 失败；`check-links.py` 源码链接 834 条 + 内链 111 条，0 失效。
 
 ---
 

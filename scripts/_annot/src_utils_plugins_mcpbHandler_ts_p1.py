@@ -1,0 +1,27 @@
+# 批注数据：src/utils/plugins/mcpbHandler.ts
+# slug = src_utils_plugins_mcpbHandler_ts
+ANNOTATIONS = [
+    (27, 'before', '''用户配置值类型：一个键到「字符串 / 数字 / 布尔 / 字符串数组」的扁平映射，描述某个 MCP 服务器需要用户填的配置。'''),
+    (35, 'before', '''用户配置 schema 类型：键到 DXT manifest 里 McpbUserConfigurationOption 的映射，决定每个配置项的类型、是否必填、是否敏感。'''),
+    (40, 'before', '''加载 MCPB 成功时的结果：manifest、生成的 MCP 服务配置、解压路径、内容哈希。'''),
+    (50, 'before', '''加载 MCPB 但「还缺用户输入」时的结果：带回 schema、已有配置、校验错误，让上层弹出配置对话框。'''),
+    (63, 'before', '''每个缓存 MCPB 的元数据：来源、内容哈希、解压路径、缓存时间、最近检查时间。'''),
+    (74, 'before', '''下载 / 解压进度的回调类型：传一个状态字符串给上层刷新 UI。'''),
+    (79, 'before', '''判断一个来源字符串是不是 MCPB 文件引用：以 .mcpb 或 .dxt 结尾即算。'''),
+    (86, 'before', '''判断来源是不是 URL：以 http:// 或 https:// 开头即算，用来区分「远程下载」与「本地读取」。'''),
+    (93, 'before', '''为 MCPB 文件算内容哈希：用 sha256 取前 16 位十六进制，作为缓存目录里的版本标识。'''),
+    (100, 'before', '''取某个插件目录下专门的缓存目录：在插件目录里建 .mcpb-cache。'''),
+    (107, 'before', '''算缓存元数据文件路径：把来源字符串 md5 取前 8 位当文件名，避免把原始 URL / 路径直接当文件名。'''),
+    (124, 'before', '''拼「每服务器密钥桶」在 secureStorage 里的键：用 pluginId/serverName 的复合键。pluginId（name@marketplace）与 serverName 都不含斜杠，所以复合键无歧义；这样既能和顶层插件选项共用一个扁平 map，又不必改动 SecureStorageData 的 schema，还能把单个密钥链条目控制在约 2KB 内。'''),
+    (141, 'before', '''加载某 MCP 服务器的用户配置：把「非敏感值（来自 settings.json）」与「敏感值（来自 secureStorage 钥匙链）」合并。冲突时 secureStorage 优先——因为若用户手改 settings.json，更安全的来源说了算。两个来源都没有才返回 null（上层据此跳过 user_config 替换）。'''),
+    (193, 'before', '''保存某 MCP 服务器的用户配置，按 schema[key].sensitive 分流：敏感项写 secureStorage（macOS 走钥匙链、其余平台写 .credentials.json 权限 0600），其余写 settings.json 的 pluginConfigs[pluginId].mcpServers[serverName]。这个分流正是堵上 H1 #3617646 那个漏洞——以前弹窗把输入打码了，保存却照样落到明文 settings.json。'''),
+    (320, 'after', '''非敏感项写 settings.json：只在「有新非敏感值」或「要擦除旧明文敏感值」时才写，确保「改成一个只含敏感项的 schema」时也能顺手清掉旧 settings.json。注意 updateSettingsForSource 用的是 mergeWith，会保留源里没有的目标键，所以想删敏感键不能简单省略，而要把该键显式设成 undefined（settings.ts 的合并器把显式 undefined 当删除）。这里先等 secureStorage 写成功，擦除才不会让你「两份秘密全丢」。'''),
+    (346, 'before', '''按 DXT 的 user_config schema 校验用户输入：必填项缺失即报错；按类型（string / number / boolean / file / directory）逐一检查，string 在 multiple:true 时允许是字符串数组；number 还会查 min / max 区间。返回 { valid, errors }。'''),
+    (413, 'before', '''从 DXT manifest 生成 MCP 服务配置：懒加载 @anthropic-ai/mcpb（它的 barrel 会拉进约 700KB 的 zod v3 闭包，按需 import 避免启动膨胀），调 getMcpConfigForManifest 并补上系统目录、用户配置、路径分隔符。manifest 没生成出配置就报错。'''),
+    (443, 'before', '''读某个 MCPB 来源的缓存元数据：读不到或解析失败（ENOENT 等）都返回 null，让上层当作「需要重新加载」。'''),
+    (468, 'before', '''写某个 MCPB 来源的缓存元数据：先建缓存目录，再把元数据 json 落盘。'''),
+    (482, 'before', '''从 URL 下载 MCPB 文件：用 axios 拉，超时 2 分钟、最多跟 5 次重定向，带下载进度回调。注意遥测在 writeFile 之前打——它量的是网络耗时而非磁盘 IO，否则 writeFile 的 EACCES 会被 classifyFetchError 误判成鉴权失败。下载完先发遥测再落盘，二进制直接写。'''),
+    (550, 'before', '''把 MCPB 解压内容写进解压目录：先建目录，逐文件写（区分文本与二进制，文本用 UTF-8）；MCPB 可能带原生服务二进制，所以保留执行位很关键——用 parseZipModes 从中央目录读出权限位再 chmod。chmod 遇到 EPERM / ENOTSUP（NFS root_squash、某些 FUSE 挂载）直接吞掉，避免中途中止。进度每 10 个文件回报一次。'''),
+    (622, 'before', '''判断某个 MCPB 来源是否「变了、需要重新解压」：先看缓存元数据，没有就视为要加载；解压目录不存在也视为要加载；本地文件比对 mtime（用 floor 对齐 ISO 字符串的毫秒精度，避免同毫秒内「刚缓存的文件比自己的缓存戳还新」的误判）；URL 来源交给显式更新时再查，这里直接返回 false。'''),
+    (698, 'before', '''加载并解压 MCPB 文件，带缓存与用户配置支持：先查缓存，未变就直接复用（必要时按 user_config 决定返回 needs-config 还是带配置生成）；缓存失效则下载或本地读取、算哈希、解压 ZIP、解析并校验 manifest、确认有 server 配置，再按是否有 user_config 走「需要配置」或「直接生成」两条路，最后写回缓存元数据。是整个 MCPB 加载的主入口。'''),
+]
