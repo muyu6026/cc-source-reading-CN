@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,309 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,307 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 4**：messages + sessionStorage + hooks + bashParser，20,075 行） | 最大的一块，但最杂。已从体量最大的根目录四份巨兽入手，往下按行数降序推进 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 6**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader，27,374 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 3,300 行档，往下继续 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,309 份没动（35.8% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,307 份没动（37.2% 行数）。
 
 ---
 
@@ -1352,6 +1352,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：批注文本里写 shell 示例（`ls <<'EOF'`、`export "FOO=bar"`）极易带进英文双引号与反斜杠——数据文件被预检连续拦下 4 轮，全部改成「加引号 XX」式表述；另注意 raw string 里 `\\r` 仍是两个反斜杠字符，预检按单反斜杠判，必须整词改写。
 
 流程账：预检两份一次通过（307 锚点）；`annotate.py` 零 `⟳`；`check-fidelity.py` 593 份 0 失败（hooks 记 135 行 vs 136 锚点，属 CJK 占比门限正常差 1）；`check-links.py` 812 条源码链接 + 104 条内链，0 失效。
+
+---
+
+### utils 第五梯队：attachments 与 pluginLoader（第 46 批，2 份 7,299 行，326 锚点）
+
+`attachments.ts`（3,997 行）与 `plugins/pluginLoader.ts`（3,302 行）。一个管「每个回合往对话里悄悄塞什么」，一个管「插件从哪来、怎么装、怎么不被恶意条目坑」。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/attachments.ts`](annotated/src/utils/attachments.ts) | 3,997 | 4,155 | 158 | 附件系统总装：40 余种 Attachment 类型的生产、节流与消息化 |
+| [`utils/plugins/pluginLoader.ts`](annotated/src/utils/plugins/pluginLoader.ts) | 3,302 | 3,470 | 168 | 插件装载线：发现 → 版本化缓存 → 策略校验 → 组件装配 → 三源合并 |
+
+**`attachments.ts` 的四个要点**：
+
+1. **回合计数必须数人类回合**。plan/auto/todo/verify 四类提醒全部倒序扫消息数「距上次提醒过了几回合」，且都只数非 meta、非 tool_result 的 user 消息——工具循环每轮都调附件生成，数 assistant 消息会把 5 回合间隔退化成每 5 次工具调用催一次（auto 模式长会话累计多发 60–105 倍）。
+2. **prompt cache 是最高约束**。date_change 附件追加在对话尾部让模型学到新日期而缓存前缀纹丝不动（清头部旧日期会让通宵会话跨午夜一次烧掉约 92 万有效 token）；agent 清单从工具 description 挪进增量附件（清单在描述里时 MCP 异步连接会打爆整个工具 schema 缓存，机群 10.2% 的 cache_creation 浪费）；代理列表输出强制排序——加载顺序不确定，不排序同样的集合产出不同字节。
+3. **外部改文件的回传通道**。`getChangedFiles` 监工 readFileState 登记过的文件：mtime 变了就重新读并产出差异片段附件；只有 ENOENT 才逐出——编辑器原子写的 tmp→rename 间隙、保存时格式化的竞态绝不能逐出，否则下次 Edit 误报 code-6。
+4. **预取不阻塞回合**。相关记忆检索用 Disposable 预取句柄：回合开始启动、模型流式输出期间后台跑、收集点看 settledAt 决定取用或下轮再试；query.ts 用 `using` 绑定，dispose 在约 13 个生成器退出路径上自动触发。
+
+**`pluginLoader.ts` 的四个要点**：
+
+1. **企业策略 fail-closed**：策略已配置但 marketplace 来源解析不出（配置损坏、条目缺失）时必须拦截，不能静默跳过策略检查——历史上有过「引入 Safe 读配置后策略检查在 undefined 上短路、回落路径绕过校验」的静默 fail-open，守卫注释把这段演化写得很细。
+2. **版本键错位 = 永远重克隆**：预克隆版本已确定（source.sha / entry.version / installedVersion）时必须复用，不能信克隆后重算——manifest.version 优先级高于 gitCommitSha，重算会得出不同版本号，温启动探测不到缓存就每次都重新克隆。
+3. **git-subdir 的省钱三板斧**：部分克隆 `--filter=tree:0` + 稀疏检出只拉路径沿途的树对象与路径下的 blob（百万文件 monorepo 省数百 MB）；checkout HEAD（慢、网络）与 rev-parse HEAD（只读、不碰 index 锁）并行执行。
+4. **三源合并的优先级**：`--plugin-dir` 会话副本覆盖同名已安装插件（用户显式指向目录的意图），但被管理 settings 锁定的（无论强制启用还是禁用）不可覆盖——管理员意图压过本地开发便利。没有这个去重时两份共存且首匹配让已安装版胜出，--plugin-dir 对迭代已装插件毫无用处。
+
+踩坑：`annotated-索引与进度.md` 在批 44 提交后被外部编辑器重排回写（表格对齐 + `<summary>` 补包裹 + 反斜杠转义），把批 45 的进度数字倒退回批 44 状态、丢失第 45 批小节、还有一个字符损坏成 HTML 实体（`错` → `&#x9519;`）。经规范化比对确认零新增内容后恢复 HEAD 版本，重排版备份在 `/tmp`。
+
+流程账：预检两份一次通过（326 锚点）；`annotate.py` 零 `⟳`；`check-fidelity.py` 595 份 0 失败；`check-links.py` 814 条源码链接 + 105 条内链，0 失效。
 
 ---
 
