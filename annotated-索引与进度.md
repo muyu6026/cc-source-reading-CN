@@ -1293,11 +1293,37 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 2**：messages + sessionStorage，10,617 行） | 最大的一块，但最杂。已从体量最大的根目录两份巨兽入手，往下按行数降序推进 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,313 份没动（31.8% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,311 份没动（33.9% 行数）。
+
+---
+
+### utils 根目录两个巨兽：messages 与 sessionStorage（第 44 批，2 份 10,617 行，226 锚点）
+
+`src/utils/` 是最后一个「体量可怕」的目录（564 份 / 180,487 行），根目录就占 298 份、90,767 行。按行数降序，前两名是 5,512 行的 `messages.ts` 与 5,105 行的 `sessionStorage.ts`——单份体量约等于此前 hooks 批次里 20 份小文件之和，因此本批只取这两份（流水线允许「大文件少取」，优先级仍是行数降序）。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/messages.ts`](annotated/src/utils/messages.ts) | 5,512 | 5,596 | 84 | 消息装配线：工厂 → 归一化 → 重排 → 附件翻译 → 发送前总装 |
+| [`utils/sessionStorage.ts`](annotated/src/utils/sessionStorage.ts) | 5,105 | 5,247 | 142 | 会话 JSONL 的读写层：追加、去重、链恢复、标题元数据、/resume 列表 |
+
+两份文件正好是主链路的两端：`messages.ts` 管「发给模型的是什么形状」，`sessionStorage.ts` 管「磁盘上留下的是什么形状」。四个最值得记的点：
+
+1. **`messages.ts` 真正难的不是构造，而是把一条对话压成 API 能接受的形状**。`normalizeMessagesForAPI` 那条总装线里塞了十几道后处理，每一道都对应一次真实 400：tool_result 必须前置（`hoistToolResults`）、相邻文本块之间要补分隔符（否则「2+2」+「3+3」拼成「2+23+3」）、assistant 不能以 thinking 收尾、只有空白的文本块要剔除、孤儿思考块要滤掉。读懂这些补丁，等于读完了一部「Anthropic Messages API 踩坑史」。
+2. **`smoosh` 系列（system-reminder 折叠进 tool_result）是为省一个 Human 回合边界**。附件消息本该跟着上一条用户消息走，但数组里它是独立的 user 消息，于是每次注入上下文都会凭空多一个 Human 边界，还会教模型在工具结果后停手。`ensureSystemReminderWrap` → `smooshSystemReminderSiblings` 用 `<system-reminder>` 前缀当判别符，把兄弟消息折叠进去，边界就消失了。
+3. **`sessionStorage.ts` 的核心矛盾是「追加写」与「就地改」的冲突**。JSONL 只能追加，可压缩要删前缀、snip 要删中段、墓碑要删最后一条——三种删除各有各的打法：压缩用 `applyPreservedSegmentRelinks` 重新接链并清 usage；snip 用 `applySnipRemovals` 重放删除记录并沿父链重连（带路径压缩）；墓碑 `removeMessageByUuid` 只读尾部 64KB、定位行边界后 truncate 再回写，超 50MB 直接放弃。
+4. **两条容易写错、且写错就静默丢数据的规矩**：① `appendEntry` 对 sidechain 的**本地写入**必须跳过去重——fork 继承来的消息 UUID 与主会话重复，去重会让子代理转录只剩 10KB 而不是完整 85KB；但同一批 UUID 的**远端**写入不能跳过，否则 409 重试耗尽后优雅退出（inc-4718）。② `recordTranscript` 里「已记录消息」只有在构成前缀时才能当父节点——压缩后的 `messagesToKeep` 排在新边界之后，若仍推进游标，新消息会挂到压缩前的 UUID 上，把边界变成孤儿。
+
+两条踩坑记录（都属锚点位置，不是理解问题）：
+
+- **`messages.ts` 数据文件末尾 13 行丢了引号**：`(4677, after, ...)` 里的 `after` 没加引号，`ast.parse` 照样通过（裸名字是合法表达式），直到 importlib 执行才抛 `NameError`。教训：预检必须**执行模块**，只做 `ast.parse` 拦不住这类错误。
+- 两个函数签名行（`deriveShortMessageId` 的 `export function ...{`、`handleMessageFromStream` 的 `): void {`）原本用了 `after`，会插进函数体第一行；改成 `before` 后读起来才是「注释在前、代码在后」。
+- `sessionStorage.ts` 首个锚点原写 96 行（空行），实际想让注释落在 import 块之后，改为 95 行（最后一条 import）。
+
+流程账：预检（slug / pos / 行号 / 重复锚点 / 无引号反斜杠 / 模块可执行）两份均一次通过；`annotate.py` 零 `⟳`；`check-fidelity.py` 591 份 0 失败（messages 记 83 行中文批注 vs 84 锚点，属短批注 CJK 占比门限的正常差 1）；`check-links.py` 810 条源码链接 + 103 条内链，0 失效。
 
 ---
 
