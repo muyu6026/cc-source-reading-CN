@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,293 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,289 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 20**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier，53,006 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,500 行档；下一批按行数降序取 sandbox-adapter(985)/mcpbHandler(968)/commitAttribution(961)/loadPluginCommands(946)/permissionSync(928) |
+| `src/utils/` | 564 份 / 180,487 行（**已做 24**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext，58,847 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,300 行档；下一批按行数降序取 bash/commands(1339)/mcpbHandler(968)/commitAttribution(961)/loadPluginCommands(946)/permissionSync(928) |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,293 份没动（42% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,289 份没动（43.3% 行数）。
 
 ---
 
@@ -1549,6 +1549,51 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：本批数据文件初版漏写 `_p1` 后缀（`scripts/_annot/src_utils_*.py` 而非 `_p1.py`），而 `annotate.py` 按 `<slug>_p*.py` 定位数据，预检直接报「找不到批注数据」；补上 `_p1` 后预检通过。另有两个锚点落进多行 `const` 声明中部（`ANTHROPIC_PERMISSIONS_TEMPLATE`、`classifierType`）被 check-fidelity 拦下，分别挪到三元收尾行与 `? :` 链末行后复验 0 失败。
 
 流程账：预检五份全过（336 锚点，一次通过）；`annotate.py` 良性 `⟳` 外移 12 处（inProcessRunner 6 + permissionSetup 4 + worktree 2，均为 `//` 注释段自动归并，非模板串）；首轮 `check-fidelity.py` 2 处失败（多行 `const` 被劈开），修锚点后 5 份 0 失败；`check-links.py` 825 条源码链接 + 109 条内链，0 失效。
+
+---
+
+### utils 第十梯队：IDE 集成、权限主流水线、CLAUDE.md 装载与上下文分析（第 51 批，4 份 5,841 行，188 锚点）
+
+四份都是「环境的入口」而不是业务逻辑：`ide.ts` 找编辑器、`permissions.ts` 判能不能动手、`claudemd.ts` 装指令、`analyzeContext.ts` 量窗口。放在一批读的好处是能看清它们共用同一条判据链——**显式声明压过一切隐式推导**。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/ide.ts`](annotated/src/utils/ide.ts) | 1,494 | 1,540 | 46 | IDE 集成发现层：锁文件扫描、端口探活、工作区前缀匹配、进程祖先链、扩展安装 |
+| [`utils/permissions/permissions.ts`](annotated/src/utils/permissions/permissions.ts) | 1,486 | 1,532 | 45 | 权限主流水线：1a–1g 规则层 → 2a/2b 模式层 → dontAsk/auto 两个后处理 |
+| [`utils/claudemd.ts`](annotated/src/utils/claudemd.ts) | 1,479 | 1,530 | 51 | CLAUDE.md 装载：四类记忆优先级、@include 递归与防环、条件规则 glob 匹配、排除项 |
+| [`utils/analyzeContext.ts`](annotated/src/utils/analyzeContext.ts) | 1,382 | 1,428 | 46 | 上下文用量分析：七个并行计数器、延迟工具记账、保留缓冲语义、10×10 字符网格 |
+
+**`ide.ts` 的四个要点**：
+
+1. **发现链有四道筛，顺序就是性能设计**：mtime 排序 → TCP 探活 → 工作区路径前缀匹配（纯内存）→ 进程祖先链（要 shell 出 ps，最多 10 次）。祖先链检查放在最后且惰性触发，注释写明早先它在每个锁文件上都跑一次，是 CPU profile 的头号热点。
+2. **路径比较必须先 NFC 归一**：macOS 返回 NFD（分解式 Unicode），VS Code 报 NFC，带重音或 CJK 的路径不做归一永远匹配不上；Windows 还要额外把盘符统一大写。
+3. **WSL 是双命名空间问题**：`/mnt/c` 访问慢 2–10 倍，所以候选路径**故意不做存在性预检**，交给消费方 readdir 吃 ENOENT；Windows 侧 pid 在 WSL 里无意义，清理锁文件必须「pid 不在 + 端口不活」双判据。
+4. **30 秒轮询只在恰好一个匹配时返回**：多于一个就返回 null 让用户走 `/ide` 手选——自动连错窗口比连不上更糟（diff 会打到别人的工作区）。
+
+**`permissions/permissions.ts` 的四个要点**：
+
+1. **步骤编号就是架构**：1a–1g 是规则层与免疫层（deny / 必需交互 / 内容级 ask / 安全路径检查都在 bypassPermissions 之前），2a/2b 是模式层，3 把 passthrough 转 ask。后面所有模块的注释都在引用这些编号。
+2. **不可被分类器批准的安全检查完全免疫所有快路**：acceptEdits 快路、安全工具白名单、分类器三条都过不去；而「可被分类器批准」的敏感路径检查则放行到分类器。区分「能不能让 AI 判」是这套设计的核心。
+3. **dontAsk 与 auto 两个转换放在最外层**（result 已成型之后），注释写明理由：内层有十余处早退，任何一处漏掉就是策略被绕过。
+4. **`syncPermissionRulesFromDisk` 有一段必须记住的坑**：替换前要主动清空每个「磁盘源 × 行为」组合，因为 `convertRulesToUpdates` 只对有规则的分组生成更新——某组被删空后不产生更新，旧规则就留在 context 里（删一条 deny，它还在）。
+
+**`claudemd.ts` 的四个要点**：
+
+1. **四类记忆按优先级从低到高装载**：Managed → User → Project → Local，后加载的优先级更高（模型更注意靠近末尾的内容）。向上走的目录循环 `reverse()` 就是为了保证「越靠近 cwd 越晚进列表」。
+2. **`@include` 用 processedPaths + 深度 5 双重防环**，且符号链接要把 realpath 也登记一遍，否则不同链接指向同一文件会重复注入。扩展名走**白名单**——允许二进制等于允许把乱码塞进 prompt。
+3. **only-when-needed 的 token 往返**：只有确实含 `<!--` 才走 lexer 重建内容，因为 marked 会把 CRLF 归一成 LF，无辜文件往返一次就会被误标 `contentDiffersFromDisk`，把下游缓存逻辑全部降级。
+4. **`getMemoryFilesForNestedDirectory` 的 Set 复制是正确性要求**：无条件规则用副本处理，否则那些文件被标成「已处理」，同目录的带 paths 规则永远匹配不到。另有一段 worktree 重复加载的处置（issue 29599）：只跳过主仓库侧的 **Project** 类文件，`CLAUDE.local.md` 不跳。
+
+**`analyzeContext.ts` 的四个要点**：
+
+1. **`TOOL_TOKEN_COUNT_OVERHEAD = 500` 是计数偏差而非工具成本**：请求带工具时 API 会加一段约 500 token 的前言，逐个计数会累积 N 份，所以单工具计数一律减 500、整批计数只减一次。
+2. **延迟工具显示但不计入占用**：`isDeferred` 分区在 `actualUsage` 求和时被跳过——tool search 开启后 MCP 工具默认不加载，算进占用会让用户以为窗口莫名满了。
+3. **有些模式下故意不画保留缓冲**：reactive-only（cobalt_raccoon）与 context-collapse（marble_origami）下前摄性压缩根本不会触发，画一个 33k 的缓冲条就是在撒谎。
+4. **总量优先用 API 真实值**（input + cache_creation + cache_read），口径与状态栏一致——两个界面显示不同数字是用户最常报的 bug。
+
+踩坑：`claudemd.ts` 的锚点 1195 文本里写了一句带英文双引号的 `避免"有指令但没内容"的空壳`，预检直接拦下（第 5 条硬规矩），改成「」后通过。这是本仓第三次因引号被拦，写数据文件时**正文里不要出现任何英文引号字符**这条已经稳了。
+
+流程账：预检四份全过（188 锚点，一次通过）；`annotate.py` 四次零 `⟳`；`check-fidelity.py` 613 份 0 失败；`check-links.py` 830 条源码链接 + 110 条内链，0 失效。
 
 ---
 
