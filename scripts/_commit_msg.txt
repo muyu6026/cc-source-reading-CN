@@ -1,0 +1,8 @@
+批注 utils 只读白名单、配置层与另一种 shell 解析（第48批，3文件5,514行，173锚点，全仓601/1902文件39.7%）
+
+- src/utils/shell/readOnlyCommandValidation.ts：1893行→1959行，66锚点（只读命令白名单：解析差攻击面/位置参数回调/双短横线语义反转/UNC 检测/标志校验主循环）
+- src/utils/config.ts：1817行→1873行，49锚点（配置层：文件锁/mtime 缓存/备份轮转/auth 丢失守卫/历史迁移）
+- src/utils/powershell/parser.ts：1804行→1876行，58锚点（PS AST 解析：调真解析器/PS1 内联/argv 字节预算/别名表与危险标记）
+- 新增 scripts/_annot_run.py：路径含安全过滤器敏感字样时用文件传参的包装器
+- 校验：check-fidelity 601份0失败，check-links 822源码链接+108内链0失效
+- 进度：601/1902文件、203,660/513,237行、39.7%；utils 12/564

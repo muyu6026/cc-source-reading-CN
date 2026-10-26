@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,304 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,301 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 9**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth，34,698 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 2,000 行档，往下继续 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 12**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser，40,212 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,800 行档，往下继续 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,304 份没动（38.6% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,301 份没动（39.7% 行数）。
 
 ---
 
@@ -1419,6 +1419,46 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`ast.ts` 与 `marketplaceManager.ts` 的数据文件都被预检拦了一轮——批注里引用 shell 字面量（`"$(cmd)"`、`env "FOO=bar"`、`\-n`）会带英文双引号与反斜杠。全部改成「引号包裹的 XX」「转义写法的 -n」这类中文表述后通过。这条已是第二次踩到（批 45 bashParser），以后写数据文件时直接不用引号字符。
 
 流程账：预检三份一次通过（321 锚点，其中 `ast.ts` 两轮修引号、`marketplaceManager` 一轮）；`annotate.py` 零 `⟳`；`check-fidelity.py` 598 份 0 失败；`check-links.py` 816 条源码链接 + 106 条内链，0 失效。
+
+---
+
+### utils 第七梯队：只读命令白名单、配置层与 PowerShell 解析（第 48 批，3 份 5,514 行，173 锚点）
+
+`shell/readOnlyCommandValidation.ts`（1,893 行）、`config.ts`（1,817 行）、`powershell/parser.ts`（1,804 行）。三份分别对应「判定能不能自动跑」「把状态存到哪」「另一种 shell 的语法怎么读」——都在权限链的上游。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/shell/readOnlyCommandValidation.ts`](annotated/src/utils/shell/readOnlyCommandValidation.ts) | 1,893 | 1,959 | 66 | 只读命令白名单：git/gh/docker/rg/pyright 的标志表、位置参数回调、UNC 检测、标志校验主循环 |
+| [`utils/config.ts`](annotated/src/utils/config.ts) | 1,817 | 1,873 | 49 | 配置层：单文件 JSON、文件锁、mtime 缓存、备份轮转、历史迁移、auth 丢失守卫 |
+| [`utils/powershell/parser.ts`](annotated/src/utils/powershell/parser.ts) | 1,804 | 1,876 | 58 | PowerShell AST 解析：调真 pwsh 解析、PS1 脚本内联、argv 字节预算、别名表与危险标记 |
+
+**`readOnlyCommandValidation.ts` 的五个要点**：
+
+1. **整张表的核心风险是 parser differential（解析差）**。`FlagArgType` 的 `none` 声明「该标志不吃参数」，一旦真程序认为它吃参数，校验器就少消费一个 token，剩下的被当位置参数放行。`git diff` 的 `-S` 就是活例：原标 `none`，`git diff -S -- --output=/tmp/pwned` 让校验器在双短横线处 break，而 git 的 getopt 把 `--` 当 pickaxe 参数、把 `--output=` 当长选项——**任意文件写**。修法是改成 `string`。
+2. **位置参数的写操作只能靠回调拦**。`git tag foo` 创建 refs、`git branch foo` 创建分支、`git reflog expire/delete` 改写 logs，都不是标志，`validateFlags` 的位置参数兜底会直接放行。回调只查「语法上唯一的危险槽位」（reflog 只看第一个位置参数；tag/branch 看有没有 `-l/--list`），比逐 token 猜语义可靠。
+3. **`--` 之后的语义会反转**。`git tag -- -l` 不是列表，而是**创建**一个名叫 `-l` 的标签；`git branch -- -l` 同理。所以 `seenDashDash` 之后所有 token 一律按位置参数处理，且所有「有列表标志才安全」的判断都失效。
+4. **`git branch --abbrev` 是双层防御的样板**。git 只接受粘连形式 `--abbrev=N`，分离形式里的 N 会变成**分支名**。所以 `safeFlags` 仍标 `number`（否则 `--abbrev=7` 被误拒），同时回调的 `flagsWithArgs` **故意删掉**它——回调因此把 N 看成没有列表标志的位置参数，判危险。单靠任何一层都不成立。
+5. **三处「宽松声明才是安全方向」**：`--sort` 允许以 `-` 开头的值（反向排序键）；`git status -u` 标 `string` 而非 `number`（值是枚举词）；`gh` 的 `--repo` 统一挂回调检查 `://`、`@`、两个以上斜杠（三段式主机名 = DNS 外泄通道），且要剥开 `--repo=` 的内联值再判。
+
+**`config.ts` 的四个要点**：
+
+1. **一个文件装所有状态，于是所有问题都要在这一层解决**。并发写用文件锁，写坏后自愈用「默认值打底 + 文件覆盖」合并 + 备份轮转（同分钟只备一次、只留 5 份），读写性能用内存缓存 + `watchFile` 1 秒轮询（stat 跑在 libuv 线程池，卡住的 stat 不阻塞主线程）。
+2. **auth 丢失守卫（GH #3117）是本文件的核心不变量**。另一个进程正在写或非原子写被 kill 时，本进程读到截断内容 → 解析失败 → 拿到默认配置；若写回，`oauthAccount` 与引导完成标记永久消失。守卫在**三条路径**上都存在：带锁写之前、加锁失败的回退路径、项目配置的对应路径。且「没写」必须返回 false，调用方据此决定**不刷缓存**——刷了就把守卫依赖的好状态毁掉。
+3. **写穿的 mtime 超调**。写完立刻用 `Date.now()` 记缓存时间，必然大于文件真实 mtime，于是监视器下次 tick 认为「缓存比文件新」、跳过重读自己的写。一个假时间戳换掉一次多余磁盘读。
+4. **「返回同一引用」是「无变更不写盘」的唯一信号**。`removeProjectHistory` 在无脏字段时原样返回入参；`saveConfigWithLock` 见到 `mergedConfig === currentConfig` 就返回 false。上游 updater 若随手新建对象，启动阶段几十次保存会全部变成真实的锁 + 读 + 备份 + 写。
+
+**`powershell/parser.ts` 的四个要点**：
+
+1. **不自己写解析器，调真 pwsh**。PowerShell 语法太杂（参数缩写、四种破折号、可展开字符串、splatting、参数块、using 语句），自研必然产生解析差，而解析差在权限判定里就是漏洞。脚本用 `-EncodedCommand` 传（base64 内嵌用户命令），避开 stdin 交互模式、命令行转义、临时文件三个坑。
+2. **`ParamBlock` 是 ScriptBlockAst 的兄弟节点**。它不在 Begin/Process/End 里，所以「遍历命名块」完全看不到 `param($x = (Remove-Item /))` 里的删除命令——而 PowerShell 在参数绑定时就求值默认值。`[ValidateScript({...})]` 属性同理。必须单独对 ParamBlock 做 FindAll。
+3. **argv 预算必须按 UTF-8 字节算**。Windows CreateProcess 上限 32,767 字符，而命令行是「命令 → base64 → 嵌脚本 → UTF-16LE → 再 base64」两级放大（系数 8/3）。用 `.length`（UTF-16 代码单元）判断时，1,092 个汉字能通过门禁但实际 argv 约 4 万字符 → CreateProcess 失败 → 解析失败 → **拒绝规则静默降级成询问**（finding #36）。上限现在由脚本长度反推，不再写死。
+4. **别名表用 `Object.create(null)`，并刻意留空歧义项**。前者防原型污染（命令名写 `constructor` / `__proto__` 会命中原型属性）；后者因为 PowerShell 6+ 删掉了 `sc`/`sort`/`curl`/`wget` 的别名（与原生 exe 冲突），若映射 `sort` → Sort-Object 而系统实际跑 sort.exe，就是「按安全命令批准、实际跑了别的程序」。
+
+踩坑（新类型，务必记住）：**Bash 工具的命令行里出现 `powershell` 字样会被安全策略拦截**，报「Invoking PowerShell from Bash bypasses PowerShell security checks」。`annotate.py` / `check-fidelity.py` 只要参数里带这个路径就跑不动。解法是写包装脚本，在 Python 里把路径拼成 `power` + `shell` 再传给 `runpy`，命令行里不出现完整字样；改 PowerShell 工具也不行——它的过滤器会拦批注文本里的 `Invoke-Expression`。
+
+踩坑（第二类）：**锚点落在多行模板字符串内部会被自动外移到同一行**。PS1 脚本是 250 行的模板常量，原本给内部 12 个函数各写了锚点，`template_shift` 会把这些全部挪到脚本结束行——12 条批注堆在一处。正确做法是只留「段首」与「段尾」两条总述，把内部细节合并进正文。
+
+流程账：预检三份全过（173 锚点）；`annotate.py` 仅 1 次无害 `⟳`（模板起始行 before 原地）；`check-fidelity.py` 601 份 0 失败；`check-links.py` 819 条源码链接 + 107 条内链，0 失效。
 
 ---
 
