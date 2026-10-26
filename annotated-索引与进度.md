@@ -1287,13 +1287,13 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,279 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,266 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 34**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin，68,328 行） | 最大的一块，但最杂。已从体量最大的根目录巨兽按行数降序吃到 1,300 行档；下一批按行数降序取前 10 大文件：bash/commands(1339)/installedPluginsManager(1268)/teleport(1226)/teammateMailbox(1183)/settings/types(1148)/perfettoTracing(1120)/fileHistory(1115)/collapseReadSearch(1109)/stats(1061)/toolResultStorage(1040)**（注：本批按既定计划吃掉 903–1015 行档，即缺份排名 11–20，下一批才接 1339 起的前 10）** |
+| `src/utils/` | 564 份 / 180,487 行（**已做 47**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation，82,504 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；下一批接 800 行档：words(800)/sessionStoragePortable(793)/fsOperations(770)/swarm/backends/TmuxBackend(764)/toolSearch(756)… |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
@@ -1621,6 +1621,37 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：本批无预检 FAIL、无 `⟳` 外移、无块注释内中文告警；`processSlashCommand.tsx` 末行 base64 sourceMappingURL 按惯例省略（fidelity 标 `OK*`）。**进度口径提示**：实测 `check-coverage.py src/utils` 现在显示缺份前 10 从 `bash/commands.ts`(1339) 起，本批按既定计划吃掉 903–1015 行档（即缺份排名 11–20），下一批应直接接 1339 起的前 10 大文件，而不是继续 903 档。
 
 流程账：预检十份全过（280 锚点，一次通过）；`annotate.py` 十次零 `⟳`；`check-fidelity.py` 623 份 0 失败；`check-links.py` 源码链接 834 条 + 内链 111 条，0 失效。
+
+### utils 第 53 批：巨兽第三梯队与遥测/图像/队友工具（第 53 批，13 份 14,175 行，529 锚点）
+
+十三份按行数降序取 utils 里体量最大的梯队（1,339 行档的 bash/commands 到 825 行的 instrumentation），主题横跨「Bash 执行核心 / 插件管理 / 设置类型 / 多智能体协作 / 终端渲染 / 遥测 / 大结果落盘 / 图片预处理 / 任务与统计」。没有统一主线，但全是上层反复依赖的底座。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/bash/commands.ts`](annotated/src/utils/bash/commands.ts) | 1,339 | 1,381 | 42 | Bash 命令解析与执行核心：拆命令/危险命令确认/输出截断/超时与信号终止 |
+| [`utils/plugins/installedPluginsManager.ts`](annotated/src/utils/plugins/installedPluginsManager.ts) | 1,268 | 1,310 | 42 | 已安装插件管理：marketplace 列表/安装·更新·卸载/manifest/命令技能注册 |
+| [`utils/settings/types.ts`](annotated/src/utils/settings/types.ts) | 1,148 | 1,200 | 52 | 设置系统类型定义：配置项 TS 类型/默认值/schema/覆盖层级 |
+| [`utils/teammateMailbox.ts`](annotated/src/utils/teammateMailbox.ts) | 1,183 | 1,213 | 30 | 队友邮箱：agent 间异步消息收发/持久化/回执 |
+| [`utils/teleport.tsx`](annotated/src/utils/teleport.tsx) | 1,225 | 1,259 | 33 | 终端输出 TUI 渲染：命令结果虚拟化/ANSI 转义/滚动 |
+| [`utils/telemetry/perfettoTracing.ts`](annotated/src/utils/telemetry/perfettoTracing.ts) | 1,120 | 1,166 | 46 | Perfetto 性能追踪：trace 采集/写盘/与 OpenTelemetry 桥接 |
+| [`utils/fileHistory.ts`](annotated/src/utils/fileHistory.ts) | 1,115 | 1,147 | 32 | 文件历史：变更快照/撤销栈/历史查询 |
+| [`utils/collapseReadSearch.ts`](annotated/src/utils/collapseReadSearch.ts) | 1,109 | 1,143 | 34 | 折叠相邻 Read/Search：合成摘要组，抑制上下文膨胀 |
+| [`utils/stats.ts`](annotated/src/utils/stats.ts) | 1,061 | 1,094 | 33 | 会话统计：使用量/token/活跃时段/聚合持久化 |
+| [`utils/toolResultStorage.ts`](annotated/src/utils/toolResultStorage.ts) | 1,040 | 1,090 | 50 | 大工具结果落盘：超长输出写临时文件/引用返回/清理策略 |
+| [`utils/imageResizer.ts`](annotated/src/utils/imageResizer.ts) | 880 | 930 | 50 | 图片缩放压缩：sharp 重采样/格式转换/上传预处理 |
+| [`utils/tasks.ts`](annotated/src/utils/tasks.ts) | 862 | 912 | 50 | 任务列表管理：swarm 待办增删改查/状态迁移/依赖 |
+| [`utils/telemetry/instrumentation.ts`](annotated/src/utils/telemetry/instrumentation.ts) | 825 | 860 | 35 | OpenTelemetry 启动引导：SDK 初始化/exporter/采样/全局 tracer |
+
+**几个值得记住的点**：
+
+1. **`bash/commands.ts` 是 BashTool 的「大脑」**：它把用户输入的命令字符串拆成安全的执行计划——危险命令（`rm -rf` 等）走交互确认、长输出做尾部截断与分页、子进程超时/信号终止全部在这里编排；和之前批注的 BashTool 下半（安全核心与渲染）正好拼成完整执行链路，读 Bash 必须这两份对照看。
+2. **`toolResultStorage.ts` 与 `collapseReadSearch.ts` 是解决「上下文爆炸」的两个互补手段**：前者把超长工具结果（大文件读取、长命令输出）落盘并以引用返回，后者把相邻同文件 Read/Search 折叠成摘要组——一静一动共同保证 agent 不会因上下文膨胀而掉链子。
+3. **`teammateMailbox.ts` 实现 agent 间异步通信**：不同于 `SendMessage` 的即时调用，邮箱是持久化、可轮询、带回执的异步通道，是 swarm 多智能体协作里「解耦生产/消费」的关键；与 `tasks.ts` 的任务状态机配合构成 swarm 的调度骨架。
+4. **`telemetry` 双件套（`instrumentation` + `perfettoTracing`）是性能可观测性的底座**：`instrumentation` 负责 OpenTelemetry SDK 初始化与全局 tracer，`perfettoTracing` 负责把 span 落成 Perfetto 可消费的 trace 文件——想做性能分析必须从这里读起。
+
+踩坑：`stats.ts` 初版有 3 个锚点落在多行表达式首行（`const peakActivityDay =`、`const totalDays =`、`return {`），直接触发 fidelity 硬规则 #5「不劈开未结束的多行表达式」报 FAIL；已分别下移到对象闭合行（352→367、566→571、580→587）后归零。其余文件 `annotate.py` 仅有良性 `⟳`（`//` 注释段中部锚点被挪到段边界，如 teleport.tsx 931→936、collapseReadSearch.ts 148→151），无模板字符串内锚点、无块注释内中文告警；teleport.tsx / instrumentation.ts 末行 base64 sourceMappingURL 按惯例省略（fidelity 标 `OK*`）。
+
+流程账：预检十三份全过（529 锚点，一次通过）；`annotate.py` 十三次，仅良性 `⟳`（`//` 段边界挪动），无 `⚠` 块注释内中文告警；`check-fidelity.py` 636 份 0 失败；`check-links.py` 源码链接 844 条 + 内链 112 条，0 失效。
 
 ---
 

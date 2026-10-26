@@ -1,0 +1,36 @@
+# 数据文件：source/src/utils/teammateMailbox.ts
+# slug = src_utils_teammateMailbox_ts
+# 约束：中文用三引号；正文禁英文双引号与反斜杠。
+
+ANNOTATIONS = [
+    (1, 'after', '''本模块是「智能体集群」的邮箱系统：每个队友在 .claude/teams/团队名/inboxes/智能体名.json 有一份收件箱文件，其他队友往里写消息，接收方把这些消息当附件看到。核心设计：收件箱按「团队内的智能体名」做键。'''),
+    (35, 'after', '''LOCK_OPTIONS 用「带退避的重试」拿锁：集群里多个 Claude 并发写同一个收件箱时，后来者会等锁而不是立刻失败。同步版 lockSync 会阻塞事件循环，所以异步版必须显式重试才能达到同样的串行化语义。'''),
+    (50, 'after', '''TeammateMessage 是收件箱里一条消息的形状：发件人、正文、时间戳、是否已读，外加可选的发送者颜色（界面用）和 5 到 10 词摘要（界面预览用）。'''),
+    (56, 'after', '''getInboxPath 拼出收件箱文件路径，关键点是团队名和智能体名都先过 sanitizePathComponent 清洗——防止用 ../ 之类的路径穿越写到收件箱目录之外。文件名用清洗后的智能体名加 .json。'''),
+    (84, 'after', '''readMailbox 读整个收件箱：文件不存在（ENOENT）不当错误，直接返回空数组；其他读错误也降级返回空数组并记日志，不让上层崩。返回的是 TeammateMessage 数组。'''),
+    (115, 'after', '''readUnreadMessages 在 readMailbox 的基础上只滤出未读消息（read 为假的）。'''),
+    (134, 'after', '''writeToMailbox 是写收件箱的核心入口：先确保目录存在，再上文件锁（带 LOCK_OPTIONS 重试），锁内重读最新消息、追加新消息、写回。新消息统一把 read 置为 false。finally 里释放锁。'''),
+    (148, 'after', '''一个易踩的坑：proper-lockfile 要求锁文件对应的目标文件先存在。所以这里先用写模式 wx（不存在才创建）建一个空数组文件，EEXIST 说明已存在就跳过——只创建一次。'''),
+    (201, 'after', '''markMessageAsReadByIndex 按索引把某条消息标为已读，同样上锁、锁内重读、越界或已读就直接返回。'''),
+    (279, 'after', '''markMessagesAsRead 把整个收件箱全部标为已读：用 count 统计未读数，对从 jsonParse 出来的全新对象直接原地改 read=true 后写回（对象未被共享，改了安全）。'''),
+    (349, 'after', '''clearMailbox 清空收件箱：用 r+ 标志写空数组——r+ 在文件不存在时会抛 ENOENT 而不创建，避免凭空造出一个原本没有的收件箱文件。'''),
+    (373, 'after', '''formatTeammateMessages 把消息列表拼成一段 XML（每条带 teammate_id、可选 color 和 summary 属性，正文放在标签内），供作为附件展示给用户。'''),
+    (394, 'after', '''IdleNotificationMessage 是「队友空闲」时通过 Stop 钩子发出的结构化消息，告诉队长自己为什么空闲（可用/被打断/失败）以及刚发的私信摘要。'''),
+    (435, 'after', '''isIdleNotification 尝试把消息文本当 JSON 解析，类型是 idle_notification 就返回该结构，否则（或解析失败）返回 null。下面一串 isXxx 检查器都是这个套路。'''),
+    (449, 'after', '''PermissionRequestMessage 是「工作节点向队长请求权限」的消息，字段名故意和 SDK 的 can_use_tool 对齐（全 snake_case）：request_id、agent_id、tool_name、tool_use_id、description、input、permission_suggestions。'''),
+    (464, 'after', '''PermissionResponseMessage 是队长回工作节点的权限答复，形状镜像 SDK 的 ControlResponse/ControlErrorResponse：success 时带可选 updated_input 与 permission_updates，error 时带错误信息。'''),
+    (576, 'after', '''SandboxPermissionRequestMessage 是沙箱运行时检测到工作节点要访问「非白名单主机」时发出的网络权限请求，带请求 id、工作节点 id/名/色、以及要访问的 host 模式。'''),
+    (681, 'after', '''PlanApprovalRequestMessageSchema 用 lazySchema 包一层 zod 对象：计划审批请求含 type、from、timestamp、planFilePath、planContent、requestId。所有消息 schema 都用 lazySchema 惰性构造，避免循环依赖。'''),
+    (699, 'after', '''PlanApprovalResponseMessageSchema 是队长对计划审批请求的回复：approved 布尔值、可选 feedback、可选 permissionMode（复用 SDK 的权限模式 schema）。'''),
+    (717, 'after', '''ShutdownRequestMessageSchema 是队长发给队友的「关闭请求」，含 type、requestId、from、可选 reason、timestamp——集群关停流程的第一步。'''),
+    (737, 'after', '''ShutdownApprovedMessageSchema 是队友回队长的「已同意关闭」，可带 paneId 和 backendType，便于对应到具体面板与后端。'''),
+    (755, 'after', '''ShutdownRejectedMessageSchema 是队友回队长的「拒绝关闭」，必须带 reason 说明为什么拒绝。'''),
+    (772, 'after', '''createShutdownRequestMessage 构造关闭请求消息：发送者名回退到 TEAM_LEAD_NAME，requestId 由 generateRequestId 生成。'''),
+    (831, 'after', '''sendShutdownRequestToMailbox 把关闭逻辑抽出来给「工具」和「UI 组件」复用：解析团队名、取发送者名（支持 AsyncLocalStorage 的进程内队友）、生成确定性 requestId、构造消息并写进目标收件箱，返回 requestId 与目标名。'''),
+    (953, 'after', '''TaskAssignmentMessage 是把任务派给队友的分配消息：taskId、subject、description、assignedBy、timestamp。'''),
+    (983, 'after', '''TeamPermissionUpdateMessage 是队长向全体队友广播的「权限更新」：携带一段 addRules（工具名、规则内容、allow/deny/ask 行为、目标设为 session），以及被允许的直径路径和工具名。一次广播应用给所有队友。'''),
+    (1015, 'after', '''ModeSetRequestMessageSchema 是队长让队友切换权限模式的请求，复用 SDK 的 PermissionModeSchema 校验模式值。'''),
+    (1064, 'after', '''isStructuredProtocolMessage 是个关键的路由分界线：它判断一条消息是不是「结构化协议消息」（权限请求/响应、沙箱权限、关闭、团队权限更新、模式设置、计划审批等）。这类消息必须交给 useInboxPoller 的专门处理器路由到对应队列；如果 getTeammateMailboxAttachments 先把它们当原始文本吃掉，它们就再也不会到达本该处理它们的处理器了。'''),
+    (1101, 'after', '''markMessagesAsReadByPredicate 按谓词条件只标部分消息为已读，其余保留，复用和 markMessagesAsRead 一样的文件锁机制。'''),
+    (1149, 'after', '''getLastPeerDmSummary 从最后一条助手消息里抽取「[to 某人] 摘要」字符串：只有当该回合以一条发往「同伴」（不是队长、不是通配）的 SendMessage 工具调用结尾时才返回；遇到唤醒边界（用户 prompt 这类字符串内容而非工具结果）就停止向上找。返回 undefined 表示这回合不是以同伴私信收尾。'''),
+]
