@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,313 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,309 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 2**：messages + sessionStorage，10,617 行） | 最大的一块，但最杂。已从体量最大的根目录两份巨兽入手，往下按行数降序推进 |
+| `src/utils/` | 564 份 / 180,487 行（**已做 4**：messages + sessionStorage + hooks + bashParser，20,075 行） | 最大的一块，但最杂。已从体量最大的根目录四份巨兽入手，往下按行数降序推进 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,311 份没动（33.9% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,309 份没动（35.8% 行数）。
 
 ---
 
@@ -1324,6 +1324,34 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 - `sessionStorage.ts` 首个锚点原写 96 行（空行），实际想让注释落在 import 块之后，改为 95 行（最后一条 import）。
 
 流程账：预检（slug / pos / 行号 / 重复锚点 / 无引号反斜杠 / 模块可执行）两份均一次通过；`annotate.py` 零 `⟳`；`check-fidelity.py` 591 份 0 失败（messages 记 83 行中文批注 vs 84 锚点，属短批注 CJK 占比门限的正常差 1）；`check-links.py` 810 条源码链接 + 103 条内链，0 失效。
+
+---
+
+### utils 巨兽第二梯队：hooks 与 bashParser（第 45 批，2 份 9,458 行，307 锚点）
+
+utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 `bash/bashParser.ts`（4,436 行）。一个管「生命周期钩子怎么执行」，一个管「bash 命令怎么被读懂」——后者是 Bash 工具安全判定的地基。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/hooks.ts`](annotated/src/utils/hooks.ts) | 5,022 | 5,158 | 136 | Hook 执行引擎：五类 hook（命令/提示/代理/HTTP/回调）的匹配、执行、输出协议与结果聚合 |
+| [`utils/bash/bashParser.ts`](annotated/src/utils/bash/bashParser.ts) | 4,436 | 4,607 | 171 | 纯 TS 手写 bash 解析器：词法 → 递归下降语法 → tree-sitter-bash 兼容 AST（3449 条金标准语料对齐） |
+
+**`hooks.ts` 的四个要点**：
+
+1. **退出码协议 + JSON 协议双轨**。老 hook 只管 echo：退出码 0 成功、2 阻塞（stderr 喂回模型）、其他非零仅展示；新 hook 输出 JSON，经 Zod 校验后按事件名分派十几种特化字段（改工具入参、注入上下文、代答权限、代答 MCP 引导）。两轨在 `processHookJSONOutput` 汇合。
+2. **权限归并取最保守值**：多 hook 并行时 deny > ask > allow，只要有一个拒绝就拒绝；`updatedInput` 只在 allow/ask 时随决策带出，passthrough 可单独改入参不做权限表态。
+3. **Windows 上 hook 经 Git Bash 跑**：所有进环境变量/命令串的路径必须 POSIX 化（`C:/Users/foo` → `/c/Users/foo`，纯 JS 正则转换 + LRU 记忆化）；PowerShell hook 走显式 argv（`-NoProfile -NonInteractive`）并跳过全部 bash 专属准备。插件目录缺失必须预检——缺脚本退出码 2 会被误读成「有意阻塞」，把 UserPromptSubmit/Stop 卡死到重启。
+4. **性能心思**：内部回调快路径（全 callback 批次跳过 span/进度/JSON 处理，实测每次 PostToolUse 从 6µs 降到 1.8µs）；`hasHookForEvent` 故意过近似的存在性检查让未配置 hook 的会话在热点路径早退；`hookDedupKey` 按来源上下文分命名空间——插件间同模板不误合并、settings 内重复定义仍去重。
+
+**`bashParser.ts` 的三个要点**：
+
+1. **为什么手写**：摆脱 WASM 依赖、可控 50ms 超时 + 5 万节点预算（防恶意输入 OOM），同时 AST 逐形状兼容 tree-sitter-bash——连它的怪癖都复刻（`a > x && b > y` 整体被 redirected_statement 包住、管道中段重定向提升包裹、case 空体模式降级 word），因为下游安全行走器按形状判 `tooComplex`。
+2. **安全是主旋律**：heredoc 定界符与换行之间的 `| rm -rf /tmp/evil` 绝不能静默丢弃——尾随单词正常解析、管道/列表直接发 ERROR 让 fail-closed 路径拒掉；`echo {;touch /tmp/evil` 必须在 `;` 断开；`unset 'a[$(id)]'` 的引号参数要发 raw_string 让行走器能拒绝（历史上曾静默丢弃，藏住算术下标代码执行向量）。
+3. **双坐标系**：JS 字符串下标（charAt 用）与 UTF-8 字节偏移（AST 位置用）全程并行推进，ASCII 快路径两者相等；非 ASCII 惰性建 byteTable 二分回查。回溯原语 saveLex 把两个游标打包进一个数字，零堆分配。
+
+踩坑：批注文本里写 shell 示例（`ls <<'EOF'`、`export "FOO=bar"`）极易带进英文双引号与反斜杠——数据文件被预检连续拦下 4 轮，全部改成「加引号 XX」式表述；另注意 raw string 里 `\\r` 仍是两个反斜杠字符，预检按单反斜杠判，必须整词改写。
+
+流程账：预检两份一次通过（307 锚点）；`annotate.py` 零 `⟳`；`check-fidelity.py` 593 份 0 失败（hooks 记 135 行 vs 136 锚点，属 CJK 占比门限正常差 1）；`check-links.py` 812 条源码链接 + 104 条内链，0 失效。
 
 ---
 
