@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,254 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,244 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 59**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor，91,246 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 600–640 行档：theme(639)/plugins/mcpPluginIntegration(634)/doctorDiagnostic(625)/model/model(618)/handlePromptSubmit(610)… |
+| `src/utils/` | 564 份 / 180,487 行（**已做 69**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor + theme + plugins/mcpPluginIntegration + doctorDiagnostic + model/model + handlePromptSubmit + processUserInput/processUserInput + cleanup + markdownConfigLoader + conversationRecovery + plugins/pluginInstallationHelpers，97,371 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 550–590 行档：file(584)/bash/ShellSnapshot(582)/suggestions/commandSuggestions(567)/cronScheduler(565)/autoUpdater(561)/deepLink/terminalLauncher(557)… |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,254 份没动（约 50% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,244 份没动（50.8% 行数）。
 
 ---
 
@@ -1684,6 +1684,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：四处锚点初版落在多行表达式首行（`const uuidRegex =` / `const SKIP_FIRST_PROMPT_PATTERN =` 在 sessionStoragePortable.ts，`const cacheKey =` 在 api.ts，`const HEREDOC_START_PATTERN =` 在 heredoc.ts），直接触发 fidelity 硬规则 #5「不劈开未结束的多行表达式」报 FAIL；已分别下移到正则/三元闭合行（24 / 124 / 150 / 71）后归零；`executor.ts` 初版有一锚点落进 `scroll` 的 `/** */` 块注释内（触发 fidelity 块注释纯净判据），已挪到函数声明行（600）修复。其余文件 `annotate.py` 仅有良性 `⟳`（`//` 注释段中部锚点被挪到段边界，如 heredoc.ts 442→453、forkedAgent.ts 520→523、ripgrep.ts 47→48 与 382→383），无模板字符串内锚点告警；`⚠` 块注释内中文告警已清零。
 
 流程账：预检十二份全过（347 锚点，一次通过）；`annotate.py` 十二次，仅良性 `⟳`（`//` 段边界挪动），`⚠` 块注释内中文告警已清零；`check-fidelity.py` 648 份 0 失败；`check-links.py` 源码链接 857 条 + 内链 113 条，0 失效。
+
+---
+
+### utils 第 55 批：600 到 640 行档收口（第 55 批，10 份 6,125 行，170 锚点）
+
+十份按行数降序吃 utils 里 600 到 640 行档的收口：theme / plugins/mcpPluginIntegration / doctorDiagnostic / model/model / handlePromptSubmit / processUserInput/processUserInput / cleanup / markdownConfigLoader / conversationRecovery / plugins/pluginInstallationHelpers。主题横跨「UI 主题与 chalk 着色 / MCP 插件集成 / 安装自检诊断 / 模型抽象与 provider 选型 / 提示提交处理 / 用户输入处理 / 过期文件清理 / Markdown 配置装载 / 会话恢复 / 插件安装辅助」。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/theme.ts`](annotated/src/utils/theme.ts) | 639 | 655 | 16 | 终端 UI 颜色主题系统：命名主题（浅色/深色/ANSI/色盲友好）+ 主题色转 ANSI 转义码，全用显式 RGB/命名色避免被终端配色干扰 |
+| [`utils/plugins/mcpPluginIntegration.ts`](annotated/src/utils/plugins/mcpPluginIntegration.ts) | 634 | 650 | 16 | 从插件加载解析 MCP 服务器配置：多来源（MCPB 压缩包/插件清单/.mcp.json/.mcpb）收集、环境变量与用户配置替换、加插件作用域前缀防命名冲突 |
+| [`utils/doctorDiagnostic.ts`](annotated/src/utils/doctorDiagnostic.ts) | 625 | 639 | 14 | `claude doctor` 自检核心：诊断安装类型/版本/路径/自动更新权限/多重安装冲突/配置问题，给可执行修复建议 |
+| [`utils/model/model.ts`](annotated/src/utils/model/model.ts) | 618 | 641 | 23 | 模型选择中枢：按会话覆盖/启动参数/环境变量/设置/订阅/1M 上下文多重来源解析当前主循环模型，含别名解析/规范名/显示名整套工具（含 ANT 专用防泄漏标记） |
+| [`utils/handlePromptSubmit.ts`](annotated/src/utils/handlePromptSubmit.ts) | 610 | 627 | 17 | 用户提交提示词总入口：分流退出命令/本地 JSX 即时命令/队列/直接执行；真正执行在 executeUserInput，统一走 processUserInput→onQuery 循环 |
+| [`utils/processUserInput/processUserInput.ts`](annotated/src/utils/processUserInput/processUserInput.ts) | 605 | 623 | 18 | 用户单条输入处理基座：图片缩放/附件抽取/粘贴图处理/斜杠命令与 ultraplan 关键词与 bash 路由，最终交 processTextPrompt 生成用户消息 |
+| [`utils/cleanup.ts`](annotated/src/utils/cleanup.ts) | 602 | 620 | 18 | 过期文件清理逻辑：消息日志/会话/计划/文件历史备份/调试日志/npm 缓存/旧版本按保留天数（默认 30 天）删除，后台一键清理组合调用 |
+| [`utils/markdownConfigLoader.ts`](annotated/src/utils/markdownConfigLoader.ts) | 600 | 613 | 13 | 加载解析 Markdown 配置（命令/智能体/技能/工作流）：多级目录收集 .md、frontmatter 解析、inode 去重、git 根截断与软链处理、工具列表解析 |
+| [`utils/conversationRecovery.ts`](annotated/src/utils/conversationRecovery.ts) | 597 | 613 | 16 | 会话恢复：transcript jsonl 反序列化成 REPL 消息，遗留附件类型迁移/未解析工具调用过滤/中断检测/技能状态恢复，多来源加载 |
+| [`utils/plugins/pluginInstallationHelpers.ts`](annotated/src/utils/plugins/pluginInstallationHelpers.ts) | 595 | 614 | 19 | 插件安装共享辅助层：路径穿越防护/缓存登记插件/解析插件 ID/依赖闭包解析/结构化错误格式化/CLI 与交互 UI 共用安装逻辑 |
+
+**几个值得记住的点**：
+
+1. **`theme.ts` 是「颜色不随终端配色漂」的保证**：所有主题色用显式 RGB 或 ANSI 命名色写死，不读终端的 256 色/truecolor 配置，保证日志与权限提示在任何环境下颜色一致。
+2. **`model/model.ts` 的模型名有「三重身份」**：codename（内部泄漏敏感，ANT 构建用 `process.env.USER_TYPE==='ant'` 包裹做死代码消除）、规范名（API 实际接受）、显示名（给用户看），解析时要按来源优先级层层覆盖。
+3. **`conversationRecovery.ts` 是「崩溃可续」的关键**：transcript 里可能残留未完成的工具调用或旧版附件类型，恢复时过滤掉未解析调用、做附件类型迁移，REPL 才不会因读到半截状态而崩。
+4. **`processUserInput/processUserInput.ts` 与 `handlePromptSubmit.ts` 是「输入流水线的上下游」**：前者管单条输入的内容处理（图片/附件/路由），后者管整条提交的流向分发，两者经 `executeUserInput` 汇入 `onQuery` 主循环。
+
+踩坑：三处锚点初版落在多行表达式首行（`const chalkForChart =` 在 theme.ts、`export type InstallationType =` 在 doctorDiagnostic.ts、`const origin =` 在 handlePromptSubmit.ts），触发 fidelity 硬规则 #5「不劈开未结束的多行表达式」报 FAIL；已分别下移到收尾行（620 / 53 / 507）后复验 0 失败；其余文件 `annotate.py` 仅有良性 `⟳`（`//` 注释段中部锚点被挪到段边界，如 doctorDiagnostic.ts 432→433、processUserInput 306→311 / 422→427 / 455→466 / 531→532、conversationRecovery 52→53、pluginInstallationHelpers 361→364 / 414→417），无模板字符串内锚点告警；`⚠` 块注释内中文告警已清零。
+
+流程账：预检十份全过（170 锚点，一次通过）；`annotate.py` 十次，仅良性 `⟳`（`//` 段边界挪动），`⚠` 块注释内中文告警已清零；`check-fidelity.py` 658 份 0 失败；`check-links.py` 源码链接 869 条 + 内链 113 条，0 失效。
 
 ---
 

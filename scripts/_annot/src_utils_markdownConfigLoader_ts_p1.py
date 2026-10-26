@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级：本文件负责加载并解析各类 Markdown 配置（命令、智能体、技能、工作流等）——从被管、用户、项目多级目录收集 .md 文件，做 frontmatter 解析、inode 去重、git 根截断与软链处理，并提供工具列表解析等辅助。'''),
+    (29, 'after', '''`CLAUDE_CONFIG_DIRECTORIES`：受支持的配置子目录清单（commands/agents/skills 等），TEMPLATES 特性开启时追加 templates。'''),
+    (40, 'after', '''`MarkdownFile`：单个已加载 Markdown 文件的结构——路径、基准目录、frontmatter、正文、来源。'''),
+    (48, 'before', '''`extractDescriptionFromMarkdown`：从正文取首行非空作为描述（去标题前缀、超长截断），兜底给默认描述。'''),
+    (77, 'before', '''`parseToolListString`：把 frontmatter 里的工具字段统一解析成字符串数组，支持字符串/数组/通配 `*`，缺失返回 null 交调用方决定默认。'''),
+    (113, 'before', '''`parseAgentToolsFromFrontmatter`：智能体工具解析——缺失=全部工具（undefined），空=无工具（[]），含 `*` 也等价全部。'''),
+    (132, 'before', '''`parseSlashCommandToolsFromFrontmatter`：斜杠命令工具解析——缺失或空都视为无工具（[]）。'''),
+    (142, 'before', '''`getFileIdentity`：用 dev:inode 生成文件唯一标识以检测跨路径重复（软链/硬链），Windows 不可靠或 NFS 全 0 时返回 null 跳过去重。'''),
+    (174, 'before', '''`resolveStopBoundary`：向上遍历的停止边界——通常停在最近的 .git，但若 cwd 处于项目内嵌的子仓库（子模块/vendored 克隆）则越过它停在项目根，避免父项目 .claude 不可达。'''),
+    (222, 'before', '''`getProjectDirsUpToHome`：从 cwd 向上遍历到 git 根（或 home），收集沿途所有 `.claude/<子目录>`，用 statSync 过滤已存在目录，避免对不存在目录误启 ripgrep。'''),
+    (297, 'before', '''`loadMarkdownFilesForSubdir`：核心加载器（带 memoize 缓存）——合并被管/用户/项目三来源，处理 git worktree 回退到主仓库副本，并按 inode 去重，优先级被管 > 用户 > 项目。'''),
+    (451, 'before', '''`findMarkdownFilesNative`：纯 Node fs 的原生 Markdown 查找实现，作为 ripgrep 的回退/可显式启用项，用 dev+inode 检测循环软链，不读 .gitignore。'''),
+    (546, 'before', '''`loadMarkdownFiles`：单目录加载——默认用 ripgrep（快），设了环境变量就走原生实现，对每个 .md 读 frontmatter 后返回，解析失败只跳过不报错。'''),
+]

@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级：本文件实现 `claude doctor` 自检命令的核心——诊断当前安装类型、版本、路径、自动更新权限、多重安装冲突、配置问题，并给出可执行的修复建议。'''),
+    (53, 'after', '''`InstallationType`：安装类型枚举，区分 npm 全局/本地、原生、包管理器、开发、未知。'''),
+    (54, 'after', '''`DiagnosticInfo`：自检结果的结构体，含安装类型、版本、路径、自动更新状态、多重安装列表、告警、ripgrep 状态等。'''),
+    (73, 'before', '''`getNormalizedPaths`：取当前进程被调用的路径与可执行路径，Windows 下把反斜杠统一成正斜杠便于路径匹配。'''),
+    (86, 'before', '''`getCurrentInstallationType`：判定当前属于哪种安装类型——先判开发模式，再按打包模式、本地 npm、全局 npm 路径、包管理器逐项识别。'''),
+    (150, 'before', '''`getInstallationPath`：根据安装类型返回实际二进制/安装目录，打包模式优先用 realpath 解析真实路径。'''),
+    (191, 'before', '''`getInvokedBinary`：返回真正被调用的可执行文件路径（打包用 execPath，npm/开发用脚本路径）。'''),
+    (205, 'before', '''`detectMultipleInstallations`：扫描本地目录、npm 全局、原生安装等多处，列出所有重复安装，并跳过当前正在用的 Homebrew 软链以避免重复报告。'''),
+    (317, 'before', '''`detectConfigurationIssues`：核心告警收集——先看被管设置里 `strictPluginOnlyCustomization` 的非法/未知值，再按安装类型检查 PATH、配置方法一致性等。'''),
+    (373, 'after', '''针对原生安装检查 `~/.local/bin` 是否在 PATH 中，缺失时按 Windows/Unix 给出不同修复命令。'''),
+    (432, 'after', '''检查配置方法 mismatch（如本地安装却声明原生），以及本地安装不可达（别名失效或不在 PATH）的情况。'''),
+    (487, 'before', '''`detectLinuxGlobPatternWarnings`：Linux 上沙箱权限规则里的 glob 模式支持不全，列出前三个并提示其余数量。'''),
+    (514, 'before', '''`getDoctorDiagnostic`：总装函数——汇集安装类型、版本、路径、多重安装、告警，并追加 Linux glob 警告与遗留 npm 清理建议，最后组装成 `DiagnosticInfo`。'''),
+    (605, 'after', '''组装最终诊断对象，含自动更新是否禁用、是否有更新权限、ripgrep 状态、包管理器信息。'''),
+]

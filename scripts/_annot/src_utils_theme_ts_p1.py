@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级：本文件集中定义整个终端 UI 的颜色主题系统。导出若干命名主题（浅色、深色、ANSI 兼容、色盲友好等）以及把主题色转成 ANSI 转义码的工具函数。所有颜色用显式 RGB 值或 ANSI 命名色，避免被用户自定义的终端配色干扰。'''),
+    (89, 'after', '''`Theme` 类型：一份完整的颜色槽位清单，每个槽位都是字符串（RGB 或 ANSI 命名色）。新增 UI 元素时通常要先在这里加一个槽位，再在下面每个主题里填值。'''),
+    (57, 'after', '''`messageActionsBackground` 与 `selectionBg` 的文档块：前者是消息操作选中态背景（偏蓝，区别于默认与用户消息背景），后者是文本选择高亮（取代逐格反显，避免与语法高亮打架）。'''),
+    (98, 'after', '''`THEME_NAMES`：可选主题名列表（浅/深 × 三套变体），用 as const 固定为字面量联合类型。'''),
+    (100, 'after', '''`ThemeName`：从 `THEME_NAMES` 推导出的字面量联合类型，保证运行期传入的主题名一定合法。'''),
+    (103, 'after', '''`THEME_SETTINGS`：在主题名之上多一个 `auto`，用于「跟随系统明暗」的偏好值。'''),
+    (105, 'after', '''`ThemeSetting`：用户配置里存储的主题偏好，`auto` 会在运行期解析成具体 `ThemeName`。'''),
+    (191, 'after', '''`lightTheme`：浅色主题，全部用显式 RGB 值（电光紫、品红、克劳德橙等），注释里标注每个色的中文含义与用途。'''),
+    (272, 'after', '''`lightAnsiTheme`：浅色 ANSI 主题，只用 16 个标准 ANSI 命名色，适配不支持真彩色的终端。'''),
+    (353, 'after', '''`darkAnsiTheme`：深色 ANSI 主题，与浅色 ANSI 对称，全部走 16 色命名表。'''),
+    (434, 'after', '''`lightDaltonizedTheme`：浅色色盲友好主题，把红绿等易混淆色换成蓝/橙/黄等色盲可辨组合，并附去饱和说明。'''),
+    (515, 'after', '''`darkTheme`：默认深色主题，真彩色，是大多数用户的日常配色。'''),
+    (596, 'after', '''`darkDaltonizedTheme`：深色色盲友好主题，与浅色版本同理但基色整体调亮以适配暗背景。'''),
+    (598, 'before', '''`getTheme`：主题名到具体 `Theme` 对象的查表函数，未命中时回退到 `darkTheme`（默认深色）。'''),
+    (620, 'after', '''针对 Apple Terminal 的特殊处理：它不支持 24 位真彩色，所以用 256 色档位新建一个 chalk 实例，其余终端沿用全局 chalk。'''),
+    (626, 'before', '''`themeColorToAnsi`：把主题里的 RGB 色转成 ANSI 转义前缀，供 asciichart 画图表使用；解析失败时回退到品红。'''),
+]

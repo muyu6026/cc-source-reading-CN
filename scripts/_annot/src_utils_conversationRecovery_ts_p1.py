@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级：本文件负责「会话恢复」——把磁盘上的 transcript jsonl 反序列化成 REPL 可用的消息，处理遗留附件类型迁移、未解析工具调用过滤、中断检测、技能状态恢复，并统一从最近/指定/路径等多种来源加载。'''),
+    (52, 'after', '''蚂蚁内网专用工具名通过条件 require 引入（DCE 时静态 import 会泄漏字符串），仅 KAIROS 等特性开启才取真值。'''),
+    (74, 'before', '''`migrateLegacyAttachmentTypes`：向后兼容——把旧版 attachment 类型（new_file/new_directory）迁移成新类型并补 displayPath。'''),
+    (134, 'after', '''`TeleportRemoteResponse`/`TurnInterruptionState`/`DeserializeResult`：恢复相关的返回类型定义。'''),
+    (148, 'after', '''`deserializeMessages`：把日志消息反序列化成 REPL 格式，过滤未解析工具调用与孤儿思考消息，并在末尾用户消息后补一个合成助手哨兵。'''),
+    (164, 'before', '''`deserializeMessagesWithInterruptDetection`：在反序列化基础上额外检测会话是否中途被打断，供 SDK 恢复路径自动续接。'''),
+    (186, 'after', '''依次做四道清洗：迁移遗留附件类型 → 剥离非法 permissionMode → 过滤未解析工具调用 → 过滤孤儿思考消息 → 过滤纯空白助手消息。'''),
+    (204, 'after', '''把中途打断的回合转成 interrupted_prompt（追加一条合成延续消息），统一两种中断形态只让消费方处理 interrupted_prompt。'''),
+    (254, 'after', '''`InternalInterruptionState` 与 `detectTurnInterruption`：内部三态检测——根据过滤后最后一条相关消息判断 none/interrupted_turn/interrupted_prompt，系统/进度消息与 API 错误助手都不算回合结束。'''),
+    (306, 'after', '''用户消息分支：meta/压缩摘要不算中断；工具结果要先看是否终结算「完成的简报模式回合」而非被打断；纯文本 prompt 才算真正中断。'''),
+    (335, 'before', '''`isTerminalToolResult`：回溯找该 tool_result 对应 tool_use，若其名为简报/发送用户文件等「终结型」工具，则该回合视为已完成而非中断。'''),
+    (375, 'before', '''`restoreSkillStateFromMessages`：从 invoked_skills 附件恢复技能状态（跨压缩不丢失），并对 skill_listing 附件触发「抑制重复播报」锁。'''),
+    (405, 'before', '''`loadMessagesFromJsonlPath`：从任意 jsonl 路径做链式遍历——找最新非 sidechain 叶节点，构建对话链并去冗余字段，返回消息与 sessionId。'''),
+    (442, 'before', '''`loadConversationForResume`：恢复总入口——按 undefined（最近会话）/字符串（指定 ID）/jsonl 路径/.logoption 四种来源加载，恢复计划与文件历史、技能状态、反序列化并跑会话开始钩子。'''),
+    (487, 'after', '''undefined 来源走 --continue：取最近会话但跳过正在写入的 live 后台/守护会话。'''),
+    (533, 'after', '''有 log 时先补全（lite 日志加载完整版）、确定 sessionId、复制计划与文件历史、做一致性校验，再反序列化与钩子处理。'''),
+]

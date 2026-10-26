@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级：本文件负责从插件里加载并解析 MCP 服务器配置。涵盖从 MCPB 压缩包、插件清单字段、`.mcp.json`/`.mcpb` 文件多种来源收集服务器，做环境变量与用户配置替换，最后加上插件作用域前缀避免跨插件命名冲突。'''),
+    (34, 'before', '''`loadMcpServersFromMcpb`：从 MCPB 压缩包加载服务器——下载/解压 DXT 清单并转成 MCP 配置；若需要用户配置则先返回 null 等用户填完再加载。'''),
+    (55, 'after', '''needs-config 分支：尚未配置的用户态插件正常返回 null（非错误），由 `/plugin` 菜单引导用户填写。'''),
+    (79, 'before', '''catch 段按错误信息关键词把失败分成下载失败、清单非法、解压失败三类，推入 `errors` 供 UI 展示。'''),
+    (131, 'before', '''`loadPluginMcpServers`：插件级入口，按优先级合并多来源服务器——先 `.mcp.json`（最低），再清单里的 `mcpServers`（更高，支持字符串/数组/内联三种写法）。'''),
+    (147, 'after', '''清单 `mcpServers` 字段支持三种形态：字符串（MCPB 或 JSON 路径）、数组（并行加载后保序合并）、直接对象（内联配置）。'''),
+    (219, 'before', '''`loadMcpServersFromFile`：从插件目录内的 JSON 文件读取服务器，并用 Zod schema 逐个校验，非法条目只打日志不阻断其余。'''),
+    (272, 'after', '''`UnconfiguredChannel` 类型：描述插件清单里「用户配置尚未填好」的 channel 入口。'''),
+    (290, 'before', '''`getUnconfiguredChannels`：纯函数，找出哪些 channel 的必填用户配置还没保存，供 ManagePlugins 决定要不要弹配置对话框。'''),
+    (326, 'before', '''`loadChannelUserConfig`：按服务器名从插件清单定位 channel 并读已保存的用户配置；非 channel 或没有用户配置 schema 时返回 undefined，跳过变量替换。'''),
+    (341, 'before', '''`addPluginScopeToServers`：给服务器名加 `plugin:<插件名>:<原名>` 前缀并标记 `dynamic` 作用域，避免不同插件同名冲突。'''),
+    (366, 'before', '''`extractMcpServersFromPlugins`：批量处理所有已启用插件——加载、逐服务器解析环境变量、缓存未解析版本、加作用域后汇总。每个服务器单独 try/catch，单个坏配置不影响整体。'''),
+    (440, 'before', '''`buildMcpUserConfig`：合并插件顶层 `userConfig` 与 channel 级 per-server 配置（channel 级优先），都缺失时返回 undefined 以跳过替换。'''),
+    (465, 'before', '''`resolvePluginMcpEnvironment`：核心替换函数——按插件变量 → 用户配置变量 → 通用环境变量的顺序解析命令/参数/环境变量/URL/请求头，并收集缺失变量报告。'''),
+    (495, 'after', '''switch 按服务器类型分支：stdio 解析命令与参数并注入 `CLAUDE_PLUGIN_ROOT`/`CLAUDE_PLUGIN_DATA`；sse/http/ws 解析 URL 与请求头；其余类型原样透传。'''),
+    (589, 'before', '''`getPluginMcpServers`：激活单个插件时调用，优先用缓存，未命中再加载并逐服务器解析环境、加作用域后返回。'''),
+]
