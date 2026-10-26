@@ -1,5 +1,12 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 47 批（2026-10-26）：utils ast + marketplaceManager + auth
+- 状态：完成并推送，commit `d60bcfc`。
+- 本批：`src/utils/bash/ast.ts`（2,679→2,783 行，104 锚点）、`src/utils/plugins/marketplaceManager.ts`（2,643→2,746 行，103 锚点）、`src/utils/auth.ts`（2,002→2,116 行，114 锚点）。合计 3 文件 7,324 行 / 321 锚点。
+- 进度：全仓 **598/1902 文件 / 198,146 行 / 38.6%**；`src/utils/` 9/564（剩 555 份），hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 598 份 0 失败；check-links 819 源码链接 + 107 内链 0 失效；annotate.py 零 `⟳`。
+- 下一批目标（按行数降序）：`utils/shell/readOnlyCommandValidation.ts` 1,893 → `utils/config.ts` 1,817 → `utils/powershell/parser.ts` 1,804 → `utils/permissions/filesystem.ts` 1,777。
+
 ## 第 46 批（2026-10-26）：utils attachments + pluginLoader
 - 状态：完成并推送，commit `cf844dd`。
 - 本批：`src/utils/attachments.ts`（3,997→4,155 行，158 锚点）、`src/utils/plugins/pluginLoader.ts`（3,302→3,470 行，168 锚点）。合计 2 文件 7,299 行 / 326 锚点。
@@ -28,3 +35,5 @@
 - 函数签名行（`export function f(...) {` / `): void {`）一律用 `before`，用 `after` 会把中文插进函数体首行。
 - 锚点行号以 Read 输出为准；空行/import 末行容易差 1，写完抽验语义。
 - **批注文本避免引用含引号/反斜杠的 shell 字面量**（第 45 批踩坑：`ls <<'EOF'`、`export "FOO=bar"`、`\\r`、`/\\s/` 让 bashParser 数据文件被预检连拦 4 轮；shell 转义序列 `'"'"'` 还会混进文本）——用「加引号 XX」式中文表述代替，raw string 里 `\\r` 仍是两个反斜杠字符。
+- **写数据文件时干脆不用引号字符**（第 47 批第二次踩到）：`ast.ts` 两轮、`marketplaceManager.ts` 一轮被预检拦下，全是 `"$(cmd)"`、`env "FOO=bar"`、`\-n` 这类字面量引用。改写成「引号包裹的 XX」「转义写法的 -n」即可，一次过。
+- 2,000–2,700 行档一批 3 份是合适的（本批 7,324 行 / 321 锚点，三个数据文件各 100 余锚点）。
