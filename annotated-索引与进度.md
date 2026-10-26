@@ -1253,19 +1253,51 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 流程账：预检四断言一次通过（43 锚点）、零合并错误（硬规矩连续第 20 批生效）；annotate.py 良性 ⟳ 外移 9 处（我的 `after` 锚落在 `//` 注释段首行，自动挪到段尾，落点人眼确认在代码之前，未劈开英文）；首轮 1 FAIL——useDoublePress 锚点 (33,'after') 落在多行表达式 `const isDoublePress =` 首行中间（规矩 7 变体：多行语句首行同性质），挪到 35 后复验 0 失败；check-links 0 失效。
 
 
+### hooks 根目录收尾 24 件（第 43 批，24 份 683 行，69 锚点，hooks 104/104 全清）
+
+把 `src/hooks/` 根目录最后 24 份一次清零，hooks 整目录 104/104 全清——这是继 `services/`、`src/tools/` 之后第三个整目录清零的大模块。24 份多为小而专的 hook（15–48 行），逐一过：
+
+1. **`useOfficialMarketplaceNotification.tsx`（48 行，2 锚点，含 sourcemap）**——薄封装 hook。仅把「官方市场自动安装检查」作为一次性 compute 交给 useStartupNotification 基座；configSaveFailed / installed / skipped(unknown) 三类结果各自 push 一条右下角通知，基座统一控展示与超时。
+2. **`useDeferredHookMessages.ts`（47 行，4 锚点）**——延迟 hook 消息「先渲染后注入」。两个 ref（pendingRef 持未决 promise、resolvedRef 标已结算）；promise 结算后把消息前置插入对话（`[...msgs, ...prev]`），确保模型首轮就能看到 hook 上下文；返回的回调供 onSubmit 在首个 API 请求前调用。
+3. **`useMergedTools.ts`（45 行，3 锚点）**——组装 REPL 完整工具池。复用 assembleToolPool（REPL 与 runAgent 共用纯函数：内置+MCP+deny 过滤+去重），再叠 initialTools；`replBridgeEnabled` / `replBridgeOutboundOnly` 声明未使用（早期开关残留），仍列进 deps 保引用稳定。
+4. **`useIdeLogging.ts`（42 行，3 锚点）**——订阅 IDE 经 MCP 发来的 `log_event` 通知，转成内部 analytics 事件（`tengu_ide_<name>`），eventData passthrough 保留任意附加字段。
+5. **`useMemoryUsage.ts`（40 行，4 锚点）**——Node 内存监控。1.5GB（high）/ 2.5GB（critical）双阈值；**关键优化**：status 为 normal 时返回 null 而非新对象，避免 99% 用户每 10s 重渲染整个通知子树。
+6. **`useElapsedTime.ts`（38 行，3 锚点）**——格式化经过时长。useSyncExternalStore + 定时 notify；`endTime` 优先（终态任务冻结时长，避免看完超时任务显示膨胀），减掉暂停时长；get 同时作 server/getSnapshot 同源防 hydration 不匹配。
+7. **`useMinDisplayTime.ts`（36 行，3 锚点）**——节流显示。保证每个值至少停留 minMs 才被替换，防快速轮转文本一闪而过；不够久时 setTimeout 补足剩余时间，并把 ref/setter/value 作参数传进闭包（避过期值）。
+8. **`useUpdateNotification.ts`（35 行，3 锚点）**——版本 semver（major.minor.patch）去重决定更新提示；用惰性初始化把已通知版本记成初始版本 semver，避首屏误弹。
+9. **`useBlink.ts`（35 行，3 锚点，含 sourcemap）**——同步闪烁动画。所有实例共享同一动画时钟（按 floor(time/interval)%2 天然同步），仅至少一个可见订阅者时跑时钟，终端失焦即暂停。
+10. **`useMainLoopModel.ts`（35 行，3 锚点）**——解析主循环模型名（session 覆盖 > 全局 > 默认）。订阅 GB 刷新信号强制重渲染：GB 初始化完成后 AppState 不变，但别名解析需重算（否则 /model 显示与实际采样不一致）。
+11. **`useIdeConnectionStatus.ts`（34 行，3 锚点）**——从 MCP 客户端定位 ide client，推导连接状态（connected/pending/disconnected/null）与名称（仅 sse-ide/ws-ide 可取）。
+12. **`useSettingsChange.ts`（26 行，3 锚点）**——订阅设置变更。**坑**：缓存已由通知方（changeDetector.fanOut）重置，这里不能再清，否则 N 个订阅者互相踩出 N 路抖动。
+13. **`useVoiceEnabled.ts`（26 行，3 锚点）**——综合「用户开关 + 鉴权 + GB kill-switch」三者。只把贵的鉴权半（冷启动 sync security spawn ~60ms）memo 在 authVersion，GB 廉价缓存查留在 memo 外以便中途翻转即时生效。
+14. **`useFileHistorySnapshotInit.ts`（26 行，3 锚点）**——启动时文件历史快照一次性灌进内存状态（仅首次），之后由运行期机制接管；功能未开或已初始化则跳过。
+15. **`useExitOnCtrlCDWithKeybindings.ts`（25 行，2 锚点）**——便利封装接 useExitOnCtrlCD + useKeybindings，是组件用退出双按的标准入口；拆分是为避 import 循环。
+16. **`useMergedClients.ts`（24 行，3 锚点）**——合并初始 + MCP 客户端，按 name 去重（initialClients 优先）；纯函数 mergeClients 便于单测。
+17. **`useDynamicConfig.ts`（23 行，4 锚点）**——动态配置 hook；测试环境直接 return 不拉配置（防测试挂起）。
+18. **`useMailboxBridge.ts`（22 行，3 锚点）**——邮箱消息桥接。useSyncExternalStore 订阅 mailbox.revision，仅队列变化重渲染；非加载态时 poll 一条消息投递给输入框。
+19. **`useSettings.ts`（18 行，2 锚点）**——从 AppState 取 settings 的响应式 hook；优先用它而非 getSettings_DEPRECATED()，才能在组件里拿到响应式更新。
+20. **`useAfterFirstRender.ts`（18 行，3 锚点）**——ant 环境 + 指定 env 下，首渲后打印启动耗时并 process.exit(0)，用于自动化基准测量；被 custom-rules 允许越过 no-process-exit。
+21. **`useMergedCommands.ts`（16 行，3 锚点）**——合并内置 + MCP 命令，按 name 去重（initialCommands 优先）。
+22. **`useCommandQueue.ts`（16 行，2 锚点）**——订阅统一命令队列，返回冻结数组，仅队列变更时改引用。
+23. **`useTerminalSize.ts`（16 行，2 锚点）**——从 TerminalSizeContext 取终端尺寸；非 Ink App 组件内使用直接抛错。
+24. **`useTimeout.ts`（15 行，2 锚点）**——延时 hook：delay 毫秒后翻 isElapsed；resetTrigger 变化重置计时器。
+
+流程账：预检四断言一次通过（69 锚点）、零合并错误（硬规矩连续第 21 批生效）；annotate.py 良性 ⟳ 外移 1 处（useSettingsChange 锚点原落 `//` 注释段中部，自动挪到段尾，落点人眼确认在英文注释块之后、代码之前，未劈开英文）；首轮 1 FAIL——useIdeConnectionStatus 锚点 (21,'after') 落在多行赋值 `const ideName =` 首行（规矩 7 变体：行尾 `=` 触发「未结束多行表达式」判据），挪到三元收尾行 (24,'after') 后复验 0 失败；check-links 0 失效。
+
+
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/toolPermission/`、`src/hooks/notifs/` 均已清零（tools 184/184，hooks 80/104）。`src/` 还剩 1,337 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,313 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**已做 80**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。只剩根目录 24 份（683 行：useOfficialMarketplaceNotification 48 / useDeferredHookMessages 46 / useMergedTools 44 / useIdeLogging 41 / useMemoryUsage 39 / useElapsedTime 37 / useMinDisplayTime 35 / useMainLoopModel 34 / useBlink 34 / useUpdateNotification 34 等） |
+| `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
 | `src/utils/` | 564 份 / 180,487 行（0 已做） | 最大的一块，但最杂。适合按需读（遇到哪个函数再查），不适合线性通读 |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,337 份没动（31.7% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,313 份没动（31.8% 行数）。
 
 ---
 
