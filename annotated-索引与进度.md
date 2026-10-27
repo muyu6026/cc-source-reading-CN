@@ -1849,6 +1849,39 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 61 批：390 行档十五件套（第 61 批，15 份 5,620 行，493 锚点）
+
+本批是 utils 的「390 行档」收口——按行数降序，上一档（450）已清零，这一档 15 份全是 354–393 行的「类型与小程序」模块：署名类型、任务输出常量、权限类型抽取、LSP 插件集成、文件区间读取、Markdown 渲染、swarm 安装向导 / 分屏后端、frontmatter 解析、shell 前缀安全、日志标题、状态类型、更新日志、插件推荐。彼此独立，但共同补齐 utils 中层的「小积木」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/attribution.ts`](annotated/src/utils/attribution.ts) | 393 | 448 | 55 | 定义 `AttributionTexts` 类型（仅 `commit` / `pr` 两个字段），对应提交信息与 PR 描述里要插入的署名 |
+| [`utils/task/TaskOutput.ts`](annotated/src/utils/task/TaskOutput.ts) | 390 | 431 | 41 | 后台任务输出的三个核心常量：内存上限 8MB、轮询间隔 1 秒、进度尾巴采样 4KB |
+| [`utils/permissions/PermissionUpdate.ts`](annotated/src/utils/permissions/PermissionUpdate.ts) | 389 | 423 | 34 | 权限更新相关类型，抽取到 `src/types/permissions.ts` 以打破导入循环 |
+| [`utils/plugins/lspPluginIntegration.ts`](annotated/src/utils/plugins/lspPluginIntegration.ts) | 387 | 425 | 38 | LSP 插件集成的接入层：导入 zod、LSP 类型、插件类型与若干工具函数 |
+| [`utils/readFileInRange.ts`](annotated/src/utils/readFileInRange.ts) | 383 | 419 | 36 | 文件区间读取：小文件走 readFile 快路径、大文件 / 管道走流式路径，二者都去 BOM 与回车符 |
+| [`utils/markdown.ts`](annotated/src/utils/markdown.ts) | 381 | 415 | 34 | 把 Markdown 渲染成带终端样式的字符串（标题 / 列表 / 代码 / 链接 / 表格对齐），统一以换行符作行尾 |
+| [`utils/swarm/It2SetupPrompt.tsx`](annotated/src/utils/swarm/It2SetupPrompt.tsx) | 379 | 405 | 25 | `SetupStep` 联合类型枚举了 swarm 安装向导的全部步骤状态（React Compiler 编译产物） |
+| [`utils/plugins/lspRecommendation.ts`](annotated/src/utils/plugins/lspRecommendation.ts) | 374 | 403 | 29 | `LspPluginRecommendation`：返回给调用方的 LSP 插件推荐结构 |
+| [`utils/swarm/backends/ITermBackend.ts`](annotated/src/utils/swarm/backends/ITermBackend.ts) | 370 | 397 | 27 | swarm iTerm2 分屏后端：`teammateSessionIds` 追踪已创建队友分屏的会话 ID |
+| [`utils/frontmatterParser.ts`](annotated/src/utils/frontmatterParser.ts) | 370 | 397 | 27 | `FrontmatterData` 定义 frontmatter 各字段的类型与含义说明 |
+| [`utils/shell/prefix.ts`](annotated/src/utils/shell/prefix.ts) | 367 | 399 | 32 | `DANGEROUS_SHELL_PREFIXES` 列出绝不可作裸前缀接受的 shell 可执行文件，避免绕过权限系统 |
+| [`utils/log.ts`](annotated/src/utils/log.ts) | 362 | 392 | 30 | `getLogDisplayTitle` 按优先级拼出日志 / 会话的显示标题，并去除不友好标签 |
+| [`utils/status.tsx`](annotated/src/utils/status.tsx) | 361 | 387 | 25 | `Property` 类型：标签加值，值可为 React 节点或字符串数组（状态展示用） |
+| [`utils/releaseNotes.ts`](annotated/src/utils/releaseNotes.ts) | 360 | 391 | 31 | 更新日志展示：`MAX_RELEASE_NOTES_SHOWN` 每次最多展示的版本更新条数 |
+| [`utils/swarm/backends/PaneBackendExecutor.ts`](annotated/src/utils/swarm/backends/PaneBackendExecutor.ts) | 354 | 383 | 29 | `PaneBackendExecutor` 把 `PaneBackend` 适配为 `TeammateExecutor` 接口，使分屏后端接入队友执行器 |
+
+两条横切观察：
+
+- **「类型先行」是这批的共性**：`attribution.ts` / `frontmatterParser.ts` / `status.tsx` / `lspRecommendation.ts` 基本是「先定类型再谈逻辑」——`AttributionTexts` / `FrontmatterData` / `Property` / `LspPluginRecommendation` 这些类型本身就是文件的主要产出，读懂类型就读懂了文件。
+- **swarm 后端成对出现**：`ITermBackend.ts` 与 `PaneBackendExecutor.ts` 一个管 iTerm2 分屏的会话追踪、一个把分屏后端适配成统一的 `TeammateExecutor` 接口，配合 `src/utils/swarm/backends/` 下的其他后端（tmux / 进程内）构成多智能体协作的「分屏执行层」。
+
+流程账：预检 15 份一次通过（493 锚点；两份数据文件曾因 `after` 锚在 `const x =` 行尾被 `check-fidelity` 的 `_OPEN_TAIL` 判据判失败，已把锚点挪到赋值收尾行后重新生成）；`annotate.py` 零 `⟳`、零 `⚠`；`check-fidelity.py` 717 份 0 失败（本批 15 份合计 +493 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 981 条 + 内链 129 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`logoV2Utils.ts`(350) · `ultraplan/ccrSession.ts`(349) · `plugins/loadPluginAgents.ts`(348) · `deepLink/registerProtocol.ts`(348) · `env.ts`(347) · `plugins/pluginStartupCheck.ts`(341) · `swarm/backends/InProcessBackend.ts`(339) · `hooks/execAgentHook.ts`(339) · `nativeInstaller/packageManagers.ts`(336) · `mcp/elicitationValidation.ts`(336) …（utils 还剩 439 份；全仓还剩 1,185 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
