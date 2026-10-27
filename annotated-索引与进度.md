@@ -1287,17 +1287,17 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,215 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,200 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
 | `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
 | `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 95**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor + theme + plugins/mcpPluginIntegration + doctorDiagnostic + model/model + handlePromptSubmit + processUserInput/processUserInput + cleanup + markdownConfigLoader + conversationRecovery + plugins/pluginInstallationHelpers + deepLink/terminalLauncher + queryHelpers + sessionRestore + messageQueueManager + model/modelOptions + claudeInChrome/common + fastMode + gitDiff + gracefulShutdown + claudeInChrome/chromeNativeHost + nativeInstaller/download + bash/treeSitterAnalysis + telemetry/betaSessionTracing + settings/changeDetector + permissions/pathValidation + Shell + teleport/api + ShellCommand + swarm/backends/registry + cronTasks，111,049 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 550–590 行档：file(584)/bash/ShellSnapshot(582)/suggestions/commandSuggestions(567)/cronScheduler(565)/autoUpdater(561)/deepLink/terminalLauncher(557)… |
+| `src/utils/` | 564 份 / 180,487 行（**已做 110**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor + theme + plugins/mcpPluginIntegration + doctorDiagnostic + model/model + handlePromptSubmit + processUserInput/processUserInput + cleanup + markdownConfigLoader + conversationRecovery + plugins/pluginInstallationHelpers + deepLink/terminalLauncher + queryHelpers + sessionRestore + messageQueueManager + model/modelOptions + claudeInChrome/common + fastMode + gitDiff + gracefulShutdown + claudeInChrome/chromeNativeHost + nativeInstaller/download + bash/treeSitterAnalysis + telemetry/betaSessionTracing + settings/changeDetector + permissions/pathValidation + Shell + teleport/api + ShellCommand + swarm/backends/registry + cronTasks + listSessionsImpl + task/diskOutput + hooks/sessionHooks + plugins/officialMarketplaceStartupCheck + betas + statsCache + nativeInstaller/pidLock + tmuxSocket + proxy + imagePaste + plugins/zipCache + claudeInChrome/setup + hooks/hooksConfigManager + plugins/pluginOptionsStorage + plans，117,413 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 550–590 行档：file(584)/bash/ShellSnapshot(582)/suggestions/commandSuggestions(567)/cronScheduler(565)/autoUpdater(561)/deepLink/terminalLauncher(557)… |
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,215 份没动（53.6% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,200 份没动（54.9% 行数）。
 
 ---
 
@@ -1811,6 +1811,41 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 流程账：预检三份一次通过（55 锚点，数据文件末尾加 `ANNOTATIONS.sort` 兜顺序，因为 `annotate.py` 按列表顺序插入、不排序）；`annotate.py` 三次零 `⟳`；`check-fidelity.py` 687 份 0 失败（本批三份合计 +102 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 963 条 + 内链 127 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`listSessionsImpl.ts`(454) · `task/diskOutput.ts`(451) · `hooks/sessionHooks.ts`(447) · `plugins/officialMarketplaceStartupCheck.ts`(439) · `statsCache.ts`(434) · `betas.ts`(434) · `nativeInstaller/pidLock.ts`(433) · `tmuxSocket.ts`(427) · `proxy.ts`(426) · `imagePaste.ts`(416) …（utils 还剩 469 份；全仓还剩 1,215 份）。
+
+---
+
+### utils 第 60 批：450 行档十五件套（第 60 批，15 份 6,364 行，610 锚点）
+
+本批是 utils 的「450 行档」收口——按行数降序，上一档（550/520）已清零，这一档 15 份全是 397–454 行的「运行时外围」模块：会话列表、任务落盘、钩子注册表、代理、图片粘贴、插件缓存/选项/市场自检、计划文件。彼此独立，但共同撑起主链路之外的那圈「能力装配层」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/listSessionsImpl.ts`](annotated/src/utils/listSessionsImpl.ts) | 454 | 499 | 45 | 会话列表实现：`listSessionsImpl` 扫 projects 目录 JSONL、解析 `SessionInfo`、按 mtime 排序过滤，供 `/resume` 与 `--list` 用 |
+| [`utils/task/diskOutput.ts`](annotated/src/utils/task/diskOutput.ts) | 451 | 485 | 34 | 任务磁盘输出：`DiskTaskOutput` 类 + 全局 append/flush/evict/getTaskOutputDelta，5GB 上限，后台 agent 长输出的落盘与增量读 |
+| [`utils/hooks/sessionHooks.ts`](annotated/src/utils/hooks/sessionHooks.ts) | 447 | 482 | 35 | 会话级钩子注册表：`addSessionHook`/`removeSessionHook` 按 matcher 派发，生命周期钩子的内存索引 |
+| [`utils/plugins/officialMarketplaceStartupCheck.ts`](annotated/src/utils/plugins/officialMarketplaceStartupCheck.ts) | 439 | 480 | 41 | 启动期官方市场自检：`checkAndInstallOfficialMarketplace` 带重试拉取并安装官方 marketplace，含跳过原因枚举与退避配置 |
+| [`utils/betas.ts`](annotated/src/utils/betas.ts) | 434 | 477 | 43 | Beta 标头装配厂：`getMergedBetas`/`getModelBetas` 按模型 memoize 合并 SDK/ISP/结构化输出等 beta 头，决定能力开关 |
+| [`utils/statsCache.ts`](annotated/src/utils/statsCache.ts) | 434 | 476 | 42 | 用量统计缓存：`withStatsCacheLock` 加锁读写 `PersistedStatsCache`，按日期合并新统计，跨会话累计 token/成本 |
+| [`utils/nativeInstaller/pidLock.ts`](annotated/src/utils/nativeInstaller/pidLock.ts) | 433 | 473 | 40 | 原生安装器 PID 锁：`tryAcquireLock`/`acquireProcessLifetimeLock` 用进程存活探测防并发安装，`cleanupStaleLocks` 清僵尸锁 |
+| [`utils/tmuxSocket.ts`](annotated/src/utils/tmuxSocket.ts) | 427 | 467 | 40 | tmux 套接字：`getClaudeSocketPath`/`ensureSocketInitialized` 为 swarm agent 建 socket 与环境变量，记录 tmux 是否被用过 |
+| [`utils/proxy.ts`](annotated/src/utils/proxy.ts) | 426 | 476 | 50 | 代理层：`getProxyUrl`/`shouldBypassProxy`/`createAxiosInstance`/`configureGlobalAgents` 统一 HTTP/WS/_fetch 代理与 no_proxy 旁路 |
+| [`utils/imagePaste.ts`](annotated/src/utils/imagePaste.ts) | 416 | 459 | 43 | 图片粘贴：`getImageFromClipboard`/`getImagePathFromClipboard` 跨平台读剪贴板图片（含阈值与路径回退），喂给多模态输入 |
+| [`utils/plugins/zipCache.ts`](annotated/src/utils/plugins/zipCache.ts) | 406 | 442 | 36 | 插件 ZIP 缓存：`atomicWriteToZipCache`/`createZipFromDirectory`/`extractZipToDirectory` 会话级原子缓存已下载插件包 |
+| [`utils/claudeInChrome/setup.ts`](annotated/src/utils/claudeInChrome/setup.ts) | 400 | 440 | 40 | Claude-in-Chrome 装配：`setupClaudeInChrome`/`installChromeNativeHostManifest` 装原生消息宿主清单，接通浏览器扩展 |
+| [`utils/hooks/hooksConfigManager.ts`](annotated/src/utils/hooks/hooksConfigManager.ts) | 400 | 425 | 25 | 钩子配置管理：`getHookEventMetadata`/`groupHooksByEventAndMatcher`/`getHooksForMatcher` 加载、去重、按事件+matcher 排序钩子 |
+| [`utils/plugins/pluginOptionsStorage.ts`](annotated/src/utils/plugins/pluginOptionsStorage.ts) | 400 | 443 | 43 | 插件选项存储：`loadPluginOptions`/`savePluginOptions` 把敏感项与 `settings` 项分离落盘，`substitutePluginVariables` 注入 `${CLAUDE_PLUGIN_ROOT}` |
+| [`utils/plans.ts`](annotated/src/utils/plans.ts) | 397 | 450 | 53 | 计划文件管理：`getPlanSlug`/`getPlanFilePath`/`getPlan`/`copyPlanForResume`/`copyPlanForFork` 管理 `/plan` 文件与恢复 |
+
+四套并发安全写法值得对照：`pidLock.ts` 的进程存活探测（轮询判断 PID 是否真在跑）、`statsCache.ts` 的 `withStatsCacheLock` 文件锁、zipCache 的 `atomicWriteToZipCache`（写临时文件再 rename）、tmuxSocket 的 socket 初始化——同一个「别让我和别的进程/自己抢同一份资源」问题，四份各写各的，是读 utils 时最能体会「没有统一基础设施」的一段。
+
+另外两条横切观察：
+
+- **memoize 是这批的共用范式**：`betas.ts` 的 `getModelBetas`/`getAllModelBetas`、`proxy.ts` 的 `getProxyAgent`、`hooksConfigManager.ts` 的 `getHookEventMetadata` 都是「昂贵解析 + 记忆化」——模型/环境相关的字符串拼接本可以每次重算，全部用 memoize 兜住，热路径上几乎零成本。
+- **`proxy.ts` 是「全局副作用」集中地**：`configureGlobalAgents` 改的是 undici 的全局 dispatcher，调用一次影响整个进程所有 `_fetch`；所以它被故意放在启动时早期、且带 `clearProxyCache` 供测试复位。读懂它才懂为什么某些网络问题重启进程才消失。
+
+流程账：预检 15 份一次通过（610 锚点；上游在生成前已用 `_fix_annot.py` 清掉 4 处非法字符、用 `_reloc_annot.py` 把落在 `const x =` 行尾 `=` 的 `after` 锚点挪到赋值收尾行，预先规避 `_OPEN_TAIL` 判据）；`annotate.py` 本批出现良性 `⟳` 外移（锚点落 `//` 注释段中部时自动挪到段尾，未劈开英文注释），无 `⚠` 块注释位移、无模板串位移；`check-fidelity.py` 702 份 0 失败（本批 15 份合计 +610 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 966 条 + 内链 129 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`attribution.ts`(393) · `task/TaskOutput.ts`(390) · `permissions/PermissionUpdate.ts`(389) · `plugins/lspPluginIntegration.ts`(387) · `readFileInRange.ts`(383) · `markdown.ts`(381) · `plugins/lspRecommendation.ts`(374) · `swarm/backends/ITermBackend.ts`(370) · `frontmatterParser.ts`(370) …（utils 还剩 454 份；全仓还剩 1,200 份）。
 
 ---
 
