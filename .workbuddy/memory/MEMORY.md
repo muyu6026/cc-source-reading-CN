@@ -15,6 +15,7 @@
 - 第 58 批：`aab0b0e` · 10 文件/4,820 行/199 锚点 · 全仓 **684/1902 · 274,497 行 · 53.5%** · utils **95/564**。
 - 第 59 批：`9acd794` · 3 文件/402 行/55 锚点（学习路线补课）· 全仓 **687/1902 · 274,899 行 · 53.6%** · `src/commands/clear` **4/4 全清**。
 - 第 60 批：`be70691` · 15 文件/6,364 行/610 锚点 · 全仓 **702/1902 · 281,873 行 · 54.9%** · utils **110/564**。
+- 第 61 批：`1426030` · 15 文件/5,620 行/493 锚点 · 全仓 **717/1902 · 287,493 行 · 56.0%** · utils **125/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -25,9 +26,9 @@
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
 ## 当前状态（2026-10-27 第 60 批后）
-- 全仓 **702/1902 文件（缺失 1,200）；281,873/513,237 行，按行数覆盖 54.9%**。
-- `src/utils` **110/564**（剩 454）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 350–393 行档）：attribution(393)/task/TaskOutput(390)/permissions/PermissionUpdate(389)/plugins/lspPluginIntegration(387)/readFileInRange(383)/markdown(381)/plugins/lspRecommendation(374)/swarm/backends/ITermBackend(370)/frontmatterParser(370)。
+- 全仓 **717/1902 文件（缺失 1,185）；287,493/513,237 行，按行数覆盖 56.0%**。
+- `src/utils` **125/564**（剩 439）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~339–350 行档）：logoV2Utils(350)/ultraplan/ccrSession(349)/plugins/loadPluginAgents(348)/deepLink/registerProtocol(348)/env(347)/plugins/pluginStartupCheck(341)/swarm/backends/InProcessBackend(339)/hooks/execAgentHook(339)/nativeInstaller/packageManagers(336)/mcp/elicitationValidation(336)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -40,6 +41,6 @@
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)。
-- 进行中：`src/utils` **110/564**（最大剩余块）。
+- 进行中：`src/utils` **125/564**（最大剩余块）。
 - 未启动：按 `check-coverage.py src` 取真实 top 降序推进。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。
