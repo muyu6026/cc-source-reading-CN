@@ -1882,6 +1882,39 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 62 批：350 行档十五件套（第 62 批，15 份 5,078 行，123 锚点）
+
+本批是 utils 的「350 行档」收口——按行数降序，上一档（390）已清零，这一档 15 份全是 318–350 行的「探测与适配」工具：LogoV2 启动布局、ultraplan 会话轮询、深链协议注册、插件智能体加载 / 启动自检、运行环境探测、包管理器探测、swarm 进程内后端 / 队友生成、智能体式钩子、Computer Use 桥接、MCP 询问校验、ANSI 转 PNG、effort 推理强度、bash 命令解析。彼此独立，但共同补齐 utils 中层的「自省与适配」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/logoV2Utils.ts`](annotated/src/utils/logoV2Utils.ts) | 350 | 361 | 11 | LogoV2 启动界面的布局与文案工具：按终端宽度选布局、算面板尺寸、截断路径 / 欢迎语、收集版本与计费信息、格式化最近活动 |
+| [`utils/ultraplan/ccrSession.ts`](annotated/src/utils/ultraplan/ccrSession.ts) | 349 | 360 | 11 | /ultraplan 的 CCR 会话轮询：等用户在浏览器批准 ExitPlanMode 后抽取计划文本，含轮询状态机与传送哨兵串解析 |
+| [`utils/deepLink/registerProtocol.ts`](annotated/src/utils/deepLink/registerProtocol.ts) | 348 | 358 | 10 | 注册 `claude-cli://` 自定义协议（macOS / Linux / Windows 三套实现），让浏览器深链唤起 `claude --handle-uri` |
+| [`utils/plugins/loadPluginAgents.ts`](annotated/src/utils/plugins/loadPluginAgents.ts) | 348 | 354 | 6 | 从插件目录与 frontmatter 加载智能体定义并记忆化并行加载，故意不越过用户授予的信任边界 |
+| [`utils/env.ts`](annotated/src/utils/env.ts) | 347 | 355 | 8 | 运行环境探测：终端类型、部署平台、WSL、包管理器、宿主平台，统一聚合给全应用读取 |
+| [`utils/plugins/pluginStartupCheck.ts`](annotated/src/utils/plugins/pluginStartupCheck.ts) | 341 | 348 | 7 | 插件启动检查：合并设置判定启用、计算可写回范围、读已安装列表并补齐缺失插件安装 |
+| [`utils/swarm/backends/InProcessBackend.ts`](annotated/src/utils/swarm/backends/InProcessBackend.ts) | 339 | 347 | 8 | 多智能体进程内执行后端：队友与 leader 同进程、AsyncLocalStorage 隔离、文件信箱通信与终止 |
+| [`utils/hooks/execAgentHook.ts`](annotated/src/utils/hooks/execAgentHook.ts) | 339 | 346 | 7 | 智能体式钩子执行：多轮 LLM 读取转录判断停止条件，以结构化输出返回 ok / 阻断 |
+| [`utils/nativeInstaller/packageManagers.ts`](annotated/src/utils/nativeInstaller/packageManagers.ts) | 336 | 347 | 11 | 探测 Claude 由哪个包管理器安装（mise / asdf / brew / winget / pacman / deb / rpm / apk），按家族门控与优先级回退 |
+| [`utils/computerUse/wrapper.tsx`](annotated/src/utils/computerUse/wrapper.tsx) | 336 | 343 | 6 | 把 ToolUseContext 桥接到 computer-use-mcp 会话，绑定 dispatcher、渲染覆盖与授权弹窗（.tsx 源映射行省略） |
+| [`utils/mcp/elicitationValidation.ts`](annotated/src/utils/mcp/elicitationValidation.ts) | 336 | 346 | 10 | MCP elicitation 输入校验：schema→Zod、枚举 / 格式占位提示、同步与异步（Haiku 自然语言日期）校验 |
+| [`utils/ansiToPng.ts`](annotated/src/utils/ansiToPng.ts) | 334 | 341 | 7 | 把 ANSI 终端文本栅格化为 PNG：内嵌位图字体、零依赖最小 PNG 编码器、圆角与字形 alpha 合成 |
+| [`utils/effort.ts`](annotated/src/utils/effort.ts) | 329 | 337 | 8 | effort 推理强度解析与持久化：环境覆盖→应用状态→模型默认优先级链、档位映射与默认取值 |
+| [`utils/swarm/spawnInProcess.ts`](annotated/src/utils/swarm/spawnInProcess.ts) | 328 | 333 | 5 | 进程内队友生成与强制终止：独立 AbortController、队友身份注册到 AppState、清理回收 |
+| [`utils/bash/ParsedCommand.ts`](annotated/src/utils/bash/ParsedCommand.ts) | 318 | 326 | 8 | 解析 shell 命令（管道 / 重定向）：tree-sitter 字节偏移解析加正则兜底，避免多字节切半字符 |
+
+两条横切观察：
+
+- **本批是「自省 / 适配」工具集**：`env`、`packageManagers`、`registerProtocol`、`loadPluginAgents`、`pluginStartupCheck`、`effort` 共同构成 CC 启动期的「自省层」——它们不直接做业务，而是回答「我现在在哪、由谁安装、该走哪条路、能加载什么」；其中 `env` 与 `packageManagers` 都是「先探测再门控」的范式（先判 OS 家族再查包归属、先读环境变量再回退），把不确定性的判断收敛到一处。
+- **swarm 与「外部能力接入」成对出现**：`InProcessBackend`（队友怎么跑）与 `spawnInProcess`（队友怎么生 / 怎么杀）配合 AppState + AsyncLocalStorage 完成同进程多智能体隔离；`wrapper`（Computer Use 桥接）、`execAgentHook`（agent 式钩子）则属于「把外部 MCP / LLM 能力接进主流程」的适配层。读懂这三者就懂了 CC 如何把「多智能体」和「外部工具」统一收编进单一进程。
+
+流程账：预检 15 份一次通过（123 锚点；`ROOT` 用 `D:/CC泄露源码分析` 而非 `/d/CC泄露源码分析`——后者混合分隔符会让 `os.path.exists` 判 False）；`annotate.py` 零 `⟳`、零 `⚠`；`check-fidelity.py` 732 份 0 失败（本批 15 份合计 +123 行中文批注，代码行与原文逐行相等；`computerUse/wrapper.tsx` 原有一行 35,092 字符的 base64 `sourceMappingURL`，按规则省略不抄并补 2 行说明，故批注版 343 = 336 − 1 + 6 + 2）；`check-links.py` 源码链接 996 条 + 内链 130 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`powershell/staticPrefix.ts`(316) · `settings/mdm/settings.ts`(316) · `skills/skillChangeDetector.ts`(311) · `swarm/backends/types.ts`(311) · `hooks/AsyncHookRegistry.ts`(309) · `format.ts`(308) · `cron.ts`(308) · `task/framework.ts`(308) · `agenticSessionSearch.ts`(307) · `plugins/dependencyResolver.ts`(305) …（utils 还剩 424 份；全仓还剩 1,170 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
