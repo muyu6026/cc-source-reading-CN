@@ -16,6 +16,7 @@
 - 第 59 批：`9acd794` · 3 文件/402 行/55 锚点（学习路线补课）· 全仓 **687/1902 · 274,899 行 · 53.6%** · `src/commands/clear` **4/4 全清**。
 - 第 60 批：`be70691` · 15 文件/6,364 行/610 锚点 · 全仓 **702/1902 · 281,873 行 · 54.9%** · utils **110/564**。
 - 第 61 批：`1426030` · 15 文件/5,620 行/493 锚点 · 全仓 **717/1902 · 287,493 行 · 56.0%** · utils **125/564**。
+- 第 62 批：`1dc9a7e` · 15 文件/5,078 行/123 锚点 · 全仓 **732/1902 · 291,963 行 · 56.9%** · utils **140/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -25,10 +26,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-10-27 第 60 批后）
-- 全仓 **717/1902 文件（缺失 1,185）；287,493/513,237 行，按行数覆盖 56.0%**。
-- `src/utils` **125/564**（剩 439）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~339–350 行档）：logoV2Utils(350)/ultraplan/ccrSession(349)/plugins/loadPluginAgents(348)/deepLink/registerProtocol(348)/env(347)/plugins/pluginStartupCheck(341)/swarm/backends/InProcessBackend(339)/hooks/execAgentHook(339)/nativeInstaller/packageManagers(336)/mcp/elicitationValidation(336)。
+## 当前状态（2026-10-28 第 62 批后）
+- 全仓 **732/1902 文件（缺失 1,170）；291,963/513,237 行，按行数覆盖 56.9%**。
+- `src/utils` **140/564**（剩 424）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~316 行档）：powershell/staticPrefix.ts(316)/settings/mdm/settings.ts(316)/skills/skillChangeDetector.ts(311)/swarm/backends/types.ts(311)/hooks/AsyncHookRegistry.ts(309)/format.ts(308)/cron.ts(308)/task/framework.ts(308)/agenticSessionSearch.ts(307)/plugins/dependencyResolver.ts(305)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -38,6 +39,7 @@
 - **索引/记忆文档会被常驻进程外部重排回写**：每次开工先 `git diff` 确认无外部回写残留；编辑遇 `EBUSY` 重试即可。
 - 预检脚本的连字符断言（`startswith(slug+'_p')` 未把 `-` 换 `_`）与 `annotate.py` 的 slug 规则（`-` 也换 `_`）不一致，预检误报以 `annotate.py` 为准。
 - bash 命令里出现那个 shell 的名字会被安全策略拒绝；用 `scripts/_upd*.py` 间接执行，命令里只出现脚本名。
+- 预检脚本的 `ROOT` 须用 Windows 绝对路径 `D:/CC泄露源码分析`，不可用 Git Bash 风格 `/d/CC泄露源码分析`——混合分隔符会让 `os.path.exists` 判 False、15 份数据文件全报「MISSING」（第 62 批踩过，改成 `D:/` 即过）。
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)。

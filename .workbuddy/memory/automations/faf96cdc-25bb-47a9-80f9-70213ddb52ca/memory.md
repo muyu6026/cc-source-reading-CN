@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 62 批（2026-10-28）：utils 350 行档十五件套
+- 状态：完成并推送，commit `1dc9a7e`（全仓已 732/1902）。
+- 本批：logoV2Utils(350→361/11)、ultraplan/ccrSession(349→360/11)、deepLink/registerProtocol(348→358/10)、plugins/loadPluginAgents(348→354/6)、env(347→355/8)、plugins/pluginStartupCheck(341→348/7)、swarm/backends/InProcessBackend(339→347/8)、hooks/execAgentHook(339→346/7)、nativeInstaller/packageManagers(336→347/11)、computerUse/wrapper.tsx(336→343/6)、mcp/elicitationValidation(336→346/10)、ansiToPng(334→341/7)、effort(329→337/8)、swarm/spawnInProcess(328→333/5)、bash/ParsedCommand(318→326/8)。合计 15 文件 5,078 行源 / 123 锚点。
+- 进度：全仓 **732/1902 文件 / 291,963 行 / 56.9%**；`src/utils/` 140/564（剩 424 份），hooks 104/104、tools 184/184、services 130/130、commands/clear 4/4 仍全清。
+- 校验：check-fidelity 732 份 0 失败；check-links 996 源码链接 + 130 内链 0 失效；annotate.py 十五次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：powershell/staticPrefix.ts(316)/settings/mdm/settings.ts(316)/skills/skillChangeDetector.ts(311)/swarm/backends/types.ts(311)/hooks/AsyncHookRegistry.ts(309)/format.ts(308)/cron.ts(308)/task/framework.ts(308)/agenticSessionSearch.ts(307)/plugins/dependencyResolver.ts(305)。
+
+### 本批经验（下次先看）
+- **预检脚本 ROOT 用 `D:/` 不用 `/d/`**：本批首跑预检 15 份全报 MISSING，根因是 `ROOT='/d/CC泄露源码分析'` 与后缀反斜杠拼成混合分隔符，`os.path.exists` 返回 False；改 `D:/CC泄露源码分析` 一次过。
+- **`.tsx` 的 base64 sourceMappingURL 行按规则省略**：`computerUse/wrapper.tsx` 原有一行 35,092 字符的 `sourceMappingURL`，annotate.py 省略不抄并补 2 行说明，故批注版 343 = 336 − 1（删源映射）+ 6（锚点）+ 2（说明）；用 `splitlines()` 而非 `wc -l` 算行数，否则源文件缺尾换行会少算一行、与锚点数对不上。
+- 注：第 57–61 批（550/520 行档十件套、commands/clear 补课、utils 450/390 行档十五件套）已并入项目 MEMORY.md（`.workbuddy/memory/MEMORY.md` 里程碑账），本文件自第 56 批后未续写，本次仅补第 62 批。
+
 ## 第 56 批（2026-10-27）：utils 中断批回收 6 文件
 
 - 状态：完成并推送，commit `ae3afe6`（cdd2641..ae3afe6）。
