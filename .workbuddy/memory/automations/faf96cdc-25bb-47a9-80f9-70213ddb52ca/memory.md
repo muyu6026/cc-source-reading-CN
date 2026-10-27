@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 56 批（2026-10-27）：utils 中断批回收 6 文件
+
+- 状态：完成并推送，commit `ae3afe6`（cdd2641..ae3afe6）。
+- 本批是**中断回收**：开工时工作树有 6 份未提交数据文件（file/autoUpdater/ShellSnapshot/cronScheduler/marketplaceHelpers/commandSuggestions）+ 1 份已生成 `annotated/src/utils/file.ts`，均为上一轮自动化被中断遗留。先 `git ls-files` 确认 6 个 annotated 路径全为空（不触碰已提交内容），再重跑统一预检（importlib + `ast.parse` + 引号/反斜杠/行号/重复锚点断言）确认 6 份 112 锚点全过，然后对 6 份统一跑 `annotate.py` 补齐产出（脚本从 source/ 重读、幂等，重跑已生成的 file.ts 结果一致）。
+- 合计 6 文件 3,451 行源 / 112 锚点；`annotate.py` 六次零 `⟳` 外移、`⚠` 块注释内中文告警清零。
+- 进度：全仓 **664/1902 文件 / 264,270 行 / 51%**；`src/utils/` 75/564（剩 489 份），hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 664 份 0 失败；check-links 879 源码链接 + 115 内链 0 失效。
+- 下一批目标（按行数降序，utils 剩余）：`deepLink/terminalLauncher.ts` 557 → `queryHelpers.ts` 552 → `sessionRestore.ts` 551 → `messageQueueManager.ts` 547 → `claudeInChrome/common.ts` 540 → `model/modelOptions.ts` 540。
+
+### 本批经验（下次先看）
+- **开工先查未提交改动救了一回**：本批正是「上一轮留下孤儿文件」的情形——不先停一下核对，就会要么覆盖、要么漏掉半截批注。规则「有未提交改动先停下报告」在此类场景尤其关键（本批确认是自家孤儿、无他人改动才接手）。
+- **数据文件已写好时重跑 annotate.py 是幂等的**（从 source/ 重读，不读 annotated/），所以即便 file.ts 上一轮已生成，六份一起重跑也安全、结果一致。
+- **README 与索引进度数字要实算**：本批前 README 是 658/260,819/50.8%，实际 check-coverage 已是 664/264,270/51%；索引无集中顶部汇总，「还剩 N 份」散落在各批散文里，刷新以各批 `流程账` 行 + check-coverage 实算为准。
+
 ## 第 51 批（2026-10-26）：utils 四个环境入口 ide + permissions + claudemd + analyzeContext
 - 状态：完成并推送，commit `aabb1f9`。
 - 本批：`src/utils/ide.ts`（1,494→1,540 行，46 锚点）、`src/utils/permissions/permissions.ts`（1,486→1,532 行，45 锚点）、`src/utils/claudemd.ts`（1,479→1,530 行，51 锚点）、`src/utils/analyzeContext.ts`（1,382→1,428 行，46 锚点）。合计 4 文件 5,841 行 / 188 锚点。
