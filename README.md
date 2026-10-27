@@ -5,13 +5,15 @@
 > **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
 > **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
 > **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **684 个源码文件 / 274,497 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **53.5%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；**`src/tools/` 已 184/184 全目录完成**（50,863 行），文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)，交互与杂项五工具见 [AskUserQuestion / REPL / McpAuth / NotebookEdit / Brief](annotated-索引与进度.md#交互与杂项五工具askuserquestion--repl--mcpauth--notebookedit--brief)，联网两件见 [WebFetch / WebSearch](annotated-索引与进度.md#网络两件套webfetch--websearch)，MCP 工具模板见 [MCPTool](annotated-索引与进度.md#mcptool模板工具与折叠名单)，代码智能见 [LSPTool](annotated-索引与进度.md#lsptool编辑器级代码智能的-cli-移植)，PowerShell 外围九件见 [PowerShellTool 上](annotated-索引与进度.md#powershelltool上外围机制九件)，安全核心五文件见 [PowerShellTool 下](annotated-索引与进度.md#powershelltool-下安全核心五文件目录-1414-清零)，计划模式与待办见 [EnterPlanMode / ExitPlanMode / TodoWrite](annotated-索引与进度.md#计划模式与待办三件套三个目录-1111-全清)，协作与调度见 [SendMessage / Cron 三件套 / ToolSearch](annotated-索引与进度.md#协作与调度三件套三个目录-1212-全清tools-破百)，隔离与协作六件套见 [worktree / MCP 资源 / team](annotated-索引与进度.md#隔离与协作六件套worktree--mcp-资源--team六个目录-2222-全清)，管理面四件见 [Config / TaskOutput / TaskUpdate / RemoteTrigger](annotated-索引与进度.md#配置--任务输出--任务更新--远程触发四个目录-1313-全清)，任务管理四件套见 [TaskCreate / TaskGet / TaskList / TaskStop](annotated-索引与进度.md#任务管理四件套--杂项五份八个目录-1616-全清tools-到-151184)，队友 spawn 与 git 埋点见 [shared/ 两份](annotated-索引与进度.md#队友-spawn-共享模块--git-埋点shared-22-全清tools-到-153184)，BashTool 安全核心与渲染见 [BashTool 下](annotated-索引与进度.md#bashtool-下半安全核心与渲染bashtool-1818-全清tools-到-167184)，agent 全机制见 [AgentTool 下半](annotated-索引与进度.md#agenttool-下半跑起来的-agent-全机制agenttool-2020-全清tools-184184-全清)，权限交互五方竞速见 [toolPermission](annotated-索引与进度.md#toolpermission权限交互的五方竞速第-34-批5-份-1386-行)，输入与补全八件套见 [输入补全第一批](annotated-索引与进度.md#输入与补全八件套第-35-批8-份-4060-行)，通信与远程五件套见 [通信与远程五件套](annotated-索引与进度.md#通信与远程五件套第-36-批5-份-4118-行)，交互与插件管理六件套见 [交互插件第六批](annotated-索引与进度.md#交互与插件管理六件套第-37-批6-份-2374-行)。任务管理与远程缝合十件套见 [hooks 第五批](annotated-索引与进度.md#任务管理与远程缝合十件套第-38-批10-份-2302-行)。通知系统全目录见 [notifs 全清](annotated-索引与进度.md#通知系统全目录第-39-批notifs-16-份-1355-行)。根目录输入/会话/选区等十件套见 [hooks 第六批](annotated-索引与进度.md#根目录输入会话选区等十件套第-40-批10-份-1372-行)。根目录快捷键/退出/剪贴板等十件套见 [hooks 第七批](annotated-索引与进度.md#根目录快捷键退出剪贴板等十件套第-41-批10-份-944-行)。根目录 @提及/队列/队友视图等十件套见 [hooks 第八批](annotated-索引与进度.md#根目录提及队列队友视图等十件套第-42-批10-份-638-行)。hooks 根目录收尾 24 件见 [hooks 第九批](annotated-索引与进度.md#hooks-根目录收尾-24-件第-43-批24-份-683-行)。utils 根目录两个巨兽见 [utils 第一批](annotated-索引与进度.md#utils-根目录两个巨兽messages-与-sessionstorage第-44-批2-份-10617-行226-锚点)。utils 巨兽第二梯队见 [utils 第二批](annotated-索引与进度.md#utils-巨兽第二梯队hooks-与-bashparser第-45-批2-份-9458-行307-锚点)。utils 附件与插件装载线见 [utils 第三批](annotated-索引与进度.md#utils-第五梯队attachments-与-pluginloader第-46-批2-份-7299-行326-锚点)。utils 语法树与凭证层见 [utils 第四批](annotated-索引与进度.md#utils-第六梯队astmarketplacemanager-与-auth第-47-批3-份-7324-行321-锚点)。utils 白名单·配置·另一种 shell 见 [utils 第五批](annotated-索引与进度.md#utils-第七梯队只读命令白名单配置层与-powershell-解析第-48-批3-份-5514-行173-锚点)；utils 路径判据·安装器·插件 schema 见 [utils 第六批](annotated-索引与进度.md#utils-第八梯队路径权限判据原生安装器与插件-schema第-49-批3-份-5166-行170-锚点)；utils 进程内队友运行器·权限初始化·终端光标·worktree·YOLO 分类器见 [utils 第七批](annotated-索引与进度.md#utils-第九梯队进程内队友运行器权限初始化终端光标worktree-与-yolo-分类器第-50-批5-份-7628-行336-锚点)。utils 的四个环境入口（IDE 发现·权限主流水线·CLAUDE.md 装载·上下文用量）见 [utils 第八批](annotated-索引与进度.md#utils-第十梯队ide-集成权限主流水线claudemd-装载与上下文分析第-51-批4-份-5841-行188-锚点)。utils 的设置·沙箱·插件与 git 基础工具十份见 [utils 第九批](annotated-索引与进度.md#utils-第-52-批设置沙箱插件与-git-基础工具第-52-批10-份-9481-行280-锚点)；utils 巨兽第三梯队与遥测/图像/队友工具十三份见 [utils 第十批](annotated-索引与进度.md#utils-第-53-批巨兽第三梯队与遥测图像队友工具第-53-批13-份-14175-行529-锚点)；utils 800 行档余下巨兽与分叉团队搜索计算机操控底座十二份见 [utils 第 54 批](annotated-索引与进度.md#utils-第-54-批800-行档余下巨兽-分叉团队搜索计算机操控底座第-54-批12-份-8742-行347-锚点)；utils 600 到 640 行档收口十份见 [utils 第 55 批](annotated-索引与进度.md#utils-第-55-批600-到-640-行档收口第-55-批10-份-6125-行170-锚点)。
+> **当前进度**：`annotated/` 已批注 **687 个源码文件 / 274,899 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **53.6%**）。数字由 `python scripts/check-coverage.py src` 实算，不手数；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；**`src/tools/` 已 184/184 全目录完成**（50,863 行），文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)，交互与杂项五工具见 [AskUserQuestion / REPL / McpAuth / NotebookEdit / Brief](annotated-索引与进度.md#交互与杂项五工具askuserquestion--repl--mcpauth--notebookedit--brief)，联网两件见 [WebFetch / WebSearch](annotated-索引与进度.md#网络两件套webfetch--websearch)，MCP 工具模板见 [MCPTool](annotated-索引与进度.md#mcptool模板工具与折叠名单)，代码智能见 [LSPTool](annotated-索引与进度.md#lsptool编辑器级代码智能的-cli-移植)，PowerShell 外围九件见 [PowerShellTool 上](annotated-索引与进度.md#powershelltool上外围机制九件)，安全核心五文件见 [PowerShellTool 下](annotated-索引与进度.md#powershelltool-下安全核心五文件目录-1414-清零)，计划模式与待办见 [EnterPlanMode / ExitPlanMode / TodoWrite](annotated-索引与进度.md#计划模式与待办三件套三个目录-1111-全清)，协作与调度见 [SendMessage / Cron 三件套 / ToolSearch](annotated-索引与进度.md#协作与调度三件套三个目录-1212-全清tools-破百)，隔离与协作六件套见 [worktree / MCP 资源 / team](annotated-索引与进度.md#隔离与协作六件套worktree--mcp-资源--team六个目录-2222-全清)，管理面四件见 [Config / TaskOutput / TaskUpdate / RemoteTrigger](annotated-索引与进度.md#配置--任务输出--任务更新--远程触发四个目录-1313-全清)，任务管理四件套见 [TaskCreate / TaskGet / TaskList / TaskStop](annotated-索引与进度.md#任务管理四件套--杂项五份八个目录-1616-全清tools-到-151184)，队友 spawn 与 git 埋点见 [shared/ 两份](annotated-索引与进度.md#队友-spawn-共享模块--git-埋点shared-22-全清tools-到-153184)，BashTool 安全核心与渲染见 [BashTool 下](annotated-索引与进度.md#bashtool-下半安全核心与渲染bashtool-1818-全清tools-到-167184)，agent 全机制见 [AgentTool 下半](annotated-索引与进度.md#agenttool-下半跑起来的-agent-全机制agenttool-2020-全清tools-184184-全清)，权限交互五方竞速见 [toolPermission](annotated-索引与进度.md#toolpermission权限交互的五方竞速第-34-批5-份-1386-行)，输入与补全八件套见 [输入补全第一批](annotated-索引与进度.md#输入与补全八件套第-35-批8-份-4060-行)，通信与远程五件套见 [通信与远程五件套](annotated-索引与进度.md#通信与远程五件套第-36-批5-份-4118-行)，交互与插件管理六件套见 [交互插件第六批](annotated-索引与进度.md#交互与插件管理六件套第-37-批6-份-2374-行)。任务管理与远程缝合十件套见 [hooks 第五批](annotated-索引与进度.md#任务管理与远程缝合十件套第-38-批10-份-2302-行)。通知系统全目录见 [notifs 全清](annotated-索引与进度.md#通知系统全目录第-39-批notifs-16-份-1355-行)。根目录输入/会话/选区等十件套见 [hooks 第六批](annotated-索引与进度.md#根目录输入会话选区等十件套第-40-批10-份-1372-行)。根目录快捷键/退出/剪贴板等十件套见 [hooks 第七批](annotated-索引与进度.md#根目录快捷键退出剪贴板等十件套第-41-批10-份-944-行)。根目录 @提及/队列/队友视图等十件套见 [hooks 第八批](annotated-索引与进度.md#根目录提及队列队友视图等十件套第-42-批10-份-638-行)。hooks 根目录收尾 24 件见 [hooks 第九批](annotated-索引与进度.md#hooks-根目录收尾-24-件第-43-批24-份-683-行)。utils 根目录两个巨兽见 [utils 第一批](annotated-索引与进度.md#utils-根目录两个巨兽messages-与-sessionstorage第-44-批2-份-10617-行226-锚点)。utils 巨兽第二梯队见 [utils 第二批](annotated-索引与进度.md#utils-巨兽第二梯队hooks-与-bashparser第-45-批2-份-9458-行307-锚点)。utils 附件与插件装载线见 [utils 第三批](annotated-索引与进度.md#utils-第五梯队attachments-与-pluginloader第-46-批2-份-7299-行326-锚点)。utils 语法树与凭证层见 [utils 第四批](annotated-索引与进度.md#utils-第六梯队astmarketplacemanager-与-auth第-47-批3-份-7324-行321-锚点)。utils 白名单·配置·另一种 shell 见 [utils 第五批](annotated-索引与进度.md#utils-第七梯队只读命令白名单配置层与-powershell-解析第-48-批3-份-5514-行173-锚点)；utils 路径判据·安装器·插件 schema 见 [utils 第六批](annotated-索引与进度.md#utils-第八梯队路径权限判据原生安装器与插件-schema第-49-批3-份-5166-行170-锚点)；utils 进程内队友运行器·权限初始化·终端光标·worktree·YOLO 分类器见 [utils 第七批](annotated-索引与进度.md#utils-第九梯队进程内队友运行器权限初始化终端光标worktree-与-yolo-分类器第-50-批5-份-7628-行336-锚点)。utils 的四个环境入口（IDE 发现·权限主流水线·CLAUDE.md 装载·上下文用量）见 [utils 第八批](annotated-索引与进度.md#utils-第十梯队ide-集成权限主流水线claudemd-装载与上下文分析第-51-批4-份-5841-行188-锚点)。utils 的设置·沙箱·插件与 git 基础工具十份见 [utils 第九批](annotated-索引与进度.md#utils-第-52-批设置沙箱插件与-git-基础工具第-52-批10-份-9481-行280-锚点)；utils 巨兽第三梯队与遥测/图像/队友工具十三份见 [utils 第十批](annotated-索引与进度.md#utils-第-53-批巨兽第三梯队与遥测图像队友工具第-53-批13-份-14175-行529-锚点)；utils 800 行档余下巨兽与分叉团队搜索计算机操控底座十二份见 [utils 第 54 批](annotated-索引与进度.md#utils-第-54-批800-行档余下巨兽-分叉团队搜索计算机操控底座第-54-批12-份-8742-行347-锚点)；utils 600 到 640 行档收口十份见 [utils 第 55 批](annotated-索引与进度.md#utils-第-55-批600-到-640-行档收口第-55-批10-份-6125-行170-锚点)。
 
 ---
 
 ## 一分钟看懂这个项目
 
-> **最新一批（第 58 批）**：utils 520 行档十件套（原生安装器下载 / bash 安全树解析 / Beta 会话追踪 / 设置变更检测 / 路径权限校验 / Shell 封装与命令对象 / Teleport API / swarm 后端注册 / 定时任务），10 份 / 4,820 行 / 199 锚点；校验 check-fidelity 684 份 0 失败、check-links 895+116 0 失效。详见 [索引与进度 · 第 58 批](annotated-索引与进度.md#utils-第-58-批520-行档十件套)。
+> **学习路线已重构（零基础版）**：旧的「七步」按模块切（一步 = 半天 = 几千行），0 基础读不动。现在改成 **六层 · 一单元 30 分钟 · 2–150 行**，每单元带三个问题和一个验证动作——见 [零基础学习路线](docs/00-零基础学习路线.md) 与 [TypeScript 地基](docs/00a-TypeScript地基.md)。
+>
+> **最新一批（第 59 批）**：为新路线补课——`commands/clear/` 剩余三份（`clear.ts` 7 / `caches.ts` 144 / `conversation.ts` 251，55 锚点），该目录 **4/4 全清**；校验 check-fidelity 687 份 0 失败、check-links 963+127 0 失效。详见 [索引与进度 · 第 59 批](annotated-索引与进度.md#commandsclear-第-59-批为新学习路线补课第-59-批3-份-402-行55-锚点)。
 
 `Claude Code` 是 Anthropic 出品的**终端里运行的 AI 编程智能体**（agentic coding tool）。它不是普通聊天框，而是能**读你的代码库、改文件、跑终端命令**的"会动手的 AI"。
 
@@ -41,7 +43,9 @@
 
 | 序号                          | 章节         | 一句话内容                                                               | 适合什么时候读                 |
 | --------------------------- | ---------- | ------------------------------------------------------------------- | ----------------------- |
-| [01](docs/01-项目总览与架构.md)    | 项目总览与架构    | 技术栈、整体架构图、数据流                                                       | 第一天，先建立全局印象             |
+| [00](docs/00-零基础学习路线.md)    | **零基础学习路线** | 六层关卡、每单元 20–30 分钟、2–150 行、三个问题 + 一个验证动作                            | **0 基础从这里开始，别跳**        |
+| [00a](docs/00a-TypeScript地基.md) | **TypeScript 地基** | 只讲本仓库真实出现的语法；每个符号配「中文怎么念」                                        | 读 L0 时随时查，卡住就回来看        |
+| [01](docs/01-项目总览与架构.md)    | 项目总览与架构    | 技术栈、整体架构图、数据流                                                       | 走完 L1 之后，建立全局印象         |
 | [02](docs/02-目录结构中英对照.md)   | 目录结构中英对照   | `src/` 每个目录的英文 / 文件数 / 中文含义                                         | 想找"某个功能在哪个目录"时查         |
 | [03](docs/03-启动流程.md)       | 启动流程       | `cli.tsx` → `main()` → `setup()` 三棒接力                               | 想懂"程序怎么起来的"             |
 | [04](docs/04-工具系统.md)       | 工具系统       | 工具注册中心 `tools.ts` + 工具执行流水线                                         | **重点**：AI 的"双手"         |
@@ -57,13 +61,49 @@
 | [14](docs/14-底层运行时与基础设施.md) | 底层运行时与基础设施 | cli / bridge / remote / server / tasks / state / vim / migrations 等 | 想搞懂"程序怎么跑起来"            |
 | [15](docs/15-常量·技能与伙伴系统.md) | 常量·技能·伙伴系统 | constants 全表、多智能体权限矩阵、skills、buddy 宠物                               | 想懂工具/Agent 的权限边界        |
 
-> 学习路线不单独成篇，就写在下面这一节——先看路线，再按路线翻上面的篇目。
+> 学习路线分两份：**00 篇是「按什么顺序读」（零基础用），下面的进阶路线是「有基础之后查哪」（模块速查用）。**
 
 ---
 
-## 学习路线（七步，按顺序读）
+## 学习路线（零基础，先读这份）
 
-> 不知道怎么下手时，照这条线走。每步都标了耗时和对应章节，走完就对整个项目有了完整的认识。
+> **如果你没写过 TypeScript、没读过上千行的文件** —— 直接打开 [`docs/00-零基础学习路线.md`](docs/00-零基础学习路线.md)，别从下面那七步开始。
+>
+> 原因很实在：旧路线第 1 步是「读 `cli.tsx` 前 120 行」，而这 120 行里同时出现了动态 `import()`、`feature()` 构建期开关、`process.argv`、`.js` 后缀——**四个从没解释过的概念**。不是你不适合读，是顺序不对。
+
+### 六层总览（详细卡片见 [00 篇](docs/00-零基础学习路线.md)）
+
+| 层 | 内容 | 单元数 | 时长 | 读完能干什么 |
+| --- | --- | --- | --- | --- |
+| **L0** 语言地基 | 不读业务，只读语法标本；每个语法配真实代码 + 行号 | 11 | 约 5 小时 | 看懂一个 TS 文件 80% 的符号 |
+| **L1** 单文件解剖 | 2–19 行的小文件，整个读完不跳 | 6 | 约 2.5 小时 | 5 分钟讲清一个小文件 |
+| **L2** 单函数追踪 | 从入口跟到返回值，学会「顺着数据流读」 | 6 | 约 3 小时 | 拿到 60–150 行能画出数据流 |
+| **L3** 小模块协作 | 一个目录 3–4 个文件怎么配合 | 4 | 约 4 小时 | 画出依赖方向图、看出循环依赖 |
+| **L4** 子系统 | 工具系统 / 主循环 / 权限，各拆 3–5 个聚焦单元 | 12 | 约 3 天 | 默写 Agent 主循环伪代码 |
+| **L5** 全链路 | 跟一次真实请求从键盘走到屏幕 | 2 | 各半天 | 每一跳都能指到文件和函数 |
+
+**合计约 7 天**（每天 2–3 小时）。旧路线标「1 天读主循环」，0 基础实际要两周还读不懂——因为 L0–L3 被全省了。
+
+### 每个单元长什么样
+
+每个单元都是同一个版式，照做就行：
+
+| 部分 | 你该做什么 |
+| --- | --- |
+| `⏱ 时长｜📄 行数｜前置` | 超时就停；前置没读先回去补 |
+| **读** | 只读标出来的那些行，**不要顺手往下翻** |
+| **一句话** | 先看这句建立预期——知道要找什么，眼睛才找得到 |
+| **带三个问题读** | 带着问题读比通读快 5 倍；答不出就是没读懂 |
+| **读完自测** | **合上文件**再答，开着文件答等于抄 |
+| **验证** | 跑那条命令，用输出确认「我以为的」和「代码里的」一致 |
+
+> 旧路线没有被删掉，它在下面改叫「进阶路线」：**00 篇决定顺序，下面七步决定查哪。** 比如旧第 2 步的 `clear` 模块，在 00 篇里被拆成 L1-5 / L1-6 / L3-1；旧第 4 步的工具系统（7,537 行）被拆成 4 个聚焦单元。
+
+---
+
+## 进阶路线（七步，按模块读）
+
+> 有基础之后按模块速查用。不知道怎么下手时，照这条线走。每步都标了耗时和对应章节，走完就对整个项目有了完整的认识。
 
 ### 第 1 步：先认门面（约 30 分钟）
 

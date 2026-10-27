@@ -1,0 +1,20 @@
+// 本文件是 /clear 命令的**真正身体**。上层 `index.ts` 只声明「有这么个命令、用到时再去加载」，加载的就是这里。
+//
+// 三行代码，但把命令的契约说全了：收什么、做什么、返回什么形状。
+// `LocalCommandCall` 是「本地命令的执行函数」类型别名——所有不走模型的斜杠命令都长这样。
+import type { LocalCommandCall } from '../../types/command.js'
+import { clearConversation } from './conversation.js'
+
+// `call` 是命令被触发时真正执行的函数，类型标明它一定是异步的。
+//
+// 第一个参数写成下划线：这是约定，意思是「这个位置有参数，但我不用它」（这里是命令的原始输入文本，/clear 不需要）。第二个参数 `context` 才是真东西，里面装着 setMessages、setAppState 这些改状态的钩子。
+export const call: LocalCommandCall = async (_, context) => {
+// 整个命令只做一件事：把「清会话」这件事委托给 `conversation.ts` 里的 `clearConversation`。
+//
+// **为什么这层不自己写逻辑**：`conversation.ts` 有 251 行，依赖二十几个模块；而本文件只有 7 行、依赖两个。把「薄壳」和「厚实现」分开，才能做到按需加载——启动时只解析这 7 行。
+  await clearConversation(context)
+// 返回值是命令的执行结果，`type: 'text'` 表示「往对话里放一段纯文本」，`value` 是空串——所以 /clear 之后屏幕上不会多出任何回显。
+//
+// 这一点和「清完了打印一句 已清空」的直觉相反：因为消息列表已经被清空了，如果再塞一条文本，用户会看到一条孤零零的系统提示。
+  return { type: 'text', value: '' }
+}

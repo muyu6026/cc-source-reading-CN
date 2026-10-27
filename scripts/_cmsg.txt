@@ -1,0 +1,16 @@
+重构学习路线为零基础六层制 + 补批 commands/clear 三份（第59批，3文件402行，55锚点，全仓687/1902文件53.6%）
+
+学习架构重构（新增两份文档）：
+- docs/00-零基础学习路线.md：六层关卡制 L0→L5，每个单元 20–30 分钟 / 2–150 行，固定版式（时长+行数+前置 / 一句话 / 三个问题 / 合书自测 / grep 验证），每层有「过关标准」，末尾附「卡住时的三个救命动作」
+- docs/00a-TypeScript地基.md：只讲本仓库真实出现的语法，每条配「中文怎么念」+ 真实文件行号；重点讲透 satisfies vs 类型标注、三种 ? 的含义、?. ?? ! 的区别、async/await 与「删掉 await 就是逻辑 bug」、.js 后缀但文件是 .ts、循环依赖拆第三方
+- README：插入「学习路线（零基础，先读这份）」六层总览 + 单元版式表；原七步降级为「进阶路线（七步，按模块读）」保留不删；文档目录表新增 00 / 00a 两行
+- 诊断依据：旧第 1 步读 cli.tsx 前 120 行，同时出现动态 import()、feature() 开关、process.argv、.js 后缀四个未解释概念
+
+补批（因新路线引用而必须先做）：
+- src/commands/clear/clear.ts：7→20 行，4 锚点（命令的薄壳：7 行说全契约）
+- src/commands/clear/caches.ts：144→223 行，23 锚点（清缓存总闸：七类缓存 + 四类 hasPreserved 故意不清 + 复用 runPostCompactCleanup 要还的债）
+- src/commands/clear/conversation.ts：251→374 行，28 锚点（/clear 十五步时序，含 pluginReconnectKey 为什么是唯一的例外）
+- src/commands/clear/ 4/4 全清
+
+校验：check-fidelity 687 份 0 失败，check-links 966 源码链接 + 129 内链 0 失效，annotate.py 三次零 ⟳
+进度：687/1902 文件、274,899/513,237 行、53.6%；utils 95/564

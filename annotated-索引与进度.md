@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,218 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,215 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -1297,7 +1297,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,228 份没动（52.5% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,215 份没动（53.6% 行数）。
 
 ---
 
@@ -1782,7 +1782,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 要点摘录：① `download` 的二进制来自两条互不相同的源——Artifactory（内部 npm 镜像）与 GCS 公开桶——靠 `getBinaryName`/`getPlatform` 拼出版本化路径，下载后 `createHash` 校验完整性再 `chmod` +x，失败走指数重试。② `Shell.ts` 的 cwd 追踪文件在 Windows 下是 POSIX 路径（`pwd -P` 输出），必须经 `posixPathToWindowsPath` 转成原生路径才能喂给 `readFileSync`/`unlinkSync`；命令结束后才更新全局 cwd 并失效环境缓存。③ `changeDetector` 的 `DELETION_GRACE_MS` 是一道防抖闸门——编辑器保存常是「删后重建」两步，没有宽限窗口会被当成删除触发配置回滚，所以先延迟再判定。④ `teleport/api` 用 `[2000,4000,8000,16000]` 四档退避只重试「无响应/5xx」这类瞬态错误，认证失败（4xx 带响应）不重试，避免无意义循环。⑤ `cronTasks` 分两种生命周期：一次性任务触发后自删，循环任务从「现在」重排并受 `recurringMaxAgeMs` 自动过期约束；jitter 防止同一 cron 的多个任务同时开火。
 
-**下一批候选（utils 剩余，按行数降序）**：`listSessionsImpl.ts`(454) · `task/diskOutput.ts`(451) · `hooks/sessionHooks.ts`(447) · `plugins/officialMarketplaceStartupCheck.ts`(439) · `statsCache.ts`(434) · `betas.ts`(434) · `nativeInstaller/pidLock.ts`(433) · `tmuxSocket.ts`(427) · `proxy.ts`(426) · `imagePaste.ts`(416) …（utils 还剩 469 份；全仓还剩 1,218 份）。
+**下一批候选（utils 剩余，按行数降序）**：`listSessionsImpl.ts`(454) · `task/diskOutput.ts`(451) · `hooks/sessionHooks.ts`(447) · `plugins/officialMarketplaceStartupCheck.ts`(439) · `statsCache.ts`(434) · `betas.ts`(434) · `nativeInstaller/pidLock.ts`(433) · `tmuxSocket.ts`(427) · `proxy.ts`(426) · `imagePaste.ts`(416) …（utils 还剩 469 份；全仓还剩 1,215 份）。
+
+---
+
+### commands/clear 第 59 批：为新学习路线补课（第 59 批，3 份 402 行，55 锚点）
+
+本批不是按行数降序挑的，是**被新的零基础学习路线点名的**。
+
+重构学习路线时发现一个硬伤：路线里 L1-6（`clear.ts` 7 行）、L2-3（`conversation.ts` 第 150–166 行）、L3-1（整个 `commands/clear/` 四个文件）都要求「看批注版」，但这个目录只有 `index.ts` 批注过——另外三份在 `annotated/` 里根本不存在，路线一落地就是死链。于是先补这三份，让路线能真的走通。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`clear/clear.ts`](annotated/src/commands/clear/clear.ts) | 7 | 20 | 4 | 命令的「身体」：7 行把契约说全（收什么/做什么/返回什么形状） |
+| [`clear/caches.ts`](annotated/src/commands/clear/caches.ts) | 144 | 223 | 23 | 清缓存总闸：七类缓存、四类「有后台 agent 时故意不清」 |
+| [`clear/conversation.ts`](annotated/src/commands/clear/conversation.ts) | 251 | 374 | 28 | `/clear` 主体：十五步时序，每步顺序都有原因 |
+
+**`src/commands/clear/` 4/4 全清。**
+
+三份各自最值得带走的一条：
+
+① **薄壳 + 厚实现是可加载性的前提**：`index.ts` 19 行只声明「有这么个命令」，`clear.ts` 7 行只转发，251 行的真身在 `conversation.ts`。启动时只解析前 19 行——这就是 `load: () => import(...)` 存在的理由。
+
+② **复用别人的清理函数要付代价**：`caches.ts` 直接调 `runPostCompactCleanup()`，但它顺带会把「记忆文件缓存重置原因」标成 `compact`；`/clear` 不是压缩事件，必须紧接着用 `session_start` 再重置一次覆盖掉。第 80–84 行那五行注释就是在还这笔债。
+
+③ **「重置一切」的代码里，最有信息量的是那个例外**：`conversation.ts` 重建 AppState 时把 MCP 全清了，唯独保留 `pluginReconnectKey`——因为它只由 `/reload-plugins` 递增，`/clear` 若也重置，插件重连会变成空操作（第 180–189 行）。
+
+流程账：预检三份一次通过（55 锚点，数据文件末尾加 `ANNOTATIONS.sort` 兜顺序，因为 `annotate.py` 按列表顺序插入、不排序）；`annotate.py` 三次零 `⟳`；`check-fidelity.py` 687 份 0 失败（本批三份合计 +102 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 963 条 + 内链 127 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`listSessionsImpl.ts`(454) · `task/diskOutput.ts`(451) · `hooks/sessionHooks.ts`(447) · `plugins/officialMarketplaceStartupCheck.ts`(439) · `statsCache.ts`(434) · `betas.ts`(434) · `nativeInstaller/pidLock.ts`(433) · `tmuxSocket.ts`(427) · `proxy.ts`(426) · `imagePaste.ts`(416) …（utils 还剩 469 份；全仓还剩 1,215 份）。
 
 ---
 
