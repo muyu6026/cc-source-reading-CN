@@ -1,0 +1,10 @@
+src/utils/nativeInstaller/download.ts
+src/utils/bash/treeSitterAnalysis.ts
+src/utils/telemetry/betaSessionTracing.ts
+src/utils/settings/changeDetector.ts
+src/utils/permissions/pathValidation.ts
+src/utils/Shell.ts
+src/utils/teleport/api.ts
+src/utils/ShellCommand.ts
+src/utils/swarm/backends/registry.ts
+src/utils/cronTasks.ts

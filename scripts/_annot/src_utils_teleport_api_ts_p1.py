@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'after', """文件级摘要：Teleport（远程会话与 BYOC）API 客户端，封装带重试的 axios 请求与 Sessions API 的会话增删查改。"""),
+    (16, 'after', """重试延迟 2、4、8、16 秒共 4 次指数退避，最多 5 次总尝试。"""),
+    (24, 'before', """`isTransientNetworkError`：无响应（网络层）或 5xx 视为可重试，4xx 客户端错误不重试。"""),
+    (47, 'before', """`axiosGetWithRetry`：带自动重试的 GET，指数退避，耗尽重试后抛出最后错误。"""),
+    (83, 'after', """与后端 `sessions.py` 对齐的响应类型：会话状态、Git 来源、产物、会话资源等。"""),
+    (145, 'after', """`CodeSessionSchema` 用 Zod 描述旧版 CodeSession 结构，按需惰性加载。"""),
+    (181, 'before', """`prepareApiRequest`：组装访问令牌与组织 UUID，缺失则提示用户先 `/login`。"""),
+    (204, 'before', """`fetchCodeSessionsFromSessionsAPI`：从新 Sessions API 拉会话列表并映射成 CodeSession 结构。"""),
+    (227, 'after', """从 git 来源里解析仓库信息，借助现有 `parseGitHubRepository` 工具拆出 owner 与 name。"""),
+    (276, 'after', """`getOAuthHeaders`：构造带 Bearer 令牌、Content-Type 与 anthropic 版本的请求头。"""),
+    (289, 'before', """`fetchSession`：按 ID 拉单个会话，404 与 401 给出针对性报错。"""),
+    (334, 'before', """`getBranchFromSession`：从会话的 git 产物里取出第一个分支名。"""),
+    (361, 'before', """`sendEventToRemoteSession`：向远程会话推送一条用户消息事件，支持传入 UUID 去重。"""),
+    (394, 'after', """该端点可能阻塞到 CCR worker 就绪，正常约 2.6 秒，故超时放宽到 30 秒。"""),
+    (425, 'before', """`updateSessionTitle`：通过 PATCH 更新远程会话标题。"""),
+]
