@@ -1717,6 +1717,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 56 批：中断批回收 + 600 行档收口（第 56 批，6 份 3,451 行，112 锚点）
+
+本批是**上一轮自动化运行被中断后遗留的半成品**：6 份数据文件（`scripts/_annot/*_p1.py`）与 1 份已生成的 `annotated/src/utils/file.ts` 以未提交状态留在工作树，其余 5 份只写到数据文件、尚未跑 `annotate.py`。本批先把这批孤儿文件接完——重跑预检（importlib 加载 + `ast.parse` + 引号/反斜杠/行号/重复锚点断言）确认 6 份全部有效，再对 6 份统一跑 `annotate.py` 补齐产出。六份都是 utils 里 560–592 行的中型文件，主题横跨「文件 IO/路径 / 自动更新与版本门槛 / bash 快照 / 定时任务调度 / 插件市场策略 / 斜杠命令建议」。
+
+| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/file.ts`](annotated/src/utils/file.ts) | 584 | 610 | 26 | 文件读写与路径展示工具箱：可替换文件系统实现（getFsImplementation）、存在性/读写/编码与换行探测/行号前缀/符号链接安全写入/桌面路径解析 |
+| [`utils/autoUpdater.ts`](annotated/src/utils/autoUpdater.ts) | 561 | 581 | 20 | 自动更新模块：版本门槛校验（assertMinVersion）/ 服务端封顶（getMaxVersion，事故时当开关暂停更新）/ 从 npm 或 GCS 拉最新版 / 全局安装（installGlobalPackage），刻意从 home 跑 npm 避开项目级 .npmrc |
+| [`utils/bash/ShellSnapshot.ts`](annotated/src/utils/bash/ShellSnapshot.ts) | 582 | 597 | 15 | bash 快照：source 用户 rc 后把函数/选项/别名/PATH dump 进快照文件，后续命令 source 快照以「像在用户交互 shell 里跑」而无需每条新建登录 shell |
+| [`utils/cronScheduler.ts`](annotated/src/utils/cronScheduler.ts) | 565 | 576 | 11 | 非 React 定时任务调度内核：管 `.claude/scheduled_tasks.json`，难点是「多 Claude 共享 cwd 时防重复触发」与「进程崩溃后接手」 |
+| [`utils/plugins/marketplaceHelpers.ts`](annotated/src/utils/plugins/marketplaceHelpers.ts) | 592 | 615 | 23 | 插件市场策略与判定层：源解析成可展示形态 + 企业策略（黑名单/白名单）拦截，isSourceAllowedByPolicy 是下载前守门员 |
+| [`utils/suggestions/commandSuggestions.ts`](annotated/src/utils/suggestions/commandSuggestions.ts) | 567 | 584 | 17 | 斜杠命令搜索与建议引擎：fuse.js 模糊匹配 + 技能使用频率排序，识别行中斜杠命令/前缀补全/按来源分类展示，是 PromptInput 底部建议条底层 |
+
+**几个值得记住的点**：
+
+1. **`file.ts` 的「可替换文件系统实现」是关键抽象**：所有读写都走 `getFsImplementation()` 拿到的 fs 接口，于是测试能塞进 memory fs、生产用真实 fs，而不用满世界改调用点。
+2. **`autoUpdater.ts` 刻意从 home 目录跑 npm/bun**：避开项目级 `.npmrc`，否则项目里被恶意改过的 `.npmrc` 会把更新重定向到攻击者仓库——这是「更新器自己不能被投毒」的硬约束。
+3. **`ShellSnapshot.ts` 解决的是「每条命令都新建登录 shell 太慢」**：它把用户环境一次性 dump 成快照，后续命令只 source 快照，等价于「在用户交互 shell 里跑」但零启动开销。
+4. **`cronScheduler.ts` 的锁是「多 Claude 同 cwd」防重触发的核心**：抢到调度锁的才做文件触发，没抢到的每 5 秒探测一次接管，原主崩溃时顶上。
+5. **`marketplaceHelpers.ts` 的 `isSourceAllowedByPolicy` 优先级是「黑名单 → 白名单 → 放行」**：被封的来源根本不碰文件系统，是企业策略的第一道闸。
+
+踩坑：本批是**中断回收**，6 份数据文件与 1 份已生成 annotated 都是上一轮留下的未提交孤儿；先确认它们不触碰任何已提交内容（`git ls-files` 对 6 个 annotated 路径全部为空），再重跑预检确认 6 份数据文件（112 锚点）全部通过（slug↔路径对应、pos 合法、行号在 [1,源行数]、无重复锚点、正文无英文引号/反斜杠、整文件 `ast.parse` 通过）；`annotate.py` 六次**零 `⟳` 外移**（锚点全部精准落在语句/注释块边界，无模板字符串内锚点、无块注释内中文告警）；`⚠` 块注释内中文告警已清零。
+
+流程账：预检六份全过（112 锚点，一次通过）；`annotate.py` 六次，零 `⟳` 外移、`⚠` 块注释内中文告警已清零；`check-fidelity.py` 664 份 0 失败（本批 6 份合计 +112 行批注，代码行与原文逐行相等）；`check-links.py` 源码链接 879 条 + 内链 115 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`deepLink/terminalLauncher.ts`(557) · `queryHelpers.ts`(552) · `sessionRestore.ts`(551) · `messageQueueManager.ts`(547) · `claudeInChrome/common.ts`(540) · `model/modelOptions.ts`(540) · `fastMode.ts`(532) · `gitDiff.ts`(532) · `gracefulShutdown.ts`(529) · `claudeInChrome/chromeNativeHost.ts`(523) · `nativeInstaller/download.ts`(523) · `bash/treeSitterAnalysis.ts`(506) …（utils 还剩 489 份；全仓还剩 1,238 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
