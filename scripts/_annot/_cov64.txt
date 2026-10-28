@@ -1,0 +1,29 @@
+目录：src/services
+source 文件 130 · annotated 已有 130 · 缺失 0
+
+子目录                                    文件             行数  状态
+api                            20/20    10477/10477   OK 
+(根目录)                          16/16     4907/4907    OK 
+mcp                            23/23    12311/12311   OK 
+lsp                             7/7      2460/2460    OK 
+plugins                         3/3      1616/1616    OK 
+SessionMemory                   3/3      1026/1026    OK 
+tools                           4/4      3113/3113    OK 
+analytics                       9/9      4040/4040    OK 
+PromptSuggestion                2/2      1514/1514    OK 
+remoteManagedSettings           5/5       951/951     OK 
+compact                        11/11     3960/3960    OK 
+policyLimits                    2/2       690/690     OK 
+MagicDocs                       2/2       381/381     OK 
+oauth                           5/5      1051/1051    OK 
+tips                            3/3       761/761     OK 
+AgentSummary                    1/1       179/179     OK 
+teamMemorySync                  5/5      2167/2167    OK 
+extractMemories                 2/2       769/769     OK 
+settingsSync                    2/2       648/648     OK 
+autoDream                       4/4       550/550     OK 
+toolUseSummary                  1/1       112/112     OK 
+
+合计: 130/130 文件, 53683/53683 行 (100%)
+
+--- 未做文件（按行数降序，前 40）---

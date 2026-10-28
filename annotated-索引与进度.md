@@ -1941,6 +1941,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 64 批：300 行档下沿十件套（第 64 批，10 份 2,969 行，105 锚点）
+
+本批是「300 行档」的下沿收口——292–304 行的十份独立工具：shell 引号安全包装、堆转储服务、查询剖析器、PDF 处理、权限装载、Chrome 桥接服务器、队友身份判定、git bundle 播种、管道重排、SSRF 防护。与前一批的「配置与调度」不同，这一批更偏「防御与外围通道」：一半文件在防出错（引号、SSRF、管道语义），一半在搭旁路通道（堆转储、剖析、桥接、播种）。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/bash/shellQuote.ts`](annotated/src/utils/bash/shellQuote.ts) | 304 | 314 | 10 | shell-quote 库的安全包装：把库函数换成「出错不炸、降级处理」的 drop-in 替身，注入类输入不会把解析器带崩 |
+| [`utils/heapDumpService.ts`](annotated/src/utils/heapDumpService.ts) | 303 | 313 | 10 | 堆转储捕获服务（`/heapdump` 命令的后端）：把当前内存快照写到临时目录并列出历史转储 |
+| [`utils/queryProfiler.ts`](annotated/src/utils/queryProfiler.ts) | 301 | 311 | 10 | 查询流水线剖析器：从用户输入到首 token 的分段计时，`CLAUDE_CODE_PROFILE_QUERY=1` 开启 |
+| [`utils/pdf.ts`](annotated/src/utils/pdf.ts) | 300 | 311 | 11 | PDF 附件处理：临时目录落盘、按内容寻址的缓存命中与读取 |
+| [`utils/permissions/permissionsLoader.ts`](annotated/src/utils/permissions/permissionsLoader.ts) | 296 | 307 | 11 | 权限规则装载：从各层 settings 读 allow/deny 规则并安全解析，是权限主流水线的「进货口」 |
+| [`utils/claudeInChrome/mcpServer.ts`](annotated/src/utils/claudeInChrome/mcpServer.ts) | 293 | 303 | 10 | Claude in Chrome 桥接：stdio 传输的 MCP 服务器，把浏览器扩展的标签页/读取能力暴露给主进程 |
+| [`utils/teammate.ts`](annotated/src/utils/teammate.ts) | 292 | 303 | 11 | 队友身份判定：判断当前实例是否作为 swarm 队友运行，及对应的名字/团队上下文读取 |
+| [`utils/teleport/gitBundle.ts`](annotated/src/utils/teleport/gitBundle.ts) | 292 | 303 | 11 | git bundle 创建 + 上传：CCR seed-bundle 播种流程，把工程历史打成单文件包传到云端 |
+| [`utils/bash/bashPipeCommand.ts`](annotated/src/utils/bash/bashPipeCommand.ts) | 294 | 305 | 11 | 管道重排：把 stdin 重定向移到首个命令之后，修掉「eval 把整条管道当成一个单元」的语义偏差 |
+| [`utils/hooks/ssrfGuard.ts`](annotated/src/utils/hooks/ssrfGuard.ts) | 294 | 304 | 10 | SSRF 防护：自定义 DNS lookup 钩子，解析出的 IP 逐一校验，挡住「域名合法、指向内网」的绕过 |
+
+两条横切观察：
+
+- **防御类文件共享同一个模式：在边界处包一层，而不是在每处调用点改**。`shellQuote` 包装第三方库函数、`ssrfGuard` 包装 DNS lookup、`bashPipeCommand` 在命令进入 eval 前重排——三者都在「数据进入危险区之前」的窄口处动手，调用方无感知。这是读懂 CC 安全外围的钥匙：危险操作集中收口，包装层薄而可测。
+- **旁路通道类文件都是「主流程之外再加一条观测/同步线」**：`heapDumpService`（内存观测）、`queryProfiler`（耗时观测）、`claudeInChrome/mcpServer`（浏览器旁路）、`teleport/gitBundle`（历史播种）都不在主循环的关键路径上，坏了也不挡主流程——所以它们统一走「环境变量开关 / 命令触发」的懒加载模式。
+
+流程账：数据文件与批注生成在上轮会话完成；本轮回收时 `check-fidelity.py` 752 份 0 失败（本批 10 份合计 +105 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1021 条 + 内链 132 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`plugins/installCounts.ts`(292) · `messages/mappers.ts`(290) · `telemetry/pluginTelemetry.ts`(289) · `memoryFileDetection.ts`(289) · `plugins/loadPluginHooks.ts`(287) · `filePersistence/filePersistence.ts`(287) · `slowOperations.ts`(286) · `plugins/pluginAutoupdate.ts`(284) · `json.ts`(277) · `git/gitConfigParser.ts`(277) …（utils 还剩 404 份；全仓还剩 1,150 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
