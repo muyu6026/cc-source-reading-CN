@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,160 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,120 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -1297,7 +1297,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,160 份没动（57.5% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,120 份没动（59.6% 行数）。
 
 ---
 
@@ -2016,6 +2016,32 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 772 份 0 失败（本批 10 份合计 +91 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1348 条 + 内链 456 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`suggestions/directoryCompletion.ts`(263) · `claudeInChrome/toolRendering.tsx`(262) · `settings/permissionValidation.ts`(262) · `tokens.ts`(261) · `bash/shellCompletion.ts`(259) · `shell/bashProvider.ts`(255) · `telemetry/bigqueryExporter.ts`(252) · `permissions/permissionExplainer.ts`(250) · `sessionFileAccessHooks.ts`(250) · `swarm/backends/it2Setup.ts`(245) …（utils 还剩 384 份；全仓还剩 1,130 份）。
+
+### utils 第 67 批：小文件十件套（263-245 行档，97 锚点）
+
+本批是「260 行上下」的十份独立工具，主题横跨「路径补全（目录/文件/shell）、Claude-in-Chrome 工具渲染、权限规则校验、token 计数、Bash 执行提供器、遥测导出、权限解释生成、会话文件访问埋点、iTerm2 安装校验」——彼此独立，但共同补齐 utils 中层的「输入补全 + 权限/安全治理 + 遥测/可观测 + 外部工具集成」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/suggestions/directoryCompletion.ts`](annotated/src/utils/suggestions/directoryCompletion.ts) | 263 | 271 | 8 | 路径补全：把未写完的路径拆成「目录+前缀」，用 LRU 缓存避免反复读盘，目录与文件路径分别匹配 |
+| [`utils/claudeInChrome/toolRendering.tsx`](annotated/src/utils/claudeInChrome/toolRendering.tsx) | 262 | 273 | 10 | Chrome 工具渲染：把浏览器工具调用显示成可点击的 View Tab 链接与一句话成功摘要，verbose 模式走默认渲染 |
+| [`utils/settings/permissionValidation.ts`](annotated/src/utils/settings/permissionValidation.ts) | 262 | 271 | 9 | 权限规则校验：括号配对、转义感知的空括号检测、MCP 规则格式、Bash 的 :* 前缀与 File 通配边界约束 |
+| [`utils/tokens.ts`](annotated/src/utils/tokens.ts) | 261 | 271 | 10 | token 计数：从 API usage 算上下文窗口，处理并行工具调用拆片对齐与跨压缩边界的最终窗口 |
+| [`utils/bash/shellCompletion.ts`](annotated/src/utils/bash/shellCompletion.ts) | 259 | 269 | 10 | shell 补全：解析光标前输入判断补「命令/变量/文件」，调 bash/zsh 原生 compgen 并防命令注入 |
+| [`utils/shell/bashProvider.ts`](annotated/src/utils/shell/bashProvider.ts) | 255 | 264 | 9 | Bash 执行提供器：拼「source 快照+会话环境+关 extglob+eval」，并处理 tmux socket 隔离 |
+| [`utils/telemetry/bigqueryExporter.ts`](annotated/src/utils/telemetry/bigqueryExporter.ts) | 252 | 263 | 11 | 遥测导出：把 OTel 指标转成 BigQuery 上传格式，校验信任态与组织开关后 POST 上报 |
+| [`utils/permissions/permissionExplainer.ts`](annotated/src/utils/permissions/permissionExplainer.ts) | 250 | 262 | 12 | 权限解释生成：用 Haiku 通过强制结构化输出，给每条命令生成「做什么/为什么/风险」三段说明 |
+| [`utils/sessionFileAccessHooks.ts`](annotated/src/utils/sessionFileAccessHooks.ts) | 250 | 258 | 8 | 会话文件访问埋点：拦截 Read/Grep/Glob/Edit/Write，统计对会话记忆/transcript/memdir/团队记忆的访问 |
+| [`utils/swarm/backends/it2Setup.ts`](annotated/src/utils/swarm/backends/it2Setup.ts) | 245 | 255 | 10 | iTerm2 安装校验：检测 Python 包管理器、安装 it2、验证能否连上 iTerm2 的 Python API |
+
+两条横切观察：
+
+- **「输入补全」本批占了三份**：`directoryCompletion`（目录/文件路径补全）、`shellCompletion`（shell 命令/变量/文件补全）与 `tokens`（上下文窗口计数，是补全触发时机判断的底座之一）共同补全「用户敲到一半时系统怎么帮他想全」这条链路；三者都依赖 fsOperations、shellQuote、tokenEstimation 等周边模块。
+- **「权限与安全治理」是另一条暗线**：`permissionValidation`（规则格式校验）、`permissionExplainer`（给命令配自然语言解释）、`sessionFileAccessHooks`（记忆文件访问埋点）从「格式正确性 / 可解释性 / 可观测性」三个角度把权限体系讲全；而 `bashProvider`（命令拼装与 tmux 隔离）、`bigqueryExporter`（遥测上报）、`toolRendering`（Chrome 工具渲染）、`it2Setup`（外部终端集成）则是「执行 / 可观测 / 外部集成」的解耦工具，彼此独立却在同一行数档自然聚合。
+
+流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 782 份 0 失败（本批 10 份合计 +97 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1394 条 + 内链 461 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`hooks/execHttpHook.ts`(242) · `shell/specPrefix.ts`(241) · `asciicast.ts`(239) · `errors.ts`(238) · `desktopDeepLink.ts`(235) · `errorLogSink.ts`(235) · `stringUtils.ts`(235) · `background/remote/preconditions.ts`(235) · `contextSuggestions.ts`(235) · `permissions/shadowedRuleDetection.ts`(234) …（utils 还剩 374 份；全仓还剩 1,120 份）。
 
 ---
 
