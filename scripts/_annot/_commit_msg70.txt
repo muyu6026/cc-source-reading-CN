@@ -1,0 +1,6 @@
+批注第 70 批：utils 小文件十件套（10 文件 / 2,113 源行 / 118 锚点）
+
+- context.ts / officialMarketplaceGcs.ts / computerUseLock.ts / refresh.ts
+- execPromptHook.ts / slackChannelSuggestions.ts / mcpValidation.ts
+- pluginFlagging.ts / codeIndexing.ts / bash/prefix.ts
+- 逐行中文批注，代码行逐行保真

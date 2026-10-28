@@ -2098,6 +2098,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 70 批：小文件十件套（221-204 行档，118 锚点）
+
+本批是「210 行上下」的十份独立工具，横跨「上下文窗口解析、官方市场 GCS 镜像拉取、ComputerUse 锁、插件激活刷新、提示词式 hook、Slack 频道建议、MCP 输出截断、插件下架标记、代码索引识别、bash 命令前缀推导」——彼此独立，但共同补齐 utils 中层的「模型上下文与配额 / 插件生命周期治理 / 外部工具集成 / 命令理解」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/context.ts`](annotated/src/utils/context.ts) | 221 | 233 | 12 | 上下文窗口：默认 20 万、1M 检测、max output token 分桶、压缩占比计算 |
+| [`utils/plugins/officialMarketplaceGcs.ts`](annotated/src/utils/plugins/officialMarketplaceGcs.ts) | 216 | 229 | 13 | 官方市场 GCS 镜像：latest 指针、哨兵比对、原子下载解压、遥测分桶 |
+| [`utils/computerUse/computerUseLock.ts`](annotated/src/utils/computerUse/computerUseLock.ts) | 215 | 228 | 13 | CU 锁：O_EXCL 原子抢锁、陈旧 PID 回收、只查不抢契约、关机清理 |
+| [`utils/plugins/refresh.ts`](annotated/src/utils/plugins/refresh.ts) | 215 | 226 | 11 | 插件激活刷新：清缓存→全量加载→填 mcp/lsp→更新 AppState→LSP 重初始化 |
+| [`utils/hooks/execPromptHook.ts`](annotated/src/utils/hooks/execPromptHook.ts) | 211 | 224 | 13 | 提示词式 hook：用 LLM 判条件、超时/中止组合信号、blocking/error 结果 |
+| [`utils/suggestions/slackChannelSuggestions.ts`](annotated/src/utils/suggestions/slackChannelSuggestions.ts) | 209 | 222 | 13 | Slack 频道建议：MCP 搜索、信封解包、前缀缓存复用、前 10 截断 |
+| [`utils/mcpValidation.ts`](annotated/src/utils/mcpValidation.ts) | 208 | 220 | 12 | MCP 输出校验：token 上限优先级、字符预算、文本/图片块截断与提示 |
+| [`utils/plugins/pluginFlagging.ts`](annotated/src/utils/plugins/pluginFlagging.ts) | 208 | 220 | 12 | 插件下架标记：flagged-plugins.json、48h 过期、原子写与缓存同步 |
+| [`utils/codeIndexing.ts`](annotated/src/utils/codeIndexing.ts) | 206 | 214 | 8 | 代码索引识别：CLI 首词映射、MCP 服务器名正则、三类检测入口 |
+| [`utils/bash/prefix.ts`](annotated/src/utils/bash/prefix.ts) | 204 | 215 | 11 | bash 前缀推导：包装命令递归解析、复合命令词对齐最长公共前缀折叠 |
+
+两条横切观察：
+
+- **「插件生命周期治理」本批占三份**：`officialMarketplaceGcs`（从 GCS 镜像拉取并原子落盘官方市场）、`refresh`（把激活组件换进运行中的 AppState）、`pluginFlagging`（下架插件的标记/过期/忽略）从「拿得来 / 换得进 / 下得去」三个角度把插件在运行期的完整生命周期讲全；它们都依赖模块级缓存与原子写（rename）来保证「读改写」不被并发或半失败撕裂。
+- **「外部工具的集成与约束」是另一条暗线**：`execPromptHook`（用 LLM 替代脚本执行 hook，靠组合超时/中止信号兜底）、`slackChannelSuggestions`（把 Slack 搜索结果收敛成输入框高亮）、`mcpValidation`（给 MCP 工具输出套上 token/字符双预算的截断闸）共同体现「第三方能力进得来，但上下文预算与行为边界要守住」；而 `context`（模型上下文与配额）与 `bash/prefix`（命令理解与前缀推导）则是被上层反复依赖的「模型参数 / 命令理解」底座。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检三断言一次通过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`（初版 GCS_BASE 锚点落在多行字符串首行被 fidelity 拦下，后挪到字符串末行修正）；`check-fidelity.py` 本批 10 份 0 失败（合计 +118 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1424 条 + 内链 464 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`concurrentSessions.ts`(204) · `fullscreen.ts`(202) · `transcriptSearch.ts`(202) · `settings/constants.ts`(202) · `streamlinedTransform.ts`(201) · `mcpWebSocketTransport.ts`(200) · `managedEnv.ts`(199) · `permissions/permissionRuleParser.ts`(198) · `heatmap.ts`(198) · `powershell/dangerousCmdlets.ts`(185) …（utils 还剩 344 份；全仓还剩 1,090 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。

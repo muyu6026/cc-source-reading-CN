@@ -1,0 +1,10 @@
+src/utils/context.ts
+src/utils/plugins/officialMarketplaceGcs.ts
+src/utils/computerUse/computerUseLock.ts
+src/utils/plugins/refresh.ts
+src/utils/hooks/execPromptHook.ts
+src/utils/suggestions/slackChannelSuggestions.ts
+src/utils/mcpValidation.ts
+src/utils/plugins/pluginFlagging.ts
+src/utils/codeIndexing.ts
+src/utils/bash/prefix.ts
