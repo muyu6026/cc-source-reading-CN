@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,120 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,110 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -1297,7 +1297,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,120 份没动（59.6% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,110 份没动（60% 行数）。
 
 ---
 
@@ -2042,6 +2042,33 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 782 份 0 失败（本批 10 份合计 +97 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1394 条 + 内链 461 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`hooks/execHttpHook.ts`(242) · `shell/specPrefix.ts`(241) · `asciicast.ts`(239) · `errors.ts`(238) · `desktopDeepLink.ts`(235) · `errorLogSink.ts`(235) · `stringUtils.ts`(235) · `background/remote/preconditions.ts`(235) · `contextSuggestions.ts`(235) · `permissions/shadowedRuleDetection.ts`(234) …（utils 还剩 374 份；全仓还剩 1,120 份）。
+
+### utils 第 68 批：小文件十件套（242-234 行档，116 锚点）
+
+本批是「240 行上下」的十份独立工具，横跨「HTTP 钩子治理、命令前缀截断、终端录制、错误处理体系、桌面接力深链、上下文用量建议、远程操作前置条件、字符串工具、错误落盘、权限规则遮蔽检测」——彼此独立，但共同补齐 utils 中层的「对外调用安全 / 终端与录制 / 错误归一 / 桌面与远程衔接 / 权限规则体检」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/hooks/execHttpHook.ts`](annotated/src/utils/hooks/execHttpHook.ts) | 242 | 255 | 13 | HTTP 钩子：URL 白名单 + 环境变量插值白名单 + SSRF 防护，把钩子输入 POST 出去并兜成错误回传 |
+| [`utils/shell/specPrefix.ts`](annotated/src/utils/shell/specPrefix.ts) | 241 | 253 | 12 | 命令前缀截断：按规约给定的深度把命令拼成「命令+子命令」前缀，文件/URL 处截断以保护参数 |
+| [`utils/asciicast.ts`](annotated/src/utils/asciicast.ts) | 239 | 251 | 12 | 终端录制：包住 stdout.write 抓带时间戳输出，写 asciicast v2 协议，会话切换时改名续接 |
+| [`utils/errors.ts`](annotated/src/utils/errors.ts) | 238 | 250 | 12 | 错误体系：自研 Abort/ConfigParse 基类 + 中止判定 + axios 错误分桶 + 堆栈帧截断省 token |
+| [`utils/desktopDeepLink.ts`](annotated/src/utils/desktopDeepLink.ts) | 236 | 247 | 11 | 桌面接力：跨平台探测 Claude.app/xdg/注册表，版本兼容性三态判定，拼 claude://resume 深链打开 |
+| [`utils/contextSuggestions.ts`](annotated/src/utils/contextSuggestions.ts) | 235 | 245 | 10 | 上下文建议：五类阈值检查（容量/工具占比/读文件/记忆/自动压缩），告警优先 + 可省 token 降序 |
+| [`utils/background/remote/preconditions.ts`](annotated/src/utils/background/remote/preconditions.ts) | 235 | 246 | 11 | 远程前置：分层判定 GitHub App / 令牌同步 / 凭据三选一，决定是否可做远程操作 |
+| [`utils/stringUtils.ts`](annotated/src/utils/stringUtils.ts) | 235 | 247 | 12 | 字符串工具：转义/首字母大写/单复数/全角归一/累加器截断上限，集中复用的小函数集 |
+| [`utils/errorLogSink.ts`](annotated/src/utils/errorLogSink.ts) | 235 | 247 | 12 | 错误落盘：按日期生成 JSONL 缓冲写入器，分常规错误与 MCP 错误两路，幂等挂载 |
+| [`utils/permissions/shadowedRuleDetection.ts`](annotated/src/utils/permissions/shadowedRuleDetection.ts) | 234 | 245 | 11 | 规则遮蔽检测：逐条 allow 先查 deny 再查 ask 遮蔽，生成「规则不可达」告警与修复建议 |
+
+三条横切观察：
+
+- **「对外调用的安全底座」本批占三份**：`execHttpHook`（HTTP 钩子的 URL 白名单 + 环境变量白名单 + SSRF）、`shadowedRuleDetection`（权限规则不可达检测）与 `errorLogSink`（错误落地审计）从「发得出去 / 配得对 / 记得下来」三个角度把「调用外系统的安全与可观测」讲全。
+- **「终端与录制 / 桌面接力」是另一条暗线**：`asciicast`（终端输出录制）与 `desktopDeepLink`（会话接力深链）共同处理「本地 CLI 与终端/桌面客户端的衔接」；`contextSuggestions` 与 `stringUtils` 则是通用的「上下文自检 + 字符串处理」工具，被上层广泛复用。
+- **`specPrefix` 与 `preconditions` 都做「分层判定」**：前者按「命令+子命令查表→仅命令→默认 2 层」分层拼前缀，后者按「GitHub App→令牌同步→皆无」分层判定远程能力，二者都体现了「优先精确、逐级兜底」的同一设计直觉。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检三断言一次通过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 792 份 0 失败（本批 10 份合计 +116 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1404 条 + 内链 462 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`claudeInChrome/setupPortable.ts`(233) · `sessionStart.ts`(232) · `modelCost.ts`(231) · `secureStorage/macOsKeychainStorage.ts`(231) · `bash/parser.ts`(230) · `permissions/shellRuleMatching.ts`(228) · `readEditContext.ts`(227) · `dxt/zip.ts`(226) · `notebook.ts`(224) · `sideQuery.ts`(221) …（utils 还剩 364 份；全仓还剩 1,110 份）。
 
 ---
 
