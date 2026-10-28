@@ -1991,7 +1991,31 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 762 份 0 失败（本批 10 份合计 +90 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1338 条 + 内链 455 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`ansiToSvg.ts`(272) · `contextAnalysis.ts`(272) · `hooks/hooksSettings.ts`(271) · `memoize.ts`(269) · `debug.ts`(268) · `hooks/skillImprovement.ts`(267) · `settings/validation.ts`(265) · `model/bedrock.ts`(265) · `plugins/reconciler.ts`(265) · `doctorContextWarnings.ts`(265) …（utils 还剩 394 份；全仓还剩 1,140 份）。
+### utils 第 66 批：272 行档十件套（第 66 批，10 份 2,679 行，91 锚点）
+
+本批是「272 行档」的十份独立工具，主题横跨「运行态观测诊断（上下文用量 / 调试日志 / doctor 告警）、配置治理（设置校验 / 钩子归一 / 市场对账）、缓存与渲染、AWS Bedrock 封装、技能自我改进钩子」——彼此独立，但共同补齐 utils 中层的「可观测性 + 配置校验 + 云/AI 集成」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/contextAnalysis.ts`](annotated/src/utils/contextAnalysis.ts) | 272 | 281 | 9 | 上下文用量分析：把对话消息的 token 消耗按来源（工具请求/结果、人类/助手、附件、重复读）拆解成统计项，再摊平成上报指标 |
+| [`utils/ansiToSvg.ts`](annotated/src/utils/ansiToSvg.ts) | 272 | 283 | 11 | 把带 ANSI 转义码的终端文本渲染成 SVG：解析颜色与加粗、按 span 拼 tspan，保留彩色命令行输出 |
+| [`utils/hooks/hooksSettings.ts`](annotated/src/utils/hooks/hooksSettings.ts) | 271 | 280 | 9 | 钩子设置汇总与展示：多来源钩子（用户/项目/本地/会话/插件/内置）归一，提供等价判断与排序展示文案 |
+| [`utils/memoize.ts`](annotated/src/utils/memoize.ts) | 269 | 277 | 8 | 三种记忆化缓存：TTL 写穿透（同步/异步，异步含并发冷未命中去重）、LRU 限容，附清空等管理方法 |
+| [`utils/debug.ts`](annotated/src/utils/debug.ts) | 268 | 278 | 10 | 调试日志系统：按级别过滤、多开关判定开启、同步/缓冲写文件并维护最新日志符号链接 |
+| [`utils/hooks/skillImprovement.ts`](annotated/src/utils/hooks/skillImprovement.ts) | 267 | 275 | 8 | 技能自我改进钩子：采样后从近期对话抽改进点，侧信道模型可选回写 SKILL.md |
+| [`utils/model/bedrock.ts`](annotated/src/utils/model/bedrock.ts) | 265 | 276 | 11 | AWS Bedrock 封装：列出推理配置、构建客户端、从 ARN 抽模型名与跨区前缀、加/换区域前缀 |
+| [`utils/plugins/reconciler.ts`](annotated/src/utils/plugins/reconciler.ts) | 265 | 273 | 8 | 市场对账器：让 known_marketplaces.json 与设置声明一致，只读 diff + 幂等只增安装 |
+| [`utils/doctorContextWarnings.ts`](annotated/src/utils/doctorContextWarnings.ts) | 265 | 274 | 9 | doctor 上下文告警：CLAUDE.md 过大 / 智能体描述过长 / MCP 工具过多 / 不可达权限规则四类检查 |
+| [`utils/settings/validation.ts`](annotated/src/utils/settings/validation.ts) | 265 | 273 | 8 | 设置校验翻译：把 Zod v4 错误翻成可读中文提示并给修复建议，校验前先剔除非法权限规则 |
+
+两条横切观察：
+
+- **「运行态可观测性」本批占了三份**：`contextAnalysis`（上下文 token 用量）、`debug`（调试日志）、`doctorContextWarnings`（doctor 上下文告警）分别从「消耗统计 / 调试输出 / 健康诊断」三个角度让运行态可被看见、被排障。三者都依赖 tokenEstimation、claudemd、权限等周边模块，是读 CC 观测体系的三扇窗。
+- **「配置治理」是另一条暗线**：`settings/validation`（Zod 错误→中文提示）、`hooksSettings`（多来源钩子归一展示）、`reconciler`（市场清单与声明对账一致）共同体现「配置要能被人读懂、能被自动核对」的取向；而 `memoize`/`ansiToSvg` 是纯工具、`skillImprovement`/`bedrock` 是 AI/云集成，彼此解耦却在同一行数档自然聚合。
+
+流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 772 份 0 失败（本批 10 份合计 +91 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1348 条 + 内链 456 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`suggestions/directoryCompletion.ts`(263) · `claudeInChrome/toolRendering.tsx`(262) · `settings/permissionValidation.ts`(262) · `tokens.ts`(261) · `bash/shellCompletion.ts`(259) · `shell/bashProvider.ts`(255) · `telemetry/bigqueryExporter.ts`(252) · `permissions/permissionExplainer.ts`(250) · `sessionFileAccessHooks.ts`(250) · `swarm/backends/it2Setup.ts`(245) …（utils 还剩 384 份；全仓还剩 1,130 份）。
 
 ---
 
