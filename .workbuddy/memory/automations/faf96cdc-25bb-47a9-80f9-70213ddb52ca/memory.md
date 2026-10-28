@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 66 批（2026-10-28）：utils 272 行档十件套
+- 状态：完成并推送，commit `11cdea9`（ac9a5d6..11cdea9）。
+- 本批：contextAnalysis(272→281/9)、ansiToSvg(272→283/11)、hooks/hooksSettings(271→280/9)、memoize(269→277/8)、debug(268→278/10)、hooks/skillImprovement(267→275/8)、model/bedrock(265→276/11)、plugins/reconciler(265→273/8)、doctorContextWarnings(265→274/9)、settings/validation(265→273/8)。合计 10 文件 2,679 行源 / 91 锚点。
+- 进度：全仓 **772/1902 文件 / 303,568 行 / 59.1%**（实算；utils 170→180/564，剩 384 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 772 份 0 失败；check-links 1348 源码链接 + 456 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：suggestions/directoryCompletion(263)/claudeInChrome/toolRendering(262)/settings/permissionValidation(262)/tokens(261)/bash/shellCompletion(259)/shell/bashProvider(255)/telemetry/bigqueryExporter(252)/permissions/permissionExplainer(250)/sessionFileAccessHooks(250)/swarm/backends/it2Setup(245)。
+
+### 本批经验（下次先看）
+- **上轮「误判批次号」的坑这次反向重现**：上轮以为自己是从 65 续跑，其实 65 已提交，本次本应是 66；但开工时 `check-coverage src/utils` 的前 40 名被 `tail -20` 截断，顶端 272 行档被吃掉，一度误以为 MEMORY 的 next-target 过时、要改选 242 行档。重跑不带截断的 check-coverage 才确认 272 行档正是本批目标。**教训：check-coverage 输出永远别用 tail 截断**，否则顶部大文件消失会误导选批。
+- **预检脚本 ROOT 算错一次**：预检放在 `scripts/_annot/` 下（比 annotate.py 深一层），照搬 `dirname×2` 导致 ROOT 错成 `scripts`、ANNOT_DIR 变成 `scripts/scripts/_annot` 全报缺文件；改成 `dirname×3` 即过。新写预检脚本注意所在目录深度。
+- **本批锚点集中在「观测诊断 + 配置治理」两条暗线**：contextAnalysis/debug/doctorContextWarnings 三份都是运行态可观测，settings/validation/hooksSettings/reconciler 三份都是「配置可读可核对」，彼此独立却在同一行数档自然聚合。
+
 ## 第 65 批（2026-10-28）：utils 290 行档十件套
 - 状态：完成并推送，commit `ac9a5d6`（efd774f..ac9a5d6）。
 - 本批：installCounts(292→307/10)、messages/mappers(290→304/8)、memoryFileDetection(289→308/12)、telemetry/pluginTelemetry(289→302/9)、plugins/loadPluginHooks(287→299/8)、filePersistence/filePersistence(287→299/7)、slowOperations(286→300/11)、plugins/pluginAutoupdate(284→294/8)、json(277→289/9)、git/gitConfigParser(277→288/8)。合计 10 文件 2,858 行源 / 90 锚点。

@@ -20,6 +20,7 @@
 - 第 63 批：`09c3911` · 10 文件/3,099 行/98 锚点 · 全仓 **742/1902 · 295,062 行 · 57.5%** · utils **150/564**。
 - 第 64 批：`14aa2a6` · 10 文件/2,969 行/105 锚点 · 全仓 **752/1902 · 298,031 行 · 58.1%** · utils **160/564**。
 - 第 65 批：`ac9a5d6` · 10 文件/2,858 行/90 锚点 · 全仓 **762/1902 · 300,889 行 · 58.6%** · utils **170/564**。
+- 第 66 批：`11cdea9` · 10 文件/2,679 行/91 锚点 · 全仓 **772/1902 · 303,568 行 · 59.1%** · utils **180/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -29,10 +30,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-10-28 第 65 批后）
-- 全仓 **762/1902 文件（缺失 1,140）；300,889/513,237 行，按行数覆盖 58.6%**。
-- `src/utils` **170/564**（剩 394）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~272 行档）：ansiToSvg.ts(272)/contextAnalysis.ts(272)/hooks/hooksSettings.ts(271)/memoize.ts(269)/debug.ts(268)/hooks/skillImprovement.ts(267)/settings/validation.ts(265)/model/bedrock.ts(265)/plugins/reconciler.ts(265)/doctorContextWarnings.ts(265)。
+## 当前状态（2026-10-28 第 66 批后）
+- 全仓 **772/1902 文件（缺失 1,130）；303,568/513,237 行，按行数覆盖 59.1%**。
+- `src/utils` **180/564**（剩 384）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~263 行档）：suggestions/directoryCompletion.ts(263)/claudeInChrome/toolRendering.tsx(262)/settings/permissionValidation.ts(262)/tokens.ts(261)/bash/shellCompletion.ts(259)/shell/bashProvider.ts(255)/telemetry/bigqueryExporter.ts(252)/permissions/permissionExplainer.ts(250)/sessionFileAccessHooks.ts(250)/swarm/backends/it2Setup.ts(245)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -47,6 +48,6 @@
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)。
-- 进行中：`src/utils` **170/564**（最大剩余块）。
+- 进行中：`src/utils` **180/564**（最大剩余块）。
 - 未启动：按 `check-coverage.py src` 取真实 top 降序推进。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。
