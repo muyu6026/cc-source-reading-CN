@@ -23,6 +23,7 @@
 - 第 66 批：`11cdea9` · 10 文件/2,679 行/91 锚点 · 全仓 **772/1902 · 303,568 行 · 59.1%** · utils **180/564**。
 - 第 67 批：`5e3dd1c` · 10 文件/2,559 行/97 锚点 · 全仓 **782/1902 · 306,127 行 · 59.6%** · utils **190/564**。
 - 第 68 批：`35d5a2e` · 10 文件/2,370 行/116 锚点（中断回收：上轮遗留数据文件 + 预检脚本）· 全仓 **792/1902 · 308,497 行 · 60%** · utils **200/564**。
+- 第 69 批：`d879058` · 10 文件/2,284 行/111 锚点 · 全仓 **802/1902 · 310,781 行 · 60.6%** · utils **210/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -32,10 +33,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-10-29 第 68 批后）
-- 全仓 **792/1902 文件（缺失 1,110）；308,497/513,237 行，按行数覆盖 60%**。
-- `src/utils` **200/564**（剩 364）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~221–233 行档）：claudeInChrome/setupPortable.ts(233)/sessionStart.ts(232)/modelCost.ts(231)/secureStorage/macOsKeychainStorage.ts(231)/bash/parser.ts(230)/permissions/shellRuleMatching.ts(228)/readEditContext.ts(227)/dxt/zip.ts(226)/notebook.ts(224)/sideQuery.ts(221)。
+## 当前状态（2026-10-29 第 69 批后）
+- 全仓 **802/1902 文件（缺失 1,100）；310,781/513,237 行，按行数覆盖 60.6%**。
+- `src/utils` **210/564**（剩 354）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~204–221 行档）：context.ts(221)/plugins/officialMarketplaceGcs.ts(216)/computerUse/computerUseLock.ts(215)/plugins/refresh.ts(215)/hooks/execPromptHook.ts(211)/suggestions/slackChannelSuggestions.ts(209)/plugins/pluginFlagging.ts(208)/mcpValidation.ts(208)/codeIndexing.ts(206)/bash/prefix.ts(204)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
