@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 70 批（2026-10-29）：utils 小文件十件套（221→204 行档）
+
+- 状态：完成并推送，commit `f1c6359`（ebd9985..f1c6359）。
+- 本批：context(221→233/12)、plugins/officialMarketplaceGcs(216→229/13)、computerUse/computerUseLock(215→228/13)、plugins/refresh(215→226/11)、hooks/execPromptHook(211→224/13)、suggestions/slackChannelSuggestions(209→222/13)、mcpValidation(208→220/12)、plugins/pluginFlagging(208→220/12)、codeIndexing(206→214/8)、bash/prefix(204→215/11)。合计 **10 文件 2,113 行源 / 118 锚点**。
+- 进度：全仓 **812/1902 文件 / 312,894 行 / 61.0%**（实算；utils 220/564，剩 344 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **812 份 0 失败**；check-links **1424 源码链接 + 464 内链 0 失效**；annotate.py 十次零 `⟳`、零 `⚠`（初版 officialMarketplaceGcs 锚点落在多行字符串首行被 fidelity 判据 5 拦下，挪到字符串末行后过）。
+- 下一批目标（utils 按行数降序）：concurrentSessions(204) · fullscreen(202) · transcriptSearch(202) · settings/constants(202) · streamlinedTransform(201) · mcpWebSocketTransport(200) · managedEnv(199) · permissions/permissionRuleParser(198) · heatmap(198) · powershell/dangerousCmdlets(185)。
+
+### 本批经验（下次先看）
+- **`precheck_batch70.py` 的 ROOT 用 `D:/CC泄露源码分析`**：沿用第 69 批修好的盘符写法 + `dirname×3`，10 份一次过；别退回 `/d/`。
+- **判据 5 实际触发一次**：`officialMarketplaceGcs.ts` 的 `const GCS_BASE =`（多行字符串首行）被 fidelity 判为「插在未结束的多行表达式中间」，初版锚点落点就设在该行；修正为锚到字符串末行（第 29 行 `'https://...'`）后过——写数据文件时凡遇 `= '...'` / `= \`...\`` 多行字面量首行，锚点一律落到闭合行。
+- **commit 用 `git add --pathspec-from-file` 显式清单**：用户文档 `docs/11-上下文压缩.md` 仍在改（与本流水线无关），严格不碰、不纳入；只提交付物（annotated/ 10 份、数据文件 10 份、预检/运行/todo/addpaths/commit_msg 脚本、README、索引）。
+- push 照例 `dangerouslyDisableSandbox=true`（沙箱拦 `~/.ssh`）。
+
 ## 第 69 批（2026-10-29）：utils 小文件十件套（233→221 行档）
 
 - 状态：完成并推送，commit `d879058`（bdf457e..d879058）。
