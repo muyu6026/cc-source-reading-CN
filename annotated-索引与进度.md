@@ -1967,6 +1967,32 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`plugins/installCounts.ts`(292) · `messages/mappers.ts`(290) · `telemetry/pluginTelemetry.ts`(289) · `memoryFileDetection.ts`(289) · `plugins/loadPluginHooks.ts`(287) · `filePersistence/filePersistence.ts`(287) · `slowOperations.ts`(286) · `plugins/pluginAutoupdate.ts`(284) · `json.ts`(277) · `git/gitConfigParser.ts`(277) …（utils 还剩 404 份；全仓还剩 1,150 份）。
 
+### utils 第 65 批：290 行档下沿十件套（第 65 批，10 份 2,858 行，90 锚点）
+
+本批是「290 行档」的下沿收口——277–292 行的十份独立工具：插件安装量缓存、SDK/内部消息双向映射、记忆文件识别、插件遥测字段、插件钩子加载与热重载、回合结束文件持久化、慢操作埋点封装、插件后台自动更新、.git/config 轻量解析、JSON/JSONL 安全解析。主题横跨「插件生命周期（遥测/钩子/自动更新/安装量）、会话与记忆文件识别、JSON 解析与持久化、性能埋点」——彼此独立，但共同补齐 utils 中层的「插件生态 + 数据格式 + 性能观测」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/plugins/installCounts.ts`](annotated/src/utils/plugins/installCounts.ts) | 292 | 307 | 10 | 插件安装量数据层：官方统计仓库拉取 → 本地 24h 缓存 → Map 输出，出错返回 null 让界面隐藏数字 |
+| [`utils/messages/mappers.ts`](annotated/src/utils/messages/mappers.ts) | 290 | 304 | 8 | SDK 消息与内部 Message 双向映射，含压缩边界与本地命令输出的特殊处理 |
+| [`utils/memoryFileDetection.ts`](annotated/src/utils/memoryFileDetection.ts) | 289 | 308 | 12 | 会话/记忆类文件识别：区分自动托管记忆与用户自管指令，供权限与折叠徽标使用 |
+| [`utils/telemetry/pluginTelemetry.ts`](annotated/src/utils/telemetry/pluginTelemetry.ts) | 289 | 302 | 9 | 插件遥测字段：双列隐私（原始值 + 脱敏孪生）+ 不依赖隐私的标识哈希 |
+| [`utils/plugins/loadPluginHooks.ts`](annotated/src/utils/plugins/loadPluginHooks.ts) | 287 | 299 | 8 | 插件钩子加载：原子清空再注册，外加热重载与卸载剪枝 |
+| [`utils/filePersistence/filePersistence.ts`](annotated/src/utils/filePersistence/filePersistence.ts) | 287 | 299 | 7 | 回合结束文件持久化编排：BYOC 与云端模式分支，仅公开会话用户启用 |
+| [`utils/slowOperations.ts`](annotated/src/utils/slowOperations.ts) | 286 | 300 | 11 | 慢操作埋点封装：JSON/克隆/深拷贝/同步写计时，重入守卫防自触发 |
+| [`utils/plugins/pluginAutoupdate.ts`](annotated/src/utils/plugins/pluginAutoupdate.ts) | 284 | 294 | 8 | 插件后台自动更新：刷新开启自动更新的市场后更新相关插件，非原地落盘 |
+| [`utils/json.ts`](annotated/src/utils/json.ts) | 277 | 289 | 9 | JSON/JSONL 安全解析与就地修改：LRU 缓存、jsonc、超大文件尾部读取 |
+| [`utils/git/gitConfigParser.ts`](annotated/src/utils/git/gitConfigParser.ts) | 277 | 288 | 8 | 轻量 .git/config 解析器：对照 git config.c 的段/键/值/转义规则 |
+
+两条横切观察：
+
+- **插件生命周期这条线在本批高度集中**：`installCounts`（安装量数据）、`pluginTelemetry`（遥测字段）、`loadPluginHooks`（钩子加载）、`pluginAutoupdate`（后台更新）四份恰好覆盖了插件从「被看到（遥测/安装量）→ 被挂上（钩子）→ 被保持最新（自动更新）」的完整生命周期外围，是读 CC 插件体系绕不开的四块地基。
+- **数据格式与安全解析是另一条暗线**：`json.ts` 的「无效 JSON 也缓存以省去重复报错 + LRU 限容」与 `gitConfigParser.ts` 逐字符对照 git 自身的转义规则，共同体现了「宁可慢一点、也要对脏输入稳」的工程取向——前者防内存泄漏，后者防解析歧义。
+
+流程账：数据文件与批注生成在本轮完成；`check-fidelity.py` 762 份 0 失败（本批 10 份合计 +90 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1338 条 + 内链 455 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`ansiToSvg.ts`(272) · `contextAnalysis.ts`(272) · `hooks/hooksSettings.ts`(271) · `memoize.ts`(269) · `debug.ts`(268) · `hooks/skillImprovement.ts`(267) · `settings/validation.ts`(265) · `model/bedrock.ts`(265) · `plugins/reconciler.ts`(265) · `doctorContextWarnings.ts`(265) …（utils 还剩 394 份；全仓还剩 1,140 份）。
+
 ---
 
 ### FileEditTool 与 FileWriteTool

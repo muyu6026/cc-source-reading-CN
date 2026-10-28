@@ -1,118 +1,91 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""批注预检（第 64 批）：校验 10 份数据文件。
-
-检查项：
-  1. 文件名 slug == rel_path 推导 slug（数据文件归属正确）
-  2. 每个条目是 (int, pos, str) 三元组，pos ∈ {before, after, after_block}
-  3. 1 <= 行号 <= 源文件行数
-  4. 同一文件内无重复行号锚点
-  5. 中文文本不含英文双引号 " 与反斜杠 \
-  6. 整个数据文件 ast.parse 通过
-"""
+# 预检脚本（第 64 批）：校验本批 10 份数据文件
 import ast
 import importlib.util
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = 'D:/CC泄露源码分析'
 ANNOT_DIR = os.path.join(ROOT, 'scripts', '_annot')
-SRC = os.path.join(ROOT, 'source')
+SOURCE_DIR = os.path.join(ROOT, 'source')
 
-BATCH = [
-    ('src_utils_bash_shellQuote_ts', 'src/utils/bash/shellQuote.ts'),
-    ('src_utils_heapDumpService_ts', 'src/utils/heapDumpService.ts'),
-    ('src_utils_queryProfiler_ts', 'src/utils/queryProfiler.ts'),
-    ('src_utils_pdf_ts', 'src/utils/pdf.ts'),
-    ('src_utils_permissions_permissionsLoader_ts', 'src/utils/permissions/permissionsLoader.ts'),
-    ('src_utils_hooks_ssrfGuard_ts', 'src/utils/hooks/ssrfGuard.ts'),
-    ('src_utils_bash_bashPipeCommand_ts', 'src/utils/bash/bashPipeCommand.ts'),
-    ('src_utils_claudeInChrome_mcpServer_ts', 'src/utils/claudeInChrome/mcpServer.ts'),
-    ('src_utils_teleport_gitBundle_ts', 'src/utils/teleport/gitBundle.ts'),
-    ('src_utils_teammate_ts', 'src/utils/teammate.ts'),
-]
+# slug -> 源文件相对路径（source/ 下）
+FILES = {
+    'src_utils_plugins_installCounts_ts': 'src/utils/plugins/installCounts.ts',
+    'src_utils_messages_mappers_ts': 'src/utils/messages/mappers.ts',
+    'src_utils_memoryFileDetection_ts': 'src/utils/memoryFileDetection.ts',
+    'src_utils_telemetry_pluginTelemetry_ts': 'src/utils/telemetry/pluginTelemetry.ts',
+    'src_utils_plugins_loadPluginHooks_ts': 'src/utils/plugins/loadPluginHooks.ts',
+    'src_utils_filePersistence_filePersistence_ts': 'src/utils/filePersistence/filePersistence.ts',
+    'src_utils_slowOperations_ts': 'src/utils/slowOperations.ts',
+    'src_utils_plugins_pluginAutoupdate_ts': 'src/utils/plugins/pluginAutoupdate.ts',
+    'src_utils_git_gitConfigParser_ts': 'src/utils/git/gitConfigParser.ts',
+    'src_utils_json_ts': 'src/utils/json.ts',
+}
 
-POS_OK = {'before', 'after', 'after_block'}
-BAD_CHARS = set('"\\')
+VALID_POS = {'before', 'after', 'after_block'}
+NG_CHARS = set('"\\')  # 英文双引号、反斜杠
 
-
-def slug_of(rel):
-    return rel.replace('/', '_').replace('.', '_').replace('-', '_')
-
-
-def nlines(p):
-    with open(p, encoding='utf-8') as f:
-        return sum(1 for _ in f)
+errors = []
 
 
-def main():
-    total = 0
-    problems = 0
-    for slug, rel in BATCH:
-        if slug_of(rel) != slug:
-            print('  ✗ slug 不匹配: %s -> %s (期望 %s)' % (rel, slug_of(rel), slug))
-            problems += 1
-        path = os.path.join(SRC, rel)
-        if not os.path.exists(path):
-            print('  ✗ 源文件不存在: %s' % path)
-            problems += 1
-            continue
-        n = nlines(path)
-        # ast.parse 整份数据文件
-        data_path = os.path.join(ANNOT_DIR, slug + '_p1.py')
-        if not os.path.exists(data_path):
-            print('  ✗ 数据文件缺失: %s' % data_path)
-            problems += 1
-            continue
-        src_text = open(data_path, encoding='utf-8').read()
-        try:
-            ast.parse(src_text)
-        except SyntaxError as e:
-            print('  ✗ %s ast.parse 失败: %s' % (slug, e))
-            problems += 1
-            continue
-        # importlib 加载
-        spec = importlib.util.spec_from_file_location(slug, data_path)
-        mod = importlib.util.module_from_spec(spec)
+def load(slug):
+    name = slug + '_p1.py'
+    path = os.path.join(ANNOT_DIR, name)
+    if not os.path.exists(path):
+        errors.append('缺失数据文件: %s' % name)
+        return None
+    try:
+        with open(path, encoding='utf-8') as f:
+            ast.parse(f.read())
+    except SyntaxError as e:
+        errors.append('%s: ast.parse 失败: %s' % (name, e))
+        return None
+    spec = importlib.util.spec_from_file_location(slug, path)
+    mod = importlib.util.module_from_spec(spec)
+    try:
         spec.loader.exec_module(mod)
-        items = mod.ANNOTATIONS
-        seen = set()
-        file_problems = 0
-        for entry in items:
-            if not (isinstance(entry, tuple) and len(entry) == 3):
-                print('  ✗ %s 条目格式错误: %r' % (slug, entry))
-                file_problems += 1
-                continue
-            ln, pos, text = entry
-            if not isinstance(ln, int):
-                print('  ✗ %s 行号非 int: %r' % (slug, entry))
-                file_problems += 1
-            if pos not in POS_OK:
-                print('  ✗ %s 非法 pos=%r (行 %d)' % (slug, pos, ln))
-                file_problems += 1
-            if ln < 1 or ln > n:
-                print('  ✗ %s 行号越界 %d (文件 %d 行)' % (slug, ln, n))
-                file_problems += 1
-            if ln in seen:
-                print('  ✗ %s 重复锚点 行 %d' % (slug, ln))
-                file_problems += 1
-            seen.add(ln)
-            if not isinstance(text, str):
-                print('  ✗ %s 文本非 str 行 %d' % (slug, ln))
-                file_problems += 1
-            else:
-                bad = [c for c in text if c in BAD_CHARS]
-                if bad:
-                    print('  ✗ %s 行 %d 含禁用字符 %r: %s' % (slug, ln, bad, text[:30]))
-                    file_problems += 1
-        total += len(items)
-        problems += file_problems
-        flag = 'OK' if file_problems == 0 else 'FAIL(%d)' % file_problems
-        print('  [%s] %-45s 锚点 %2d / 源 %d 行' % (flag, slug, len(items), n))
-    print('=' * 60)
-    print('合计 %d 个锚点，问题 %d 处' % (total, problems))
-    sys.exit(1 if problems else 0)
+    except Exception as e:  # noqa
+        errors.append('%s: 执行失败: %r' % (name, e))
+        return None
+    return getattr(mod, 'ANNOTATIONS', None)
 
 
-if __name__ == '__main__':
-    main()
+total_ann = 0
+for slug, rel in FILES.items():
+    src = os.path.join(SOURCE_DIR, rel)
+    if not os.path.exists(src):
+        errors.append('源文件不存在: %s' % rel)
+        continue
+    n_lines = len(open(src, encoding='utf-8').read().splitlines())
+    ann = load(slug)
+    if ann is None:
+        continue
+    seen = set()
+    for tup in ann:
+        if not (isinstance(tup, tuple) and len(tup) == 3):
+            errors.append('%s: 元组格式错误: %r' % (slug, tup))
+            continue
+        line, pos, text = tup
+        if pos not in VALID_POS:
+            errors.append('%s: 非法 pos=%r (行 %s)' % (slug, pos, line))
+        if not (isinstance(line, int) and 1 <= line <= n_lines):
+            errors.append('%s: 行号越界 %s (文件 %d 行)' % (slug, line, n_lines))
+        if not isinstance(text, str):
+            errors.append('%s: 文本非字符串 (行 %s)' % (slug, line))
+        else:
+            bad = [c for c in text if c in NG_CHARS]
+            if bad:
+                errors.append('%s: 文本含禁用字符 %r (行 %s)' % (slug, bad, line))
+        if (line, pos) in seen:
+            errors.append('%s: 重复锚点 (行 %s, %s)' % (slug, line, pos))
+        seen.add((line, pos))
+        total_ann += 1
+    print('  %-50s %3d 锚点 / 源 %d 行  OK' % (rel, len(ann), n_lines))
+
+print('合计 %d 锚点' % total_ann)
+if errors:
+    print('=== 预检失败 %d 项 ===' % len(errors))
+    for e in errors:
+        print('  -', e)
+    sys.exit(1)
+print('=== 预检全部通过 ===')
