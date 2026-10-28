@@ -30,6 +30,7 @@ def load(path):
 
 FILES = (['README.md', 'annotated-索引与进度.md']
          + sorted(glob.glob('docs/*.md'))
+         + sorted(glob.glob('docs/*/*.md'))   # 课时文档：docs/L0/ 等子目录
          + sorted(glob.glob('annotated/*.md')))
 
 src_links = md_links = 0
