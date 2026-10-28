@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 67 批（2026-10-28）：utils 小文件十件套（263-245 行档）
+- 状态：完成并推送，commit `5e3dd1c`（1c82cc1..5e3dd1c）。
+- 本批：suggestions/directoryCompletion(263→271/8)、claudeInChrome/toolRendering.tsx(262→272/10)、settings/permissionValidation(262→271/9)、tokens(261→271/10)、bash/shellCompletion(259→269/10)、shell/bashProvider(255→264/9)、telemetry/bigqueryExporter(252→263/11)、permissions/permissionExplainer(250→262/12)、sessionFileAccessHooks(250→258/8)、swarm/backends/it2Setup(245→255/10)。合计 10 文件 2,559 行源 / 97 锚点。
+- 进度：全仓 **782/1902 文件 / 306,127 行 / 59.6%**（实算；utils 180→190/564，剩 374 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 782 份 0 失败；check-links 1404 源码链接 + 462 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：hooks/execHttpHook(242) · shell/specPrefix(241) · asciicast(239) · errors(238) · desktopDeepLink(235) · errorLogSink(235) · stringUtils(235) · background/remote/preconditions(235) · contextSuggestions(235) · permissions/shadowedRuleDetection(234)。
+
+### 本批经验（下次先看）
+- **用户未提交文档 `docs/11-上下文压缩.md` 被规则 #1 保住**：开工 `git status` 发现该文件有 +309/-115 的「精读版」重写（与流水线无关），严格不 stash、不覆盖、不纳入本批提交；用显式 `git add <本批路径>`（非 `git add -A`）只提交流水线交付物，工作树里该文档改动原样保留。下次遇任何未提交改动先停下报告，绝不 force 覆盖他人/自己的在途工作。
+- **check-coverage 计数「190」已含本批**：开工时一度以为 utils 该是 200（180+10），重跑不截断的 `check-coverage.py src/utils` 并用 `os.walk` 直接核对 10 个目标文件确实入盘，确认基线 180、本批已在计数内，权威实算为 `782/1902 · 306,127 · 59%`；文档以实算为准，别手数。
+- **本批两条横向暗线**：①「补全/补全器」——directoryCompletion（目录补全 + LRU 缓存）、shellCompletion（compgen 补全）、toolRendering（View Tab 渲染补全 UI）三份都在讲「怎么帮用户在 CLI/UI 里少打字」；②「可观测 + 准入」——bigqueryExporter（遥测导出）、permissionExplainer（Haiku 解释授权）、sessionFileAccessHooks（会话文件访问钩子）、permissionValidation（规则校验）四份收口「动作前先解释/校验/记录」。
+- **预检脚本复刻 `ROOT='D:/CC泄露源码分析'` + `dirname×3`**，10 份一次过（slug↔path 1:1、pos 合法、1≤line≤len、无重复 (line,pos)、无 `"`/`\`、`ast.parse` 通过）。
+
 ## 第 66 批（2026-10-28）：utils 272 行档十件套
 - 状态：完成并推送，commit `11cdea9`（ac9a5d6..11cdea9）。
 - 本批：contextAnalysis(272→281/9)、ansiToSvg(272→283/11)、hooks/hooksSettings(271→280/9)、memoize(269→277/8)、debug(268→278/10)、hooks/skillImprovement(267→275/8)、model/bedrock(265→276/11)、plugins/reconciler(265→273/8)、doctorContextWarnings(265→274/9)、settings/validation(265→273/8)。合计 10 文件 2,679 行源 / 91 锚点。
