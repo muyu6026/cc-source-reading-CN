@@ -2070,6 +2070,32 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`claudeInChrome/setupPortable.ts`(233) · `sessionStart.ts`(232) · `modelCost.ts`(231) · `secureStorage/macOsKeychainStorage.ts`(231) · `bash/parser.ts`(230) · `permissions/shellRuleMatching.ts`(228) · `readEditContext.ts`(227) · `dxt/zip.ts`(226) · `notebook.ts`(224) · `sideQuery.ts`(221) …（utils 还剩 364 份；全仓还剩 1,110 份）。
 
+### utils 第 69 批：小文件十件套（233-221 行档，111 锚点）
+
+本批是「230 行上下」的十份独立工具，横跨「Chrome 扩展便携探测、会话启动钩子、模型费用折算、macOS 钥匙串、bash 命令解析、权限通配匹配、编辑上下文扫描、zip 解压防御、notebook 解析、旁路 API 封装」——彼此独立，但共同补齐 utils 中层的「跨平台适配 / 动作前治理（计费·放行·归因·安全读）/ 内容解析底座」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/claudeInChrome/setupPortable.ts`](annotated/src/utils/claudeInChrome/setupPortable.ts) | 233 | 246 | 13 | Chrome 便携探测：按 process.platform 拼各浏览器数据目录，遍历 Default/Profile 找扩展 ID 判定安装 |
+| [`utils/sessionStart.ts`](annotated/src/utils/sessionStart.ts) | 232 | 243 | 11 | 会话启动钩子：bare 跳过、插件钩子加载失败降级、收集消息/上下文/监视路径 |
+| [`utils/modelCost.ts`](annotated/src/utils/modelCost.ts) | 231 | 244 | 13 | 费用模型：各档价位常量、按模型名解析价位、token 折算成美元 |
+| [`utils/secureStorage/macOsKeychainStorage.ts`](annotated/src/utils/secureStorage/macOsKeychainStorage.ts) | 231 | 240 | 9 | macOS 钥匙串：TTL 缓存、stale-while-error、stdin/argv 双路径与可执行位 |
+| [`utils/bash/parser.ts`](annotated/src/utils/bash/parser.ts) | 230 | 241 | 11 | bash 解析：tree-sitter 特性门控、解析中止哨兵、命令节点定位与参数抽取 |
+| [`utils/permissions/shellRuleMatching.ts`](annotated/src/utils/permissions/shellRuleMatching.ts) | 228 | 238 | 10 | 权限匹配：精确/前缀/通配三种规则，转义感知的通配匹配 |
+| [`utils/readEditContext.ts`](annotated/src/utils/readEditContext.ts) | 227 | 237 | 10 | 编辑上下文：8KB 分块跨块重叠扫描、CRLF 兼容、±上下文切片 |
+| [`utils/dxt/zip.ts`](annotated/src/utils/dxt/zip.ts) | 226 | 236 | 10 | zip 解压：路径穿越/体积/数量/压缩比四重防御、中央目录权限位恢复 |
+| [`utils/notebook.ts`](annotated/src/utils/notebook.ts) | 224 | 236 | 12 | notebook 解析：cell 处理、大输出截断、图片抽取、相邻文本块合并 |
+| [`utils/sideQuery.ts`](annotated/src/utils/sideQuery.ts) | 222 | 234 | 12 | 侧查询封装：OAuth 指纹、归属头、CLI 前缀、思考预算、结构化输出 |
+
+两条横切观察：
+
+- **「跨平台落地」本批占了三份**：`setupPortable`（跨操作系统拼浏览器数据目录）、`macOsKeychainStorage`（macOS 钥匙串的缓存与 stdin/argv 双路径写入）、`dxt/zip`（解压时的路径穿越防御与 Unix 权限位恢复）共同处理「代码如何安全落到不同系统」；三者都体现「先防御、再降级、最后保功能」的同一直觉。
+- **「动作发生前的治理」是另一条暗线**：`modelCost`（token 折算美元与价位分档）、`shellRuleMatching`（命令权限的精确/前缀/通配匹配）、`sideQuery`（主循环之外的旁路调用统一做 OAuth 归因）与 `readEditContext`（编辑前的安全上下文扫描）从「算得清账 / 放不放行 / 调用可归因 / 读得安全」四个角度把「动作前的治理」讲全；而 `notebook` 与 `bash/parser` 则是被上层反复依赖的「内容解析 / 命令理解」底座。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检三断言一次通过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 802 份 0 失败（本批 10 份合计 +111 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1414 条 + 内链 463 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`context.ts`(221) · `plugins/officialMarketplaceGcs.ts`(216) · `computerUse/computerUseLock.ts`(215) · `plugins/refresh.ts`(215) · `hooks/execPromptHook.ts`(211) · `suggestions/slackChannelSuggestions.ts`(209) · `plugins/pluginFlagging.ts`(208) · `mcpValidation.ts`(208) · `codeIndexing.ts`(206) · `bash/prefix.ts`(204) …（utils 还剩 354 份；全仓还剩 1,100 份）。
+
 ---
 
 ### FileEditTool 与 FileWriteTool

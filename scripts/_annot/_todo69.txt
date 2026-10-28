@@ -1,0 +1,10 @@
+src/utils/claudeInChrome/setupPortable.ts
+src/utils/sessionStart.ts
+src/utils/modelCost.ts
+src/utils/secureStorage/macOsKeychainStorage.ts
+src/utils/bash/parser.ts
+src/utils/permissions/shellRuleMatching.ts
+src/utils/readEditContext.ts
+src/utils/dxt/zip.ts
+src/utils/notebook.ts
+src/utils/sideQuery.ts
