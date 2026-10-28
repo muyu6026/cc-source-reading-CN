@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 65 批（2026-10-28）：utils 290 行档十件套
+- 状态：完成并推送，commit `ac9a5d6`（efd774f..ac9a5d6）。
+- 本批：installCounts(292→307/10)、messages/mappers(290→304/8)、memoryFileDetection(289→308/12)、telemetry/pluginTelemetry(289→302/9)、plugins/loadPluginHooks(287→299/8)、filePersistence/filePersistence(287→299/7)、slowOperations(286→300/11)、plugins/pluginAutoupdate(284→294/8)、json(277→289/9)、git/gitConfigParser(277→288/8)。合计 10 文件 2,858 行源 / 90 锚点。
+- 进度：全仓 **762/1902 文件 / 300,889 行 / 58.6%**（实算；utils 160→170/564，剩 394 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 762 份 0 失败；check-links 1338 源码链接 + 455 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：ansiToSvg(272)/contextAnalysis(272)/hooks/hooksSettings(271)/memoize(269)/debug(268)/hooks/skillImprovement(267)/settings/validation(265)/model/bedrock(265)/plugins/reconciler(265)/doctorContextWarnings(265)。
+
+### 本批经验（下次先看）
+- **本批实际是第 65 批，不是 64**：第 64 批（shellQuote 等 292–304 行档十件）已在上一轮会话完成并提交，README/索引已有 第 64 批 条目、check-coverage 已从 752 升到 762。开工先读 README/索引确认「最新一批」编号，别硬套上轮 memory 的 next-target。
+- **precheck 用 splitlines() 口径**：行号以 Read 输出为准（与 splitlines 一致）；memoryFileDetection 收尾行号易差 2（isShellCommandTargetingMemory 收尾 271、isAutoManagedMemoryPattern 收尾 289），写完用 Read 尾部复核。
+- **README/索引已有 第 64 批 条目**：本批只改顶部进度数字（752/298,031/58.1% → 762/300,889/58.6%）并新增 第 65 批 小节，next-target 刷到 utils 剩 394 / 全仓 1,140。
+
 ## 第 63 批（2026-10-28）：utils 300 行档十件套
 - 状态：完成并推送，commit `09c3911`（23e289e..09c3911）。
 - 本批：powershell/staticPrefix(316→324/8)、settings/mdm/settings(316→327/11)、skills/skillChangeDetector(311→321/10)、swarm/backends/types(311→322/11)、hooks/AsyncHookRegistry(309→318/9)、format(308→319/11)、cron(308→317/9)、task/framework(308→318/10)、agenticSessionSearch(307→315/8)、plugins/dependencyResolver(305→316/11)。合计 10 文件 3,099 行源 / 98 锚点。
