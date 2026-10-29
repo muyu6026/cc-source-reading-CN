@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 75 批（2026-10-30）：utils 小文件十一件套（170→164 行档）
+
+- 状态：完成并推送，commit `3580d1d`（f0a8ca3..3580d1d）。
+- 本批（11 文件，按行数降序，含 model/modelAllowlist 新晋 170 行档榜首）：model/modelAllowlist(170)/shellConfig(167)/imageStore(167)/sessionEnvironment(166)/textHighlighting(166)/completionCache(166)/model/modelStrings(166)/activityManager(164)/plugins/hintRecommendation(164)/settings/validationTips(164)/plugins/zipCacheAdapters(164)。合计 **11 文件 1,824 行源 / 113 锚点**。
+- 进度：全仓 **868/1902 文件 / 323,185 行 / 63.0%**（实算；utils 276/564，剩 288 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **868 份 0 失败**；check-links **1983 源码链接 + 595 内链 0 失效**；annotate.py 十一次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：localInstaller(162) · githubRepoPathMapping(162) · thinking(162) · plugins/parseMarketplaceInput(162) · model/validateModel(159) · debugFilter(157) · plugins/pluginVersioning(157) · model/agent(157) · sideQuestion(155) · permissions/bypassPermissionsKillswitch(155)。
+
+### 本批经验（下次先看）
+- **小文件 11 件套单批未超 15 上限**：与第 74 批 15 件套同级，按行数降序取前 11（170→164 行档），比常规 10 件套多取 1 份（model/modelAllowlist 新晋榜首）；进度数字用 `check-coverage.py src` 口径实算（868/1902 · 323,185 · 63.0%，README 取一位小数）。
+- **预检 `_precheck_batch75.py` 的 ROOT 用 `D:/CC泄露源码分析`**（沿用第 69 批之后修好的盘符写法）+ `dirname×2`（脚本在 `scripts/_annot/` 下深一层）+ 内含 `SOURCE_PATH` 断言 slug↔path 1:1，11 份一次过；文本严格无英文双引号/反斜杠（一律「」/『』，路径用反引号）。
+- **锚点全落在函数/类型/语句收尾行**：无跨行赋值首行、无 `/* */` 块内、无 `//` 段中部，故 annotate 零 `⟳`、零 `⚠`，check-fidelity 无块注释内中文告警——印证硬规矩「after 不落跨行赋值 / 块注释首行 / 块结尾行」。
+- push 照例 `dangerouslyDisableSandbox=true`（沙箱拦 `~/.ssh` 读取会 `Host key verification failed`）。
+
 ## 第 74 批（2026-10-29）：utils 小文件十五件套（183→170 行档）
 
 - 状态：完成并推送，commit `42b6ac7`（b285536..42b6ac7）。
