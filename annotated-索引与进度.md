@@ -2206,7 +2206,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检十份全过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（合计 +108 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1958 条 + 内链 593 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`editor.ts`(183) · `groupToolUses.ts`(182) · `mtls.ts`(179) · `truncate.ts`(179) · `queryContext.ts`(179) · `agentContext.ts`(178) · `detectRepository.ts`(178) · `plugins/loadPluginOutputStyles.ts`(178) · `headlessProfiler.ts`(178) · `plugins/pluginDirectories.ts`(178) …（utils 还剩 314 份；全仓还剩 1,060 份）。
+**本批（第 74 批）完成（utils 剩余，按行数降序）**：`editor.ts`(183) · `groupToolUses.ts`(182) · `mtls.ts`(179) · `truncate.ts`(179) · `queryContext.ts`(179) · `agentContext.ts`(178) · `detectRepository.ts`(178) · `plugins/loadPluginOutputStyles.ts`(178) · `headlessProfiler.ts`(178) · `plugins/pluginDirectories.ts`(178) · `diff.ts`(177) · `headlessPluginInstall.ts`(174) · `windowsPaths.ts`(173) · `treeify.ts`(170) · `deepLink/parseDeepLink.ts`(170)（utils 还剩 299 份；全仓还剩 1,045 份）。
+
+### utils 第 74 批：小文件十五件套（183-170 行档，168 锚点）
+
+本批是「180 行上下」的十五份独立工具，横跨「外部编辑器启动、工具调用分组渲染、mTLS 证书装配、宽度感知截断、query 缓存键前缀、插件输出样式加载、仓库 remote 解析、插件目录真相、智能体上下文隔离、无界面剖析、结构化 diff、无界面插件安装、Windows/POSIX 路径互转、树形渲染、深链 URI 解析」——彼此独立，但共同补齐 utils 中层的「对外桥接 / 无头环境自处 / 通用文本与渲染积木」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/editor.ts`](annotated/src/utils/editor.ts) | 183 | 204 | 11 | 把文件交给外部编辑器：GUI 用 detached 子进程、终端用 Ink alt-screen 接管 |
+| [`utils/groupToolUses.ts`](annotated/src/utils/groupToolUses.ts) | 182 | 201 | 11 | 把同一条响应里的多个同类工具调用聚合成一条 grouped 消息 |
+| [`utils/mtls.ts`](annotated/src/utils/mtls.ts) | 179 | 196 | 12 | mTLS 客户端证书/私钥/口令读取、HTTPS Agent 与 undici dispatcher 装配 |
+| [`utils/truncate.ts`](annotated/src/utils/truncate.ts) | 179 | 196 | 12 | 宽度感知的截断与换行，grapheme 边界切分避免劈坏 CJK/emoji |
+| [`utils/queryContext.ts`](annotated/src/utils/queryContext.ts) | 179 | 192 | 9 | 构建 query 缓存键前缀的三段上下文，SDK 侧追问回建缓存安全参数 |
+| [`utils/plugins/loadPluginOutputStyles.ts`](annotated/src/utils/plugins/loadPluginOutputStyles.ts) | 178 | 187 | 9 | 从插件目录加载输出样式并以插件名做命名空间 |
+| [`utils/detectRepository.ts`](annotated/src/utils/detectRepository.ts) | 178 | 194 | 13 | 把任意主机 remote URL 解析为 host/owner/name，过滤 SSH 别名 |
+| [`utils/plugins/pluginDirectories.ts`](annotated/src/utils/plugins/pluginDirectories.ts) | 178 | 194 | 13 | 插件目录唯一真相来源，cowork 切换与只读种子层 |
+| [`utils/agentContext.ts`](annotated/src/utils/agentContext.ts) | 178 | 191 | 12 | 用 AsyncLocalStorage 跟踪子智能体与队友身份，跨并发隔离 |
+| [`utils/headlessProfiler.ts`](annotated/src/utils/headlessProfiler.ts) | 178 | 189 | 9 | 无界面模式每轮延迟剖析与采样上报 |
+| [`utils/diff.ts`](annotated/src/utils/diff.ts) | 177 | 187 | 10 | 结构化 diff 生成、行数统计与 &/$ 特殊字符转义 |
+| [`utils/plugins/headlessPluginInstall.ts`](annotated/src/utils/plugins/headlessPluginInstall.ts) | 174 | 185 | 10 | 无界面（CCR）模式插件安装，不更新 AppState |
+| [`utils/windowsPaths.ts`](annotated/src/utils/windowsPaths.ts) | 173 | 186 | 13 | Windows 与 POSIX 路径互转，git-bash 定位与当前目录恶意过滤 |
+| [`utils/treeify.ts`](annotated/src/utils/treeify.ts) | 170 | 180 | 10 | 带 Ink 主题色的树形渲染实现 |
+| [`utils/deepLink/parseDeepLink.ts`](annotated/src/utils/deepLink/parseDeepLink.ts) | 170 | 185 | 14 | 解析 claude-cli 深链 URI，校验 cwd/repo/query 防注入 |
+
+两条横切观察：
+
+- **「对外桥接的注入边界」本批占三份**：`editor.ts`（把文件交给外部编辑器，Windows 上 shell 拼命令、POSIX 上直接传 argv 数组避免命令注入）、`windowsPaths.ts`（Windows/Unix 路径互转、过滤当前目录的恶意 git.bat）、`parseDeepLink.ts`（深链 URI 的 cwd/repo/query 强制绝对路径、拒绝控制字符、超长拒绝而非截断）共同把「Claude Code 与外部环境（编辑器/Shell/URI）的接口」讲全；三者都把真正的注入边界放在使用点（单引号转义 / 路径校验 / 字符拒绝），而不是解析阶段。
+- **「无头环境怎么不依赖 UI 把事办成」是另一条暗线**：`headlessProfiler.ts`（无界面每轮延迟剖析、采样上报）、`headlessPluginInstall.ts`（无界面插件安装、无 AppState 更新）、`loadPluginOutputStyles.ts`（插件产物样式加载）、`pluginDirectories.ts`（插件目录真相、cowork 切换、只读种子层）四份都收口「CCR/无界面模式下插件体系怎么落地、指标怎么采」；而 `agentContext.ts` 用 AsyncLocalStorage 把并发子智能体身份隔离，恰好是「无头多智能体」能安全并行的前提。
+
+踩坑：本批 15 份预检五断言一次通过、零合并错误；`annotate.py` 十五次零 `⟳`、零 `⚠`；`queryContext.ts` 初版一处锚点落在多行 `const {...} =` 赋值起始行，被 check-fidelity 判据 5（劈开未结束的多行表达式）拦下，改到该语句收尾行 (125) 后通过——印证「after 不落跨行赋值首行」；`check-fidelity` 全仓 857 份 0 失败；`check-links` 源码链接 1968 条 + 内链 594 条，0 失效。
+
+流程账：本批 15 个数据文件逐一对齐源文件（硬规矩连续生效，queryContext 一处跨行赋值首行被保真度拦下后修正）；预检 15 份全过、零合并错误；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 15 份 0 失败（合计 +168 处锚点、+211 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1968 条 + 内链 594 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`shellConfig.ts`(167) · `imageStore.ts`(167) · `completionCache.ts`(166) · `textHighlighting.ts`(166) · `sessionEnvironment.ts`(166) · `model/modelStrings.ts`(166) · `activityManager.ts`(164) · `settings/validationTips.ts`(164) · `plugins/zipCacheAdapters.ts`(164) · `plugins/hintRecommendation.ts`(164) …（utils 还剩 299 份；全仓还剩 1,045 份）。
 
 ---
 
