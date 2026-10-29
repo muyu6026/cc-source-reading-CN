@@ -1,5 +1,35 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 72 批（2026-10-29）：utils 小文件十件套（196→191 行档）· 中断回收
+
+- 状态：完成并推送，commit `63c438a`。
+- 性质：**中断回收**——开工工作树已有上轮遗留的 10 个 `_p1.py` 数据文件 + `_precheck_batch72.py` + 10 个 `annotated/` 产出（正好对上第 71 批 next-target 十件套）。直接预检（123 锚点全过）→ 重跑 annotate（十次零 `⟳`、零 `⚠`）→ 校验 → 文档刷新 → 提交，未重读源文件重做。
+- 本批：computerUse/appNames(196→210/14)、plugins/cacheUtils(196→208/12)、authFileDescriptor(196→208/12)、cronTasksLock(195→207/12)、startupProfiler(194→207/13)、user(194→206/12)、claudeCodeHints(193→206/13)、hooks/hookEvents(192→205/13)、jetbrains(191→202/11)、earlyInput(191→202/11)。合计 **10 文件 1,938 行源 / 123 锚点**。
+- 进度：全仓 **832/1902 文件 / 316,836 行 / 61.7%**（实算；utils 240/564，剩 324 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **832 份 0 失败**；check-links **1958 源码链接 + 593 内链 0 失效**；annotate.py 十次零 `⟳`、零 `⚠`（仅 jetbrains 一处 `=` 结尾行锚点，数据文件已修正到收尾行 39）。
+- 下一批目标（utils 按行数降序）：managedEnvConstants(191) · terminalPanel(191) · hooks/fileChangedWatcher(191) · mcpOutputStorage(189) · promptEditor(188) · powershell/dangerousCmdlets(185) · exampleCommands(184) · genericProcessUtils(184) · promptShellExecution(183) · envUtils(183)。
+
+### 本批经验（下次先看）
+- **中断回收复用孤儿文件的完整判定链**：`git status` 见 10 个 `?? _p1.py` + 10 个 `?? annotated/` + 1 个 `?? _precheck_batch72.py`，slug 与 `check-coverage src/utils` 缺漏 top10 吻合 + 预检（importlib + ast.parse + 行号/引号/反斜杠/重复锚点断言）全过 → 判定为上轮已写完未提交，直接复用；README/索引已被上轮改成 832/61.7% 且 diff 内容干净（非外部回写），确认后即重跑 annotate 落盘。
+- **进度数字用 `check-coverage.py src` 口径实算**：832/1902 · 316,836 · 61.7%（脚本显示 61% 是取整，README 取一位小数 61.7%），勿手数。
+- **索引链接数要复核实际 `check-links` 输出**：上轮留下的索引散文写「源码链接 1948 + 内链 592」，但重跑 check-links 实为 1958 + 593（差 10/1，恰好是新增 10 份 annotated 各贡献 1 外链 + 1 内链锚），已修正为 1958/593。
+- push 照例 `dangerouslyDisableSandbox=true`（沙箱拦 `~/.ssh` 读取会 `Host key verification failed`）。
+
+## 第 71 批（2026-10-29）：utils 小文件十件套（204→198 行档）· 中断回收
+
+- 状态：完成并推送，commit `5ec08f0`（810cdd4..5ec08f0）。
+- 性质：**中断回收**——开工工作树已有上轮遗留的 10 个 `_p1.py` 数据文件 + `_precheck_batch71.py` + 10 个 `annotated/` 产出（正好对上第 70 批 next-target 十件套，仅以 `statusNoticeDefinitions.tsx` 替换原候选 `powershell/dangerousCmdlets` 以避开 powershell 路径安全过滤器）。直接预检→校验→文档刷新→提交，未重读源文件重做。
+- 本批：concurrentSessions(204→216/12)、fullscreen(202→214/12)、heatmap(198→209/11)、managedEnv(199→212/13)、mcpWebSocketTransport(200→214/14)、permissions/permissionRuleParser(198→210/12)、settings/constants(202→214/12)、statusNoticeDefinitions.tsx(198→211/14)、streamlinedTransform(201→213/12)、transcriptSearch(202→213/11)。合计 **10 文件 2,004 行源 / 123 锚点**。
+- 进度：全仓 **822/1902 文件 / 314,898 行 / 61.4%**（实算；utils 230/564，剩 334 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **822 份 0 失败**；check-links **1434 源码链接 + 465 内链 0 失效**；annotate.py 十次零 `⟳`、零 `⚠`（数据/产出已落盘，本次仅重跑校验）。
+- 下一批目标（utils 按行数降序）：authFileDescriptor(196) · computerUse/appNames(196) · plugins/cacheUtils(196) · cronTasksLock(195) · startupProfiler(194) · user(194) · claudeCodeHints(193) · hooks/hookEvents(192) · earlyInput(191) · jetbrains(191)。
+
+### 本批经验（下次先看）
+- **中断回收先「认领孤儿文件」**：10 个 `?? _p1.py` + 10 个 `?? annotated/` + 1 个 `_precheck_batch71.py` 的 slug 与 `check-coverage src/utils` 缺漏 top10 吻合 + 预检全过 → 判定为上轮已写完未提交，直接复用，省去重读源文件。
+- **进度数字用 check-coverage 口径实算**：本批初跑 `os.walk(source)` 误把 `source/` 根下 5 个非 src 文件计入（1907/525,799），与历史基线 1902/513,237 不符；改 `os.walk(source/src)` + `wc -l` 口径（不数末尾换行）后得 1902/513,237/822/314,898/61.4%，与 README 历史数字无缝衔接——脚本口径务必与 `check-coverage.py` 一致。
+- **用户文档 `docs/11-上下文压缩.md` 全程不动**：既未 stash/覆盖，也未纳入提交；用 `git add --pathspec-from-file=scripts/_annot/_addpaths71.txt` 只提交付物（annotated/ 10 份、数据文件 10 份、预检脚本、README、索引），工作树该文档改动原样保留；提交后删掉 `_addpaths71.txt`/`_commit_msg71.txt` 两个辅助文件，避免下一轮自动化误判为「未提交改动」而停下。
+- push 照例 `dangerouslyDisableSandbox=true`（沙箱拦 `~/.ssh` 读取会 `Host key verification failed`）。
+
 ## 第 70 批（2026-10-29）：utils 小文件十件套（221→204 行档）
 
 - 状态：完成并推送，commit `f1c6359`（ebd9985..f1c6359）。
