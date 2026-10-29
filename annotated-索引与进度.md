@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,034 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,024 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -1297,7 +1297,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,110 份没动（60% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 1,024 份没动（约 54% 文件、37% 行数）。
 
 ---
 
@@ -2267,6 +2267,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 流程账：本批 11 个数据文件逐一对齐源文件（硬规矩连续生效，无跨行赋值首行 / 块注释内锚点）；预检 11 份全过、零合并错误；`annotate.py` 十一次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 11 份 0 失败（合计 +113 处锚点、+112 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1983 条加内链 595 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`localInstaller.ts`(162) · `githubRepoPathMapping.ts`(162) · `thinking.ts`(162) · `plugins/parseMarketplaceInput.ts`(162) · `model/validateModel.ts`(159) · `debugFilter.ts`(157) · `plugins/pluginVersioning.ts`(157) · `model/agent.ts`(157) · `sideQuestion.ts`(155) · `permissions/bypassPermissionsKillswitch.ts`(155) …（utils 还剩 288 份；全仓还剩 1,034 份）。
+
+### utils 第 76 批：小文件十件套（162→155 行档，89 锚点）
+
+本批是「160 行上下」的十份独立工具，横跨「思考模式判定与彩虹色板、插件源字符串解析、本地安装器、GitHub 仓库路径映射、模型在线校验、调试过滤器、插件版本计算、子代理模型选择、路径工具集、bypass 权限与 auto 模式开关」——彼此独立，但共同补齐 utils 中层的「模型路由 / 插件生态 / 路径与环境 / 权限门控」四类积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/thinking.ts`](annotated/src/utils/thinking.ts) | 162 | 171 | 9 | ThinkingConfig 联合类型、ultrathink 关键词检测与高亮定位、彩虹色板、模型是否支持思考/自适应思考、默认思考开关 |
+| [`utils/plugins/parseMarketplaceInput.ts`](annotated/src/utils/plugins/parseMarketplaceInput.ts) | 162 | 170 | 8 | 插件源字符串总入口：git SSH / http(s) / 本地路径 / GitHub 简写 五类源解析，错误降级而非抛错 |
+| [`utils/localInstaller.ts`](annotated/src/utils/localInstaller.ts) | 162 | 170 | 8 | 受管本地安装环境：原子写、wrapper 脚本、npm 安装、shell 类型推断 |
+| [`utils/githubRepoPathMapping.ts`](annotated/src/utils/githubRepoPathMapping.ts) | 162 | 170 | 8 | 全局配置里的仓库对本地路径映射：启动期无阻塞写入、前排置顶、失效清理 |
+| [`utils/model/validateModel.ts`](annotated/src/utils/model/validateModel.ts) | 159 | 166 | 7 | 通过真实 API 调用校验模型有效性，404 给 3P 回退建议，结果缓存 |
+| [`utils/debugFilter.ts`](annotated/src/utils/debugFilter.ts) | 157 | 166 | 9 | 调试过滤字符串解析、消息分类抽取、包含/排他两种过滤模式 |
+| [`utils/plugins/pluginVersioning.ts`](annotated/src/utils/plugins/pluginVersioning.ts) | 157 | 166 | 9 | 插件版本计算：清单版本到提供版本到 git SHA 到 unknown，git-subdir 把子目录哈希进版本串防缓存串台 |
+| [`utils/model/agent.ts`](annotated/src/utils/model/agent.ts) | 157 | 166 | 9 | 子代理模型选择：inherit 默认、Bedrock 跨区域前缀继承、裸家族别名同档匹配 |
+| [`utils/path.ts`](annotated/src/utils/path.ts) | 155 | 167 | 12 | 路径工具集：波浪号展开、绝对对相对、目录探测、穿越检测、配置键归一化 |
+| [`utils/permissions/bypassPermissionsKillswitch.ts`](annotated/src/utils/permissions/bypassPermissionsKillswitch.ts) | 155 | 165 | 10 | bypass 权限与 auto 模式的灰度门开关守卫，一次性标志加 /login 后重置 |
+
+两条横切观察：
+
+- **「模型路由的两端」本批占三份**：`thinking.ts`（思考能力判定）、`validateModel.ts`（在线校验加 3P 回退）、`model/agent.ts`（子代理模型选择加 Bedrock 区域继承）共同把「模型名怎么解析、能力怎么判定、子代理怎么继承」收口；三者都强调「一方/三方差异」与「默认开启需谨慎，改之前先通知模型发布负责人」。
+- **「插件生态的入口与版本」是一条暗线**：`parseMarketplaceInput.ts`（用户输入变成五类源）与 `pluginVersioning.ts`（源变成缓存版本串）首尾相接，把「用户给的字符串」变成「磁盘上可寻址的缓存路径」；而 `githubRepoPathMapping.ts`（仓库对路径映射）则解决「同一仓库多个克隆该怎么选」。
+
+踩坑：本批 10 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 `[1, len]` 内、无重复锚点、无英文双引号与反斜杠、`ast.parse` 全过）；`annotate.py` 十次零 `⟳`、零 `⚠`（无一处分流到块注释内或模板字符串内）；`check-fidelity` 全仓 878 份 0 失败；`check-links` 源码链接 1994 条加内链 596 条，0 失效。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，无跨行赋值首行 / 块注释内锚点）；预检 10 份全过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（合计 +89 处锚点、+88 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1994 条加内链 596 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`sideQuestion.ts`(155) · `claudeDesktop.ts`(152) · `preflightChecks.tsx`(151) · `envDynamic.ts`(151) · `platform.ts`(150) · `execFileNoThrow.ts`(150) · `sessionState.ts`(150) · `swarm/spawnUtils.ts`(146) · `argumentSubstitution.ts`(145) · `advisor.ts`(145) …（utils 还剩 278 份；全仓还剩 1,024 份）。
 
 ---
 
