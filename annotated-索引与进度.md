@@ -2154,6 +2154,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 72 批：小文件十件套（196-191 行档，123 锚点）
+
+本批是「190 行上下」的十份独立工具，横跨「已装 App 名过滤净化、插件缓存清理与孤儿版本回收、CCR 容器 token 落地、调度器租约锁、启动期性能剖析、用户核心数据聚合、hints 标签协议、hook 事件广播、JetBrains 插件探测、早期输入捕获」——彼此独立，但共同补齐 utils 中层的「环境边界身份注入 / 资源与调度协调 / 外部信号消化」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/computerUse/appNames.ts`](annotated/src/utils/computerUse/appNames.ts) | 196 | 210 | 14 | 已装 App 名过滤与净化，供 request_access 工具描述；路径白名单 + 显示名黑名单 + 提示注入加固（Unicode 字符集 / 长度 40 / 数量 50 上限） |
+| [`utils/plugins/cacheUtils.ts`](annotated/src/utils/plugins/cacheUtils.ts) | 196 | 208 | 12 | 插件缓存清理与孤儿版本 7 天惰性清理（两趟扫描、zip 缓存模式整体跳过） |
+| [`utils/authFileDescriptor.ts`](annotated/src/utils/authFileDescriptor.ts) | 196 | 208 | 12 | CCR 容器里把 FD 传入的 OAuth token / API key 落地到已知文件，供子进程（FD 无法跨 tmux/exec）读取 |
+| [`utils/cronTasksLock.ts`](annotated/src/utils/cronTasksLock.ts) | 195 | 207 | 12 | scheduled_tasks.json 的调度器租约锁：O_EXCL 原子创建、PID 存活探测、陈旧锁恢复 |
+| [`utils/startupProfiler.ts`](annotated/src/utils/startupProfiler.ts) | 194 | 207 | 13 | 启动期性能剖析：采样上报 Statsig + 详细模式写含内存快照的报告 |
+| [`utils/user.ts`](annotated/src/utils/user.ts) | 194 | 206 | 12 | 用户核心数据聚合：设备/会话/平台/订阅/CI 元数据，OAuth 邮箱异步预取 |
+| [`utils/claudeCodeHints.ts`](annotated/src/utils/claudeCodeHints.ts) | 193 | 206 | 13 | Claude Code hints 协议：扫描工具输出里的 <claude-code-hint /> 标签、剥离并弹安装提示，单槽存储 |
+| [`utils/hooks/hookEvents.ts`](annotated/src/utils/hooks/hookEvents.ts) | 192 | 205 | 13 | hook 执行事件广播系统：started/progress/response 三类事件，与主消息流解耦 |
+| [`utils/jetbrains.ts`](annotated/src/utils/jetbrains.ts) | 191 | 202 | 11 | JetBrains IDE 插件探测：按 IDE 名映射各平台插件目录，检测 claude-code-jetbrains-plugin 是否安装 |
+| [`utils/earlyInput.ts`](annotated/src/utils/earlyInput.ts) | 191 | 202 | 11 | 早期输入捕获：REPL 初始化前捕获终端键入，避免用户 prompt 字符丢失 |
+
+两条横切观察：
+
+- **「资源回收与调度协调」本批占两份**：`cacheUtils`（各类插件缓存清退 + 孤儿版本 7 天惰性清理，两趟扫描保证不误删 zip 缓存）与 `cronTasksLock`（调度器租约锁，O_EXCL 原子创建 + PID 存活探测 + 陈旧锁恢复）都体现「用不可靠文件系统的原语拼出可靠协调」——前者管资源回收、后者管多会话互斥，思路都是「先试原子操作、失败再按状态回退」。
+- **「环境边界与身份注入」是另一条暗线**：`authFileDescriptor`（CCR 容器里 FD→已知文件的 token 落地，因为管道 FD 跨不了 tmux/exec 边界）、`startupProfiler`（启动期按用户类型采样剖析，细节开销只落在被采样会话）、`user`（核心用户数据聚合、OAuth 邮箱异步预取避免阻塞同步路径）三份都在讲「程序在哪种环境里跑、把什么身份信息安全地带进上下文」；而 `claudeCodeHints`（工具输出里的提示标签剥离）与 `hooks/hookEvents`（hook 事件广播）则收口「外部/子系统的信号怎么被本端安全消化」。
+
+踩坑：`jetbrains.ts` 初版把锚点落在 `const localAppData =`（多行赋值首行，以 `=` 结尾）之后，被 check-fidelity 判据 5 拦下——中文批注插在未结束的多行表达式中间会把语句劈断；挪到该赋值收尾行（第 39 行）后过；其余九份预检三断言一次通过、零 `⟳`、零块注释内中文告警。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检十份全过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`（仅 jetbrains 一处 `=` 结尾行锚点外移修正）；`check-fidelity.py` 本批 10 份 0 失败（全仓 832 份 0 失败，合计 +123 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1958 条 + 内链 593 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`managedEnvConstants.ts`(191) · `terminalPanel.ts`(191) · `hooks/fileChangedWatcher.ts`(191) · `mcpOutputStorage.ts`(189) · `promptEditor.ts`(188) · `powershell/dangerousCmdlets.ts`(185) · `exampleCommands.ts`(184) · `genericProcessUtils.ts`(184) · `promptShellExecution.ts`(183) · `envUtils.ts`(183) …（utils 还剩 324 份；全仓还剩 1,070 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
