@@ -2326,6 +2326,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`fileStateCache.ts`(142) · `permissions/PermissionMode.ts`(141) · `hooks/apiQueryHookHelper.ts`(141) · `processUserInput/processBashCommand.tsx`(140) · `sessionIngressAuth.ts`(140) · `horizontalScroll.ts`(137) · `http.ts`(136) · `deepLink/protocolHandler.ts`(136) · `generatedFiles.ts`(136) · `plugins/fetchTelemetry.ts`(135) …（utils 还剩 268 份；全仓还剩 1,014 份）。
 
+### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
+
+本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/fileStateCache.ts`](annotated/src/utils/fileStateCache.ts) | 142 | 153 | 11 | 读文件状态缓存：路径键统一 normalize 的 LRU 封装，含克隆/合并/转对象等辅助 |
+| [`utils/permissions/PermissionMode.ts`](annotated/src/utils/permissions/PermissionMode.ts) | 141 | 155 | 14 | 权限模式枚举与可视配置：default/plan/acceptEdits/bypass/dontAsk/auto 的标题符号颜色与对外映射 |
+| [`utils/hooks/apiQueryHookHelper.ts`](annotated/src/utils/hooks/apiQueryHookHelper.ts) | 141 | 148 | 7 | API 查询钩子工厂：构建消息、非流式调用模型、解析并记录结果，失败也不抛出 |
+| [`utils/processUserInput/processBashCommand.tsx`](annotated/src/utils/processUserInput/processBashCommand.tsx) | 140 | 150 | 9 | 输入框 bash 命令执行：选 Bash/PowerShell 工具、包 <bash-stdout>/<bash-stderr>、进度 UI |
+| [`utils/sessionIngressAuth.ts`](annotated/src/utils/sessionIngressAuth.ts) | 140 | 145 | 5 | 会话入口令牌：环境变量 > 文件描述符 > 已知文件的回退，拼 Cookie/Bearer 认证头 |
+| [`utils/horizontalScroll.ts`](annotated/src/utils/horizontalScroll.ts) | 137 | 145 | 8 | 水平滚动窗口计算：贴边滚动保证选中项可见，ANSI 不切断 |
+| [`utils/deepLink/protocolHandler.ts`](annotated/src/utils/deepLink/protocolHandler.ts) | 136 | 141 | 5 | 深链协议处理器：解析 URI、解析工作目录、在终端拉起 claude |
+| [`utils/generatedFiles.ts`](annotated/src/utils/generatedFiles.ts) | 136 | 143 | 7 | 生成文件识别：按文件名/扩展名/目录/正则排除锁文件与构建产物 |
+| [`utils/http.ts`](annotated/src/utils/http.ts) | 136 | 143 | 7 | HTTP 辅助：拼各类 User-Agent 与 OAuth/API key 认证头，含 401 重试 |
+| [`utils/plugins/fetchTelemetry.ts`](annotated/src/utils/plugins/fetchTelemetry.ts) | 135 | 142 | 7 | 插件拉取遥测：按白名单归类主机，错误分桶，隐私口径只报枚举 |
+| [`utils/sdkEventQueue.ts`](annotated/src/utils/sdkEventQueue.ts) | 134 | 143 | 9 | SDK 事件队列：前台智能体任务开始/进度/结束事件，入队与排空 |
+| [`utils/sessionActivity.ts`](annotated/src/utils/sessionActivity.ts) | 133 | 143 | 10 | 会话活跃度心跳：引用计数驱动的 30 秒保活，注册/注销/起停 |
+| [`utils/hooks/hooksConfigSnapshot.ts`](annotated/src/utils/hooks/hooksConfigSnapshot.ts) | 133 | 141 | 8 | 钩子配置快照：按策略决定哪些来源钩子生效，支持抓取/更新/重置 |
+| [`utils/toolErrors.ts`](annotated/src/utils/toolErrors.ts) | 132 | 137 | 5 | 工具错误格式化：统一多行报错、超长截断、Zod 校验错误转中文 |
+| [`utils/terminal.ts`](annotated/src/utils/terminal.ts) | 131 | 136 | 5 | 终端文本截断渲染：按可见宽度换行，超 3 行折叠并提示展开 |
+
+三条横切观察：
+
+- **「鉴权与令牌」本批占两份**：`sessionIngressAuth.ts`（会话入口令牌的三路回退与认证头拼装）与 `http.ts`（OAuth/API key 认证头与 401 重试）共同把「怎么证明你是你」收口；两者都强调「OAuth 失败先强制刷新再重试、缺令牌返回空头加错误说明」。
+- **「缓存与状态快照」是一条暗线**：`fileStateCache.ts`（路径归一化的 LRU 封装 + 克隆合并）、`sessionActivity.ts`（引用计数心跳）、`hooksConfigSnapshot.ts`（钩子配置快照与策略化生效）三份都遵循「全局态集中管理、读取可核对、改了能重置」的设计哲学。
+- **「可观测 / 遥测」两份收口**：`plugins/fetchTelemetry.ts`（插件网络拉取按白名单归类主机、错误分桶）与 `sdkEventQueue.ts`（前台智能体任务事件入队排空），均强调「只报受限枚举、不泄漏路径与原始报错」的隐私口径。
+
+踩坑：本批 15 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 `[1, len]` 内、无重复锚点、无英文双引号与反斜杠、`ast.parse` 全过）；`annotate.py` 十五次零 `⟳`、零 `⚠`（含 `processBashCommand.tsx` 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`）；`check-fidelity` 本批 15 份 0 失败（合计 903 份全仓 0 失败）；`check-links` 源码链接 2014 条加内链 598 条，0 失效。
+
+流程账：本批 15 个数据文件逐一对齐源文件（硬规矩连续生效，三处 `/** */` 文件头锚点经 `after` 自动外移到块后、无块内中文；`fetchTelemetry.ts` 末锚点初版写成 136 行、预检报越界后修正为 135 行）；预检 15 份全过、零合并错误；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 15 份 0 失败（+117 处锚点、代码行与原文逐行相等）；`check-links.py` 源码链接 2014 条加内链 598 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`mcpInstructionsDelta.ts`(130) · `settings/mdm/rawRead.ts`(130) · `glob.ts`(130) · `sessionTitle.ts`(129) · `swarm/teammateInit.ts`(129) · `bash/shellQuoting.ts`(128) · `swarm/backends/detection.ts`(128) · `ultraplan/keyword.ts`(127) · `permissions/PermissionPromptToolResultSchema.ts`(127) · `plugins/pluginBlocklist.ts`(127) …（utils 还剩 253 份；全仓还剩 999 份）。
+
 ---
 
 ### FileEditTool 与 FileWriteTool
