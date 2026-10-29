@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,060 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 1,034 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -2239,7 +2239,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 15 个数据文件逐一对齐源文件（硬规矩连续生效，queryContext 一处跨行赋值首行被保真度拦下后修正）；预检 15 份全过、零合并错误；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 15 份 0 失败（合计 +168 处锚点、+211 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1968 条 + 内链 594 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`shellConfig.ts`(167) · `imageStore.ts`(167) · `completionCache.ts`(166) · `textHighlighting.ts`(166) · `sessionEnvironment.ts`(166) · `model/modelStrings.ts`(166) · `activityManager.ts`(164) · `settings/validationTips.ts`(164) · `plugins/zipCacheAdapters.ts`(164) · `plugins/hintRecommendation.ts`(164) …（utils 还剩 299 份；全仓还剩 1,045 份）。
+### utils 第 75 批：小文件十一件套（170→164 行档，113 锚点）
+
+本批是「170 行上下」的十一份独立工具，横跨「模型白名单判定、shell 配置别名管理、图片磁盘缓存、会话环境脚本聚合、文本高亮分段、shell 补全缓存、模型 ID 字符串解析、活跃时间统计、插件安装提示、settings 校验建议、插件 zip 缓存 I/O」——彼此独立，但共同补齐 utils 中层的「配置 / 缓存 / 环境 / 模型路由」四类积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/model/modelAllowlist.ts`](annotated/src/utils/model/modelAllowlist.ts) | 170 | 181 | 11 | availableModels 白名单的三层匹配：精确 / 家族通配 / 版本前缀，别名双向解析 |
+| [`utils/shellConfig.ts`](annotated/src/utils/shellConfig.ts) | 167 | 177 | 10 | shell rc 文件里 claude 别名的安装、查找、可执行校验 |
+| [`utils/imageStore.ts`](annotated/src/utils/imageStore.ts) | 167 | 178 | 11 | 粘贴图片落盘缓存、内存索引与 LRU 淘汰、跨会话清理 |
+| [`utils/sessionEnvironment.ts`](annotated/src/utils/sessionEnvironment.ts) | 166 | 176 | 10 | 会话级 env 脚本读写、钩子脚本按类型/序号确定性排序 |
+| [`utils/textHighlighting.ts`](annotated/src/utils/textHighlighting.ts) | 166 | 176 | 10 | 含 ANSI 转义文本的高亮分段，可见坐标与原始坐标双体系 |
+| [`utils/completionCache.ts`](annotated/src/utils/completionCache.ts) | 166 | 176 | 10 | 生成并缓存 shell 补全脚本，写入各 shell 的 rc 文件 |
+| [`utils/model/modelStrings.ts`](annotated/src/utils/model/modelStrings.ts) | 166 | 176 | 10 | 模型键到提供商特定 ID 的解析，Bedrock 推理配置叠加 overrides |
+| [`utils/activityManager.ts`](annotated/src/utils/activityManager.ts) | 164 | 175 | 11 | 通用活跃时间统计，区分用户活跃与 CLI 活跃、单例管理 |
+| [`utils/plugins/hintRecommendation.ts`](annotated/src/utils/plugins/hintRecommendation.ts) | 164 | 174 | 10 | 插件安装提示推荐，同步预存闸门加异步市场解析 |
+| [`utils/settings/validationTips.ts`](annotated/src/utils/settings/validationTips.ts) | 164 | 174 | 10 | 基于 Zod 校验错误的修复建议与文档链接匹配表 |
+| [`utils/plugins/zipCacheAdapters.ts`](annotated/src/utils/plugins/zipCacheAdapters.ts) | 164 | 173 | 9 | 插件 zip 缓存的元数据 I/O 与单市场 JSON 读写 |
+
+两条横切观察：
+
+- **「配置与缓存的读写边界」本批占四份**：`shellConfig.ts`（rc 文件别名的增删查、只动安装器写入的别名）、`imageStore.ts`（图片落盘加内存索引加跨会话清理）、`sessionEnvironment.ts`（会话 env 脚本聚合、确定性排序）、`completionCache.ts`（补全脚本生成缓存加 rc 注入）共同把「配置/缓存怎么安全读写、不污染用户文件」讲全；四者都用原子写 / datasync / 失败后安全降级（返回 null 或跳过）守边界。
+- **「模型路由与用户可见提示」是另一条暗线**：`modelAllowlist.ts`（白名单三层匹配）、`modelStrings.ts`（模型键到提供商 ID、Bedrock 叠 overrides）两端收口「模型名怎么解析成可调用 ID、又怎么被允许」；而 `hintRecommendation.ts`（插件安装提示）、`validationTips.ts`（settings 校验建议）则把「用户操作出错时给什么提示、指向哪份文档」做成 show-once / 匹配表两套机制。
+
+踩坑：本批 11 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 `[1, len]` 内、无重复锚点、无英文双引号与反斜杠、`ast.parse` 全过）；`annotate.py` 十一次零 `⟳`、零 `⚠`（无一处分流到块注释内或模板字符串内）；`check-fidelity` 全仓 868 份 0 失败；`check-links` 源码链接 1983 条加内链 595 条，0 失效。
+
+流程账：本批 11 个数据文件逐一对齐源文件（硬规矩连续生效，无跨行赋值首行 / 块注释内锚点）；预检 11 份全过、零合并错误；`annotate.py` 十一次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 11 份 0 失败（合计 +113 处锚点、+112 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1983 条加内链 595 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`localInstaller.ts`(162) · `githubRepoPathMapping.ts`(162) · `thinking.ts`(162) · `plugins/parseMarketplaceInput.ts`(162) · `model/validateModel.ts`(159) · `debugFilter.ts`(157) · `plugins/pluginVersioning.ts`(157) · `model/agent.ts`(157) · `sideQuestion.ts`(155) · `permissions/bypassPermissionsKillswitch.ts`(155) …（utils 还剩 288 份；全仓还剩 1,034 份）。
 
 ---
 
