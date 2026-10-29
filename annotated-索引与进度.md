@@ -2298,6 +2298,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 77 批：小文件十件套（155→145 行档，76 锚点）
+
+本批是「150 行上下」的十份独立工具，横跨「侧问派生智能体、Claude Desktop MCP 配置桥接、登录前连通性闸门、动态环境探测、容错子进程封装、平台与 VCS 探测、会话状态机、teammate 派生工具、advisor 工具门控、占位符替换」——彼此独立，但共同补齐 utils 中层的「环境探测 / 进程封装 / 状态与门控 / 提示词占位」四类积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/sideQuestion.ts`](annotated/src/utils/sideQuestion.ts) | 155 | 161 | 6 | 「/btw」侧问功能：用 forked agent 复用父级提示缓存、隔离响应、禁止工具、单轮回答 |
+| [`utils/claudeDesktop.ts`](annotated/src/utils/claudeDesktop.ts) | 152 | 160 | 8 | 桥接 Claude Desktop 的 MCP 配置：macOS/WSL 路径定位、安全解析、容错返回空 |
+| [`utils/preflightChecks.tsx`](annotated/src/utils/preflightChecks.tsx) | 151 | 159 | 7 | 登录/鉴权前的连通性闸门：并探测两端点、React Compiler 记忆化组件、失败退出 |
+| [`utils/envDynamic.ts`](annotated/src/utils/envDynamic.ts) | 151 | 159 | 8 | 在静态 env 上叠加运行时探测：Docker、JetBrains 终端、musl，汇成 envDynamic |
+| [`utils/execFileNoThrow.ts`](annotated/src/utils/execFileNoThrow.ts) | 150 | 158 | 8 | 容错子进程封装：execa 跨平台、始终 resolve、错误优先级解析 |
+| [`utils/platform.ts`](annotated/src/utils/platform.ts) | 150 | 158 | 8 | 平台探测：操作系统、WSL 版本、Linux 发行版、VCS 标记 |
+| [`utils/sessionState.ts`](annotated/src/utils/sessionState.ts) | 150 | 159 | 9 | 会话状态机：idle/running/requires_action，镜像 external_metadata 与 SDK 事件 |
+| [`utils/swarm/spawnUtils.ts`](annotated/src/utils/swarm/spawnUtils.ts) | 146 | 152 | 6 | 跨后端派生 teammate：命令路径、继承 CLI 标志、转发环境变量 |
+| [`utils/advisor.ts`](annotated/src/utils/advisor.ts) | 145 | 155 | 10 | advisor 工具类型与门控：GrowthBook + 环境变量 + beta 头决定启用 |
+| [`utils/argumentSubstitution.ts`](annotated/src/utils/argumentSubstitution.ts) | 145 | 151 | 6 | 技能/命令提示的 $ARGUMENTS 占位符替换：全量/索引/简写/具名四类 |
+
+两条横切观察：
+
+- **「环境探测」本批占三份**：`platform.ts`（操作系统/WSL/发行版/VCS）、`envDynamic.ts`（Docker/JetBrains/musl 运行时探测）、`claudeDesktop.ts`（macOS/WSL 配置路径）共同把「当前运行环境长什么样」收口；三者都强调「Linux 下读 /proc 或文件系统、异常一律降级、WSL 只认 microsoft 字样」。
+- **「容错与门控」是一条暗线**：`execFileNoThrow.ts`（子进程永远 resolve 不抛错）与 `advisor.ts`（advisor 工具按特性门控启用）、`sessionState.ts`（状态变更统一出口防绕过）、`preflightChecks.tsx`（鉴权前连通性闸门）四份都遵循「失败不崩溃、关键动作走单一收口点」的设计哲学。
+
+踩坑：本批 10 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 `[1, len]` 内、无重复锚点、无英文双引号与反斜杠、`ast.parse` 全过）；`annotate.py` 十次零 `⟳`、零 `⚠`（含 `preflightChecks.tsx` 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`）；`check-fidelity` 本批 10 份 0 失败（合计 888 份全仓 0 失败）；`check-links` 源码链接 2004 条加内链 597 条，0 失效。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，三个 `/** */` 文件头锚点经 `after` 自动外移到块后、无块内中文）；预检 10 份全过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（+76 处锚点、+75 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 2004 条加内链 597 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`fileStateCache.ts`(142) · `permissions/PermissionMode.ts`(141) · `hooks/apiQueryHookHelper.ts`(141) · `processUserInput/processBashCommand.tsx`(140) · `sessionIngressAuth.ts`(140) · `horizontalScroll.ts`(137) · `http.ts`(136) · `deepLink/protocolHandler.ts`(136) · `generatedFiles.ts`(136) · `plugins/fetchTelemetry.ts`(135) …（utils 还剩 268 份；全仓还剩 1,014 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
