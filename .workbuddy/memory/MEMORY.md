@@ -28,6 +28,7 @@
 - 第 71 批：`5ec08f0` · 10 文件/2,004 行/123 锚点（中断回收：上轮遗留数据文件 + 预检脚本）· 全仓 **822/1902 · 314,898 行 · 61.4%** · utils **230/564**。
 - 第 72 批：`63c438a` · 10 文件/1,938 行/123 锚点（中断回收：上轮遗留数据文件 + 预检脚本，重跑校验后提交）· 全仓 **832/1902 · 316,836 行 · 61.7%** · utils **240/564**。
 - 第 73 批：`b8726e2` · 10 文件/1,869 行/108 锚点 · 全仓 **842/1902 · 318,705 行 · 62.1%** · utils **250/564**。
+- 第 74 批：`42b6ac7` · 15 文件/2,656 行/168 锚点 · 全仓 **857/1902 · 321,361 行 · 62.6%** · utils **265/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -37,10 +38,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-10-29 第 73 批后）
-- 全仓 **842/1902 文件（缺失 1,060）；318,705/513,237 行，按行数覆盖 62.1%**。
-- `src/utils` **250/564**（剩 314）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~178–183 行档）：editor.ts(183)/groupToolUses.ts(182)/mtls.ts(179)/truncate.ts(179)/queryContext.ts(179)/agentContext.ts(178)/detectRepository.ts(178)/plugins/loadPluginOutputStyles.ts(178)/headlessProfiler.ts(178)/plugins/pluginDirectories.ts(178)。
+## 当前状态（2026-10-29 第 74 批后）
+- 全仓 **857/1902 文件（缺失 1,045）；321,361/513,237 行，按行数覆盖 62.6%**。
+- `src/utils` **265/564**（剩 299）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~164–170 行档）：shellConfig(167)/imageStore(167)/completionCache(166)/textHighlighting(166)/sessionEnvironment(166)/model/modelStrings(166)/activityManager(164)/settings/validationTips(164)/plugins/zipCacheAdapters(164)/plugins/hintRecommendation(164)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
