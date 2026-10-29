@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (23, 'before', '''withoutSSHTunnelVars 剥离由 `claude ssh` 远端启动器注入的占位认证变量，防止远端 settings.env 覆盖它们。'''),
+    (36, 'after', '''withoutSSHTunnelVars 收尾：仅在存在 SSH unix socket 时剥离，否则原样返回。'''),
+    (45, 'before', '''withoutHostManagedProviderVars 当宿主接管推理路由时，剥离 provider 选择与模型默认变量，避免用户配置重定向请求。'''),
+    (59, 'after', '''withoutHostManagedProviderVars 收尾：按是否由宿主管理决定逐键保留或剥离。'''),
+    (69, 'after', '''ccdSpawnEnvKeys 懒捕获首批 applySafeConfigEnvironmentVariables 调用前的环境变量键集合，用于保护桌面宿主的操作变量。'''),
+    (80, 'after', '''withoutCcdSpawnEnvKeys 收尾：剔除属于 CCD 启动环境的键，使后续 settings 改动仍可生效。'''),
+    (85, 'before', '''filterSettingsEnv 组合上述三个剥离过滤器，对所有来源于 settings 的环境对象统一处理。'''),
+    (91, 'after', '''filterSettingsEnv 收尾：先剥 CCD 启动键，再剥宿主托管 provider 变量，最后剥 SSH 隧道变量。'''),
+    (109, 'after', '''TRUSTED_SETTING_SOURCES 列出可在信任对话框前应用的环境来源（用户、命令行、策略），项目级来源被排除以防流量劫持。'''),
+    (124, 'before', '''applySafeConfigEnvironmentVariables 在信任对话框前应用受信来源的环境变量，使认证与基础 URL 能在首次运行时生效。'''),
+    (178, 'after', '''applySafeConfigEnvironmentVariables 收尾：分两阶段应用环境变量，先非策略后策略，并计算远端托管设置资格。'''),
+    (187, 'before', '''applyConfigEnvironmentVariables 在信任建立后应用全部环境变量，包括可能危险的 LD_PRELOAD、PATH 等。'''),
+    (199, 'after', '''applyConfigEnvironmentVariables 收尾：应用后清空证书与代理缓存并重新配置全局代理代理智能体。'''),
+]

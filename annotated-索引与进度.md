@@ -2126,6 +2126,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ---
 
+### utils 第 71 批：小文件十件套（204-198 行档，123 锚点）
+
+本批是「200 行上下」的十份独立工具，横跨「并发会话登记与计数、终端全屏/tmux 探测、终端字符密度可视化、受管配置注入环境变量、MCP 的 WebSocket 传输、权限规则解析、设置来源枚举与解析、状态提示横幅定义、流式输出精简转换、转录搜索文本提取」——彼此独立，但共同补齐 utils 中层的「运行时配置与来源 / 终端渲染与远端传输 / 会话与检索」积木。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/concurrentSessions.ts`](annotated/src/utils/concurrentSessions.ts) | 204 | 216 | 12 | 并发会话登记与计数：SessionKind/Status 类型、bg/daemon 判定、registerSession、并发数 countConcurrentSessions、活动/桥接 ID 更新 |
+| [`utils/fullscreen.ts`](annotated/src/utils/fullscreen.ts) | 202 | 214 | 12 | 全屏与 tmux 终端环境探测：tmux control mode 探测、fullscreen 开关、鼠标跟踪/点击禁用、tmux 鼠标提示 |
+| [`utils/heatmap.ts`](annotated/src/utils/heatmap.ts) | 198 | 209 | 11 | 终端热力图生成：HeatmapOptions + generateHeatmap 把字符频次渲染成可视化密度图 |
+| [`utils/managedEnv.ts`](annotated/src/utils/managedEnv.ts) | 199 | 212 | 13 | 受管环境（Managed<T> 注入配置）变量应用：safe 与常规两套 applyConfigEnvironmentVariables |
+| [`utils/mcpWebSocketTransport.ts`](annotated/src/utils/mcpWebSocketTransport.ts) | 200 | 214 | 14 | MCP 的 WebSocket 传输实现：WebSocketTransport 类实现 Transport 接口（连接/收发/关闭） |
+| [`utils/permissions/permissionRuleParser.ts`](annotated/src/utils/permissions/permissionRuleParser.ts) | 198 | 210 | 12 | 权限规则解析：legacy 工具名归一/反查、规则内容转义/反转义、字符串⇄值互转 |
+| [`utils/settings/constants.ts`](annotated/src/utils/settings/constants.ts) | 202 | 214 | 12 | 设置来源常量与解析：SETTING_SOURCES、来源名展示、parseSettingSourcesFlag、getEnabledSettingSources |
+| [`utils/statusNoticeDefinitions.tsx`](annotated/src/utils/statusNoticeDefinitions.tsx) | 198 | 211 | 14 | 状态提示横幅定义：StatusNotice 类型族 + 6 条定义（大内存文件/大 agent 描述/外部 token/API key 冲突/双认证/JetBrains 插件）+ getActiveNotices 过滤 |
+| [`utils/streamlinedTransform.ts`](annotated/src/utils/streamlinedTransform.ts) | 201 | 213 | 12 | 流式精简转换器：createStreamlinedTransformer 把消息流折叠成精简 Stdout、shouldIncludeInStreamlined 判定保留 |
+| [`utils/transcriptSearch.ts`](annotated/src/utils/transcriptSearch.ts) | 202 | 213 | 11 | 转录搜索文本提取：renderableSearchText / toolUseSearchText / toolResultSearchText 把各类消息转成可搜索纯文本 |
+
+两条横切观察：
+
+- **「配置与来源注入」本批占两份**：`managedEnv`（把托管配置安全/常规两套注入进程环境变量，隔离来自配置文件的危险变量）与 `settings/constants`（设置来源枚举 SETTING_SOURCES 与解析、决定哪些来源生效）从「配置从哪来、怎么解析、怎么安全落到环境/界面」两个角度把运行时配置底座讲全；它们都依赖显式来源声明而非隐式推断。
+- **「终端渲染与远端传输」是另一条暗线**：`fullscreen`（tmux 全屏/鼠标跟踪探测）、`heatmap`（终端字符密度可视化）、`mcpWebSocketTransport`（MCP 走 WebSocket 的传输层，连接/收发/关闭）三份都在讲「终端这层怎么被探测、被渲染、被打通到远端协议」；而 `concurrentSessions`（并发会话登记/计数，防止开太多后台/守护会话）与 `transcriptSearch`（把对话转录转成可搜索文本以支撑回溯）则收口「会话生命周期与可检索性」。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效）；预检三断言一次通过、零合并错误；`annotate.py` 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（合计 +123 行中文批注，代码行与原文逐行相等）；`check-links.py` 源码链接 1434 条 + 内链 465 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`authFileDescriptor.ts`(196) · `computerUse/appNames.ts`(196) · `plugins/cacheUtils.ts`(196) · `cronTasksLock.ts`(195) · `startupProfiler.ts`(194) · `user.ts`(194) · `claudeCodeHints.ts`(193) · `hooks/hookEvents.ts`(192) · `earlyInput.ts`(191) · `jetbrains.ts`(191) …（utils 还剩 334 份；全仓还剩 1,080 份）。
+
+---
+
 ### FileEditTool 与 FileWriteTool
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。

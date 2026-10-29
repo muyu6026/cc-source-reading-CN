@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (14, 'after', '''文件顶部说明：WebSocket 就绪状态常量与接口定义，原生与 ws 两种实现取值一致。'''),
+    (20, 'after', '''WebSocketLike 抽离出原生 WebSocket 与 ws 包共有的最小方法集合，让传输层与具体实现解耦。'''),
+    (70, 'after', '''构造函数收尾：根据运行环境（Bun 原生或 Node ws）挂载对应的消息、错误、关闭事件处理器。'''),
+    (87, 'after', '''onBunMessage 把收到的字符串解析为 JSON-RPC 消息并回调 onmessage，解析失败转交错误处理。'''),
+    (91, 'after', '''onBunError 把底层 WebSocket 错误包装成标准 Error 后交给共享错误处理。'''),
+    (95, 'after', '''onBunClose 在连接关闭时执行共享的清理逻辑。'''),
+    (106, 'after', '''onNodeMessage 把 Node ws 的 Buffer 转成 UTF-8 字符串后解析 JSON-RPC 消息。'''),
+    (110, 'after', '''onNodeError 透传 Node ws 的错误给共享错误处理。'''),
+    (114, 'after', '''onNodeClose 在 Node ws 关闭时执行共享清理逻辑。'''),
+    (120, 'after', '''handleError 记录诊断日志并回调 onerror，统一两类运行时的错误出口。'''),
+    (137, 'after', '''handleCloseCleanup 收尾：在关闭后移除所有监听器，兼容原生与 ws 两种卸载方式。'''),
+    (154, 'after', '''start 收尾：WebSocket 通常已在创建时建立，这里仅校验状态并标记已开始，无需主动连接。'''),
+    (168, 'after', '''close 收尾：在连接打开或连接中时主动关闭，并确保外部调用后监听器仍被清理。'''),
+    (199, 'after', '''send 收尾：仅在连接打开时发送 JSON-RPC 消息，Bun 同步发送、Node 异步等待回调结果。'''),
+]
