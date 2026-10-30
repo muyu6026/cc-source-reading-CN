@@ -1287,7 +1287,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 989 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 974 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
 | 目录 | 规模 | 为什么是下一步 |
 | --- | --- | --- |
@@ -1297,7 +1297,7 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 | `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
 
 > 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 989 份没动（约 52% 文件、36% 行数）。
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 974 份没动（约 51% 文件、35% 行数）。
 
 ---
 
@@ -2354,6 +2354,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，三处 /** */ 文件头锚点经 after 自动外移到块后、无块内中文；detection.ts 两处 /** */ 常量注释头经 after 自动外移）；预检 10 份全过、零合并错误；annotate.py 十次（含 5 处 ⟳ 外移）零 ⚠；check-fidelity.py 本批 10 份 0 失败（+128 处锚点、代码行与原文逐行相等）；check-links.py 源码链接 2029 条加内链 599 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`mcp/dateTimeParser.ts`(121) · `warningHandler.ts`(121) · `QueryGuard.ts`(121) · `teleport/environments.ts`(120) · `suggestions/shellHistoryCompletion.ts`(119) · `swarm/reconnection.ts`(119) · `systemTheme.ts`(119) · `model/modelCapabilities.ts`(118) · `model/configs.ts`(118) · `secureStorage/keychainPrefetch.ts`(116) …（utils 还剩 243 份；全仓还剩 989 份）。
+
+### utils 第 80 批：小文件十五件套（127→120 行档，134 锚点）
+
+本批是「125 行上下」的十五份独立工具，横跨「outputs 目录扫描、computer-use 渲染覆盖、macOS 终端备份恢复、stream-json 标准输出守护、深链来源横幅、插件标识符映射、PowerShell 外壳提供者、系统提示词组装、自动运行 issue 判定、自然语言时间解析、截图写剪贴板、全局警告处理、查询生命周期状态机、云环境获取创建、终端明暗主题探测」——体量小但各自补齐一个独立能力，彼此无依赖。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/filePersistence/outputsScanner.ts`](annotated/src/utils/filePersistence/outputsScanner.ts) | 127 | 134 | 11 | outputs 目录扫描器：依环境变量判定会话环境、扫描本回合被修改文件（findModifiedFiles），目录读取失败与空结果均安全降级 |
+| [`utils/computerUse/toolRendering.tsx`](annotated/src/utils/computerUse/toolRendering.tsx) | 125 | 134 | 7 | computer-use 工具渲染覆盖层：坐标格式化、动作结果摘要映射、verbose 兜底（base64 sourceMappingURL 按惯例省略） |
+| [`utils/appleTerminalBackup.ts`](annotated/src/utils/appleTerminalBackup.ts) | 125 | 134 | 10 | macOS Terminal.plist 备份与恢复：初始化前后标记、defaults export 备份、恢复结果联合类型、无备份不报错 |
+| [`utils/streamJsonStdoutGuard.ts`](annotated/src/utils/streamJsonStdoutGuard.ts) | 123 | 130 | 7 | stream-json 标准输出守护：拦截 process.stdout.write，按行 JSON 解析合法转发、残留半行冲刷到 stderr |
+| [`utils/deepLink/banner.ts`](annotated/src/utils/deepLink/banner.ts) | 123 | 132 | 9 | 深链来源横幅：claude-cli:// 打开时提示工作目录/分支/过期 fetch，阈值常量与 tildify 路径缩写 |
+| [`utils/plugins/pluginIdentifier.ts`](annotated/src/utils/plugins/pluginIdentifier.ts) | 123 | 134 | 11 | 插件标识符与来源映射：name@marketplace 解析、Extended/Persistable 作用域、设置来源↔作用域双向映射 |
+| [`utils/shell/powershellProvider.ts`](annotated/src/utils/shell/powershellProvider.ts) | 123 | 130 | 7 | PowerShell 外壳提供者：固定 pwsh 参数、UTF-16LE base64 编码、退出码捕获、/env 环境变量注入 |
+| [`utils/systemPrompt.ts`](annotated/src/utils/systemPrompt.ts) | 123 | 130 | 7 | 有效系统提示词组装：覆盖提示最高优先、协调器/主动模式分支、兜底组合 appendSystemPrompt |
+| [`utils/autoRunIssue.tsx`](annotated/src/utils/autoRunIssue.tsx) | 122 | 133 | 10 | 自动运行 /issue 通知与判定：反馈后自动触发问题上报的 UI 与原因判定，当前默认不自动运行（sourceMappingURL 省略） |
+| [`utils/mcp/dateTimeParser.ts`](annotated/src/utils/mcp/dateTimeParser.ts) | 121 | 131 | 10 | 自然语言日期时间解析：调 Haiku 转 ISO 8601，带符号时区拼接、INVALID 兜底、looksLikeISO8601 校验 |
+| [`utils/screenshotClipboard.ts`](annotated/src/utils/screenshotClipboard.ts) | 121 | 129 | 8 | 截图写入剪贴板：ANSI 渲染为 PNG 后按平台（macOS osascript / Linux xclip / Windows PowerShell）复制 |
+| [`utils/warningHandler.ts`](annotated/src/utils/warningHandler.ts) | 121 | 129 | 8 | 全局警告处理器：拦截 Node warning 事件，外部用户屏蔽、内部告警上报，计数上限与重复安装防护 |
+| [`utils/QueryGuard.ts`](annotated/src/utils/QueryGuard.ts) | 121 | 133 | 12 | 查询生命周期同步状态机：兼容 useSyncExternalStore，reserve/cancelReservation/tryStart/end/forceEnd 并发保护 |
+| [`utils/teleport/environments.ts`](annotated/src/utils/teleport/environments.ts) | 120 | 128 | 8 | 云环境获取与创建：Environment API 拉取列表、为无环境用户创建默认云环境（python3.11/node20） |
+| [`utils/systemTheme.ts`](annotated/src/utils/systemTheme.ts) | 119 | 128 | 9 | 终端明暗主题探测：auto 主题经 OSC 11 背景色判定，BT.709 亮度阈值、rgb 解析与 COLORFGBG 兜底 |
+
+三条横切观察：
+
+- **「环境探测与备份」暗线**：`outputsScanner.ts`（会话环境类型 + 回合内改动扫描）、`teleport/environments.ts`（云端环境拉取/创建）、`systemTheme.ts`（终端明暗经 OSC 11 探测）、`appleTerminalBackup.ts`（macOS Terminal.plist 备份恢复）四份都在回答「运行环境长什么样、要不要备份/恢复」；均强调「失败不崩溃、无则降级」。
+- **「外部输入的结构化落地」三份**：`deepLink/banner.ts`（外部 claude-cli:// 深链打开时构建风险横幅）、`plugins/pluginIdentifier.ts`（name@marketplace 解析 + 设置来源↔作用域双向映射）、`mcp/dateTimeParser.ts`（自然语言时间调 Haiku 转 ISO 8601、歧义偏未来、INVALID 兜底）共同收口「任意外部文本如何安全变成结构化数据」。
+- **「输出侧拦截与渲染」四份**：`streamJsonStdoutGuard.ts`（拦截 process.stdout.write 按行 JSON 解析、半行冲刷 stderr）、`warningHandler.ts`（拦截 Node warning、外部屏蔽内部上报、计数上限）、`computerUse/toolRendering.tsx`（computer-use 动作结果覆盖层渲染）、`screenshotClipboard.ts`（ANSI 渲染为 PNG 按平台写剪贴板）都偏「把程序输出转换成对人或机器友好的形态」。
+
+踩坑：本批 15 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；annotate.py 十五次零 `⟳`、零 `⚠`（`computerUse/toolRendering.tsx` 与 `autoRunIssue.tsx` 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`）；check-fidelity 本批 15 份 0 失败（合计 928 份全仓 0 失败）；check-links 源码链接 2039 条加内链 647 条，0 失效。
+
+流程账：本批 15 个数据文件逐一对齐源文件（硬规矩连续生效，锚点全落函数/类型/语句收尾行或文件头 `after`，无跨行赋值首行、无 `/* */` 块内、无 `//` 段中部，故 annotate 零 `⟳`、零 `⚠`；`toolRendering.tsx`/`autoRunIssue.tsx` 末行 base64 sourceMappingURL 省略各补 2 行中文说明，故 cn 行比锚点多 2）；预检 15 份全过、零合并错误；annotate.py 十五次零 `⟳`、零 `⚠`；check-fidelity.py 本批 15 份 0 失败（+134 处锚点、代码行与原文逐行相等）；check-links.py 源码链接 2039 条加内链 647 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`swarm/reconnection.ts`(119) · `suggestions/shellHistoryCompletion.ts`(119) · `model/modelCapabilities.ts`(118) · `model/configs.ts`(118) · `secureStorage/keychainPrefetch.ts`(116) · `staticRender.tsx`(116) · `caCerts.ts`(115) · `plugins/orphanedPluginFilter.ts`(114) · `secureStorage/macOsKeychainHelpers.ts`(111) · `shell/powershellDetection.ts`(107) · `swarm/teammateLayoutManager.ts`(107) · `ghPrStatus.ts`(106) · `computerUse/mcpServer.ts`(106) · `imageValidation.ts`(104) · `pasteStore.ts`(104) …（utils 还剩 228 份；全仓还剩 974 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
