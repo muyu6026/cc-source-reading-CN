@@ -9,6 +9,14 @@
 - 性质：**中断回收**——开工工作树已有本批遗留的 15 个 `_p1.py` 数据文件 + 15 个 `annotated/` 产出 + `_precheck_batch80.py`/`_run80.py`/`_count_batch80.py`（git log 显示第 79 批 `5dbac19` 已提交、utils 321/564，这批正是其后的下一档 127→120 行文件）。判定为自家孤儿文件（非用户工作），预检 134 锚点一次过 → 重跑 annotate 幂等落盘 → 校验 → 文档刷新 → 提交，未重读源文件重做。
 - 下一批目标（utils 按行数降序）：swarm/reconnection(119) · suggestions/shellHistoryCompletion(119) · model/modelCapabilities(118) · model/configs(118) · secureStorage/keychainPrefetch(116) · staticRender.tsx(116) · caCerts(115) · plugins/orphanedPluginFilter(114) · secureStorage/macOsKeychainHelpers(111) · shell/powershellDetection(107)。
 
+## 第 81 批（2026-10-30）：utils 小文件十五件套（119→104 行档）
+
+- 状态：完成并推送，commit `342b160`（8c984ac..342b160）。
+- 本批（15 文件，按行数降序 119→104 档，单批取满 15 上限）：swarm/reconnection(119)/suggestions/shellHistoryCompletion(119)/model/configs(118)/model/modelCapabilities(118)/staticRender.tsx(116)/secureStorage/keychainPrefetch(116)/caCerts(115)/plugins/orphanedPluginFilter(114)/secureStorage/macOsKeychainHelpers(111)/shell/powershellDetection(107)/swarm/teammateLayoutManager(107)/computerUse/mcpServer(106)/ghPrStatus(106)/pasteStore(104)/imageValidation(104)。合计 **15 文件 1,680 源行 / 100 锚点**。
+- 进度：全仓 **943/1902 文件 / 333,115 行 / 64.9%**（实算；utils 351/564，剩 213 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **943 份 0 失败**；check-links **2054 源码链接 + 648 内链 0 失效**；annotate.py 十五次零 `⟳`、零 `⚠`（staticRender.tsx 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`）。
+- 下一批目标（utils 按行数降序）：agentId(99) · git/gitignore(99) · subprocessEnv(99) · abortController(99) · exportRenderer.tsx(98) · permissions/classifierDecision(98) · background/remote/remoteSession(98) · messages/systemInit(96) · teammateContext(96) · fileReadCache(96)。
+
 ## 第 79 批（2026-10-30）：utils 小文件十件套（130→127 行档）· 已提交（git log `5dbac19`）
 
 - 状态：完成并推送（git log 确认；上轮自动化记忆未补记，本次回填）。
