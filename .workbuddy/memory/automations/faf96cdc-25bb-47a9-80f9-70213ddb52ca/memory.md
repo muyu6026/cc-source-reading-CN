@@ -1,5 +1,21 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 80 批（2026-10-30）：utils 小文件十五件套（127→120 行档）· 中断回收
+
+- 状态：完成并推送，commit `8c984ac`（51687fe..8c984ac）。
+- 本批（15 文件，按行数降序 127→120 档，单批取满 15 上限）：filePersistence/outputsScanner(127)/computerUse/toolRendering.tsx(125)/appleTerminalBackup(125)/streamJsonStdoutGuard(123)/deepLink/banner(123)/plugins/pluginIdentifier(123)/shell/powershellProvider(123)/systemPrompt(123)/autoRunIssue.tsx(122)/mcp/dateTimeParser(121)/screenshotClipboard(121)/warningHandler(121)/QueryGuard(121)/teleport/environments(120)/systemTheme(119)。合计 **15 文件 1,837 行源 / 134 锚点**。
+- 进度：全仓 **928/1902 文件 / 331,435 行 / 64.6%**（实算；utils 336/564，剩 228 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity **928 份 0 失败**；check-links **2039 源码链接 + 647 内链 0 失效**；annotate.py 十五次零 `⟳`、零 `⚠`（toolRendering.tsx 与 autoRunIssue.tsx 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`，各补 2 行中文说明故 cn 行比锚点多 2）。
+- 性质：**中断回收**——开工工作树已有本批遗留的 15 个 `_p1.py` 数据文件 + 15 个 `annotated/` 产出 + `_precheck_batch80.py`/`_run80.py`/`_count_batch80.py`（git log 显示第 79 批 `5dbac19` 已提交、utils 321/564，这批正是其后的下一档 127→120 行文件）。判定为自家孤儿文件（非用户工作），预检 134 锚点一次过 → 重跑 annotate 幂等落盘 → 校验 → 文档刷新 → 提交，未重读源文件重做。
+- 下一批目标（utils 按行数降序）：swarm/reconnection(119) · suggestions/shellHistoryCompletion(119) · model/modelCapabilities(118) · model/configs(118) · secureStorage/keychainPrefetch(116) · staticRender.tsx(116) · caCerts(115) · plugins/orphanedPluginFilter(114) · secureStorage/macOsKeychainHelpers(111) · shell/powershellDetection(107)。
+
+## 第 79 批（2026-10-30）：utils 小文件十件套（130→127 行档）· 已提交（git log `5dbac19`）
+
+- 状态：完成并推送（git log 确认；上轮自动化记忆未补记，本次回填）。
+- 本批：mcpInstructionsDelta/settings/mdm/rawRead/glob/swarm/teammateInit/sessionTitle/swarm/backends/detection/bash/shellQuoting/ultraplan/keyword/permissions/PermissionPromptToolResultSchema/plugins/pluginBlocklist。合计 **10 文件 1,290 行源 / 128 锚点**。
+- 进度：全仓 **913/1902 文件 / 329,600 行 / 64.2%**（utils 321/564，剩 243 份）。
+- 校验：check-fidelity 913 份 0 失败；check-links 2029 源码链接 + 599 内链 0 失效。
+
 ## 第 78 批（2026-10-30）：utils 小文件十五件套（142→131 行档）
 
 - 状态：完成并推送。

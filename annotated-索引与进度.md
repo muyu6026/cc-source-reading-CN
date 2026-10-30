@@ -2389,6 +2389,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`swarm/reconnection.ts`(119) · `suggestions/shellHistoryCompletion.ts`(119) · `model/modelCapabilities.ts`(118) · `model/configs.ts`(118) · `secureStorage/keychainPrefetch.ts`(116) · `staticRender.tsx`(116) · `caCerts.ts`(115) · `plugins/orphanedPluginFilter.ts`(114) · `secureStorage/macOsKeychainHelpers.ts`(111) · `shell/powershellDetection.ts`(107) · `swarm/teammateLayoutManager.ts`(107) · `ghPrStatus.ts`(106) · `computerUse/mcpServer.ts`(106) · `imageValidation.ts`(104) · `pasteStore.ts`(104) …（utils 还剩 228 份；全仓还剩 974 份）。
 
+### utils 第 81 批：小文件十五件套（119→104 行档，100 锚点）
+
+本批是「119→104 行」的十五份独立工具，横跨「蜂群重连与会话恢复、shell 历史行内补全、模型配置表与能力缓存、组件静态渲染、macOS 钥匙串预取与辅助、CA 证书加载、孤立插件排除、PowerShell 探查、队友布局管理、computer-use MCP 服务、PR 状态查询、粘贴缓存、图像校验」——体量小但各自补齐一个独立能力，彼此无依赖。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/swarm/reconnection.ts`](annotated/src/utils/swarm/reconnection.ts) | 119 | 124 | 5 | 蜂群重连：冷启动从 CLI 动态上下文装配 teamContext，会话恢复从 transcript 重建队友上下文 |
+| [`utils/suggestions/shellHistoryCompletion.ts`](annotated/src/utils/suggestions/shellHistoryCompletion.ts) | 119 | 127 | 8 | shell 历史行内补全：按精确前缀匹配历史命令返回幽灵文本后缀，带 60 秒缓存与去重 |
+| [`utils/model/configs.ts`](annotated/src/utils/model/configs.ts) | 118 | 127 | 9 | 模型配置表：各 firstParty/bedrock/vertex/foundry 标识汇总，提供规范标识↔短名映射 |
+| [`utils/model/modelCapabilities.ts`](annotated/src/utils/model/modelCapabilities.ts) | 118 | 127 | 9 | 模型能力缓存：从 API 拉取并缓存上下文窗口等能力，仅内部蚂蚁用户启用 |
+| [`utils/staticRender.tsx`](annotated/src/utils/staticRender.tsx) | 116 | 123 | 6 | 组件静态渲染：把 React 节点渲染成 ANSI/纯文本字符串，绕开 Ink 多 Static 限制（base64 sourceMappingURL 省略） |
+| [`utils/secureStorage/keychainPrefetch.ts`](annotated/src/utils/secureStorage/keychainPrefetch.ts) | 116 | 124 | 8 | 钥匙串预取：main 顶层并行触发 macOS 钥匙串读取，与导入期重叠隐藏约 65 毫秒开销 |
+| [`utils/caCerts.ts`](annotated/src/utils/caCerts.ts) | 115 | 120 | 5 | CA 证书加载：按 NODE_EXTRA_CA_CERTS 与系统 CA 组合加载，保持配置无关 |
+| [`utils/plugins/orphanedPluginFilter.ts`](annotated/src/utils/plugins/orphanedPluginFilter.ts) | 114 | 121 | 7 | 孤立插件排除：用 ripgrep 找 .orphaned_at 生成排除 glob，避免用到旧版本代码 |
+| [`utils/secureStorage/macOsKeychainHelpers.ts`](annotated/src/utils/secureStorage/macOsKeychainHelpers.ts) | 111 | 119 | 8 | 钥匙串辅助：服务名构造、缓存 TTL/代际、预取写入，严禁拖入 execa 重依赖 |
+| [`utils/shell/powershellDetection.ts`](annotated/src/utils/shell/powershellDetection.ts) | 107 | 114 | 7 | PowerShell 探查：优先 pwsh、规避 Linux snap 启动器、按二进制名判 core/desktop 版本 |
+| [`utils/swarm/teammateLayoutManager.ts`](annotated/src/utils/swarm/teammateLayoutManager.ts) | 107 | 116 | 9 | 队友布局管理：颜色轮转分配、tmux/iTerm2 后端抽象、窗格创建与命令发送 |
+| [`utils/computerUse/mcpServer.ts`](annotated/src/utils/computerUse/mcpServer.ts) | 106 | 111 | 5 | computer-use MCP 服务：替换 ListTools 处理器注入已装应用名，子进程入口冲刷分析 |
+| [`utils/ghPrStatus.ts`](annotated/src/utils/ghPrStatus.ts) | 106 | 111 | 5 | PR 状态查询：调 gh pr view 推导评审态，默认分支/已合并不显示 |
+| [`utils/pasteStore.ts`](annotated/src/utils/pasteStore.ts) | 104 | 109 | 5 | 粘贴缓存：内容寻址的跨会话文本缓存，按修改时间清理 |
+| [`utils/imageValidation.ts`](annotated/src/utils/imageValidation.ts) | 104 | 108 | 4 | 图像校验：API 边界按 base64 串长判超限，超限抛 ImageSizeError |
+
+三条横切观察：
+
+- **「凭据与钥匙串」暗线两份**：`keychainPrefetch.ts`（顶层并行预取、与导入期重叠隐藏延迟）与 `macOsKeychainHelpers.ts`（服务名构造、缓存 TTL/代际/预取写入）共同收口「macOS 凭据怎么既安全又快」；均强调「非 darwin 为空操作、超时则让同步路径重试」。
+- **「模型元数据」两份**：`configs.ts`（各提供方标识汇总表 + 规范标识↔短名映射）与 `modelCapabilities.ts`（从 API 拉取并缓存能力、仅内部用户）一静一动，把「模型有哪些能力、怎么查」补齐全。
+- **「对外边界治理」三份**：`imageValidation.ts`（API 边界图像大小校验）、`pasteStore.ts`（粘贴内容寻址缓存）、`ghPrStatus.ts`（外部 PR 状态查询）都偏「对外输入输出怎么安全落地、失败怎么降级」。
+
+踩坑：本批 15 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；annotate.py 十五次零 `⟳`、零 `⚠`（`staticRender.tsx` 的 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`）；check-fidelity 本批 15 份 0 失败（合计 943 份全仓 0 失败）；check-links 源码链接 2054 条加内链 648 条，0 失效。
+
+流程账：本批 15 个数据文件逐一对齐源文件（硬规矩连续生效，文件头 `/** */` 锚点经 `after` 自动外移到块后、无块内中文；`caCerts.ts` 第 49 行 `/* eslint-enable */` 单行块注释改用其后语句行落锚，规避 `after` 落 `*/` 风险）；预检 15 份全过、零合并错误；annotate.py 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 15 份 0 失败（+100 处锚点、代码行与原文逐行相等）；`check-links.py` 源码链接 2054 条加内链 648 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`agentId.ts`(99) · `git/gitignore.ts`(99) · `subprocessEnv.ts`(99) · `abortController.ts`(99) · `exportRenderer.tsx`(98) · `permissions/classifierDecision.ts`(98) · `background/remote/remoteSession.ts`(98) · `messages/systemInit.ts`(96) · `teammateContext.ts`(96) · `fileReadCache.ts`(96) · `queueProcessor.ts`(95) · `planModeV2.ts`(95) · `diagLogs.ts`(94) · `backgroundHousekeeping.ts`(94) · `intl.ts`(94) …（utils 还剩 213 份；全仓还剩 959 份）。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。

@@ -1,0 +1,59 @@
+=== src/utils/swarm/reconnection.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/swarm/reconnection.ts
+  原文 119 行 → 批注版 124 行（插入注释 5 行，5 处锚点）
+
+=== src/utils/suggestions/shellHistoryCompletion.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/suggestions/shellHistoryCompletion.ts
+  原文 119 行 → 批注版 127 行（插入注释 8 行，8 处锚点）
+
+=== src/utils/model/configs.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/model/configs.ts
+  原文 118 行 → 批注版 127 行（插入注释 9 行，9 处锚点）
+
+=== src/utils/model/modelCapabilities.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/model/modelCapabilities.ts
+  原文 118 行 → 批注版 127 行（插入注释 9 行，9 处锚点）
+
+=== src/utils/staticRender.tsx (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/staticRender.tsx
+  原文 116 行 → 批注版 123 行（插入注释 7 行，6 处锚点）
+
+=== src/utils/secureStorage/keychainPrefetch.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/secureStorage/keychainPrefetch.ts
+  原文 116 行 → 批注版 124 行（插入注释 8 行，8 处锚点）
+
+=== src/utils/caCerts.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/caCerts.ts
+  原文 115 行 → 批注版 120 行（插入注释 5 行，5 处锚点）
+
+=== src/utils/plugins/orphanedPluginFilter.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/plugins/orphanedPluginFilter.ts
+  原文 114 行 → 批注版 121 行（插入注释 7 行，7 处锚点）
+
+=== src/utils/secureStorage/macOsKeychainHelpers.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/secureStorage/macOsKeychainHelpers.ts
+  原文 111 行 → 批注版 119 行（插入注释 8 行，8 处锚点）
+
+=== src/utils/shell/powershellDetection.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/shell/powershellDetection.ts
+  原文 107 行 → 批注版 114 行（插入注释 7 行，7 处锚点）
+
+=== src/utils/swarm/teammateLayoutManager.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/swarm/teammateLayoutManager.ts
+  原文 107 行 → 批注版 116 行（插入注释 9 行，9 处锚点）
+
+=== src/utils/computerUse/mcpServer.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/computerUse/mcpServer.ts
+  原文 106 行 → 批注版 111 行（插入注释 5 行，5 处锚点）
+
+=== src/utils/ghPrStatus.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/ghPrStatus.ts
+  原文 106 行 → 批注版 111 行（插入注释 5 行，5 处锚点）
+
+=== src/utils/pasteStore.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/pasteStore.ts
+  原文 104 行 → 批注版 109 行（插入注释 5 行，5 处锚点）
+
+=== src/utils/imageValidation.ts (rc=0) ===
+写入 D:\CC泄露源码分析\annotated\src/utils/imageValidation.ts
+  原文 104 行 → 批注版 108 行（插入注释 4 行，4 处锚点）
