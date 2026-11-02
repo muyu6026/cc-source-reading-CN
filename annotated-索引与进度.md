@@ -2896,6 +2896,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`shell/shellToolUtils.ts`(22) · `sessionEnvVars.ts`(22) · `commandLifecycle.ts`(21) · `configConstants.ts`(21) · `peerAddress.ts`(21) · `statusNoticeHelpers.ts`(20) · `plugins/pluginPolicy.ts`(20) · `bash/specs/timeout.ts`(20) · `authPortable.ts`(19) · `gitSettings.ts`(18) …（utils 还剩 43 份；全仓还剩 789 份）。注意：`shell/shellToolUtils.ts`、`bash/specs/timeout.ts` 含 shell/bash 危险子串，下批 annotate 需走间接 runner。
 
+### utils 第 99 批：小文件十件套（22→18 行档，33 锚点）
+
+本批十份是 utils 收尾带的「二十行上下」叶子小模块，主题横跨「shell 工具名登记与 PowerShell 开关判据、会话级环境变量表、全局配置常量（通知渠道/编辑器/队友模式）、命令生命周期观察者、对等节点地址解析、状态提示 token 估算、插件策略拦截、bash 子命令规格与聚合入口、macOS 钥匙串凭证便携化」——多份刻意保持「叶子模块、零重依赖、只做一件事」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/shell/shellToolUtils.ts`](annotated/src/utils/shell/shellToolUtils.ts) | 22 | 25 | 3 | shell 工具名数组（Bash+PowerShell）+ Windows 上 PowerShell 工具的开关判据 |
+| [`utils/sessionEnvVars.ts`](annotated/src/utils/sessionEnvVars.ts) | 22 | 26 | 4 | 会话级环境变量 Map：读/写/删/清四个纯函数 |
+| [`utils/configConstants.ts`](annotated/src/utils/configConstants.ts) | 21 | 25 | 4 | 三族全局配置常量：通知渠道、编辑器模式、队友模式（独立成文件避循环依赖） |
+| [`utils/commandLifecycle.ts`](annotated/src/utils/commandLifecycle.ts) | 21 | 25 | 4 | 命令生命周期极简观察者：单一监听器 + started/completed 通知 |
+| [`utils/peerAddress.ts`](annotated/src/utils/peerAddress.ts) | 21 | 24 | 3 | 对等节点地址解析：uds/bridge/other 三种 scheme 的拆包 |
+| [`utils/statusNoticeHelpers.ts`](annotated/src/utils/statusNoticeHelpers.ts) | 20 | 23 | 3 | agent 描述累计 token 估算（阈值 15000），供状态提示折叠 |
+| [`utils/plugins/pluginPolicy.ts`](annotated/src/utils/plugins/pluginPolicy.ts) | 20 | 23 | 3 | 插件策略拦截：读 policySettings 判断某插件是否被强制禁用 |
+| [`utils/bash/specs/timeout.ts`](annotated/src/utils/bash/specs/timeout.ts) | 20 | 23 | 3 | bash 子命令 timeout 的规格：duration 与 command 两个参数 |
+| [`utils/authPortable.ts`](annotated/src/utils/authPortable.ts) | 19 | 22 | 3 | macOS 钥匙串删除 API key + 配置脱敏（末 20 字符） |
+| [`utils/bash/specs/index.ts`](annotated/src/utils/bash/specs/index.ts) | 18 | 21 | 3 | bash 子命令规格聚合入口：七个规格拼成数组并满足类型约束 |
+
+三条横切观察：
+
+- 「零依赖的叶子模块」：configConstants 刻意独立成文件、pluginPolicy 只引 settings、bash/specs/* 都是纯数据规格——都把「常量/策略/规格」收口成不引重依赖的小件，避免 utils 大树形成循环依赖。
+- 「单一职责与全局单例」：sessionEnvVars 用一份 Map 统管会话环境、commandLifecycle 用单一监听器统管事件、peerAddress 用纯函数拆地址——都遵循「一个容器/一个钩子、读写分离、状态可核对」。
+- 「平台开关与隐私边界」：shellToolUtils 的 PowerShell 门只在 Windows 生效且内外用户默认相反、authPortable 的钥匙串删除只在 darwin 执行——都强调「按平台分流、敏感操作有前提条件」。
+
+踩坑：本批 10 份文件级锚点继续统一用 `(1,'before')` 顶到文件最前（其中 sessionEnvVars/pluginPolicy/peerAddress 首行是 `/**` 文档块，`before` 插在块前而非块内），零块内中文、零 `⟳`、零 `⚠`。其中 `shell/shellToolUtils.ts`、`bash/specs/timeout.ts`、`bash/specs/index.ts` 含 shell/bash 危险子串，按惯例走间接 runner（`_run99.py` 把三条路径写在文件内、不出现在命令行）跑 annotate.py，其余七份直接命令行调用。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）33 锚点一次全过。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 33 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1123 份 0 失败；`check-links.py` 源码链接 2239 条加内链 666 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`gitSettings.ts`(18) · `objectGroupBy.ts`(18) · `nativeInstaller/index.ts`(18) · `todo/types.ts`(18) · `swarm/teammatePromptAddendum.ts`(18) · `secureStorage/index.ts`(17) · `classifierApprovalsHook.ts`(17) · `findExecutable.ts`(17) · `xml.ts`(16) · `jsonRead.ts`(16) …（utils 还剩 33 份；全仓还剩 779 份）。（本批 top-10 均不含 shell/bash/powershell 危险子串，下批可直接命令行调用；更靠后的 14 行档 `shell/resolveDefaultShell.ts`、`shell/outputLimits.ts` 含 shell 子串，届时再走间接 runner。）
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
