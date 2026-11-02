@@ -2423,6 +2423,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`agentId.ts`(99) · `git/gitignore.ts`(99) · `subprocessEnv.ts`(99) · `abortController.ts`(99) · `exportRenderer.tsx`(98) · `permissions/classifierDecision.ts`(98) · `background/remote/remoteSession.ts`(98) · `messages/systemInit.ts`(96) · `teammateContext.ts`(96) · `fileReadCache.ts`(96) · `queueProcessor.ts`(95) · `planModeV2.ts`(95) · `diagLogs.ts`(94) · `backgroundHousekeeping.ts`(94) · `intl.ts`(94) …（utils 还剩 213 份；全仓还剩 959 份）。
 
+### utils 第 82 批：小文件十件套（103→99 行档，56 锚点）
+
+本批是「103→99 行」的十份独立工具，横跨「工具校验配置声明、进程内队友辅助、同步文件读取叶子、Shift+Tab 权限模式循环、模型弃用提示、带缓冲写入器、用户输入整理、确定式 agent/请求 ID、gitignore 自动忽略、子进程环境机密剥离」——体量小但各自补齐一个独立能力，彼此无依赖。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/settings/toolValidationConfig.ts`](annotated/src/utils/settings/toolValidationConfig.ts) | 103 | 110 | 7 | 工具校验配置：filePattern/bashPrefix/customValidation 三类，多数工具无需配置 |
+| [`utils/inProcessTeammateHelpers.ts`](annotated/src/utils/inProcessTeammateHelpers.ts) | 102 | 108 | 6 | 进程内队友辅助：按名找任务 ID、计划审批状态、权限消息判定 |
+| [`utils/fileRead.ts`](annotated/src/utils/fileRead.ts) | 102 | 108 | 6 | 同步读文件叶子：编码/行尾探测、一次读取带回元数据、避免拖入长依赖链 |
+| [`utils/permissions/getNextPermissionMode.ts`](annotated/src/utils/permissions/getNextPermissionMode.ts) | 101 | 106 | 5 | Shift+Tab 循环权限模式：default→acceptEdits→plan→bypass/auto，蚂蚁账号特殊处理 |
+| [`utils/model/deprecation.ts`](annotated/src/utils/model/deprecation.ts) | 101 | 106 | 5 | 模型弃用信息：按 ID 子串匹配各 provider 下线日期，拼出提示语 |
+| [`utils/bufferedWriter.ts`](annotated/src/utils/bufferedWriter.ts) | 100 | 105 | 5 | 带缓冲写入器：按时间/条数/字节阈值冲刷，setImmediate 延后阻塞写入 |
+| [`utils/processUserInput/processTextPrompt.ts`](annotated/src/utils/processUserInput/processTextPrompt.ts) | 100 | 106 | 6 | 用户输入整理成消息：字符串与内容块两形态、图片/附件、OTEL 埋点 |
+| [`utils/agentId.ts`](annotated/src/utils/agentId.ts) | 99 | 104 | 5 | 确定式 agent/请求 ID 拼接与解析：agentName@teamName 与 type-timestamp@id |
+| [`utils/git/gitignore.ts`](annotated/src/utils/git/gitignore.ts) | 99 | 105 | 6 | git check-ignore 封装与全局 gitignore 写入：敏感文件自动忽略 |
+| [`utils/subprocessEnv.ts`](annotated/src/utils/subprocessEnv.ts) | 99 | 104 | 5 | 子进程环境组装：GitHub Actions 下剥离敏感变量，注入 CCR 代理变量 |
+
+三条横切观察：
+
+- **「配置集中声明」两份**：`toolValidationConfig.ts`（工具校验的静态配置对象，调用方只查不写）与 `subprocessEnv.ts`（子进程环境要剥离的敏感变量清单，同样集中在一处常量）共同体现「规则放一处、调用方只消费」的治理哲学。
+- **「身份与权限模式」三份**：`agentId.ts`（确定式 ID 拼接解析）、`getNextPermissionMode.ts`（权限模式循环切换）、`inProcessTeammateHelpers.ts`（进程内队友的权限消息判定）收口「怎么标识一个 agent、怎么在模式间切换、怎么认出权限响应」这条暗线。
+- **「读写与生命周期」三份**：`fileRead.ts`（同步读 + 编码/行尾探测）、`bufferedWriter.ts`（带缓冲写）、`gitignore.ts`（忽略规则写入）一静一动一治理，把「文件怎么安全读、怎么攒批写、怎么从版本控制里藏起来」补齐全。
+
+踩坑：本批 10 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；annotate.py 十次零 `⟳`、零 `⚠`；check-fidelity 本批 10 份 0 失败（合计 953 份全仓 0 失败）；check-links 源码链接 2069 条加内链 649 条，0 失效。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，锚点全部落在 import/函数声明/语句收尾行，无块注释内锚点、无跨行赋值首行锚点）；预检 10 份全过、零合并错误；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（+56 处锚点、代码行与原文逐行相等）；`check-links.py` 源码链接 2069 条加内链 649 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`abortController.ts`(99) · `exportRenderer.tsx`(98) · `permissions/classifierDecision.ts`(98) · `background/remote/remoteSession.ts`(98) · `messages/systemInit.ts`(96) · `teammateContext.ts`(96) · `fileReadCache.ts`(96) · `queueProcessor.ts`(95) · `planModeV2.ts`(95) · `diagLogs.ts`(94) · `backgroundHousekeeping.ts`(94) · `intl.ts`(94) · `sanitization.ts`(91) · `bash/specs/pyright.ts`(91) · `sliceAnsi.ts`(91) …（utils 还剩 203 份；全仓还剩 949 份）。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。

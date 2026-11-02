@@ -1,0 +1,10 @@
+src/utils/settings/toolValidationConfig.ts
+src/utils/inProcessTeammateHelpers.ts
+src/utils/fileRead.ts
+src/utils/permissions/getNextPermissionMode.ts
+src/utils/model/deprecation.ts
+src/utils/bufferedWriter.ts
+src/utils/processUserInput/processTextPrompt.ts
+src/utils/agentId.ts
+src/utils/git/gitignore.ts
+src/utils/subprocessEnv.ts

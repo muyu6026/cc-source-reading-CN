@@ -1,0 +1,9 @@
+批注流水线第 82 批：utils 小文件十件套（103→99 行档）· 10 文件 1,006 源行 / 56 锚点 · 全仓 953/1902（65.0%）· check-fidelity 953 份 0 失败 · check-links 2069+649 0 失效
+
+本批（10 文件，按行数降序 103→99 档）：settings/toolValidationConfig(103)/inProcessTeammateHelpers(102)/fileRead(102)/permissions/getNextPermissionMode(101)/model/deprecation(101)/bufferedWriter(100)/processUserInput/processTextPrompt(100)/agentId(99)/git/gitignore(99)/subprocessEnv(99)。合计 10 文件 1,006 源行 / 56 锚点。
+
+进度：全仓 953/1902 文件 / 334,121 行 / 65.0%（实算；utils 361/564，剩 203 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+
+校验：check-fidelity 953 份 0 失败；check-links 2069 源码链接 + 649 内链 0 失效；annotate.py 十次零 ⟳、零 ⚠。
+
+下一批目标（utils 按行数降序）：abortController(99) · exportRenderer(98) · classifierDecision(98) · remoteSession(98) · systemInit(96) · teammateContext(96) · fileReadCache(96) · queueProcessor(95) · planModeV2(95) · diagLogs(94)。
