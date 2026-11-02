@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 93 批（2026-11-02）：utils 小文件十件套（51→45 行档）
+
+- 状态：完成并推送，commit `fe1a272`（d7b85f5..fe1a272）。
+- 本批 10 文件（51→45 档）：contentArray(51)/model/modelSupportOverrides(50)/promptCategory(49)/fpsTracker(47)/combinedAbortSignal(47)/model/contextWindowUpgradeCheck(47)/profilerBase(46)/hash(46)/permissions/denialTracking(45)/settings/validateEditTool(45)。合计 10 文件 473 源行 / 49 锚点。
+- 进度：全仓 1063/1902 文件 / 342,071 行 / 66%（实算；utils 471/564，剩 93 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1063 份 0 失败；check-links 2179 源码链接 + 660 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：agentSwarmsEnabled(44) · signal(43) · lockfile(43) · model/providers(40) · permissions/PermissionRule(40) · hyperlink(39) · permissions/autoModeState(39) · timeouts(39) · telemetry/skillLoadedEvent(39) · unaryLogging(39)。
+
+### 本批经验（下次先看）
+- **文件级锚点别落进跨行类型定义**：`fpsTracker.ts` 第 1 行是跨行 `export type FpsMetrics = {`（1–4 行），用 `(1,after)` 会把中文塞进类型内部，改用 `(1,before)` 顶到文件最前才安全；其余以 `/**` 开头的文件照常用 `(1,after)` 由脚本自动外移。
+- **批注正文禁止反斜杠（预检门禁）**：`hash.ts` 第 34 行初稿把 Node 端的「以空字节分隔」写成 `\\0` 转义，被自己的门禁拦下，改成纯文字描述才过——块注释内部分隔一律用「空字节」而非反斜杠转义。
+- **运行时分叉类文件锚点密度**：`combinedAbortSignal.ts` 与 `hash.ts` 都有 Bun/Node 双路径，锚点放在「为什么避开某 API」的注释旁最自然，整批 49 锚点零外移。
+
 ## 第 92 批（2026-11-02）：utils 小文件十件套（54→51 行档）
 
 - 状态：完成并推送，commit `8847cdf`（3350e63..8847cdf）。
