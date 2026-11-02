@@ -1,0 +1,16 @@
+批注流水线第 85 批：utils 小文件十件套（88→84 行档）· 10 文件 861 源行 / 81 锚点 · 全仓 983/1902（65.6%）
+
+本批（src/utils 剩余按行数降序前 10）：
+- generators.ts（88 行 / 9 锚点）异步生成器工具集：末值、返回值、限流合并、数组互转
+- dxt/helpers.ts（88 / 7）DXT 清单校验与扩展 ID 生成
+- teamMemoryOps.ts（88 / 8）团队记忆判定与摘要文案
+- classifierApprovals.ts（88 / 9）分类器自动放行记账与检查态
+- swarm/backends/teammateModeSnapshot.ts（87 / 8）队友模式启动快照
+- computerUse/cleanup.ts（86 / 8）计算机操控回合收尾：恢复应用后释放锁
+- collapseBackgroundBashNotifications.ts（84 / 8）折叠连续后台 bash 完成通知
+- secureStorage/plainTextStorage.ts（84 / 8）明文凭据降级后端
+- sleep.ts（84 / 8）可中止 sleep 与超时竞速
+- CircularBuffer.ts（84 / 8）定长环形缓冲
+
+进度（check-coverage 实算）：983/1902 文件、336,856/513,237 行、65.6%；utils 391/564（剩 173）。
+校验：check-fidelity 983 份 0 失败；check-links 源码 2099 + 内链 652，0 失效；annotate.py 十次零外移零告警。

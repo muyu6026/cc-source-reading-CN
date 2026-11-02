@@ -2508,7 +2508,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件（锚点落在 import/函数声明/语句收尾行，无块注释内、无跨行赋值首行）；预检 10 份全过；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 973 份 0 失败；`check-links.py` 源码链接 2089 条加内链 651 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`classifierApprovals.ts`(88) · `teamMemoryOps.ts`(88) · `dxt/helpers.ts`(88) · `swarm/backends/teammateModeSnapshot.ts`(87) · `computerUse/cleanup.ts`(86) · `collapseBackgroundBashNotifications.ts`(84) · `secureStorage/plainTextStorage.ts`(84) · `sleep.ts`(84) · `CircularBuffer.ts`(84) · `hooks/hookHelpers.ts`(83) …（utils 还剩 183 份；全仓还剩 929 份）。
+**下一批候选（utils 剩余，按行数降序）**：`generators.ts`(88) · `dxt/helpers.ts`(88) · `teamMemoryOps.ts`(88) · `classifierApprovals.ts`(88) · `swarm/backends/teammateModeSnapshot.ts`(87) · `computerUse/cleanup.ts`(86) · `collapseBackgroundBashNotifications.ts`(84) · `secureStorage/plainTextStorage.ts`(84) · `sleep.ts`(84) · `CircularBuffer.ts`(84) …（utils 还剩 183 份；全仓还剩 929 份）。
+
+### utils 第 85 批：小文件十件套（88→84 行档，81 锚点）
+
+本批十份是「机制小件」：异步生成器工具、DXT 清单校验、团队记忆摘要、分类器放行记账、队友模式快照、计算机操控收尾、通知折叠、明文凭据存储、可中止 sleep、环形缓冲。单个都不大，但每一份都在处理一个具体的边界问题。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/generators.ts`](annotated/src/utils/generators.ts) | 88 | 97 | 9 | 异步生成器工具集：取末值、取返回值、带上限并发合并、数组互转 |
+| [`utils/dxt/helpers.ts`](annotated/src/utils/dxt/helpers.ts) | 88 | 95 | 7 | DXT 清单校验与扩展 ID 生成：懒加载 zod、三入口共用校验、五拍清洗 |
+| [`utils/teamMemoryOps.ts`](annotated/src/utils/teamMemoryOps.ts) | 88 | 96 | 8 | 团队记忆判定与摘要文案：搜索与写入识别、四态动词、单复数变形 |
+| [`utils/classifierApprovals.ts`](annotated/src/utils/classifierApprovals.ts) | 88 | 97 | 9 | 分类器自动放行记账：approvals 与 checking 两容器，信号驱动 UI 重渲 |
+| [`utils/swarm/backends/teammateModeSnapshot.ts`](annotated/src/utils/swarm/backends/teammateModeSnapshot.ts) | 87 | 95 | 8 | 队友模式启动快照：CLI 覆盖优先，运行期改配置不影响本次会话 |
+| [`utils/computerUse/cleanup.ts`](annotated/src/utils/computerUse/cleanup.ts) | 86 | 94 | 8 | 计算机操控回合收尾：恢复隐藏应用（5 秒兜底）后释放文件锁 |
+| [`utils/collapseBackgroundBashNotifications.ts`](annotated/src/utils/collapseBackgroundBashNotifications.ts) | 84 | 92 | 8 | 折叠连续的后台 bash 完成通知为一条汇总，失败与流式事件不折叠 |
+| [`utils/secureStorage/plainTextStorage.ts`](annotated/src/utils/secureStorage/plainTextStorage.ts) | 84 | 92 | 8 | 明文凭据降级后端：读失败即 null、0600 权限、成功时带明文警告 |
+| [`utils/sleep.ts`](annotated/src/utils/sleep.ts) | 84 | 92 | 8 | 可中止 sleep 与超时竞速：TDZ 顺序、once 监听、定时器 unref |
+| [`utils/CircularBuffer.ts`](annotated/src/utils/CircularBuffer.ts) | 84 | 92 | 8 | 定长环形缓冲：覆盖写 O(1)、取模绕圈、最近 N 条与全量导出 |
+
+三条横切观察：
+
+- **「小函数考的都是边界」三份**：`generators.ts` 用私有 Symbol 区分「没产出」与「产出了 undefined」、`sleep.ts` 因为 TDZ 把「先判已中止」写在建定时器之前、`CircularBuffer.ts` 靠 `(start + size - available + i) % capacity` 一圈对齐。三份都只有十几行逻辑，值钱的全在这些偏移量上。
+- **「启动即定格」两份**：`teammateModeSnapshot.ts` 把队友模式在会话开始时锁死、`applySettingsChange.ts`（上批）只让设置变更走受控通道——同一个判断：运行期的配置改动不该穿透到已开始的会话。
+- **「为坏情况定行为」三份**：`plainTextStorage.ts` 内存不了就落明文但给 0600 加警告、`computerUse/cleanup.ts` 给 unhide 5 秒兜底后照常放行、`dxt/helpers.ts` 把 700KB 校验库推迟到真正用到时——三处都在回答「主路径之外出问题怎么办」，并且答案都不约而同是「降级但留痕」。
+
+踩坑：本批 10 份预检五断言加块注释内部硬拦一次通过、零命中（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；块注释密集的三份（`CircularBuffer.ts` 7 处、`teammateModeSnapshot.ts` 6 处、`computerUse/cleanup.ts` 2 处长段）全部绕开，锚点只取函数与类方法的收尾 `}`、语句行；`teamMemoryOps.ts` 第 63 与 85 行是单行模板字符串，未作锚点；annotate.py 十次零 `⟳`、零 `⚠`。
+
+流程账：本批 10 个数据文件逐一对齐源文件（锚点落在 import/函数声明/语句收尾行，无块注释内、无跨行赋值首行）；预检 10 份全过、81 个锚点；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 983 份 0 失败；`check-links.py` 源码链接 2099 条加内链 652 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`hooks/hookHelpers.ts`(83) · `claudeInChrome/prompt.ts`(83) · `which.ts`(82) · `teamDiscovery.ts`(81) · `awsAuthStatusManager.ts`(81) · `formatBriefTimestamp.ts`(81) · `settings/mdm/constants.ts`(81) · `settings/settingsCache.ts`(80) · `permissions/dangerousPatterns.ts`(80) · `computerUse/drainRunLoop.ts`(79) …（utils 还剩 173 份；全仓还剩 919 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
