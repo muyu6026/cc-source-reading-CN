@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 91 批（2026-11-02）：utils 小文件十件套（60→54 行档）
+
+- 状态：完成并推送，commit `0ec0c38`（d067a05..0ec0c38）。
+- 本批 10 文件（60→54 档）：cliArgs(60)/slashCommandParsing(60)/semver(59)/collapseHookSummaries(59)/workloadContext(57)/sequential(56)/privacyLevel(55)/collapseTeammateShutdowns(55)/suggestions/skillUsageTracking(55)/computerUse/escHotkey(54)。合计 10 文件 570 源行 / 52 锚点。
+- 进度：全仓 1043/1902 文件 / 341,066 行 / 66.5%（实算；utils 451/564，剩 113 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 1043 份 0 失败；check-links 2159 源码链接 + 658 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：taggedId(54) · deepLink/terminalPreference(54) · swarm/leaderPermissionBridge(54) · cliHighlight(54) · set(53) · binaryCheck(53) · bash/registry(53) · idleTimeout(53) · computerUse/setup(53) · contentArray(51)。
+
+### 本批经验（下次先看）
+- **开工前先处理遗留改动**：本轮 `git status` 出现第 90 批未提交的执行记忆（上批写完忘了提交）。确认是本流水线自己的产物（`git diff` 看内容是第 90 批小结）后补提交 `d067a05` 再开工，没有覆盖也没 stash。下次每批收尾务必确认 `.workbuddy/memory` 已入库。
+- **同一骨架的两份折叠不要硬抽公共函数**：`collapseHookSummaries.ts` 与 `collapseTeammateShutdowns.ts` 结构完全一致（单趟扫描 + 内层贪婪 + 单个保留），但折叠后的消息形状不同，抽公共函数要传判定/收集/构造三组回调，反而更难读——这条判断写进了批次小节的观察里。
+- **块注释吃掉锚点空间时要接受稀疏**：`workloadContext.ts` 57 行里第 36–51 行是块注释，只剩 4 个可锚点，不硬凑。
+- **五六个两三行函数的小文件，锚函数收尾 `}` 最整齐**：`privacyLevel.ts` 五个函数全走这个方法，6 锚点零外移。
+
 ## 第 90 批（2026-11-02）：utils 小文件十件套（68→60 行档）
 
 - 状态：完成并推送，commit `2e8bb77`（fdede70..2e8bb77）。
