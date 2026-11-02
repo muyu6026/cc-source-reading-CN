@@ -2730,6 +2730,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`contentArray.ts`(51) · `model/modelSupportOverrides.ts`(50) · `promptCategory.ts`(49) · `fpsTracker.ts`(47) · `combinedAbortSignal.ts`(47) · `model/contextWindowUpgradeCheck.ts`(47) · `profilerBase.ts`(46) · `hash.ts`(46) · `settings/validateEditTool.ts`(45) · `permissions/denialTracking.ts`(45) …（utils 还剩 103 份；全仓还剩 849 份）。
 
+### utils 第 93 批：小文件十件套（51→45 行档，49 锚点）
+
+本批十份全部落在「四五十行」，主题横跨内容数组插入、模型能力覆盖、埋点来源分类、FPS 度量、合并中止信号、上下文升级提示、哈希工具、profiler 基件、拒绝追踪、settings 编辑校验——每份都是单一职责的小工具，注释多用来解释约束与回退路径。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/contentArray.ts`](annotated/src/utils/contentArray.ts) | 51 | 55 | 4 | content 数组插入；相对最后一个 tool_result 落位，末尾补 text 续接 |
+| [`utils/model/modelSupportOverrides.ts`](annotated/src/utils/model/modelSupportOverrides.ts) | 50 | 54 | 4 | 模型能力覆盖；按环境变量三元组查 TIERS，memoize 缓存 |
+| [`utils/promptCategory.ts`](annotated/src/utils/promptCategory.ts) | 49 | 54 | 5 | 埋点来源；agent 类型与 REPL 风格映射到 QuerySource |
+| [`utils/fpsTracker.ts`](annotated/src/utils/fpsTracker.ts) | 47 | 52 | 5 | FPS 度量；记帧时长算平均与低 1% 帧率，p99 反推 |
+| [`utils/combinedAbortSignal.ts`](annotated/src/utils/combinedAbortSignal.ts) | 47 | 51 | 4 | 合并中止信号；setTimeout 替 AbortSignal.timeout 防 Bun 计时器泄漏 |
+| [`utils/model/contextWindowUpgradeCheck.ts`](annotated/src/utils/model/contextWindowUpgradeCheck.ts) | 47 | 52 | 5 | 上下文升级；opus/sonnet 1M 提示与 warning/tip 文案 |
+| [`utils/hash.ts`](annotated/src/utils/hash.ts) | 46 | 52 | 6 | 哈希工具；djb2 确定、hashContent 变更检测、hashPair 免拼接 |
+| [`utils/profilerBase.ts`](annotated/src/utils/profilerBase.ts) | 46 | 51 | 5 | profiler 基件；懒加载 perf_hooks、共享时间线行格式 |
+| [`utils/permissions/denialTracking.ts`](annotated/src/utils/permissions/denialTracking.ts) | 45 | 52 | 7 | 拒绝追踪；连续/累计计数与回退提问阈值 |
+| [`utils/settings/validateEditTool.ts`](annotated/src/utils/settings/validateEditTool.ts) | 45 | 49 | 4 | settings 编辑校验；仅 Claude settings 文件，前后都须合法 |
+
+三条横切观察：
+
+- 「阈值驱动回退」：`denialTracking.ts` 用连续拒绝上限 3、累计上限 20 双阈值决定何时改回提问，两个计数清零时机不同（成功只清连续、保留累计），是不可变更新风格的典型。
+- 「Bun 与 Node 的运行时分叉」：`combinedAbortSignal.ts` 特意避开 `AbortSignal.timeout` 是因为 Bun 下惰性持有计时器（约 2.4KB/次）；`hash.ts` 同理在 Bun 走 `Bun.hash`、Node 走 `crypto` 增量 sha256，两条路径都规避拼接临时串。
+- 「只校验目标文件」：`validateEditTool.ts` 用 `isClaudeSettingsPath` 先过滤，非 settings 文件直接放行，且编辑前已非法时也不阻断——避免把历史脏配置卡死在编辑环节。
+
+踩坑：`fpsTracker.ts` 第 1 行是跨行 `export type FpsMetrics = {`，文件级锚点不能用 `(1,after)`（会落进类型定义内部），改用 `(1,before)` 顶到文件最前；`hash.ts` 第 34 行初稿把 Node 端分隔方式写成反斜杠转义，被预检门禁拦下（批注正文禁止反斜杠），改成「以空字节分隔」的文字描述才过。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 49 锚点全过；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1063 份 0 失败；`check-links.py` 源码链接 2179 条加内链 660 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`agentSwarmsEnabled.ts`(44) · `signal.ts`(43) · `lockfile.ts`(43) · `model/providers.ts`(40) · `permissions/PermissionRule.ts`(40) · `hyperlink.ts`(39) · `permissions/autoModeState.ts`(39) · `timeouts.ts`(39) · `telemetry/skillLoadedEvent.ts`(39) · `unaryLogging.ts`(39) …（utils 还剩 93 份；全仓还剩 839 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
