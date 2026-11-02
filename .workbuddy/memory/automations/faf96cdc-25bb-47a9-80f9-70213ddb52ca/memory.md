@@ -1,5 +1,20 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 87 批（2026-11-02）：utils 小文件十件套（79→75 行档）
+
+- 状态：完成并推送，commit `a9cb74a`（adb9989..a9cb74a）。
+- 本批（10 文件，按行数降序 79→75 档）：computerUse/drainRunLoop(79)/permissions/PermissionUpdateSchema(78)/billing(78)/teleport/environmentSelection(77)/renderOptions(77)/fingerprint(76)/stream(76)/cronJitterConfig(75)/crossProjectResume(75)/telemetry/events(75)。合计 10 文件 766 源行 / 57 锚点。
+- 进度：全仓 1003/1902 文件 / 338,433 行 / 65.9%（实算，首次破千）；utils 411/564，剩 153 份；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 1003 份 0 失败；check-links 2119 源码链接 + 654 内链 0 失效；annotate.py 十次失败 0、零 ⟳、零 ⚠。
+- 下一批目标（utils 按行数降序）：aws(74) · systemDirectories(74) · iTermBackup(73) · mailbox(73) · tokenBudget(73) · computerUse/gates(72) · model/check1mAccess(72) · apiPreconnect(71) · fileOperationAnalytics(71) · telemetryAttributes(71)。
+
+### 本批经验（下次先看）
+- **同分行数时以脚本输出顺序为准**：第 86 批候选把 billing(78) 写在 PermissionUpdateSchema(78) 前，实际脚本是 PermissionUpdateSchema 在前。本批已按脚本顺序改回，候选行继续直接复制 `check-coverage.py` 输出前十行。
+- **`before` 落第 1 行是安全的文件级锚点方式**：本批 drainRunLoop（5-15 行块注释）与 cronJitterConfig（1-9 行连续 `//` 注释）都用 `(1,'before')`，插在 import 之前，既没进块注释也没劈开 `//` 注释块。
+- **多行调用首行不能 `after`**：`PermissionUpdateSchema.ts` 第 43 行 `z.discriminatedUnion('type', [` 是跨行调用开头，改锚第 61 行（第三个规则分支的 `}),`）。
+- **纯类文件按方法收尾锚最稳**：`stream.ts` 76 行、6 个方法，7 个锚点全落方法 `}`，零外移。
+- 破千里程碑：全仓已批注 1003 份，utils 剩 153 份（本轮起每批约 10 份、行数已降到 75 行档，剩余多是 70 行以下的小件）。
+
 ## 第 86 批（2026-11-02）：utils 小文件十件套（83→79 行档）
 
 - 状态：完成并推送，commit `0ac8637`（c092fb3..0ac8637）。
