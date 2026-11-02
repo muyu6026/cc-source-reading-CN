@@ -2597,6 +2597,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`aws.ts`(74) · `systemDirectories.ts`(74) · `iTermBackup.ts`(73) · `mailbox.ts`(73) · `tokenBudget.ts`(73) · `computerUse/gates.ts`(72) · `model/check1mAccess.ts`(72) · `apiPreconnect.ts`(71) · `fileOperationAnalytics.ts`(71) · `telemetryAttributes.ts`(71) …（utils 还剩 153 份；全仓还剩 899 份）。
 
+### utils 第 88 批：小文件十件套（74→71 行档，60 锚点）
+
+本批十份的共同点是「在运行环境边界上做翻译与保护」：把平台/凭证/坐标/上下文窗口这些外部差异统一成内部一致的事实，把真实路径与内容替换成去标识哈希，把「异常输入」翻译成明确的安全行为。十份里没有一份做业务逻辑，全在回答「外部不确定时，内部该信什么」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/systemDirectories.ts`](annotated/src/utils/systemDirectories.ts) | 74 | 80 | 6 | 跨平台系统目录（桌面/文档/下载）解析；家目录 + `USERPROFILE` + XDG 三套平台分支，未知平台回落默认并记日志 |
+| [`utils/aws.ts`](annotated/src/utils/aws.ts) | 74 | 80 | 6 | AWS 短期凭证工具集：凭证形状、STS 输出校验、调用者身份、清 ini 缓存 |
+| [`utils/iTermBackup.ts`](annotated/src/utils/iTermBackup.ts) | 73 | 79 | 6 | iTerm2 设置备份/恢复：备份 plist、失败回滚、维护「安装进行中」标记 |
+| [`utils/mailbox.ts`](annotated/src/utils/mailbox.ts) | 73 | 80 | 7 | 轻量点对点消息信箱；队列 + 等待者列表 + 信号；send/poll/receive 三件套 |
+| [`utils/tokenBudget.ts`](annotated/src/utils/tokenBudget.ts) | 73 | 79 | 6 | 从自然语言解析 token 预算；简写（`+500k`）与完整说法两路，千分位续写提示 |
+| [`utils/computerUse/gates.ts`](annotated/src/utils/computerUse/gates.ts) | 72 | 79 | 7 | 计算机操控（Chicago）门控：启用/坐标模式/子开关，首次冻结坐标语义 |
+| [`utils/model/check1mAccess.ts`](annotated/src/utils/model/check1mAccess.ts) | 72 | 77 | 5 | 百万上下文资格判定；订阅看额外用量、API/按量直接放行，Opus/Sonnet 两入口 |
+| [`utils/apiPreconnect.ts`](annotated/src/utils/apiPreconnect.ts) | 71 | 76 | 5 | 启动预连接 Anthropic API；TCP+TLS 并行、一次性旗标、HEAD 即弃、十秒超时 |
+| [`utils/telemetryAttributes.ts`](annotated/src/utils/telemetryAttributes.ts) | 71 | 77 | 6 | 遥测属性入口；会话 id/版本/账户 uuid 基数控制，OAuth 才附账户维度 |
+| [`utils/fileOperationAnalytics.ts`](annotated/src/utils/fileOperationAnalytics.ts) | 71 | 77 | 6 | 文件操作隐私分析；截断/完整 SHA256 代真实路径与内容，百 KB 上限防内存耗尽 |
+
+三条横切观察：
+
+- **「异常/未知输入翻译成安全行为」六份**：`systemDirectories.ts` 未知平台回落默认路径并记日志、`aws.ts` 清缓存失败仅记调试日志、`computerUse/gates.ts` 用保守 `DEFAULTS` 并对缺失字段展开补全、`check1mAccess.ts` 未缓存原因保守判否且未列出的新原因落保守分支、`apiPreconnect.ts` 超时无妨由真实请求重握手、`telemetryAttributes.ts` 三项基数维度给出默认取向。六处都不抛错，而是把「拿不准」收敛成一个明确、可预期的内部状态。
+- **「去标识化替真实数据」两份**：`fileOperationAnalytics.ts` 用截断/完整 SHA256 代替真实路径与内容，`telemetryAttributes.ts` 账户 uuid 用带标签标识降低再识别风险。两份都在「既要统计、又绝不泄露用户数据」之间找平衡，连类型名都被显式标注为「非路径/非代码」以防误用。
+- **「一次性/冻结防止会话中途不一致」三份**：`apiPreconnect.ts` 的 `fired` 旗标保证预热只触发一次、`computerUse/gates.ts` 的坐标模式在首次读取后冻结（避免远程翻转导致模型收到的坐标语义与点击换算对不上）、`check1mAccess.ts` 缓存禁用原因。三份都是跨请求的一致性屏障，专门防「中途变了导致前后矛盾」。
+
+踩坑：`apiPreconnect.ts` 第 1 行是 `/**` 块注释开头，文件级锚点用 `(1,after)` 落在块注释之后（会自动 shift 到下一条 import 之前），不进注释内部；`mailbox.ts` 是纯 class 文件，7 个锚点全部取类内字段或方法首行，不碰块注释；`check1mAccess.ts` 第 43 行是 switch 的 fall-through 统一返回分支，用 `(43,after)` 夹在末尾返回之后，第 11 行 `isExtraUsageEnabled` 是函数体首行锚 `before`；`tokenBudget.ts` 第 15 行 `MULTIPLIERS` 常量块用 `(15,after)` 落在常量之后；`computerUse/gates.ts` 第 21 行 `DEFAULTS` 用 `(21,after)` 落在默认对象之后；`iTermBackup.ts` 第 73 行是文件末（函数返回可辨识联合），用 `(73,after)`。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；60 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1013 份 0 失败；`check-links.py` 源码链接 2139 条加内链 656 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`plugins/addDirPluginSettings.ts`(71) · `plugins/performStartupChecks.tsx`(70) · `getWorktreePaths.ts`(70) · `hooks/postSamplingHooks.ts`(70) · `pdfUtils.ts`(70) · `secureStorage/fallbackStorage.ts`(70) · `plugins/gitAvailability.ts`(69) · `plugins/walkPluginMarkdown.ts`(69) · `directMemberMessage.ts`(69) · `computerUse/hostAdapter.ts`(69) …（utils 还剩 143 份；全仓还剩 889 份）。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。

@@ -1,0 +1,10 @@
+src/utils/systemDirectories.ts
+src/utils/aws.ts
+src/utils/iTermBackup.ts
+src/utils/mailbox.ts
+src/utils/tokenBudget.ts
+src/utils/computerUse/gates.ts
+src/utils/model/check1mAccess.ts
+src/utils/apiPreconnect.ts
+src/utils/telemetryAttributes.ts
+src/utils/fileOperationAnalytics.ts
