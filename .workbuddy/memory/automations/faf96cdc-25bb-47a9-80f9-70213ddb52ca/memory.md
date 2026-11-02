@@ -1,5 +1,21 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 83 批（2026-11-02）：utils 小文件十件套（99→94 行档）
+
+- 状态：完成并推送，commit `4f06c04`（70d2e14..4f06c04）。
+- 本批（10 文件，按行数降序 99→94 档）：abortController(99)/background/remote/remoteSession(98)/exportRenderer.tsx(98)/permissions/classifierDecision(98)/messages/systemInit(96)/teammateContext(96)/fileReadCache(96)/queueProcessor(95)/planModeV2(95)/diagLogs(94)。合计 10 文件 965 源行 / 78 锚点。
+- 进度：全仓 963/1902 文件 / 335,086 行 / 65.3%（实算；utils 371/564，剩 193 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 963 份 0 失败；check-links 2079 源码链接 + 650 内链 0 失效；annotate.py 十次零 ⟳、零 ⚠。
+- 下一批目标（utils 按行数降序）：intl(94) · backgroundHousekeeping(94) · settings/applySettingsChange(92) · sanitization(91) · bash/specs/pyright(91) · sliceAnsi(91) · idePathConversion(90) · execFileNoThrowPortable(89) · undercover(89) · dxt/helpers(88)。
+
+### 本批经验（下次先看）
+- **预检升级为「块注释内部硬拦」**：在原有五断言（slug 1:1、pos 合法、行号区间、无重复锚点、无 `"`/`\`、ast.parse）之外，`_precheck_batch83.py` 自己扫一遍 `/* */` 内部行号集合，锚点落进去直接 FAIL——比等 check-fidelity 事后拦更早、更省一轮。10 份零命中。
+- **大段块注释要整体绕开**：`planModeV2.ts` 第 45–87 行是一段 40 行的实验说明块注释，所有锚点取函数收尾行（29/43/62/95），一个都不进块内。
+- **模块级 `/** */` 文档头仍用 `(1, 'after')`**：`teammateContext.ts` 靠脚本自动外移到块后，正文没有一行中文进块内。
+- **锚点选「`}` 收尾行」最稳**：本批大量锚在函数/类型/对象的闭合 `}` 上（22/36/53/39/41/64/72/96 等），零外移零告警，也不会劈开英文句子。
+- `exportRenderer.tsx` 批注版 107 行 = 98 源行 + 8 锚点 + 1 行 sourcemap 省略说明；fidelity 判 `OK*`，行数与锚点数差 1 属正常，不是错。
+- push 照例 `dangerouslyDisableSandbox=true`。
+
 ## 第 82 批（2026-11-02）：utils 小文件十件套（103→99 行档）
 
 - 状态：完成并推送，commit `d648aed`（703fd22..d648aed）。
