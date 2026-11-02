@@ -2784,7 +2784,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检 51 锚点全过（含块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）；`annotate.py` 十次失败 0、一次 `⟳`（autoModeState 自动外移，已 grep 确认落点）、零 `⚠`；`check-fidelity.py` 全仓 1073 份 0 失败；`check-links.py` 源码链接 2189 条加内链 661 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`permissions/classifierShared.ts`(39) · `cachePaths.ts`(38) · `execSyncWrapper.ts`(38) · `task/outputFormatting.ts`(38) · `envValidation.ts`(38) · `settings/internalWrites.ts`(37) · `semanticNumber.ts`(36) · `modifiers.ts`(36) · `task/sdkProgress.ts`(36) · `permissions/PermissionResult.ts`(35) …（utils 还剩 83 份；全仓还剩 829 份）。
+### utils 第 95 批：小文件十件套（39→35 行档，34 锚点）
+
+本批十份仍是「三四十行」的单职责小工具，主题横跨「权限分类器共享层、环境变量校验、同步执行封装、任务输出截断、缓存路径消毒、设置写入回声抑制、SDK 进度事件、语义数字解析、修饰键检测、权限结果描述」——每份都用注释解释约束、回退路径与平台门控。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/permissions/classifierShared.ts`](annotated/src/utils/permissions/classifierShared.ts) | 39 | 42 | 3 | 分类器权限系统共享基础设施；工具调用块提取 + zod 安全解析 |
+| [`utils/envValidation.ts`](annotated/src/utils/envValidation.ts) | 38 | 41 | 3 | 有界整数环境变量校验；valid/capped/invalid 三态 |
+| [`utils/execSyncWrapper.ts`](annotated/src/utils/execSyncWrapper.ts) | 38 | 41 | 3 | 包裹 execSync 加慢操作日志；已 deprecated 的同步执行封装 |
+| [`utils/task/outputFormatting.ts`](annotated/src/utils/task/outputFormatting.ts) | 38 | 42 | 4 | 任务输出格式化与截断；超长附完整文件路径 |
+| [`utils/cachePaths.ts`](annotated/src/utils/cachePaths.ts) | 38 | 42 | 4 | 缓存目录路径解析与项目目录消毒；djb2 跨版本稳定 |
+| [`utils/settings/internalWrites.ts`](annotated/src/utils/settings/internalWrites.ts) | 37 | 42 | 5 | 进程内设置写入时间戳；打破 settings→changeDetector 循环依赖 |
+| [`utils/task/sdkProgress.ts`](annotated/src/utils/task/sdkProgress.ts) | 36 | 39 | 3 | 统一 emitTaskProgress SDK 事件；后台智能体与工作流共用 |
+| [`utils/semanticNumber.ts`](annotated/src/utils/semanticNumber.ts) | 36 | 39 | 3 | 语义数字 zod 预处理；容错模型给数字加引号 |
+| [`utils/modifiers.ts`](annotated/src/utils/modifiers.ts) | 36 | 39 | 3 | macOS 原生修饰键检测封装；仅 darwin 生效 |
+| [`utils/permissions/PermissionResult.ts`](annotated/src/utils/permissions/PermissionResult.ts) | 35 | 38 | 3 | 权限结果类型重导出与行为描述辅助 |
+
+三条横切观察：
+
+- 「跨版本稳定与消毒」：`cachePaths.ts` 用 djb2 而非 Bun.hash，刻意保持缓存目录名在升级间稳定，避免遗弃已有日志（错误日志、MCP 日志）；并对服务器名消毒以兼容 Windows 保留字符（冒号）。`internalWrites.ts` 同样是为了稳定性——把共享时间戳 Map 从 changeDetector 抽离，专门打破 settings 的循环依赖。
+- 「容错解析的取舍」：`envValidation.ts` 用明确的三态（valid/capped/invalid）而非 `z.coerce`，避免吞掉真实 bug；`semanticNumber.ts` 同样只接受合法十进制字面量，把非法值透传给内层 schema 拒绝，而不是用 `z.coerce.number()` 掩盖空串或 null。两者都是「宽容但可观测」的解析哲学。
+- 「平台门控与惰性加载」：`modifiers.ts` 仅 darwin 生效、动态 require 避免顶层加载原生模块（修饰键检测是 macOS 专属能力）；`execSyncWrapper.ts` 虽是同步封装但用 `slowLogging` 模板标签埋点，且命令内容只取前 100 字符写入日志，避免把整条命令（可能含密钥）泄漏到日志。
+
+踩坑：本批 10 份文件级锚点一律用 `(1,before)` 顶到文件最前，彻底绕开块注释首行/`//` 段中部外移问题；其余锚点全部落在 import / type / function 签名 / 收尾行，零块内中文、零 `⟳`、零 `⚠`。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）34 锚点一次全过；修正了初版误把 `.ts` 源文件当 Python `ast.parse` 的判错（应解析数据文件本身而非源文件），属预检脚本自身 bug，已在跑前修掉、未污染已写数据文件。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 34 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1083 份 0 失败；`check-links.py` 源码链接 2199 条加内链 662 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`settings/managedPath.ts`(34) · `swarm/constants.ts`(33) · `shell/shellProvider.ts`(33) · `cwd.ts`(32) · `settings/allErrors.ts`(32) · `controlMessageCompat.ts`(32) · `bash/specs/srun.ts`(31) · `tempfile.ts`(31) · `computerUse/inputLoader.ts`(30) · `semanticBoolean.ts`(29) …（utils 还剩 73 份；全仓还剩 819 份）。注意：`bash/specs/srun.ts` 与 `shell/shellProvider.ts` 含危险子串，下批 `annotate.py` 需走间接 runner。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
