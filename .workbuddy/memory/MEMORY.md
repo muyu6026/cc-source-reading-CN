@@ -43,6 +43,7 @@
 - 第 86 批：`0ac8637` · 10 文件/811 行/52 锚点 · 全仓 **993/1902 · 337,667 行 · 65.8%** · utils **401/564**。
 - 第 87 批：`a9cb74a` · 10 文件/766 行/57 锚点 · 全仓 **1003/1902 · 338,433 行 · 65.9%** · utils **411/564**。
 - 第 88 批：`8144b24` · 10 文件/724 行/60 锚点 · 全仓 **1013/1902 · 339,157 行 · 66.1%** · utils **421/564**。
+- 第 89 批：`87ec2a8` · 10 文件/697 行/76 锚点 · 全仓 **1023/1902 · 339,854 行 · 66.2%** · utils **431/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -52,10 +53,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-02 第 88 批后）
-- 全仓 **1013/1902 文件（缺失 889）；339,157/513,237 行，按行数覆盖 66.1%**。
-- `src/utils` **421/564**（剩 143）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~71–69 行档）：plugins/addDirPluginSettings(71) · plugins/performStartupChecks.tsx(70) · getWorktreePaths(70) · hooks/postSamplingHooks(70) · pdfUtils(70) · secureStorage/fallbackStorage(70) · plugins/gitAvailability(69) · plugins/walkPluginMarkdown(69) · directMemberMessage(69) · computerUse/hostAdapter(69)。
+## 当前状态（2026-11-02 第 89 批后）
+- 全仓 **1023/1902 文件（缺失 879）；339,854/513,237 行，按行数覆盖 66.2%**。
+- `src/utils` **431/564**（剩 133）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 ~68–60 行档）：browser(68) · process(68) · hooks/registerFrontmatterHooks(67) · xdg(65) · model/antModels(64) · hooks/registerSkillHooks(64) · sessionUrl(64) · computerUse/common(61) · permissions/bashClassifier(61) · slashCommandParsing(60)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -70,6 +71,6 @@
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)。
-- 进行中：`src/utils` **351/564**（剩 213，最大剩余块）。
+- 进行中：`src/utils` **431/564**（剩 133，最大剩余块）。
 - 未启动：按 `check-coverage.py src` 取真实 top 降序推进。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。

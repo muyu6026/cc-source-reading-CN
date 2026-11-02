@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 89 批（2026-11-02）：utils 小文件十件套（71→69 行档）
+
+- 状态：完成并推送，commit `87ec2a8`（06ee71b..87ec2a8）。
+- 本批 10 文件（71→69 档）：plugins/addDirPluginSettings(71)/hooks/postSamplingHooks(70)/pdfUtils(70)/plugins/performStartupChecks.tsx(70)/getWorktreePaths(70)/secureStorage/fallbackStorage(70)/plugins/gitAvailability(69)/plugins/walkPluginMarkdown(69)/directMemberMessage(69)/computerUse/hostAdapter(69)。合计 10 文件 697 源行 / 76 锚点。
+- 进度：全仓 1023/1902 文件 / 339,854 行 / 66.2%（实算；utils 431/564，剩 133 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 1023 份 0 失败；check-links 2139 源码链接 + 656 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：browser(68) · process(68) · hooks/registerFrontmatterHooks(67) · xdg(65) · model/antModels(64) · hooks/registerSkillHooks(64) · sessionUrl(64) · computerUse/common(61) · permissions/bashClassifier(61) · slashCommandParsing(60)。
+
+## 第 88 批（2026-11-02）：utils 小文件十件套（74→71 行档）
+
+- 状态：完成并推送，commit `8144b24`（06ee71b 父，与 87ec2a8 衔接）。
+- 本批 10 文件（74→71 档），约 724 源行 / 60 锚点；全仓 1013/1902（66.1%）。
+
 ## 第 87 批（2026-11-02）：utils 小文件十件套（79→75 行档）
 
 - 状态：完成并推送，commit `a9cb74a`（adb9989..a9cb74a）。
