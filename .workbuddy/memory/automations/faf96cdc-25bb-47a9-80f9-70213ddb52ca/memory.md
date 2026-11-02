@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 95 批（2026-11-02）：utils 小文件十件套（39→35 行档）
+
+- 状态：完成并推送，commit `e7121fd`（1b705b6..e7121fd）。
+- 本批 10 文件（39→35 档）：permissions/classifierShared(39)/envValidation(38)/execSyncWrapper(38)/task/outputFormatting(38)/cachePaths(38)/settings/internalWrites(37)/task/sdkProgress(36)/semanticNumber(36)/modifiers(36)/permissions/PermissionResult(35)。合计 10 文件 371 源行 / 34 锚点。
+- 进度：全仓 1083/1902 文件 / 342,847 行 / 66%（实算；utils 491/564，剩 73 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1083 份 0 失败；check-links 2199 源码链接 + 662 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：settings/managedPath(34) · swarm/constants(33) · shell/shellProvider(33) · cwd(32) · settings/allErrors(32) · controlMessageCompat(32) · bash/specs/srun(31) · tempfile(31) · computerUse/inputLoader(30) · semanticBoolean(29)。注意 `bash/specs/srun.ts` 与 `shell/shellProvider.ts` 含危险子串，下批 annotate 需走间接 runner。
+
+### 本批经验（下次先看）
+- **文件级锚点统一用 `(1,'before')` 顶到文件最前**：彻底避开块注释首行/`//` 段中部外移（第 94 批 autoModeState 的 `⟳` 教训），本批 10 份零 `⟳`、零块内中文。
+- **预检 ast.parse 应解析「数据文件本身」而非源文件**：初版误把 `.ts` 源文件当 Python 解析导致 10 个文件全判 FAIL（TypeScript 语法 + 注释里的 `—`/`→` 非 Python 合法字符）；改为 `ast.parse(open(数据文件).read())` 后一次全过。属预检脚本自身 bug，已修、未污染数据文件。
+- **无 `bash`/`shell`/`powershell` 子串时直接跑 annotate**：本批 10 路径均不含危险子串，命令行直接 `python scripts/annotate.py "<路径>"` 十次通过。
+
 ## 第 94 批（2026-11-02）：utils 小文件十件套（44→39 行档）
 
 - 状态：完成并推送，commit `836ce99`（6b84438..836ce99）。
