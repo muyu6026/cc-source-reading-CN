@@ -1,0 +1,21 @@
+批注流水线第 87 批：utils 小文件十件套（79→75 行档）· 10 文件 766 源行 / 57 锚点 · 全仓 1003/1902（65.9%）
+
+本批 10 份（src/utils，按行数降序）：
+- computerUse/drainRunLoop.ts（79 行 / 5 锚点）
+- permissions/PermissionUpdateSchema.ts（78 / 5）
+- billing.ts（78 / 6）
+- teleport/environmentSelection.ts（77 / 6）
+- renderOptions.ts（77 / 5）
+- fingerprint.ts（76 / 5）
+- stream.ts（76 / 7）
+- cronJitterConfig.ts（75 / 5）
+- crossProjectResume.ts（75 / 6）
+- telemetry/events.ts（75 / 7）
+
+进度：1003/1902 文件、338,433/513,237 行、65.9%；utils 411/564（剩 153）；hooks 104/104、tools 184/184、services 130/130 全清。
+
+校验：check-fidelity 1003 份 0 失败；check-links 源码 2119 + 内链 654，0 失效；annotate.py 十次零 ⟳、零 ⚠。
+
+要点：drainRunLoop 的 try 顺序（同步抛错也要释放泵）与孤儿 promise 空 catch；renderOptions 三态缓存；stream 四分支顺序不能调换；cronJitterConfig 一处越界整份作废；fingerprint 的盐是与后端的隐性协议。
+
+下一批候选：aws(74) · systemDirectories(74) · iTermBackup(73) · mailbox(73) · tokenBudget(73) · computerUse/gates(72) · model/check1mAccess(72) · apiPreconnect(71) · fileOperationAnalytics(71) · telemetryAttributes(71)。

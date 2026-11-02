@@ -2566,7 +2566,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；52 个锚点；`annotate.py` 十次失败 0、一次 `⟳`（上面已确认落点）、零 `⚠`；`check-fidelity.py` 全仓 993 份 0 失败；`check-links.py` 源码链接 2109 条加内链 653 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`computerUse/drainRunLoop.ts`(79) · `billing.ts`(78) · `permissions/PermissionUpdateSchema.ts`(78) · `teleport/environmentSelection.ts`(77) · `renderOptions.ts`(77) · `fingerprint.ts`(76) · `stream.ts`(76) · `cronJitterConfig.ts`(75) · `telemetry/events.ts`(75) · `crossProjectResume.ts`(75) …（utils 还剩 163 份；全仓还剩 909 份）。
+**下一批候选（utils 剩余，按行数降序）**：`computerUse/drainRunLoop.ts`(79) · `permissions/PermissionUpdateSchema.ts`(78) · `billing.ts`(78) · `teleport/environmentSelection.ts`(77) · `renderOptions.ts`(77) · `fingerprint.ts`(76) · `stream.ts`(76) · `cronJitterConfig.ts`(75) · `crossProjectResume.ts`(75) · `telemetry/events.ts`(75) …（utils 还剩 163 份；全仓还剩 909 份）。
+
+### utils 第 87 批：小文件十件套（79→75 行档，57 锚点）
+
+本批十份的共同点是「一个延迟/一个缓存/一个降级」：主队列泵把不归自己管的队列抽干、渲染参数替管道输入找回按键、设置与环境的默认值在异常时退回安全值、遥测缺记录器就安静丢弃。十份里没有一份做业务逻辑，全在处理运行环境的边界。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/computerUse/drainRunLoop.ts`](annotated/src/utils/computerUse/drainRunLoop.ts) | 79 | 84 | 5 | 主队列泵；引用计数共享单个 1 毫秒定时器，同步抛错也要释放 |
+| [`utils/permissions/PermissionUpdateSchema.ts`](annotated/src/utils/permissions/PermissionUpdateSchema.ts) | 78 | 83 | 5 | 权限更新 schema；六个判别分支，三种规则操作同形不同 type |
+| [`utils/billing.ts`](annotated/src/utils/billing.ts) | 78 | 84 | 6 | 计费可见性双路径；控制台账号看角色，订阅制按档位分流 |
+| [`utils/teleport/environmentSelection.ts`](annotated/src/utils/teleport/environmentSelection.ts) | 77 | 83 | 6 | 远程环境选择推导；非桥接优先，来源按优先级倒查 |
+| [`utils/renderOptions.ts`](annotated/src/utils/renderOptions.ts) | 77 | 82 | 5 | 管道输入改用终端设备读；三态缓存，一次探测终身复用 |
+| [`utils/fingerprint.ts`](annotated/src/utils/fingerprint.ts) | 76 | 81 | 5 | 会话指纹；盐加固定三位字符加版本做 SHA256 取前三位 |
+| [`utils/stream.ts`](annotated/src/utils/stream.ts) | 76 | 83 | 7 | 最小异步可迭代队列；直通优先，错误只投递一次，只许迭代一次 |
+| [`utils/cronJitterConfig.ts`](annotated/src/utils/cronJitterConfig.ts) | 75 | 80 | 5 | 抖动配置读取；一处越界整份作废，一分钟内收敛 |
+| [`utils/crossProjectResume.ts`](annotated/src/utils/crossProjectResume.ts) | 75 | 81 | 6 | 跨项目恢复三分支；工作树判定带分隔符，灰度限制在内部账号 |
+| [`utils/telemetry/events.ts`](annotated/src/utils/telemetry/events.ts) | 75 | 82 | 7 | 遥测事件出口；缺记录器只告警一次，路径只进事件不进指标 |
+
+三条横切观察：
+
+- **「共享一个昂贵资源」两份**：`drainRunLoop.ts` 用引用计数让多个并发调用共用一个定时器，`renderOptions.ts` 把终端设备探测结果缓存成进程级事实。两份都在回答同一个问题——同一件昂贵的事，一个进程只该做一次。
+- **「失败退回安全值」四份**：`billing.ts` 角色字段缺失返回不可见、`environmentSelection.ts` 默认环境找不到时保留首个非桥接环境、`cronJitterConfig.ts` 校验失败整份回落默认、`telemetry/events.ts` 没有记录器就丢弃。四处都不是抛错，而是把「异常输入」翻译成一个明确的安全行为。
+- **「写死的契约要标注原因」两份**：`fingerprint.ts` 的盐必须与后端逐字一致、`cronJitterConfig.ts` 的字段上界是为防误推配置。两份都在注释里直接写清「改之前要协调谁」，因为这类值从代码本身看不出重要性。
+
+踩坑：`drainRunLoop.ts` 第 5 到 15 行是整段块注释，文件级锚点用 `(1,before)` 落在 import 之前，不进注释；`PermissionUpdateSchema.ts` 第 43 行是 `z.discriminatedUnion` 多行调用首行，避开后改锚第 61 行（第三个规则分支收尾）；`cronJitterConfig.ts` 开头九行是连续 `//` 注释，`before` 落第 1 行插在最前面，不会劈开注释块；`stream.ts` 是纯类文件，7 个锚点全部取方法收尾 `}`。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；57 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1003 份 0 失败；`check-links.py` 源码链接 2119 条加内链 654 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`aws.ts`(74) · `systemDirectories.ts`(74) · `iTermBackup.ts`(73) · `mailbox.ts`(73) · `tokenBudget.ts`(73) · `computerUse/gates.ts`(72) · `model/check1mAccess.ts`(72) · `apiPreconnect.ts`(71) · `fileOperationAnalytics.ts`(71) · `telemetryAttributes.ts`(71) …（utils 还剩 153 份；全仓还剩 899 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
