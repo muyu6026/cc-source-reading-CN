@@ -2757,7 +2757,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检 49 锚点全过；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1063 份 0 失败；`check-links.py` 源码链接 2179 条加内链 660 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`agentSwarmsEnabled.ts`(44) · `signal.ts`(43) · `lockfile.ts`(43) · `model/providers.ts`(40) · `permissions/PermissionRule.ts`(40) · `hyperlink.ts`(39) · `permissions/autoModeState.ts`(39) · `timeouts.ts`(39) · `telemetry/skillLoadedEvent.ts`(39) · `unaryLogging.ts`(39) …（utils 还剩 93 份；全仓还剩 839 份）。
+### utils 第 94 批：小文件十件套（44→39 行档，51 锚点）
+
+本批十份继续落在「四十行上下」，主题横跨队友功能开关、proper-lockfile 惰性封装、纯事件信号原语、API provider 推断、权限规则 schema、OSC 8 超链接、单轮补全遥测、自动模式状态、技能加载埋点、bash 超时取值——每份都是单一职责的小工具，注释多用来解释约束、回退路径与门控策略。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/agentSwarmsEnabled.ts`](annotated/src/utils/agentSwarmsEnabled.ts) | 44 | 48 | 4 | 队友功能统一闸门；Ant 恒开、外部需 opt-in 且过 killswitch |
+| [`utils/lockfile.ts`](annotated/src/utils/lockfile.ts) | 43 | 49 | 6 | proper-lockfile 惰性封装；首次调用才 require，绕开启动期猴补丁 |
+| [`utils/signal.ts`](annotated/src/utils/signal.ts) | 43 | 49 | 6 | 纯事件信号原语；把 15 处 listener Set 样板收成 createSignal |
+| [`utils/model/providers.ts`](annotated/src/utils/model/providers.ts) | 40 | 46 | 6 | API provider 推断；bedrock→vertex→foundry 优先级 + 一手 URL 校验 |
+| [`utils/permissions/PermissionRule.ts`](annotated/src/utils/permissions/PermissionRule.ts) | 40 | 44 | 4 | 权限规则 zod schema；allow/deny/ask 三态 + 规则值形状 |
+| [`utils/hyperlink.ts`](annotated/src/utils/hyperlink.ts) | 39 | 44 | 5 | OSC 8 终端超链接；不支持时回退纯文本 URL |
+| [`utils/unaryLogging.ts`](annotated/src/utils/unaryLogging.ts) | 39 | 44 | 5 | 单轮补全事件上报；四类补全类型 + 三事件类别 |
+| [`utils/permissions/autoModeState.ts`](annotated/src/utils/permissions/autoModeState.ts) | 39 | 45 | 6 | 自动模式模块级状态；激活/CLI 标志/熔断三组读写器 |
+| [`utils/telemetry/skillLoadedEvent.ts`](annotated/src/utils/telemetry/skillLoadedEvent.ts) | 39 | 43 | 4 | 会话启动技能加载埋点；技能名走 PII 特供列 |
+| [`utils/timeouts.ts`](annotated/src/utils/timeouts.ts) | 39 | 44 | 5 | bash 超时取值；默认 2 分钟 / 最大 10 分钟，可环境变量覆盖 |
+
+三条横切观察：
+
+- 「惰性加载与启动代价」：`lockfile.ts` 刻意把 proper-lockfile 的 require 推迟到首次调用，绕开 graceful-fs 在启动路径上的猴补丁开销；`providers.ts`、`unaryLogging.ts` 也把重型依赖的引用收口在窄路径，不让它们污染冷启动。
+- 「纯原语与样板收敛」：`signal.ts` 把全代码库约 15 处重复的 listener Set 样板（subscribe/emit/clear）收成一行 `createSignal`，并与 store（带 snapshot/getState）刻意区分——只关心「发生了什么」用信号、关心「当前值」用 store。
+- 「开关与门控集中化」：`agentSwarmsEnabled.ts`（队友功能唯一闸门，含 GrowthBook killswitch）与 `autoModeState.ts`（自动模式模块级状态 + 熔断，独立成模块以便被 feature 门控条件 require）都把分散的能力开关收口到单一文件，避免各处各自判断。
+
+踩坑：`autoModeState.ts` 文件级锚点原用 `(1,after)` 落在 `//` 注释段首行内部，被 annotate.py 自动外移到段边界（1→2，落在两条 `//` 注释之后），未劈开英文；其余九份锚点全部落在 import / export / let / 函数收尾行，零块内中文、零外移。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 51 锚点全过（含块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）；`annotate.py` 十次失败 0、一次 `⟳`（autoModeState 自动外移，已 grep 确认落点）、零 `⚠`；`check-fidelity.py` 全仓 1073 份 0 失败；`check-links.py` 源码链接 2189 条加内链 661 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`permissions/classifierShared.ts`(39) · `cachePaths.ts`(38) · `execSyncWrapper.ts`(38) · `task/outputFormatting.ts`(38) · `envValidation.ts`(38) · `settings/internalWrites.ts`(37) · `semanticNumber.ts`(36) · `modifiers.ts`(36) · `task/sdkProgress.ts`(36) · `permissions/PermissionResult.ts`(35) …（utils 还剩 83 份；全仓还剩 829 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
