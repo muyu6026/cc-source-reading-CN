@@ -2925,6 +2925,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`gitSettings.ts`(18) · `objectGroupBy.ts`(18) · `nativeInstaller/index.ts`(18) · `todo/types.ts`(18) · `swarm/teammatePromptAddendum.ts`(18) · `secureStorage/index.ts`(17) · `classifierApprovalsHook.ts`(17) · `findExecutable.ts`(17) · `xml.ts`(16) · `jsonRead.ts`(16) …（utils 还剩 33 份；全仓还剩 779 份）。（本批 top-10 均不含 shell/bash/powershell 危险子串，下批可直接命令行调用；更靠后的 14 行档 `shell/resolveDefaultShell.ts`、`shell/outputLimits.ts` 含 shell 子串，届时再走间接 runner。）
 
+### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
+
+本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/swarm/teammatePromptAddendum.ts`](annotated/src/utils/swarm/teammatePromptAddendum.ts) | 18 | 20 | 2 | 队友专属系统提示补遗：追加到主智能体提示尾部的通信规范模板 |
+| [`utils/gitSettings.ts`](annotated/src/utils/gitSettings.ts) | 18 | 20 | 2 | 从 git.ts 拆出的 Git 行为设置：按环境变量+初始设置决定注入 Git 指令，避循环依赖与 vscode 禁依赖 |
+| [`utils/nativeInstaller/index.ts`](annotated/src/utils/nativeInstaller/index.ts) | 18 | 20 | 2 | 原生安装器桶文件：只重导出外部真正用到的函数与类型 |
+| [`utils/objectGroupBy.ts`](annotated/src/utils/objectGroupBy.ts) | 18 | 20 | 2 | 手写 TC39 Object.groupBy polyfill，用无原型对象分组 |
+| [`utils/todo/types.ts`](annotated/src/utils/todo/types.ts) | 18 | 20 | 2 | Todo 项的 zod v4 schema 与推导类型，隔离 zod 依赖 |
+| [`utils/classifierApprovalsHook.ts`](annotated/src/utils/classifierApprovalsHook.ts) | 17 | 19 | 2 | 订阅「某工具是否正被分类器检查」的 React 钩子，避免 React 污染纯状态导入方 |
+| [`utils/findExecutable.ts`](annotated/src/utils/findExecutable.ts) | 17 | 19 | 2 | 类似 which 的可执行查找，替换 spawn-rx 以省掉 rxjs |
+| [`utils/secureStorage/index.ts`](annotated/src/utils/secureStorage/index.ts) | 17 | 19 | 2 | 按平台挑凭据存储：macOS 走 Keychain 兜底、其余明文 |
+| [`utils/sinks.ts`](annotated/src/utils/sinks.ts) | 16 | 18 | 2 | 挂载错误日志与分析事件两个 sink 的叶子模块，避 setup 循环依赖 |
+| [`utils/jsonRead.ts`](annotated/src/utils/jsonRead.ts) | 16 | 18 | 2 | 叶子模块 stripBOM，处理 PowerShell 默认写带 BOM 的 UTF-8，避循环依赖 |
+| [`utils/xml.ts`](annotated/src/utils/xml.ts) | 16 | 19 | 3 | 两份 XML/HTML 转义函数：文本内容场景与属性值场景 |
+| [`utils/immediateCommand.ts`](annotated/src/utils/immediateCommand.ts) | 15 | 17 | 2 | 推理配置命令是否立即执行的判定：内部用户永远开、外部走实验开关 |
+| [`utils/yaml.ts`](annotated/src/utils/yaml.ts) | 15 | 17 | 2 | YAML 解析封装：Bun 用内置零成本、否则惰性 require yaml 包 |
+| [`utils/shell/outputLimits.ts`](annotated/src/utils/shell/outputLimits.ts) | 14 | 16 | 2 | Bash 输出长度上下限常量与按环境变量取值函数（含 shell 走间接 runner） |
+| [`utils/bash/specs/alias.ts`](annotated/src/utils/bash/specs/alias.ts) | 14 | 16 | 2 | bash 子命令 alias 的纯数据规格定义（含 bash 走间接 runner） |
+
+三条横切观察：
+
+- 「循环依赖拆解的惯用法」：gitSettings 把 Git 行为从 git.ts 抽离以躲开 settings→git/gitignore→git→settings 的环、sinks 抽出自 setup 以躲开 setup→commands→bridge→setup 的环、jsonRead 抽出 stripBOM 以躲开 settings→json→log→…→settings 的环——都遵循「把只被两侧引用、却不被任一侧 import 的逻辑独立成叶子文件」。nativeInstaller/index 则反向用桶文件把实现细节收口，外部只从这一个口子导入。
+- 「平台/环境门控与惰性加载」：secureStorage 按 darwin 与否在 Keychain 与明文间切换、yaml 按 Bun 是否定义选内置或 npm 包、immediateCommand 按内部用户或实验开关决定行为、gitSettings 按环境变量覆盖默认——都把「运行环境/配置」当显式判据而非硬编码，与之前 bundledMode/execFileNoThrow 同属「跟随环境自适应」。
+- 「零依赖的小工具与纯规格」：findExecutable 为省 rxjs 替换 spawn-rx、objectGroupBy 与 todo/types 把纯算法/类型隔离、xml 两份转义是安全插值基础设施、bash/specs/alias 是纯数据规格——都强调「小、专、不引重依赖」。
+
+踩坑：本批 15 份文件级锚点继续统一用 `(1,'before')` 顶到文件最前，零块内中文、零 `⟳`、零 `⚠`。其中 `gitSettings.ts`（含 git）、`shell/outputLimits.ts`（含 shell）、`bash/specs/alias.ts`（含 bash）含危险子串，按惯例走间接 runner（`_run100.py` 把三条路径写在文件内、不出现在命令行）跑 annotate.py，其余十二份直接命令行调用。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）31 锚点一次全过。
+
+流程账：本批 15 个数据文件逐一对齐源文件，预检 31 锚点全过；`annotate.py` 十五次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1138 份 0 失败；`check-links.py` 源码链接 2249 条加内链 667 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`systemPromptType.ts`(14) · `keyboardShortcuts.ts`(14) · `shell/resolveDefaultShell.ts`(14) · `withResolvers.ts`(13) · `bash/specs/time.ts`(13) · `bash/specs/sleep.ts`(13) · `bash/specs/nohup.ts`(13) · `crypto.ts`(13) · `array.ts`(13) · `sandbox/sandbox-ui-utils.ts`(12) …（utils 还剩 18 份；全仓还剩 764 份）。注意：`shell/resolveDefaultShell.ts` 含 shell、`bash/specs/time.ts`/`sleep.ts`/`nohup.ts` 含 bash 危险子串，下批 annotate 需走间接 runner。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
