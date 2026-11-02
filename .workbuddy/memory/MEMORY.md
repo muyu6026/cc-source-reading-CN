@@ -44,6 +44,7 @@
 - 第 87 批：`a9cb74a` · 10 文件/766 行/57 锚点 · 全仓 **1003/1902 · 338,433 行 · 65.9%** · utils **411/564**。
 - 第 88 批：`8144b24` · 10 文件/724 行/60 锚点 · 全仓 **1013/1902 · 339,157 行 · 66.1%** · utils **421/564**。
 - 第 89 批：`87ec2a8` · 10 文件/697 行/76 锚点 · 全仓 **1023/1902 · 339,854 行 · 66.2%** · utils **431/564**。
+- 第 90–99 批：`94f557b`（90–98 各 commit 见 automation 记忆；99 收口增 10 文件/204 行/33 锚点）· 全仓 **1123/1902 · 343,883 行 · 67%** · utils **531/564**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -53,10 +54,10 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-02 第 89 批后）
-- 全仓 **1023/1902 文件（缺失 879）；339,854/513,237 行，按行数覆盖 66.2%**。
-- `src/utils` **431/564**（剩 133）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
-- 下一批目标（utils 按行数降序，已进入 ~68–60 行档）：browser(68) · process(68) · hooks/registerFrontmatterHooks(67) · xdg(65) · model/antModels(64) · hooks/registerSkillHooks(64) · sessionUrl(64) · computerUse/common(61) · permissions/bashClassifier(61) · slashCommandParsing(60)。
+## 当前状态（2026-11-03 第 99 批后）
+- 全仓 **1123/1902 文件（缺失 779）；343,883/513,237 行，按行数覆盖 67%**。
+- `src/utils` **531/564**（剩 33）。已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)。
+- 下一批目标（utils 按行数降序，已进入 18 行以下档）：gitSettings(18) · objectGroupBy(18) · nativeInstaller/index(18) · todo/types(18) · swarm/teammatePromptAddendum(18) · secureStorage/index(17) · classifierApprovalsHook(17) · findExecutable(17) · xml(16) · jsonRead(16)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。

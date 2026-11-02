@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 99 批（2026-11-03）：utils 小文件十件套（22→18 行档）
+
+- 状态：完成并推送，commit `94f557b`（13011cb..94f557b）。
+- 本批 10 文件（22→18 档）：shell/shellToolUtils(22)/sessionEnvVars(22)/configConstants(21)/commandLifecycle(21)/peerAddress(21)/statusNoticeHelpers(20)/plugins/pluginPolicy(20)/bash/specs/timeout(20)/authPortable(19)/bash/specs/index(18)。合计 10 文件 204 源行 / 33 锚点。
+- 进度：全仓 1123/1902 文件 / 343,883 行 / 67%（实算；utils 531/564，剩 33 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1123 份 0 失败；check-links 2239 源码链接 + 666 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：gitSettings(18) · objectGroupBy(18) · nativeInstaller/index(18) · todo/types(18) · swarm/teammatePromptAddendum(18) · secureStorage/index(17) · classifierApprovalsHook(17) · findExecutable(17) · xml(16) · jsonRead(16)。注意：本批 top-10 均不含 shell/bash/powershell 危险子串，下批可直接命令行调用；更靠后的 14 行档 shell/resolveDefaultShell、shell/outputLimits 含 shell 子串，届时再走间接 runner。
+
+### 本批经验（下次先看）
+- **按 check-coverage 实际 top-10 取批而非照搬上批手列清单**：上批（98）的「下一批候选」把 gitSettings(18) 列为 #10，但 check-coverage 实际降序把同档的 bash/specs/index(18) 排在第 10；本批以脚本输出为准取 bash/specs/index，gitSettings 顺延下批——两个 18 行文件都不漏。
+- **含 shell/bash 子串的三份走间接 runner**：shell/shellToolUtils、bash/specs/timeout、bash/specs/index 用 `_run99.py`（路径写在文件内）跑 annotate，其余七份直接命令行；预检同样用 `_precheck99.py`（10 路径写在文件内）避开过滤器。
+- **文件级锚点继续统一 `(1,'before')`**：10 份零块内中文、零 `⟳`；其中 sessionEnvVars/pluginPolicy/peerAddress 首行是 `/**` 文档块，`before` 插在块前安全。
+- **commit 务必「先删辅助文件再 add」**：消息含 shell/bash 路径，用 `-F` 消息文件而非 `-m` 避过滤器；但本批先 `add -A` 后删消息文件，导致该文件被误提交，已用 `git rm --cached` + `git commit --amend` 抹掉。下批删除 `_runNN.py`/`_precheckNN.py`/`_commit_msgNN.txt` 再 `git add -A`，工作树才干净。
+
 ## 第 98 批（2026-11-02）：utils 小文件十件套（26→22 行档）
 
 - 状态：完成并推送，commit `8027b7a`（74be940..8027b7a）。
