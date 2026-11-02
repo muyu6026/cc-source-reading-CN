@@ -1,0 +1,10 @@
+src/utils/intl.ts
+src/utils/backgroundHousekeeping.ts
+src/utils/settings/applySettingsChange.ts
+src/utils/sliceAnsi.ts
+src/utils/sanitization.ts
+src/utils/bash/specs/pyright.ts
+src/utils/idePathConversion.ts
+src/utils/undercover.ts
+src/utils/execFileNoThrowPortable.ts
+src/utils/caCertsConfig.ts

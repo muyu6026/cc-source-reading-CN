@@ -2479,6 +2479,37 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，`teammateContext.ts` 的模块级 `/** */` 文档头用 `(1, after)` 让脚本自动外移、无块内中文；`planModeV2.ts` 第 45 到 87 行的大段块注释整体避开，锚点一律取函数收尾行）；`exportRenderer.tsx` 批注版比源多 9 行而非 8 行，多出的一行是 base64 sourceMappingURL 的省略说明，fidelity 判 `OK*`，不是错误；预检 10 份全过；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 963 份 0 失败；`check-links.py` 源码链接 2079 条加内链 650 条，0 失效。
 
+**下一批候选（utils 剩余，按行数降序）**：`intl.ts`(94) · `backgroundHousekeeping.ts`(94) · `settings/applySettingsChange.ts`(92) · `sliceAnsi.ts`(91) · `sanitization.ts`(91) · `bash/specs/pyright.ts`(91) · `idePathConversion.ts`(90) · `undercover.ts`(89) · `execFileNoThrowPortable.ts`(89) · `caCertsConfig.ts`(88) · `classifierApprovals.ts`(88) · `teamMemoryOps.ts`(88) · `dxt/helpers.ts`(88) …（utils 还剩 183 份；全仓还剩 929 份）。
+
+### utils 第 84 批：小文件十件套（94→88 行档，88 锚点）
+
+本批十份覆盖「Intl 实例缓存、后台杂务、设置变更应用、ANSI 切片、Unicode 清洗、命令规格声明、IDE 路径换算、隐身模式、同步执行外壳、CA 证书配置」——小体量但每份都在回答一个具体问题：慢的东西怎么不挡路、看不见的字符怎么防、两套环境怎么对路径、对外输出怎么不泄密。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/intl.ts`](annotated/src/utils/intl.ts) | 94 | 102 | 8 | 共享 Intl 实例惰性缓存：分词器、相对时间格式化、时区、系统语言只建一次 |
+| [`utils/backgroundHousekeeping.ts`](annotated/src/utils/backgroundHousekeeping.ts) | 94 | 104 | 10 | 后台杂务总入口：启动批 fire-and-forget、10 分钟延迟慢清理、Ant 专属 24 小时循环 |
+| [`utils/settings/applySettingsChange.ts`](annotated/src/utils/settings/applySettingsChange.ts) | 92 | 101 | 9 | 设置变更应用器：权限规则重读、hooks 快照重建、AppState 同步、effort 值防覆盖 |
+| [`utils/sliceAnsi.ts`](annotated/src/utils/sliceAnsi.ts) | 91 | 101 | 10 | 按显示宽度切 ANSI 字符串：零宽组合符边界、OSC 8 超链接、undo 复位序列 |
+| [`utils/sanitization.ts`](annotated/src/utils/sanitization.ts) | 91 | 101 | 10 | Unicode 隐形字符清洗：NFKC 归一、属性类与显式码点段双层删除、迭代到不动点 |
+| [`utils/bash/specs/pyright.ts`](annotated/src/utils/bash/specs/pyright.ts) | 91 | 98 | 7 | pyright 命令规格：21 项选项纯数据声明，satisfies 编译期结构校验 |
+| [`utils/idePathConversion.ts`](annotated/src/utils/idePathConversion.ts) | 90 | 98 | 8 | Windows IDE 与 WSL 的路径互转：wslpath 优先、失败手写兜底、跨发行版判定 |
+| [`utils/undercover.ts`](annotated/src/utils/undercover.ts) | 89 | 97 | 8 | 隐身模式：公开仓库提交抹除内部痕迹，默认开、无强制关、外部构建整体折叠 |
+| [`utils/execFileNoThrowPortable.ts`](annotated/src/utils/execFileNoThrowPortable.ts) | 89 | 99 | 10 | 同步执行外壳：execaSync 包成永不抛错的 execSync 替身，三重历史签名兼容 |
+| [`utils/caCertsConfig.ts`](annotated/src/utils/caCertsConfig.ts) | 88 | 96 | 8 | CA 证书配置填充：从用户级设置读 NODE_EXTRA_CA_CERTS 垫进环境，依赖图隔离防包体膨胀 |
+
+三条横切观察：
+
+- **「慢的东西怎么不挡用户」三份**：`intl.ts` 把贵的构造成本摊薄到一次、`backgroundHousekeeping.ts` 用 10 分钟延迟加用户活动检查给慢清理让路、`execFileNoThrowPortable.ts` 干脆把同步调用整个封死在废弃层里。三条路线是同一个课题的三种答案：摊薄、错峰、禁用。
+- **「安全上宁可误伤」三份**：`sanitization.ts` 两层删除语义重叠是刻意的冗余防御、`undercover.ts` 没有强制关闭的开关（null 也当隐身处理）、`caCertsConfig.ts` 拒绝项目级设置注入 CA。三处的共同姿态是失败方向必须朝安全侧倒。
+- **「构建期解决」两份**：`pyright.ts` 用 `satisfies` 把规格写错拦在编译期、`undercover.ts` 靠 USER_TYPE 编译期常量把整段模板字符串从外部构建里折叠掉——错误和体积问题都不该留给运行时。
+
+踩坑：本批 10 份预检五断言加块注释内部硬拦一次通过、零命中（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；四份文件头部是大型 `/** */` 文档块（sanitization 23 行、undercover 22 行、caCertsConfig 14 行、idePathConversion 4 行），全部用 `(1, after)` 交给脚本外移；`undercover.ts` 第 41 到 69 行的保密指令模板字符串整体避开，锚点取签名行与 return 行；annotate.py 十次零 `⟳`、零 `⚠`。
+
+流程账：本批 10 个数据文件逐一对齐源文件（锚点落在 import/函数声明/语句收尾行，无块注释内、无跨行赋值首行）；预检 10 份全过；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 973 份 0 失败；`check-links.py` 源码链接 2089 条加内链 651 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`classifierApprovals.ts`(88) · `teamMemoryOps.ts`(88) · `dxt/helpers.ts`(88) · `swarm/backends/teammateModeSnapshot.ts`(87) · `computerUse/cleanup.ts`(86) · `collapseBackgroundBashNotifications.ts`(84) · `secureStorage/plainTextStorage.ts`(84) · `sleep.ts`(84) · `CircularBuffer.ts`(84) · `hooks/hookHelpers.ts`(83) …（utils 还剩 183 份；全仓还剩 929 份）。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
