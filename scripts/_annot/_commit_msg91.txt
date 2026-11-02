@@ -1,0 +1,23 @@
+批注流水线第 91 批：utils 小文件十件套（60→54 行档）· 10 文件 570 源行 / 52 锚点 · 全仓 1043/1902（66.5%）
+
+本批 10 份（src/utils，按行数降序）：
+- cliArgs.ts（60 行 / 5 锚点）
+- slashCommandParsing.ts（60 / 6）
+- semver.ts（59 / 6）
+- collapseHookSummaries.ts（59 / 5）
+- workloadContext.ts（57 / 4）
+- sequential.ts（56 / 5）
+- privacyLevel.ts（55 / 6）
+- collapseTeammateShutdowns.ts（55 / 5）
+- suggestions/skillUsageTracking.ts（55 / 5）
+- computerUse/escHotkey.ts（54 / 5）
+
+进度：1043/1902 文件、341,066/513,237 行、66.5%；utils 451/564（剩 113）；hooks 104/104、tools 184/184、services 130/130 全清。
+
+校验：check-fidelity 1043 份 0 失败；check-links 源码 2159 + 内链 658，0 失效；annotate.py 十次零 ⟳、零 ⚠。
+
+要点：折叠两份（钩子汇总与队友关闭）同骨架未抽公共函数，因折叠后消息形状不同；await 窗口三处（sequential 清标记后自检、skillUsageTracking 先记时间戳、workloadContext 必建新边界）；workloadContext 泄漏会自我延续，靠始终调用边界方法而非透传解决。
+
+另：开工前发现上批遗留未提交的执行记忆（第 90 批小结），确认是本流水线自己的产物后补提交（d067a05），才继续本批。
+
+下一批候选：taggedId(54) · deepLink/terminalPreference(54) · swarm/leaderPermissionBridge(54) · cliHighlight(54) · set(53) · binaryCheck(53) · bash/registry(53) · idleTimeout(53) · computerUse/setup(53) · contentArray(51)。

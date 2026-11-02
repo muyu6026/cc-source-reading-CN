@@ -2670,7 +2670,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检六断言加块注释内部行号扫描一次通过、零命中；56 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1033 份 0 失败；`check-links.py` 源码链接 2149 条加内链 657 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`cliArgs.ts`(60) · `slashCommandParsing.ts`(60) · `semver.ts`(59) · `collapseHookSummaries.ts`(59) · `workloadContext.ts`(57) · `sequential.ts`(56) · `collapseTeammateShutdowns.ts`(55) · `privacyLevel.ts`(55) · `suggestions/skillUsageTracking.ts`(55) · `taggedId.ts`(54) …（utils 还剩 123 份；全仓还剩 869 份）。
+**下一批候选（utils 剩余，按行数降序）**：`cliArgs.ts`(60) · `slashCommandParsing.ts`(60) · `semver.ts`(59) · `collapseHookSummaries.ts`(59) · `workloadContext.ts`(57) · `sequential.ts`(56) · `privacyLevel.ts`(55) · `collapseTeammateShutdowns.ts`(55) · `suggestions/skillUsageTracking.ts`(55) · `computerUse/escHotkey.ts`(54) …（utils 还剩 123 份；全仓还剩 869 份）。
+
+### utils 第 91 批：小文件十件套（60→54 行档，52 锚点）
+
+本批十份行数已降到 60 行以下，但密度反而更高：命令行开关的两种写法、斜杠命令的宽松切分、版本比较的六函数、两条消息折叠规则、异步上下文的边界、串行队列、三档隐私、技能使用的去抖与衰减、全局按键的生命周期。多数文件只有二三十行有效逻辑，剩下的篇幅都在注释里解释「为什么不能那样写」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/cliArgs.ts`](annotated/src/utils/cliArgs.ts) | 60 | 65 | 5 | 命令行开关早读；等号与空格两写法，纠正双横线错位 |
+| [`utils/slashCommandParsing.ts`](annotated/src/utils/slashCommandParsing.ts) | 60 | 66 | 6 | 斜杠命令解析；MCP 标记并回命令名，参数宽松归一化 |
+| [`utils/semver.ts`](annotated/src/utils/semver.ts) | 59 | 65 | 6 | 版本比较六函数；原生优先，回落开宽松模式 |
+| [`utils/collapseHookSummaries.ts`](annotated/src/utils/collapseHookSummaries.ts) | 59 | 64 | 5 | 折叠同标签钩子汇总；时长取最大，并行区间重叠不能求和 |
+| [`utils/workloadContext.ts`](annotated/src/utils/workloadContext.ts) | 57 | 61 | 4 | 轮次标签；必须建新边界而非透传，否则泄漏自我延续 |
+| [`utils/sequential.ts`](annotated/src/utils/sequential.ts) | 56 | 61 | 5 | 串行执行包装；标记先置位，单个失败不中断队列 |
+| [`utils/privacyLevel.ts`](annotated/src/utils/privacyLevel.ts) | 55 | 61 | 6 | 三档隐私等级；取最严格信号，否定式判据一次覆盖两档 |
+| [`utils/collapseTeammateShutdowns.ts`](annotated/src/utils/collapseTeammateShutdowns.ts) | 55 | 60 | 5 | 折叠队友关闭通知；四条件守卫，合并只留计数 |
+| [`utils/suggestions/skillUsageTracking.ts`](annotated/src/utils/suggestions/skillUsageTracking.ts) | 55 | 60 | 5 | 技能使用记录；一分钟去抖，七天半衰期加十分之一下限 |
+| [`utils/computerUse/escHotkey.ts`](annotated/src/utils/computerUse/escHotkey.ts) | 54 | 59 | 5 | 全局 Escape 中止；注册失败降级，注销用 finally 释放泵 |
+
+三条横切观察：
+
+- **「同一个骨架的两份折叠」**：`collapseHookSummaries.ts` 与 `collapseTeammateShutdowns.ts` 都是单趟扫描加内层贪婪收集，单个原样保留、多个换汇总。没有抽公共函数是刻意的——两者折叠后的消息形状完全不同，抽出来要传判定、收集、构造三组回调，反而更难读。
+- **「让出窗口里的顺序」三份**：`sequential.ts` 清标记后要再检查一次队列（await 期间可能入队）、`skillUsageTracking.ts` 先记时间戳再写配置（反了则去抖失效）、`workloadContext.ts` 在 await 链路上必须重新开边界而不是透传。三处都是「一个 await 把代码切成两半」引发的问题。
+- **「顺序即正确性」三份**：`privacyLevel.ts` 先查更严格的变量、`semver.ts` 先探测原生实现再回落、`escHotkey.ts` 注册成功后才持有泵引用。三处的判断顺序一旦调换，结果就完全不对。
+
+踩坑：`workloadContext.ts` 第 36 到 51 行是整段块注释（解释为什么不能透传），只有 4 个锚点，一个都不进块内；`cliArgs.ts` 与 `escHotkey.ts` 的文件级锚点都用 `(1,before)`，插在 import 之前、不碰下方文档块；`privacyLevel.ts` 六行档里给了 6 个锚点，因为五个函数各只有两三行，锚在函数收尾 `}` 上读起来最整齐。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；52 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1043 份 0 失败；`check-links.py` 源码链接 2159 条加内链 658 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`taggedId.ts`(54) · `deepLink/terminalPreference.ts`(54) · `swarm/leaderPermissionBridge.ts`(54) · `cliHighlight.ts`(54) · `set.ts`(53) · `binaryCheck.ts`(53) · `bash/registry.ts`(53) · `idleTimeout.ts`(53) · `computerUse/setup.ts`(53) · `contentArray.ts`(51) …（utils 还剩 113 份；全仓还剩 859 份）。
 
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
