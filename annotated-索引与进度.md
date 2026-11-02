@@ -2649,6 +2649,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`browser.ts`(68) · `process.ts`(68) · `hooks/registerFrontmatterHooks.ts`(67) · `xdg.ts`(65) · `model/antModels.ts`(64) · `hooks/registerSkillHooks.ts`(64) · `sessionUrl.ts`(64) · `computerUse/common.ts`(61) · `permissions/bashClassifier.ts`(61) · `slashCommandParsing.ts`(60) …（utils 还剩 133 份；全仓还剩 879 份）。
 
+### utils 第 90 批：小文件十件套（68→60 行档，56 锚点）
+
+本批是 utils 小文件收尾梯队（≤68 行）的头十份，内容横跨「系统程序拉起（浏览器/文件）、进程输出与管道防护、frontmatter 钩子注册（agent/skill 两种入口）、XDG 目录规范、会话恢复标识符解析、ant 内部模型定义、计算机使用公共能力、命令分类器对外桩、定制面插件锁定策略」——各自把一个小关注点收敛成稳定 API，没有一份做业务主流程。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/browser.ts`](annotated/src/utils/browser.ts) | 68 | 72 | 4 | 用系统默认程序打开文件/文件夹、用默认浏览器打开 URL，平台分发到 explorer/open/xdg-open |
+| [`utils/process.ts`](annotated/src/utils/process.ts) | 68 | 73 | 5 | 进程输出/错误的辅助：EPIPE 防护、统一写 stdout/stderr、快速失败退出、探测 stdin 是否真有数据 |
+| [`utils/hooks/registerFrontmatterHooks.ts`](annotated/src/utils/hooks/registerFrontmatterHooks.ts) | 67 | 72 | 5 | 把 agent/skill 的 frontmatter 钩子注册为会话作用域钩子，子 agent 的 Stop 改写成 SubagentStop |
+| [`utils/xdg.ts`](annotated/src/utils/xdg.ts) | 66 | 71 | 6 | XDG 基础目录规范：state/cache/data/home/bin 五处目录解析，支持 env 与 homedir 覆盖 |
+| [`utils/sessionUrl.ts`](annotated/src/utils/sessionUrl.ts) | 64 | 70 | 6 | 会话恢复标识符解析：JSONL 文件路径 / 裸 UUID / URL 三种形式，Windows 路径须先于 URL 处理 |
+| [`utils/model/antModels.ts`](annotated/src/utils/model/antModels.ts) | 64 | 69 | 5 | ant 内部模型类型与读取：非 ant 用户一律回落空/null，按别名或模型名解析 |
+| [`utils/hooks/registerSkillHooks.ts`](annotated/src/utils/hooks/registerSkillHooks.ts) | 64 | 69 | 5 | 把 skill 的 frontmatter 钩子注册为会话钩子，once:true 的首成功后自动移除 |
+| [`utils/computerUse/common.ts`](annotated/src/utils/computerUse/common.ts) | 61 | 68 | 7 | 计算机使用的公共常量/能力：服务器名、终端 bundle ID 回退表、静态能力声明 |
+| [`utils/permissions/bashClassifier.ts`](annotated/src/utils/permissions/bashClassifier.ts) | 61 | 69 | 8 | 命令分类器权限的对外构建桩：全部函数返回空值/禁用，仅 ant 内部有真实实现 |
+| [`utils/settings/pluginOnlyPolicy.ts`](annotated/src/utils/settings/pluginOnlyPolicy.ts) | 60 | 65 | 5 | 定制面「仅插件来源」锁定策略：受管设置判定锁定面、管理员可信来源豁免 |
+
+踩坑：本批十份文件头部与函数头多为 `/** */` 文档块或 `//` 注释，`annotate.py` 的自动外移让文件级与函数级锚点全部落在块外——如 `xdg.ts` 第 1 行 `(1,after)` 落在模块文档块之后、`bashClassifier.ts` 第 1 行 `(1,after)` 落在 `//` 桩说明之后；`registerFrontmatterHooks.ts`/`registerSkillHooks.ts`/`pluginOnlyPolicy.ts` 的 `(函数首行,before)` 都落在 `*/` 之后、函数签名之前，零块内中文、零 `⟳`、零 `⚠`；所有锚点均取 import/类型/函数签名/语句收尾行，无跨行赋值首行、无块注释内部。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检六断言加块注释内部行号扫描一次通过、零命中；56 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1033 份 0 失败；`check-links.py` 源码链接 2149 条加内链 657 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`cliArgs.ts`(60) · `slashCommandParsing.ts`(60) · `semver.ts`(59) · `collapseHookSummaries.ts`(59) · `workloadContext.ts`(57) · `sequential.ts`(56) · `collapseTeammateShutdowns.ts`(55) · `privacyLevel.ts`(55) · `suggestions/skillUsageTracking.ts`(55) · `taggedId.ts`(54) …（utils 还剩 123 份；全仓还剩 869 份）。
+
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
