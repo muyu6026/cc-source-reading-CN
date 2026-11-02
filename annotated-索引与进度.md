@@ -2699,7 +2699,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；52 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1043 份 0 失败；`check-links.py` 源码链接 2159 条加内链 658 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`taggedId.ts`(54) · `deepLink/terminalPreference.ts`(54) · `swarm/leaderPermissionBridge.ts`(54) · `cliHighlight.ts`(54) · `set.ts`(53) · `binaryCheck.ts`(53) · `bash/registry.ts`(53) · `idleTimeout.ts`(53) · `computerUse/setup.ts`(53) · `contentArray.ts`(51) …（utils 还剩 113 份；全仓还剩 859 份）。
+**下一批候选（utils 剩余，按行数降序）**：`taggedId.ts`(54) · `deepLink/terminalPreference.ts`(54) · `swarm/leaderPermissionBridge.ts`(54) · `cliHighlight.ts`(54) · `set.ts`(53) · `binaryCheck.ts`(53) · `bash/registry.ts`(53) · `idleTimeout.ts`(53) · `computerUse/setup.ts`(53) · `displayTags.ts`(51) …（utils 还剩 113 份；全仓还剩 859 份）。
+
+### utils 第 92 批：小文件十件套（54→51 行档，61 锚点）
+
+本批十份全部落在「五十行出头」，但主题横跨权限桥、终端偏好、高亮加载、ID 编码、二进制探测、命令规格、空闲超时、电脑控制装配、集合运算、标签剥离——几乎每份都是「一个概念 + 若干边界条件」，正文逻辑少，注释在解释为什么必须这么写。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/swarm/leaderPermissionBridge.ts`](annotated/src/utils/swarm/leaderPermissionBridge.ts) | 54 | 64 | 7 | 权限桥；模块级单例，React 外取 setter，卸载须置回 null |
+| [`utils/deepLink/terminalPreference.ts`](annotated/src/utils/deepLink/terminalPreference.ts) | 54 | 66 | 7 | 终端偏好；`TERM_PROGRAM` 与 `.app` 名不同需查表，非 macOS 跳过 |
+| [`utils/cliHighlight.ts`](annotated/src/utils/cliHighlight.ts) | 54 | 66 | 8 | 高亮懒加载；单例 Promise，借缓存命中顺带取语言表，失败吞成 null |
+| [`utils/taggedId.ts`](annotated/src/utils/taggedId.ts) | 54 | 62 | 5 | 标记 ID；base58 定长 22 位左填充，必须与后端脚本同格式 |
+| [`utils/binaryCheck.ts`](annotated/src/utils/binaryCheck.ts) | 53 | 60 | 7 | 二进制探测；会话缓存，false 也缓存，命中判 `!== undefined` |
+| [`utils/bash/registry.ts`](annotated/src/utils/bash/registry.ts) | 53 | 62 | 5 | 命令规格；内置表优先再图规格，三道拦截挡住路径注入 |
+| [`utils/idleTimeout.ts`](annotated/src/utils/idleTimeout.ts) | 53 | 61 | 6 | 空闲超时；创建时读一次环境变量，到点后二次校验才退出 |
+| [`utils/computerUse/setup.ts`](annotated/src/utils/computerUse/setup.ts) | 53 | 65 | 5 | 电脑控制 MCP；前缀触发后端能力提示，配置存在只为路由 |
+| [`utils/set.ts`](annotated/src/utils/set.ts) | 53 | 59 | 5 | 集合四运算；手写循环不展开，热路径省中间数组 |
+| [`utils/displayTags.ts`](annotated/src/utils/displayTags.ts) | 51 | 61 | 6 | 剥 XML 标签；泛化正则三条约束，空结果两种兜底策略 |
+
+三条横切观察：
+
+- **「false 也要缓存」**：`binaryCheck.ts` 命中判的是 `!== undefined` 而不是真值，否则缓存了 false 会被当作未命中，每次调用都重新派生子进程；`terminalPreference.ts` 同理，值没变就不写盘，省掉一次可能引发竞争的全局配置写入。两处都是「缓存的是结论，不是存在」。
+- **「配置存在只为路由」**：`computerUse/setup.ts` 的 `mcpConfig` 永远不会被真的 spawn——客户端按名字拦截改用进程内服务器。它留着是因为分发逻辑要靠 `type: 'stdio'` 落到正确分支，删掉反而会走错路。
+- **「定长编码的三处对齐」**：`taggedId.ts` 先整串填首字符再从右往左覆盖，短数字也补满 22 位，因为 58 的 22 次方刚好覆盖 2 的 128 次方。定长意味着可以直接按字符串比较，但代价是必须与后端 `tagged_id.py` 严格同步。
+
+踩坑：`cliHighlight.ts` 的文件级批注初稿抄了源文件里那行库引用指令，带进了英文双引号，被预检自己的门禁拦下，改成描述性文字才过；`computerUse/setup.ts` 初版把锚点放在第 22 行（块注释收尾 ` */`），属硬规矩 8 的禁区，改锚第 26 行函数签名收尾并合并了内容；`leaderPermissionBridge.ts` 与 `taggedId.ts` 用 `(1,after)`、`set.ts` 与 `displayTags.ts` 用 `(1,before)`，两种文件级锚点都验证过没有劈开文档块。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 61 锚点全过；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1053 份 0 失败；`check-links.py` 源码链接 2169 条加内链 659 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`contentArray.ts`(51) · `model/modelSupportOverrides.ts`(50) · `promptCategory.ts`(49) · `fpsTracker.ts`(47) · `combinedAbortSignal.ts`(47) · `model/contextWindowUpgradeCheck.ts`(47) · `profilerBase.ts`(46) · `hash.ts`(46) · `settings/validateEditTool.ts`(45) · `permissions/denialTracking.ts`(45) …（utils 还剩 103 份；全仓还剩 849 份）。
 
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）

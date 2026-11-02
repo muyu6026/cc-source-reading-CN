@@ -1,0 +1,29 @@
+批注流水线第 92 批：utils 小文件十件套（54→51 行档）· 10 文件 528 源行 / 61 锚点 · 全仓 1053/1902（66.6%）
+
+本批文件（src/utils，按行数降序前 10）：
+- swarm/leaderPermissionBridge.ts（54 行，7 锚点）
+- deepLink/terminalPreference.ts（54 行，7 锚点）
+- cliHighlight.ts（54 行，8 锚点）
+- taggedId.ts（54 行，5 锚点）
+- binaryCheck.ts（53 行，7 锚点）
+- bash/registry.ts（53 行，5 锚点）
+- idleTimeout.ts（53 行，6 锚点）
+- computerUse/setup.ts（53 行，5 锚点）
+- set.ts（53 行，5 锚点）
+- displayTags.ts（51 行，6 锚点）
+
+进度（check-coverage.py src 实算）：1053/1902 文件、341,598 行、66.6%；utils 461/564（剩 103）；
+hooks 104/104、tools 184/184、services 130/130 全清。
+
+校验：check-fidelity 1053 份 0 失败；check-links 源码链接 2169 条 + 内链 659 条 0 失效；
+annotate.py 十次失败 0，零外移告警。
+
+本批经验：
+- 预检脚本原判据把块注释首行/收尾行也算作「内部」，误报 6 项；已改为只拦「中间续行」，
+  并特批 (1,after) 为文件级锚点（脚本会整体外移，硬规矩 10 明确推荐）。
+- 批注正文抄源文件里的库引用指令会把英文双引号带进来，预检门禁可拦；一律改描述性文字。
+- computerUse/setup.ts 的块注释收尾行 ` */` 不能作 after 锚点（硬规矩 8），改锚函数签名收尾行。
+
+下一批候选：contentArray(51) · model/modelSupportOverrides(50) · promptCategory(49) ·
+fpsTracker(47) · combinedAbortSignal(47) · model/contextWindowUpgradeCheck(47) ·
+profilerBase(46) · hash(46) · settings/validateEditTool(45) · permissions/denialTracking(45)

@@ -1,0 +1,10 @@
+src/utils/swarm/leaderPermissionBridge.ts
+src/utils/deepLink/terminalPreference.ts
+src/utils/cliHighlight.ts
+src/utils/taggedId.ts
+src/utils/binaryCheck.ts
+src/utils/bash/registry.ts
+src/utils/idleTimeout.ts
+src/utils/computerUse/setup.ts
+src/utils/set.ts
+src/utils/displayTags.ts
