@@ -1,0 +1,16 @@
+批注流水线第 83 批：utils 小文件十件套（99→94 行档）· 10 文件 965 源行 / 78 锚点 · 全仓 963/1902（65.3%）
+
+本批（src/utils 剩余按行数降序前 10）：
+- abortController.ts（99 行 / 9 锚点）取消控制器工厂与父子弱引用联动
+- background/remote/remoteSession.ts（98 / 9）后台远程会话资格判定
+- exportRenderer.tsx（98 / 8）分块渲染导出 ANSI 文本
+- permissions/classifierDecision.ts（98 / 7）自动模式免分类白名单
+- messages/systemInit.ts（96 / 7）SDK 首帧 system/init 元数据
+- teammateContext.ts（96 / 8）进程内队友 AsyncLocalStorage 上下文
+- fileReadCache.ts（96 / 8）按 mtime 失效的文件读缓存
+- planModeV2.ts（95 / 7）计划模式并行配额与实验变体
+- queueProcessor.ts（95 / 8）主线程队列消费与同 mode 批量取
+- diagLogs.ts（94 / 7）诊断日志 JSONL 与计时包装
+
+进度（check-coverage 实算）：963/1902 文件、335,086/513,237 行、65.3%；utils 371/564（剩 193）。
+校验：check-fidelity 963 份 0 失败；check-links 源码 2079 + 内链 650，0 失效；annotate.py 十次零外移零告警。

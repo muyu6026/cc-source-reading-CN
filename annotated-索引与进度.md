@@ -2450,7 +2450,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，锚点全部落在 import/函数声明/语句收尾行，无块注释内锚点、无跨行赋值首行锚点）；预检 10 份全过、零合并错误；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 本批 10 份 0 失败（+56 处锚点、代码行与原文逐行相等）；`check-links.py` 源码链接 2069 条加内链 649 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`abortController.ts`(99) · `exportRenderer.tsx`(98) · `permissions/classifierDecision.ts`(98) · `background/remote/remoteSession.ts`(98) · `messages/systemInit.ts`(96) · `teammateContext.ts`(96) · `fileReadCache.ts`(96) · `queueProcessor.ts`(95) · `planModeV2.ts`(95) · `diagLogs.ts`(94) · `backgroundHousekeeping.ts`(94) · `intl.ts`(94) · `sanitization.ts`(91) · `bash/specs/pyright.ts`(91) · `sliceAnsi.ts`(91) …（utils 还剩 203 份；全仓还剩 949 份）。
+**下一批候选（utils 剩余，按行数降序）**：`intl.ts`(94) · `backgroundHousekeeping.ts`(94) · `settings/applySettingsChange.ts`(92) · `sanitization.ts`(91) · `bash/specs/pyright.ts`(91) · `sliceAnsi.ts`(91) · `idePathConversion.ts`(90) · `execFileNoThrowPortable.ts`(89) · `undercover.ts`(89) · `dxt/helpers.ts`(88) · `teamMemoryOps.ts`(88) · `generators.ts`(88) · `caCertsConfig.ts`(88) · `classifierApprovals.ts`(88) · `swarm/backends/teammateModeSnapshot.ts`(87) …（utils 还剩 193 份；全仓还剩 939 份）。
+
+### utils 第 83 批：小文件十件套（99→94 行档，78 锚点）
+
+本批十份覆盖「取消传播、远程会话资格、导出渲染、分类器白名单、SDK 首帧、队友上下文、文件读缓存、计划模式配额、队列消费、诊断日志」——都是小体量的机制件，但每一份都独自承担一条完整语义，没有一份是胶水。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/abortController.ts`](annotated/src/utils/abortController.ts) | 99 | 108 | 9 | 取消控制器工厂与父子联动：调高监听器上限，双向弱引用避免父级滞留子级 |
+| [`utils/background/remote/remoteSession.ts`](annotated/src/utils/background/remote/remoteSession.ts) | 98 | 107 | 9 | 后台远程会话资格：策略短路 + 三检查并行 + bundle 播种放宽 + App 安装判定 |
+| [`utils/exportRenderer.tsx`](annotated/src/utils/exportRenderer.tsx) | 98 | 107 | 8 | 导出渲染：无头环境下分块渲染成 ANSI，按块分配布局树换取内存下降 |
+| [`utils/permissions/classifierDecision.ts`](annotated/src/utils/permissions/classifierDecision.ts) | 98 | 105 | 7 | 自动模式免分类白名单：只读与纯元数据工具直放，Ant 工具条件 require 供 DCE |
+| [`utils/messages/systemInit.ts`](annotated/src/utils/messages/systemInit.ts) | 96 | 103 | 7 | SDK 首帧 system/init：会话元数据全字段、工具名兼容层、UDS 字段旁挂 |
+| [`utils/teammateContext.ts`](annotated/src/utils/teammateContext.ts) | 96 | 104 | 8 | 进程内队友上下文：AsyncLocalStorage 承载身份，run 而非 enterWith 防泄漏 |
+| [`utils/fileReadCache.ts`](annotated/src/utils/fileReadCache.ts) | 96 | 104 | 8 | 文件读缓存：mtime 精确失效、CRLF 入库前归一、超限删最早插入项 |
+| [`utils/planModeV2.ts`](annotated/src/utils/planModeV2.ts) | 95 | 102 | 7 | 计划模式配额与实验：agent 数按订阅分层、访谈三级开关、计划长度变体分组 |
+| [`utils/queueProcessor.ts`](annotated/src/utils/queueProcessor.ts) | 95 | 103 | 8 | 队列消费：主线程过滤防卡死、斜杠与 bash 逐条、同 mode 批量取走 |
+| [`utils/diagLogs.ts`](annotated/src/utils/diagLogs.ts) | 94 | 101 | 7 | 诊断日志：固定四字段 JSONL、同步追加一次重试、started/completed/failed 计时 |
+
+三条横切观察：
+
+- **「并发与生命周期」三份**：`abortController.ts`（父子取消传播）、`teammateContext.ts`（并发队友的身份隔离）、`queueProcessor.ts`（队列的取用节奏）合起来回答「一个进程里同时跑多件事时，取消、身份、调度各自怎么不串」。三者共同点是都用「让状态随作用域走」而不是全局变量：弱引用、ALS、按 mode 分批。
+- **「静态白名单与静态快照」两份**：`classifierDecision.ts` 的白名单集合与 `systemInit.ts` 的 init 消息都是「一次性声明、长期被读」的结构，因此都强调不可变与向后兼容（前者集合私有，后者字段只增不改）。
+- **「为省资源而设计的形状」两份**：`exportRenderer.tsx` 分块渲染把内存峰值压下去，`fileReadCache.ts` 用 mtime 命中把重复 IO 去掉；一个省内存、一个省磁盘读，手法都是「不改变对外语义的前提下换实现」。
+
+踩坑：本批 10 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；预检另加了「锚点落块注释内部」硬判据，10 份零命中；annotate.py 十次零 `⟳`、零 `⚠`；check-fidelity 本批 10 份 0 失败（合计 963 份全仓 0 失败）；check-links 源码链接 2079 条加内链 650 条，0 失效。
+
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，`teammateContext.ts` 的模块级 `/** */` 文档头用 `(1, after)` 让脚本自动外移、无块内中文；`planModeV2.ts` 第 45 到 87 行的大段块注释整体避开，锚点一律取函数收尾行）；`exportRenderer.tsx` 批注版比源多 9 行而非 8 行，多出的一行是 base64 sourceMappingURL 的省略说明，fidelity 判 `OK*`，不是错误；预检 10 份全过；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 963 份 0 失败；`check-links.py` 源码链接 2079 条加内链 650 条，0 失效。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
