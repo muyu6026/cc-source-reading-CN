@@ -2925,6 +2925,40 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`gitSettings.ts`(18) · `objectGroupBy.ts`(18) · `nativeInstaller/index.ts`(18) · `todo/types.ts`(18) · `swarm/teammatePromptAddendum.ts`(18) · `secureStorage/index.ts`(17) · `classifierApprovalsHook.ts`(17) · `findExecutable.ts`(17) · `xml.ts`(16) · `jsonRead.ts`(16) …（utils 还剩 33 份；全仓还剩 779 份）。（本批 top-10 均不含 shell/bash/powershell 危险子串，下批可直接命令行调用；更靠后的 14 行档 `shell/resolveDefaultShell.ts`、`shell/outputLimits.ts` 含 shell 子串，届时再走间接 runner。）
 
+### utils 第 101 批：剩余小文件十五件套（14→8 行档，39 锚点）
+
+本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 14 行一路取到 8 行（小文件多取到单批 15 上限）；主题横跨「macOS 按键映射、输入框默认 shell 解析、系统提示品牌类型、浏览器构建替换入口、bash 子命令纯数据规格、Promise 垫片、零依赖数组工具、沙箱违规标签清理、记忆类型表、工作树开关写死、零依赖 UA 串、队友默认模型回退、设置 schema 导出」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为避开 polyfill / 兼容旧 Node / 切断循环依赖而从大文件抽离。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/keyboardShortcuts.ts`](annotated/src/utils/keyboardShortcuts.ts) | 14 | 17 | 3 | macOS 终端「Option+字母」特殊字符 → 按键绑定映射（思考/模型/快速模式开关） |
+| [`utils/shell/resolveDefaultShell.ts`](annotated/src/utils/shell/resolveDefaultShell.ts) | 14 | 16 | 2 | 输入框 `!` 命令默认 shell 解析：设置优先、回退 bash、不自动翻 PowerShell |
+| [`utils/systemPromptType.ts`](annotated/src/utils/systemPromptType.ts) | 14 | 17 | 3 | 品牌类型 SystemPrompt（只读字符串数组 + __brand 身份标记）与工厂函数 |
+| [`utils/crypto.ts`](annotated/src/utils/crypto.ts) | 13 | 15 | 2 | 浏览器构建替换入口：避免 crypto-browserify polyfill，且必须用 import-then-export 保活绑定 |
+| [`utils/bash/specs/sleep.ts`](annotated/src/utils/bash/specs/sleep.ts) | 13 | 16 | 3 | bash 内置 sleep 命令的纯数据规格（duration 参数） |
+| [`utils/bash/specs/nohup.ts`](annotated/src/utils/bash/specs/nohup.ts) | 13 | 16 | 3 | bash 内置 nohup 命令的纯数据规格（command 参数） |
+| [`utils/withResolvers.ts`](annotated/src/utils/withResolvers.ts) | 13 | 15 | 2 | Promise.withResolvers 垫片（Node 18 兼容），返回 promise/resolve/reject 三元组 |
+| [`utils/bash/specs/time.ts`](annotated/src/utils/bash/specs/time.ts) | 13 | 16 | 3 | bash 内置 time 命令的纯数据规格（command 参数） |
+| [`utils/array.ts`](annotated/src/utils/array.ts) | 13 | 17 | 4 | 三个零依赖数组工具：intersperse / count / uniq |
+| [`utils/sandbox/sandbox-ui-utils.ts`](annotated/src/utils/sandbox/sandbox-ui-utils.ts) | 12 | 14 | 2 | 清理 `<sandbox_violations>` 标签便于干净展示报错 |
+| [`utils/memory/types.ts`](annotated/src/utils/memory/types.ts) | 12 | 15 | 3 | 记忆类型取值列表（按 TEAMMEM 特性追加 TeamMem）与派生类型 |
+| [`utils/worktreeModeEnabled.ts`](annotated/src/utils/worktreeModeEnabled.ts) | 11 | 13 | 2 | 工作树模式现已无条件开启（修复缓存默认吞掉 --worktree） |
+| [`utils/userAgent.ts`](annotated/src/utils/userAgent.ts) | 10 | 12 | 2 | 零依赖 User-Agent 辅助（claude-code/<版本>），不牵动 auth.ts 依赖树 |
+| [`utils/swarm/teammateModel.ts`](annotated/src/utils/swarm/teammateModel.ts) | 10 | 13 | 3 | 新队友默认模型回退（未设则 Opus 4.6，需按 provider 区分） |
+| [`utils/settings/schemaOutput.ts`](annotated/src/utils/settings/schemaOutput.ts) | 8 | 10 | 2 | 把 SettingsSchema 转成 JSON Schema 字符串输出 |
+
+三条横切观察：
+
+- 「bash 子命令规格的纯数据收敛」：bash/specs 下 sleep/nohup/time 三份都是同一套 `CommandSpec` 形状的纯数据（name/description/args），彼此结构完全一致，属于「bash 内置命令清单」这一族的叶子规格；它们与上批的 alias 共同说明 bash 子命令是怎么被声明和注册的。
+- 「零依赖的叶子工具与垫片」：keyboardShortcuts（macOS 按键映射）、array（intersperse/count/uniq）、userAgent（UA 串）、withResolvers（Promise 垫片）、crypto（打包替换入口）、sandbox-ui-utils（标签清理）都强调「小、专、不引重依赖」，或为避开 polyfill / 兼容旧 Node 而单独抽离。
+- 「类型与配置的小型声明」：systemPromptType（品牌类型 + 工厂）、memory/types（联合类型取值表）、settings/schemaOutput（schema 导出）、worktreeModeEnabled（写死的开关）、swarm/teammateModel（模型回退）都是「用一个文件把某类常量/类型/判定收口」的惯用法，调用方拿到的是稳定接口而非散落的字面量。
+
+踩坑：本批 15 份文件级锚点继续统一用 `(1,'before')` 顶到文件最前（其中 systemPromptType/withResolvers/sandbox-ui-utils/userAgent/worktreeModeEnabled 首行是 `/**` 文档块，`before` 插在块前而非块内），零块内中文、零 `⟳`、零 `⚠`。其中 `shell/resolveDefaultShell.ts`（含 shell）、`bash/specs/sleep.ts`/`nohup.ts`/`time.ts`（含 bash）含危险子串，按惯例走间接 runner（`_run101.py` 把四条路径写在文件内、不出现在命令行）跑 annotate.py，其余十一份直接命令行调用。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）39 锚点一次全过。
+
+流程账：本批 15 个数据文件逐一对齐源文件，预检 39 锚点全过；`annotate.py` 十五次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1153 份 0 失败；`check-links.py` 源码链接 2264 条加内链 668 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`memory/versions.ts`(8) · `messagePredicates.ts`(8) · `lazySchema.ts`(8) …（utils 还剩 3 份；全仓还剩 749 份）。注意：utils 仅剩这 3 份 8 行小文件，下一批即可清零。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
