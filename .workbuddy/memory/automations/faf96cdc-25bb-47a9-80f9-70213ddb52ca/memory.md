@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 92 批（2026-11-02）：utils 小文件十件套（54→51 行档）
+
+- 状态：完成并推送，commit `8847cdf`（3350e63..8847cdf）。
+- 本批 10 文件（54→51 档）：swarm/leaderPermissionBridge(54)/deepLink/terminalPreference(54)/cliHighlight(54)/taggedId(54)/binaryCheck(53)/bash/registry(53)/idleTimeout(53)/computerUse/setup(53)/set(53)/displayTags(51)。合计 10 文件 528 源行 / 61 锚点。
+- 进度：全仓 1053/1902 文件 / 341,598 行 / 66.6%（实算；utils 461/564，剩 103 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1053 份 0 失败；check-links 2169 源码链接 + 659 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：contentArray(51) · model/modelSupportOverrides(50) · promptCategory(49) · fpsTracker(47) · combinedAbortSignal(47) · model/contextWindowUpgradeCheck(47) · profilerBase(46) · hash(46) · settings/validateEditTool(45) · permissions/denialTracking(45)。
+
+### 本批经验（下次先看）
+- **预检判「块注释内部」只该拦中间续行**：初版权所有把块首行（`/**`）和收尾行（` */`）也算作内部，一次误报 6 项。正确做法是只拦夹在中间的续行——首行用 `(n,after)` 脚本会整体外移，收尾行用 `(n,before)` 会前移，都是安全的。同时给 `(1,after)` 开特批（文件级锚点约定）。
+- **批注正文别抄源文件里的引号内容**：`cliHighlight.ts` 文件级批注初稿照抄了那行 triple-slash 库引用指令，把英文双引号带进来，被自己的门禁拦下。一律改描述性文字（「那行库引用指令」）。
+- **`(1,before)` 与 `(1,after)` 都可用但要看清首行是不是 `/**`**：本批 set.ts / displayTags.ts 用 before（插在 `/**` 前）、leaderPermissionBridge / taggedId 用 after（自动外移到块后），四种组合都验过没劈开英文。
+
 ## 第 91 批（2026-11-02）：utils 小文件十件套（60→54 行档）
 
 - 状态：完成并推送，commit `0ec0c38`（d067a05..0ec0c38）。
