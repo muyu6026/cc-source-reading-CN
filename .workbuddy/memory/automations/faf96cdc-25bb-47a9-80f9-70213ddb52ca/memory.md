@@ -1,5 +1,13 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 90 批（2026-11-02）：utils 小文件十件套（68→60 行档）
+
+- 状态：完成并推送，commit `2e8bb77`（fdede70..2e8bb77）。
+- 本批 10 文件（68→60 档）：browser(68)/process(68)/hooks/registerFrontmatterHooks(67)/xdg(66)/sessionUrl(64)/model/antModels(64)/hooks/registerSkillHooks(64)/computerUse/common(61)/permissions/bashClassifier(61)/settings/pluginOnlyPolicy(60)。合计 10 文件 643 源行 / 56 锚点。
+- 进度：全仓 1033/1902 文件 / 340,496 行 / 66.3%（实算；utils 441/564，剩 123 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 1033 份 0 失败；check-links 2149 源码链接 + 657 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：cliArgs(60) · slashCommandParsing(60) · semver(59) · collapseHookSummaries(59) · workloadContext(57) · sequential(56) · collapseTeammateShutdowns(55) · privacyLevel(55) · suggestions/skillUsageTracking(55) · taggedId(54)。
+
 ## 第 89 批（2026-11-02）：utils 小文件十件套（71→69 行档）
 
 - 状态：完成并推送，commit `87ec2a8`（06ee71b..87ec2a8）。
