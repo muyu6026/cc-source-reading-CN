@@ -1,5 +1,22 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 84 批（2026-11-02）：utils 小文件十件套（94→88 行档）
+
+- 状态：完成并推送，commit `97ddbc2`（6c0a86f..97ddbc2）。
+- 本批（10 文件，按行数降序 94→88 档）：intl(94)/backgroundHousekeeping(94)/settings/applySettingsChange(92)/sliceAnsi(91)/sanitization(91)/bash/specs/pyright(91)/idePathConversion(90)/undercover(89)/execFileNoThrowPortable(89)/caCertsConfig(88)。合计 10 文件 909 源行 / 88 锚点。
+- 进度：全仓 973/1902 文件 / 335,995 行 / 65.5%（实算；utils 381/564，剩 183 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 973 份 0 失败；check-links 2089 源码链接 + 651 内链 0 失效；annotate.py 十次零 ⟳、零 ⚠。
+- 顺手修：索引第 83 批小节缺「下一批候选」收尾行，本批插入时补上。
+- 下一批目标（utils 按行数降序）：classifierApprovals(88) · teamMemoryOps(88) · dxt/helpers(88) · swarm/backends/teammateModeSnapshot(87) · computerUse/cleanup(86) · collapseBackgroundBashNotifications(84) · secureStorage/plainTextStorage(84) · sleep(84) · CircularBuffer(84) · hooks/hookHelpers(83)。
+
+### 本批经验（下次先看）
+- **四份文件头部是大型 `/** */` 文档块（sanitization 23 行、undercover 22 行、caCertsConfig 14 行）**：一律 `(1, 'after')` 交给脚本外移，正文锚点全落在函数收尾 `}` 或语句行，零块内中文。
+- **`undercover.ts` 第 41–69 行整段模板字符串（保密指令）**：锚点只取签名行 39 与 return 行 72，模板内部一个不进——`template_shift` 会外移但位置不再语义对应，直接绕开最稳。
+- **纯数据规格文件（bash/specs/pyright.ts）锚点允许落数组内部**（如 `options: [` 之后）：语法合法、读感尚可；7 个稀疏锚点足够，不必逐项注释 21 个选项。
+- **重载成堆的文件（execFileNoThrowPortable 三重签名）**：给「归一完成」的位置（行 60）一个锚点，比逐个注释重载声明更省。
+- **文档结构检查**：上一批遗漏了第 83 批小节的「下一批候选」行——每批小节的固定收尾三件套（踩坑/流程账/下一批候选）写入后用 grep 自查一次。
+- push 照例 `dangerouslyDisableSandbox=true`。
+
 ## 第 83 批（2026-11-02）：utils 小文件十件套（99→94 行档）
 
 - 状态：完成并推送，commit `4f06c04`（70d2e14..4f06c04）。
