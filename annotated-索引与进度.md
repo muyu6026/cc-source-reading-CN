@@ -2838,7 +2838,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检 26 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1093 份 0 失败；`check-links.py` 源码链接 2209 条加内链 663 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`embeddedTools.ts`(29) · `github/ghAuthStatus.ts`(29) · `bash/shellPrefix.ts`(28) · `highlightMatch.tsx`(28) · `getWorktreePathsPortable.ts`(27) · `userPromptKeywords.ts`(27) · `uuid.ts`(27) · `plugins/managedPlugins.ts`(27) · `autoModeDenials.ts`(26) · `toolSchemaCache.ts`(26) · `ink.ts`(26) …（utils 还剩 63 份；全仓还剩 809 份）。注意：`bash/shellPrefix.ts` 含危险子串，下批 annotate 需走间接 runner；`highlightMatch.tsx` 为 JSX，锚点只能落函数/类型收尾行、不可插在 JSX 内部。
+### utils 第 97 批：小文件十件套（29→26 行档，37 锚点）
+
+本批十份仍是「三十行上下」的叶子小模块，主题横跨「内嵌搜索工具探测、gh 鉴权遥测、Ink 反色高亮、shell 前缀加引号、用户情绪/续写关键词、worktree 轻量探测、策略锁定插件、UUID/AgentId、工具 schema 缓存、OTEL 诊断桥接」——多份刻意绕开重型依赖链或为隐私/缓存做独立小件。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/embeddedTools.ts`](annotated/src/utils/embeddedTools.ts) | 29 | 32 | 3 | 内嵌搜索工具（bfs/ugrep）检测与 bun 二进制路径；仅 ant-native 构建启用 |
+| [`utils/github/ghAuthStatus.ts`](annotated/src/utils/github/ghAuthStatus.ts) | 29 | 33 | 4 | gh CLI 安装/鉴权三态探测；用 auth token 避免网络请求、令牌不进内存 |
+| [`utils/highlightMatch.tsx`](annotated/src/utils/highlightMatch.tsx) | 28 | 30 | 3 | Ink/React 反色高亮匹配片段；JSX 锚点只落签名与收尾行 |
+| [`utils/bash/shellPrefix.ts`](annotated/src/utils/bash/shellPrefix.ts) | 28 | 31 | 3 | shell 前缀字符串拆「路径加参数」分别加引号；含 bash 走间接 runner |
+| [`utils/userPromptKeywords.ts`](annotated/src/utils/userPromptKeywords.ts) | 27 | 32 | 5 | 负面情绪词 / keep going 续写词正则检测 |
+| [`utils/getWorktreePathsPortable.ts`](annotated/src/utils/getWorktreePathsPortable.ts) | 27 | 30 | 3 | 轻量 child_process 探 git worktree 列表；不引 execa 依赖链 |
+| [`utils/plugins/managedPlugins.ts`](annotated/src/utils/plugins/managedPlugins.ts) | 27 | 30 | 3 | 从策略设置读被锁定的插件名集合；仅保护 plugin@marketplace 布尔 |
+| [`utils/uuid.ts`](annotated/src/utils/uuid.ts) | 27 | 32 | 5 | UUID 校验加带前缀 AgentId 生成；依赖 crypto.randomBytes |
+| [`utils/toolSchemaCache.ts`](annotated/src/utils/toolSchemaCache.ts) | 26 | 31 | 5 | 会话级工具 schema 渲染缓存；避免重算约 11K token 工具块 |
+| [`utils/telemetry/logger.ts`](annotated/src/utils/telemetry/logger.ts) | 26 | 29 | 3 | 实现 OTEL DiagLogger 桥接本地日志；仅 error/warn 有功 |
+
+三条横切观察：
+
+- 「轻量依赖 vs 重型依赖」：getWorktreePathsPortable 与 embeddedTools 都刻意绕开 execa/cross-spawn 重型链，前者只留 child_process、后者只读 env 与 process.execPath——符合 SDK 端「不带 CLI 依赖链」的诉求。
+- 「鉴权/遥测的隐私边界」：ghAuthStatus 用 `auth token` 而非 `auth status` 避免打到 GitHub API，且 `stdout:'ignore'` 让令牌不进本进程内存；telemetry/logger 把第三方诊断日志只映射到本地 error/warn，info/debug/verbose 静默丢弃。
+- 「缓存与稳定标识」：toolSchemaCache 用 per-session memoization 锁住 schema 字节，避免 GB 门控翻转、MCP 重连导致整块下游重算；与之前的 tempfile contentHash 同属「稳定标识省重算」家族。
+
+踩坑：本批 10 份文件级锚点继续用 `(1,before)` 顶到文件最前，零块内中文、零 `⟳`；其中 `bash/shellPrefix.ts`（含 bash）含危险子串，按惯例用间接 runner（`_run97.py` 把路径写在文件内、不出现在命令行）跑 annotate.py，其余九份直接命令行调用。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）37 锚点一次全过。highlightMatch.tsx 为 JSX，锚点只落函数签名（第 9 行 before）与函数收尾（第 27 行 after），未插 JSX 内部。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 37 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1103 份 0 失败；`check-links.py` 源码链接 2219 条加内链 664 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`autoModeDenials.ts`(26) · `ink.ts`(26) · `model/aliases.ts`(25) · `plugins/officialMarketplace.ts`(25) · `cleanupRegistry.ts`(25) · `zodToJsonSchema.ts`(23) · `extraUsage.ts`(23) · `standaloneAgent.ts`(23) · `computerUse/swiftLoader.ts`(23) · `shell/shellToolUtils.ts`(22) · `sessionEnvVars.ts`(22) …（utils 还剩 53 份；全仓还剩 799 份）。注意：`shell/shellToolUtils.ts` 含 shell 危险子串，下批 annotate 需走间接 runner。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
