@@ -1,5 +1,20 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 85 批（2026-11-02）：utils 小文件十件套（88→84 行档）
+
+- 状态：完成并推送，commit `d560ea3`（8830698..d560ea3）。
+- 本批（10 文件，按行数降序 88→84 档）：generators(88)/dxt/helpers(88)/teamMemoryOps(88)/classifierApprovals(88)/swarm/backends/teammateModeSnapshot(87)/computerUse/cleanup(86)/collapseBackgroundBashNotifications(84)/secureStorage/plainTextStorage(84)/sleep(84)/CircularBuffer(84)。合计 10 文件 861 源行 / 81 锚点。
+- 进度：全仓 983/1902 文件 / 336,856 行 / 65.6%（实算；utils 391/564，剩 173 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 983 份 0 失败；check-links 2099 源码链接 + 652 内链 0 失效；annotate.py 十次零 ⟳、零 ⚠。
+- 下一批目标（utils 按行数降序）：hooks/hookHelpers(83) · claudeInChrome/prompt(83) · which(82) · teamDiscovery(81) · awsAuthStatusManager(81) · formatBriefTimestamp(81) · settings/mdm/constants(81) · settings/settingsCache(80) · permissions/dangerousPatterns(80) · computerUse/drainRunLoop(79)。
+
+### 本批经验（下次先看）
+- **块注释密集的文件要按「可锚位置清单」挑**：`CircularBuffer.ts` 有 7 处 `/** */` 方法注释，锚点全部取方法收尾 `}`（24/33/50/67/76/84），一个都不进块内；`teammateModeSnapshot.ts` 6 处同理。
+- **`after` 落 `*/` 收尾行要避开**（硬规矩 8）：`dxt/helpers.ts` 第 12 行、`circularBuffer` 的多处都是 ` */`，改用其后的语句行（16/77 等）。
+- **单行模板字符串不作锚点**：`teamMemoryOps.ts` 第 63 与 85 行是拼摘要的模板串，插进去会进字符串内容。
+- **索引「下一批候选」是批 N 列批 N+1 的文件**：本轮首次插入时错填成批 N+2 的清单，靠 `grep -n` 三段对比（批84→批85 列表、批85→批86 列表、批78 旧行）发现并改正；下次写文档后直接核对「候选清单首个文件名 == 本批表格首个文件名」。
+- push 照例 `dangerouslyDisableSandbox=true`。
+
 ## 第 84 批（2026-11-02）：utils 小文件十件套（94→88 行档）
 
 - 状态：完成并推送，commit `97ddbc2`（6c0a86f..97ddbc2）。
