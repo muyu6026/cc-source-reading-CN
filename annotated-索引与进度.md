@@ -2811,7 +2811,34 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件，预检 34 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1083 份 0 失败；`check-links.py` 源码链接 2199 条加内链 662 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`settings/managedPath.ts`(34) · `swarm/constants.ts`(33) · `shell/shellProvider.ts`(33) · `cwd.ts`(32) · `settings/allErrors.ts`(32) · `controlMessageCompat.ts`(32) · `bash/specs/srun.ts`(31) · `tempfile.ts`(31) · `computerUse/inputLoader.ts`(30) · `semanticBoolean.ts`(29) …（utils 还剩 73 份；全仓还剩 819 份）。注意：`bash/specs/srun.ts` 与 `shell/shellProvider.ts` 含危险子串，下批 `annotate.py` 需走间接 runner。
+### utils 第 96 批：小文件十件套（34→29 行档，26 锚点）
+
+本批十份继续落在「三十行上下」，主题横跨「托管设置路径、队友会话常量、shell 抽象、异步 cwd 覆盖、错误聚合、控制消息兼容、SLURM 命令规范、临时文件、computer-use 原生模块、语义布尔」——多份仍是为打破循环依赖或做容错解析而单独抽出的小模块。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/settings/managedPath.ts`](annotated/src/utils/settings/managedPath.ts) | 34 | 37 | 3 | 托管设置目录路径解析；按平台返回固定位置 + drop-in 拆分目录 |
+| [`utils/swarm/constants.ts`](annotated/src/utils/swarm/constants.ts) | 33 | 36 | 3 | 队友/swarm 会话常量与命名；socket 名 + 三枚队友环境变量键 |
+| [`utils/shell/shellProvider.ts`](annotated/src/utils/shell/shellProvider.ts) | 33 | 35 | 2 | shell 类型与 ShellProvider 接口；bash/powershell 两类能力抽象 |
+| [`utils/cwd.ts`](annotated/src/utils/cwd.ts) | 32 | 36 | 4 | AsyncLocalStorage 实现按异步上下文覆盖 cwd；并发智能体互不污染 |
+| [`utils/settings/allErrors.ts`](annotated/src/utils/settings/allErrors.ts) | 32 | 34 | 2 | 聚合设置校验错误与 MCP 配置错误；打破 settings→mcp 循环依赖 |
+| [`utils/controlMessageCompat.ts`](annotated/src/utils/controlMessageCompat.ts) | 32 | 34 | 2 | 控制消息 requestId→request_id 兼容归一化；防老 iOS 客户端静默丢弃 |
+| [`utils/bash/specs/srun.ts`](annotated/src/utils/bash/specs/srun.ts) | 31 | 33 | 2 | srun 命令规范；SLURM 集群节点执行，选项与位置参数声明 |
+| [`utils/tempfile.ts`](annotated/src/utils/tempfile.ts) | 31 | 33 | 2 | 临时文件路径生成；UUID 或内容哈希稳定标识（保提示缓存前缀） |
+| [`utils/computerUse/inputLoader.ts`](annotated/src/utils/computerUse/inputLoader.ts) | 30 | 33 | 3 | computer-use-input 原生模块惰性加载与缓存；libuv 下主队列挂起警示 |
+| [`utils/semanticBoolean.ts`](annotated/src/utils/semanticBoolean.ts) | 29 | 32 | 3 | 语义布尔 zod 预处理；容错模型给布尔加引号 |
+
+三条横切观察：
+
+- 「循环依赖拆解的惯用法」：allErrors 与第 95 批的 internalWrites 同源思路——把「需要同时 import 两侧、却不被任一侧 import」的叶子逻辑抽到独立文件，专门切断 settings↔mcp、settings↔changeDetector 的环。cwd 也用 AsyncLocalStorage 这种「上下文局部状态」避免全局单例污染。
+- 「容错解析与稳定标识」：semanticBoolean 与第 95 批的 semanticNumber 同属「对模型偶尔加引号的标量做精确转换」家族，都拒绝用 z.coerce（会把 false 当 true、把空串吞掉）；tempfile 的 contentHash 选项则反向利用「稳定标识」保住提示缓存前缀，避免随机 UUID 每次子进程都变。
+- 「平台/环境门控与惰性加载」：shell/shellProvider 把 bash/powershell 的差异收口成接口；computerUse/inputLoader 仅在支持平台动态 require 原生模块并缓存；managedPath 用 memoize 缓存平台路径、且 Ant 专属覆盖分支在外部构建被剔除。
+
+踩坑：本批 10 份文件级锚点继续用 `(1,before)` 顶到文件最前，零块内中文、零 `⟳`；其中 `shell/shellProvider.ts`（含 shell）与 `bash/specs/srun.ts`（含 bash）含危险子串，按惯例用间接 runner（路径写在 `_run96.py` 内、不出现在命令行）跑 annotate.py，十次零 `⟳`、零 `⚠`。其余八份直接命令行调用。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）26 锚点一次全过。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检 26 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1093 份 0 失败；`check-links.py` 源码链接 2209 条加内链 663 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`embeddedTools.ts`(29) · `github/ghAuthStatus.ts`(29) · `bash/shellPrefix.ts`(28) · `highlightMatch.tsx`(28) · `getWorktreePathsPortable.ts`(27) · `userPromptKeywords.ts`(27) · `uuid.ts`(27) · `plugins/managedPlugins.ts`(27) · `autoModeDenials.ts`(26) · `toolSchemaCache.ts`(26) · `ink.ts`(26) …（utils 还剩 63 份；全仓还剩 809 份）。注意：`bash/shellPrefix.ts` 含危险子串，下批 annotate 需走间接 runner；`highlightMatch.tsx` 为 JSX，锚点只能落函数/类型收尾行、不可插在 JSX 内部。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
