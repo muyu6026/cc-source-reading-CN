@@ -2626,6 +2626,30 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`plugins/addDirPluginSettings.ts`(71) · `plugins/performStartupChecks.tsx`(70) · `getWorktreePaths.ts`(70) · `hooks/postSamplingHooks.ts`(70) · `pdfUtils.ts`(70) · `secureStorage/fallbackStorage.ts`(70) · `plugins/gitAvailability.ts`(69) · `plugins/walkPluginMarkdown.ts`(69) · `directMemberMessage.ts`(69) · `computerUse/hostAdapter.ts`(69) …（utils 还剩 143 份；全仓还剩 889 份）。
 
+### utils 第 89 批：小文件十件套（71→69 行档，76 锚点）
+
+本批是 utils 小文件收尾梯队（≤71 行）的头十份，内容横跨「插件设置聚合、启动信任门控、采样后钩子、PDF 预处理、git 工作树与可用性、安全存储回退、插件目录遍历、团队直发消息、计算机操控宿主适配」——各自把一个外部关注点（插件/git/OS/PDF/队友）收敛成一个稳定的内部 API，没有一份做业务主流程。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/plugins/addDirPluginSettings.ts`](annotated/src/utils/plugins/addDirPluginSettings.ts) | 71 | 77 | 6 | 从各 --add-dir 目录读取 enabledPlugins 与 extraKnownMarketplaces，优先级最低，调用方须在其上 spread 标准设置 |
+| [`utils/hooks/postSamplingHooks.ts`](annotated/src/utils/hooks/postSamplingHooks.ts) | 70 | 78 | 8 | 采样后钩子的注册表与执行器（注册/清空/执行），单钩子出错只记录不阻断 |
+| [`utils/pdfUtils.ts`](annotated/src/utils/pdfUtils.ts) | 70 | 77 | 7 | PDF 页码范围解析、模型 PDF 能力探测、扩展名判定三件套 |
+| [`utils/plugins/performStartupChecks.tsx`](annotated/src/utils/plugins/performStartupChecks.tsx) | 70 | 78 | 7 | 插件启动检查入口，确认信任目录后才后台安装市场与插件，种子注册改状态即清缓存并提示 /reload-plugins |
+| [`utils/getWorktreePaths.ts`](annotated/src/utils/getWorktreePaths.ts) | 70 | 77 | 7 | 调 git worktree list 找所有工作树，当前优先、其余字母序返回，带埋点 |
+| [`utils/secureStorage/fallbackStorage.ts`](annotated/src/utils/secureStorage/fallbackStorage.ts) | 70 | 79 | 9 | 主备双存储回退封装，迁移时互删避免凭据重复或 /login 死循环 |
+| [`utils/plugins/walkPluginMarkdown.ts`](annotated/src/utils/plugins/walkPluginMarkdown.ts) | 69 | 77 | 8 | 递归遍历插件目录的 .md 文件，遇 SKILL.md 即停为叶子，readdir 出错不中断 |
+| [`utils/directMemberMessage.ts`](annotated/src/utils/directMemberMessage.ts) | 69 | 77 | 8 | @成员名 消息 语法解析与绕过模型的直发信箱，无团队上下文即报错 |
+| [`utils/computerUse/hostAdapter.ts`](annotated/src/utils/computerUse/hostAdapter.ts) | 69 | 77 | 8 | Computer Use 宿主适配器单例，装配日志/执行器/权限/像素裁剪等原生能力 |
+| [`utils/plugins/gitAvailability.ts`](annotated/src/utils/plugins/gitAvailability.ts) | 69 | 77 | 8 | git 可用性记忆化探测，含强制不可用与清缓存，覆盖 macOS xcrun 垫片场景 |
+
+踩坑：本批第一份 `addDirPluginSettings.ts` 第 1 行是 `/**` 文档块开头，文件级锚点用 `(1,after)` 落在块注释之后（脚本自动外移到块后、不进注释内部）；`performStartupChecks.tsx` 末尾 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`；`fallbackStorage.ts` 是纯对象字面量工厂，9 个锚点全部取方法 `}` 或字段行，零块内中文；`postSamplingHooks.ts` 三处 `/** */` 函数头用 `(函数首行,before)` 落在块后，零外移。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检六断言加块注释内部行号扫描一次通过、零命中；76 个锚点；`annotate.py` 十次失败 0、零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1023 份 0 失败；`check-links.py` 源码链接 2139 条加内链 656 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`browser.ts`(68) · `process.ts`(68) · `hooks/registerFrontmatterHooks.ts`(67) · `xdg.ts`(65) · `model/antModels.ts`(64) · `hooks/registerSkillHooks.ts`(64) · `sessionUrl.ts`(64) · `computerUse/common.ts`(61) · `permissions/bashClassifier.ts`(61) · `slashCommandParsing.ts`(60) …（utils 还剩 133 份；全仓还剩 879 份）。
+
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
