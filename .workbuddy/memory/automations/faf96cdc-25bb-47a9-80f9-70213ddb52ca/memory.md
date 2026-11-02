@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 94 批（2026-11-02）：utils 小文件十件套（44→39 行档）
+
+- 状态：完成并推送，commit `836ce99`（6b84438..836ce99）。
+- 本批 10 文件（44→39 档）：agentSwarmsEnabled(44)/lockfile(43)/signal(43)/model/providers(40)/permissions/PermissionRule(40)/hyperlink(39)/unaryLogging(39)/permissions/autoModeState(39)/telemetry/skillLoadedEvent(39)/timeouts(39)。合计 10 文件 405 源行 / 51 锚点。
+- 进度：全仓 1073/1902 文件 / 342,476 行 / 66%（实算；utils 481/564，剩 83 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1073 份 0 失败；check-links 2189 源码链接 + 661 内链 0 失效；annotate.py 十次一次 `⟳`（autoModeState 文件级 `(1,after)` 落在 `//` 注释段中部，自动外移到段边界 1→2）、零 `⚠`。
+- 下一批目标（utils 按行数降序）：permissions/classifierShared(39) · cachePaths(38) · execSyncWrapper(38) · task/outputFormatting(38) · envValidation(38) · settings/internalWrites(37) · semanticNumber(36) · modifiers(36) · task/sdkProgress(36) · permissions/PermissionResult(35)。
+
+### 本批经验（下次先看）
+- **文件级 `(1,after)` 落在 `//` 注释段首行会被自动外移**：`autoModeState.ts` 第 1 行是 `// Auto mode state ...` 注释段首行，用 `(1,after)` 会插进段中部，annotate.py 自动外移到段边界（1→2，落在两条 `//` 注释之后），实测通顺、未劈开英文——这种 `⟳` 属预期外移，grep 确认落点即可，不是错误。
+- **预检判「块注释内部」继续零命中**：10 份数据文件 51 锚点，块首/收尾行与 `(1,after)` 豁免，无锚点落入 `/* */` 内部，印证「锚点全取 import/export/let/函数收尾行」的稳法。
+- **无 `bash`/`shell`/`powershell` 子串时直接跑 annotate**：本批 10 个相对路径均不含危险子串，命令行直接 `python scripts/annotate.py "<路径>"` 十次通过，无需间接 runner。
+
 ## 第 93 批（2026-11-02）：utils 小文件十件套（51→45 行档）
 
 - 状态：完成并推送，commit `fe1a272`（d7b85f5..fe1a272）。
