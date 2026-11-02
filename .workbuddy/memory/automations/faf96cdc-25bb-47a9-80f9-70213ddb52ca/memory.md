@@ -1,5 +1,25 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 98 批（2026-11-02）：utils 小文件十件套（26→22 行档）
+
+- 状态：完成并推送，commit `8027b7a`（74be940..8027b7a）。
+- 本批 10 文件（26→22 档）：autoModeDenials(26)/ink(26)/plugins/officialMarketplace(25)/model/aliases(25)/cleanupRegistry(25)/computerUse/swiftLoader(23)/extraUsage(23)/standaloneAgent(23)/zodToJsonSchema(23)/bundledMode(22)。合计 10 文件 241 源行 / 46 锚点（2 份回收 + 8 份新写）。
+- 进度：全仓 1113/1902 文件 / 343,679 行 / 66%（实算；utils 521/564，剩 43 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1113 份 0 失败；check-links 2229 源码链接 + 665 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：shell/shellToolUtils(22) · sessionEnvVars(22) · commandLifecycle(21) · configConstants(21) · peerAddress(21) · statusNoticeHelpers(20) · plugins/pluginPolicy(20) · bash/specs/timeout(20) · authPortable(19) · gitSettings(18)。注意 `shell/shellToolUtils.ts`、`bash/specs/timeout.ts` 含 shell/bash 危险子串，下批 annotate 需走间接 runner。
+
+### 本批经验（下次先看）
+- **回收上批孤儿文件**：开工发现 `autoModeDenials.ts` 与 `ink.ts` 的 `_p1.py` 已写好但 annotated 产出未落盘（上批 97 遗留），本批先预检确认锚点合法，再重跑 annotate 补齐，与新增八份一并校验——属「中断回收」变体，不是覆盖他人在途工作。
+- **文件级锚点继续统一 `(1,'before')`**：10 份零块内中文、零 `⟳`，其中 6 份首行是 `/**` 文档块，`before` 插在块前安全。
+- **cleanupRegistry 实际 25 行但 check-coverage 显示 23**：check-coverage 的「未做文件」行数显示与 `wc -l` 不一致（差 2），锚点行号一律以 Read/wc 实际源文件为准，不盲信其显示数。
+- **进度数字用 check-coverage 实算**：1113/1902 · 343,679 · 66%；README 的「行」口径 = 源文件行数累加（与本批 +241 吻合），索引/README 同步刷新。
+
+## 第 97 批（2026-11-02，本自动化记忆此前漏记 · 补录）
+
+- 状态：完成并推送，commit `74be940`（3010402 父）。
+- 本批 10 文件（29→26 档）：bash/shellPrefix(28)/embeddedTools(29)/getWorktreePathsPortable(27)/github/ghAuthStatus(29)/highlightMatch(28)/plugins/managedPlugins(27)/telemetry/logger(29)/toolSchemaCache(26)/userPromptKeywords(27)/uuid(27)。合计 10 文件 274 源行 / 37 锚点。
+- 进度：全仓 1103/1902（66%）；utils 511/564，剩 53 份。注意：本批把原 next-target 里的 autoModeDenials、ink 换成 telemetry/logger，导致两份 orphan（下批 98 回收）。
+
 ## 第 96 批（2026-11-02）：utils 小文件十件套（34→29 行档）
 
 - 状态：完成并推送，commit `5b71466`（6edd38b..5b71466）。
