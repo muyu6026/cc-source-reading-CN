@@ -2867,6 +2867,35 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`autoModeDenials.ts`(26) · `ink.ts`(26) · `model/aliases.ts`(25) · `plugins/officialMarketplace.ts`(25) · `cleanupRegistry.ts`(25) · `zodToJsonSchema.ts`(23) · `extraUsage.ts`(23) · `standaloneAgent.ts`(23) · `computerUse/swiftLoader.ts`(23) · `shell/shellToolUtils.ts`(22) · `sessionEnvVars.ts`(22) …（utils 还剩 53 份；全仓还剩 799 份）。注意：`shell/shellToolUtils.ts` 含 shell 危险子串，下批 annotate 需走间接 runner。
 
+### utils 第 98 批：小文件十件套（26→22 行档，46 锚点）
+
+本批十份是 utils 收尾带的「二十行上下」叶子小模块，主题横跨「自动模式拒绝记录、Ink 配色主题映射、官方插件市场常量、模型别名与族通配、优雅关闭清理登记、macOS 原生 swift 模块懒加载、额外用量计费判定、独立智能体命名、Zod 转 JSON Schema 缓存、Bun 运行时探测」——多份把「配置/缓存/探测」收口成独立小件，刻意不引重依赖。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/autoModeDenials.ts`](annotated/src/utils/autoModeDenials.ts) | 26 | 32 | 6 | 自动模式分类器最近拒绝命令清单：类型、写入（特性开关 + 截断到上限）、只读读取 |
+| [`utils/ink.ts`](annotated/src/utils/ink.ts) | 26 | 29 | 3 | 颜色名转 Ink 的 TextProps 颜色格式，未知色回退原始 ANSI 色 |
+| [`utils/plugins/officialMarketplace.ts`](annotated/src/utils/plugins/officialMarketplace.ts) | 25 | 29 | 4 | 官方 Anthropic 插件市场常量：来源配置与显示名，启动时自动安装识别 |
+| [`utils/model/aliases.ts`](annotated/src/utils/model/aliases.ts) | 25 | 30 | 5 | 模型别名与模型族通配别名：短名路由 + 允许名单 wildcard 匹配 |
+| [`utils/cleanupRegistry.ts`](annotated/src/utils/cleanupRegistry.ts) | 25 | 30 | 5 | 优雅关闭清理登记处：全局 Set 登记/撤销 + Promise.all 批量执行 |
+| [`utils/computerUse/swiftLoader.ts`](annotated/src/utils/computerUse/swiftLoader.ts) | 23 | 28 | 5 | macOS 原生 @ant/computer-use-swift 模块懒加载与缓存，非 macOS 抛错 |
+| [`utils/extraUsage.ts`](annotated/src/utils/extraUsage.ts) | 23 | 27 | 4 | 额外用量计费判定：综合订阅/快模式/opus-4-6 与 sonnet-4-6 版本 |
+| [`utils/standaloneAgent.ts`](annotated/src/utils/standaloneAgent.ts) | 23 | 27 | 4 | 独立智能体命名：非群组会话返回名，处于群组让位群组上下文 |
+| [`utils/zodToJsonSchema.ts`](annotated/src/utils/zodToJsonSchema.ts) | 23 | 28 | 5 | Zod v4 转 JSON Schema 并按引用身份缓存，扛高频 API 调用 |
+| [`utils/bundledMode.ts`](annotated/src/utils/bundledMode.ts) | 22 | 27 | 5 | 两个 Bun 运行时探测：是否 Bun 启动、是否 Bun 编译独立可执行 |
+
+三条横切观察：
+
+- 「主题与运行时自适应」：ink.ts 把智能体色名映射到主题键（未知色回退 ANSI），bundledMode.ts 探测 Bun 打包态——都让行为跟随运行环境而非硬编码，符合「配置外置」基调。
+- 「集中登记 + 按需触发」：cleanupRegistry 用全局 Set 登记清理函数、zodToJsonSchema 用 WeakMap 按引用缓存转换结果——前者解耦生命周期、后者省去每请求重复序列化，都属「一次登记/转换、多次复用」。
+- 「计费与命名的精确判据」：extraUsage 用早退优先级综合订阅态/快模式/具体模型版本，aliases 把「短名」与「族通配」两类语义分开——都强调「显式声明压过隐式推导、边界判据可核对」。
+
+踩坑：本批 10 份文件级锚点继续统一用 `(1,'before')` 顶到文件最前（其中 officialMarketplace/cleanupRegistry/standaloneAgent/zodToJsonSchema/bundledMode/autoModeDenials 首行是 `/**` 文档块，`before` 插在块前而非块内），零块内中文、零 `⟳`、零 `⚠`。其中 autoModeDenials 与 ink 是上一批（97）已写好 `_p1.py` 却未落盘 annotated 的孤儿文件，本批先预检确认锚点合法后重跑 annotate 补齐产出，与新增八份一并校验。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）46 锚点一次全过。
+
+流程账：本批 10 个数据文件（2 份回收 + 8 份新写）逐一对齐源文件，预检 46 锚点全过；`annotate.py` 十次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1113 份 0 失败；`check-links.py` 源码链接 2229 条加内链 665 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`shell/shellToolUtils.ts`(22) · `sessionEnvVars.ts`(22) · `commandLifecycle.ts`(21) · `configConstants.ts`(21) · `peerAddress.ts`(21) · `statusNoticeHelpers.ts`(20) · `plugins/pluginPolicy.ts`(20) · `bash/specs/timeout.ts`(20) · `authPortable.ts`(19) · `gitSettings.ts`(18) …（utils 还剩 43 份；全仓还剩 789 份）。注意：`shell/shellToolUtils.ts`、`bash/specs/timeout.ts` 含 shell/bash 危险子串，下批 annotate 需走间接 runner。
+
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
