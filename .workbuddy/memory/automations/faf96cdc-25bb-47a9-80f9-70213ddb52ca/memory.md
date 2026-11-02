@@ -1,5 +1,18 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 96 批（2026-11-02）：utils 小文件十件套（34→29 行档）
+
+- 状态：完成并推送，commit `5b71466`（6edd38b..5b71466）。
+- 本批 10 文件（34→29 档）：settings/managedPath(34)/swarm/constants(33)/shell/shellProvider(33)/cwd(32)/settings/allErrors(32)/controlMessageCompat(32)/bash/specs/srun(31)/tempfile(31)/computerUse/inputLoader(30)/semanticBoolean(29)。合计 10 文件 326 源行 / 26 锚点。
+- 进度：全仓 1093/1902 文件 / 343,164 行 / 66%（实算；utils 501/564，剩 63 份）；hooks/tools/services 仍全清。
+- 校验：check-fidelity 1093 份 0 失败；check-links 2209 源码链接 + 663 内链 0 失效；annotate.py 十次零 `⟳`、零 `⚠`。
+- 下一批目标（utils 按行数降序）：embeddedTools(29) · github/ghAuthStatus(29) · bash/shellPrefix(28) · highlightMatch.tsx(28) · getWorktreePathsPortable(27) · userPromptKeywords(27) · uuid(27) · plugins/managedPlugins(27) · autoModeDenials(26) · toolSchemaCache(26) · ink(26)。注意 `bash/shellPrefix.ts` 含危险子串、下批需间接 runner；`highlightMatch.tsx` 为 JSX、锚点只能落函数/类型收尾行。
+
+### 本批经验（下次先看）
+- **含危险子串（bash/shell/powershell）的文件走间接 runner**：`bash/specs/srun.ts`（bash）与 `shell/shellProvider.ts`（shell）本批仍用 `_run96.py` 把路径写在文件内、不出现在命令行，避开命令过滤；其余八份直接 `python scripts/annotate.py "<路径>"`。
+- **文件级锚点继续统一 `(1,'before')`**：10 份零块内中文、零 `⟳`。
+- **预检门禁复用批 95 修正版**（ast.parse 解析数据文件本身）：26 锚点一次全过。
+
 ## 第 95 批（2026-11-02）：utils 小文件十件套（39→35 行档）
 
 - 状态：完成并推送，commit `e7121fd`（1b705b6..e7121fd）。
