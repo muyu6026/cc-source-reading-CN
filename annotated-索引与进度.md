@@ -2537,7 +2537,36 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：本批 10 个数据文件逐一对齐源文件（锚点落在 import/函数声明/语句收尾行，无块注释内、无跨行赋值首行）；预检 10 份全过、81 个锚点；annotate.py 十次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 983 份 0 失败；`check-links.py` 源码链接 2099 条加内链 652 条，0 失效。
 
-**下一批候选（utils 剩余，按行数降序）**：`hooks/hookHelpers.ts`(83) · `claudeInChrome/prompt.ts`(83) · `which.ts`(82) · `teamDiscovery.ts`(81) · `awsAuthStatusManager.ts`(81) · `formatBriefTimestamp.ts`(81) · `settings/mdm/constants.ts`(81) · `settings/settingsCache.ts`(80) · `permissions/dangerousPatterns.ts`(80) · `computerUse/drainRunLoop.ts`(79) …（utils 还剩 173 份；全仓还剩 919 份）。
+**下一批候选（utils 剩余，按行数降序）**：`hooks/hookHelpers.ts`(83) · `claudeInChrome/prompt.ts`(83) · `which.ts`(82) · `teamDiscovery.ts`(81) · `awsAuthStatusManager.ts`(81) · `formatBriefTimestamp.ts`(81) · `settings/mdm/constants.ts`(81) · `settings/settingsCache.ts`(80) · `permissions/dangerousPatterns.ts`(80) · `toolPool.ts`(79) …（utils 还剩 173 份；全仓还剩 919 份）。
+
+### utils 第 86 批：小文件十件套（83→79 行档，52 锚点）
+
+本批十份全是「边界定义一个模块」的类型：钩子的结构化输出强制、浏览器提示词的分块注入、命令查找的四条路径、团队状态的缺字段兜底、时间标签的区域变量、MDM 路径的优先级、认证状态的成功/失败两分支、危险前缀表、三层设置缓存的三态语义、工具池的分区排序。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/hooks/hookHelpers.ts`](annotated/src/utils/hooks/hookHelpers.ts) | 83 | 88 | 5 | 钩子返回值统一成结构化输出；Stop 钩子强制调用合成输出工具，5 秒超时 |
+| [`utils/claudeInChrome/prompt.ts`](annotated/src/utils/claudeInChrome/prompt.ts) | 83 | 88 | 5 | 浏览器自动化系统提示分块；工具搜索说明与 WebBrowser 职责切分按状态注入 |
+| [`utils/which.ts`](annotated/src/utils/which.ts) | 82 | 88 | 6 | 命令路径查找四条路径：异步/同步 × Windows/POSIX，外加 Bun 原生快速路径 |
+| [`utils/teamDiscovery.ts`](annotated/src/utils/teamDiscovery.ts) | 81 | 86 | 5 | 团队与队友状态发现；跳过 team-lead，缺字段默认算活跃，后端类型过守卫 |
+| [`utils/formatBriefTimestamp.ts`](annotated/src/utils/formatBriefTimestamp.ts) | 81 | 86 | 5 | 时间标签三档粒度；自解析 POSIX 区域变量并转 BCP 47，Intl 构造即校验 |
+| [`utils/settings/mdm/constants.ts`](annotated/src/utils/settings/mdm/constants.ts) | 81 | 86 | 5 | MDM 常量与 plist 路径优先级；零重依赖，注册表必须留在策略分支 |
+| [`utils/awsAuthStatusManager.ts`](annotated/src/utils/awsAuthStatusManager.ts) | 81 | 87 | 6 | 云厂商认证状态单例；成功时清空状态，失败时保留输出供排查 |
+| [`utils/permissions/dangerousPatterns.ts`](annotated/src/utils/permissions/dangerousPatterns.ts) | 80 | 84 | 4 | 危险允许规则前缀表；跨平台清单抽常量防两份漂移，内部构建专属加段 |
+| [`utils/settings/settingsCache.ts`](annotated/src/utils/settings/settingsCache.ts) | 80 | 85 | 5 | 三层设置缓存；未命中与「确认为空」用 undefined 与 null 区分 |
+| [`utils/toolPool.ts`](annotated/src/utils/toolPool.ts) | 79 | 85 | 6 | 工具池合并去重；分区排序保提示词缓存，协调者模式裁到允许清单 |
+
+三条横切观察：
+
+- **「取不到就当没有」四份**：`which.ts` 命令找不到返回 null 而不是抛异常、`mdm/constants.ts` 用户名取不到就只留设备级路径、`teamDiscovery.ts` 缺 isActive 字段当成活跃、`settingsCache.ts` 用 undefined 表示未命中因此可以安全重查。四处都在把「信息缺失」翻译成一个明确的返回值，而不是让调用方去猜。
+- **「模块边界决定依赖形状」三份**：`toolPool.ts` 刻意不碰 React，好让无界面路径直接引用；`mdm/constants.ts` 只依赖操作系统信息，好被最底层读取模块引用；`claudeInChrome/prompt.ts` 把提示词拆成常量，好按运行期开关选择性拼接。三份的共同动作都是「把某一层从依赖图里摘出去」。
+- **「失效与保留的口径要显式」两份**：`awsAuthStatusManager.ts` 认证成功才清空输出、失败必须留着；`settingsCache.ts` 三层缓存一刀切重置。前者按「用户还要不要看」决定去留，后者按「改动影响面」决定范围。
+
+踩坑：`claudeInChrome/prompt.ts` 几乎全是模板字符串（83 行里 3 段长字符串），5 个锚点里 4 个改用 `before` 锚在块注释首行，唯独文件级 `(1,before)` 触发「落在模板字符串内部」自动外移，打印 `⟳ 1→1`，`grep -n '^// '` 确认落点在常量声明之前、未进字符串。`toolPool.ts` 第 20 与 25 行是 eslint 注释放开与收回的单行块注释，`after` 落 `*/` 结尾行会插进块内，改锚第 24 行（三元收尾）。`permissions/dangerousPatterns.ts` 数组体被注释与 spread 占满，只取 4 个锚点。
+
+流程账：本批 10 个数据文件逐一对齐源文件，预检五断言加块注释内部行号扫描一次通过、零命中；52 个锚点；`annotate.py` 十次失败 0、一次 `⟳`（上面已确认落点）、零 `⚠`；`check-fidelity.py` 全仓 993 份 0 失败；`check-links.py` 源码链接 2109 条加内链 653 条，0 失效。
+
+**下一批候选（utils 剩余，按行数降序）**：`computerUse/drainRunLoop.ts`(79) · `billing.ts`(78) · `permissions/PermissionUpdateSchema.ts`(78) · `teleport/environmentSelection.ts`(77) · `renderOptions.ts`(77) · `fingerprint.ts`(76) · `stream.ts`(76) · `cronJitterConfig.ts`(75) · `telemetry/events.ts`(75) · `crossProjectResume.ts`(75) …（utils 还剩 163 份；全仓还剩 909 份）。
 
 ### utils 第 78 批：小文件十五件套（142→131 行档，117 锚点）
 

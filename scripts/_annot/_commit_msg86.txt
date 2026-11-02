@@ -1,0 +1,21 @@
+批注流水线第 86 批：utils 小文件十件套（83→79 行档）· 10 文件 811 源行 / 52 锚点 · 全仓 993/1902（65.8%）
+
+本批 10 份（src/utils，按行数降序）：
+- hooks/hookHelpers.ts（83 行 / 5 锚点）
+- claudeInChrome/prompt.ts（83 / 5）
+- which.ts（82 / 6）
+- teamDiscovery.ts（81 / 5）
+- formatBriefTimestamp.ts（81 / 5）
+- settings/mdm/constants.ts（81 / 5）
+- awsAuthStatusManager.ts（81 / 6）
+- permissions/dangerousPatterns.ts（80 / 4）
+- settings/settingsCache.ts（80 / 5）
+- toolPool.ts（79 / 6）
+
+进度：993/1902 文件、337,667/513,237 行、65.8%；utils 401/564（剩 163）；hooks 104/104、tools 184/184、services 130/130 全清。
+
+校验：check-fidelity 993 份 0 失败；check-links 源码 2109 + 内链 653，0 失效；annotate.py 十次失败 0、一次 ⟳（prompt.ts 文件级锚点落在模板字符串内部，1→1 外移到常量声明前，已 grep 确认）、零 ⚠。
+
+要点：prompt.ts 三段长模板字符串，5 个锚点里 4 个改 before 锚块注释首行；toolPool.ts 第 20/25 行单行块注释，after 落 */ 会插进块内，改锚 24 行三元收尾；dangerousPatterns.ts 数组体被注释与 spread 占满，只取 4 锚点。
+
+下一批候选：computerUse/drainRunLoop(79) · billing(78) · permissions/PermissionUpdateSchema(78) · teleport/environmentSelection(77) · renderOptions(77) · fingerprint(76) · stream(76) · cronJitterConfig(75) · telemetry/events(75) · crossProjectResume(75)。

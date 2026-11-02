@@ -1,0 +1,10 @@
+src/utils/hooks/hookHelpers.ts
+src/utils/claudeInChrome/prompt.ts
+src/utils/which.ts
+src/utils/teamDiscovery.ts
+src/utils/formatBriefTimestamp.ts
+src/utils/settings/mdm/constants.ts
+src/utils/awsAuthStatusManager.ts
+src/utils/permissions/dangerousPatterns.ts
+src/utils/settings/settingsCache.ts
+src/utils/toolPool.ts
