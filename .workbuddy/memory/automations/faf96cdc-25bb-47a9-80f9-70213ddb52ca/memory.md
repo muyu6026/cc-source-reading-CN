@@ -1,5 +1,20 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 86 批（2026-11-02）：utils 小文件十件套（83→79 行档）
+
+- 状态：完成并推送，commit `0ac8637`（c092fb3..0ac8637）。
+- 本批（10 文件，按行数降序 83→79 档）：hooks/hookHelpers(83)/claudeInChrome/prompt(83)/which(82)/teamDiscovery(81)/formatBriefTimestamp(81)/settings/mdm/constants(81)/awsAuthStatusManager(81)/permissions/dangerousPatterns(80)/settings/settingsCache(80)/toolPool(79)。合计 10 文件 811 源行 / 52 锚点。
+- 进度：全仓 993/1902 文件 / 337,667 行 / 65.8%（实算；utils 401/564，剩 163 份）；hooks 104/104、tools 184/184、services 130/130 仍全清。
+- 校验：check-fidelity 993 份 0 失败；check-links 2109 源码链接 + 653 内链 0 失效；annotate.py 十次失败 0、一次 ⟳（prompt.ts 已确认落点）、零 ⚠。
+- 下一批目标（utils 按行数降序）：computerUse/drainRunLoop(79) · billing(78) · permissions/PermissionUpdateSchema(78) · teleport/environmentSelection(77) · renderOptions(77) · fingerprint(76) · stream(76) · cronJitterConfig(75) · telemetry/events(75) · crossProjectResume(75)。
+
+### 本批经验（下次先看）
+- **整文件都是模板字符串时，方案定型为「before 锚注释块首行 + 一个文件级」**：`claudeInChrome/prompt.ts` 83 行里 3 段长模板串，5 个锚点里 4 个用 `before` 落 `/**` 首行，文件级 `(1,'before')` 触发了 `⟳ 1→1`（判定为落进字符串内部后外移），实测落点在常量声明之前、通顺。写这类文件前先 `grep -n '`'` 看字符串边界。
+- **单行块注释（`/* eslint-disable */` 这类）同样不能 `after` 落 `*/` 行**：`toolPool.ts` 第 20/25 行就是这种，改锚第 24 行（三元收尾 `: null`）。规矩 8 说的是块注释收尾行，不分长短。
+- **注释与 spread 占满数组体时锚点自然稀疏**：`dangerousPatterns.ts` 80 行只给了 4 个锚点（跨平台清单收尾、通用前缀段、内部构建段收尾、数组收尾），不必硬凑。
+- **预检脚本的块注释内部行号扫描继续零命中**：本批 10 份全过，说明「先扫块注释再挑锚点」这个前置动作有效，比事后 check-fidelity 拦早一轮。
+- **上一批候选清单的顺序可能和脚本实际排序不一致**：第 85 批候选把 `drainRunLoop(79)` 写在 `toolPool(79)` 前面，实际脚本是 toolPool 在前。本批顺手把该行改为 toolPool；以后写候选行直接复制 `check-coverage.py` 输出前 10 行，不手工排。
+
 ## 第 85 批（2026-11-02）：utils 小文件十件套（88→84 行档）
 
 - 状态：完成并推送，commit `d560ea3`（8830698..d560ea3）。
