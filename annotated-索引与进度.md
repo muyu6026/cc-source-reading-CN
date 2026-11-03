@@ -3090,7 +3090,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1172 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2294 条加内链 674 条，0 失效；全仓 1172/1902 文件、360,066/513,237 行、70%（行覆盖首次破 70%）。
 
-**下一批候选（components 降序，建议取 4 份约 2,400 行）**：`permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637) · `ConsoleOAuthFlow.tsx`(631) · `Feedback.tsx`(592) · `hooks/HooksConfigMenu.tsx`(578) · `Spinner.tsx`(562) · `agents/ToolSelector.tsx`(562) · `LogoV2/LogoV2.tsx`(543) …（components 已做 82/389，剩 307 份；全仓还剩 730 份）。
+### components 第 108 批：权限请求表单、全屏布局壳、OAuth 登录流程、反馈上报（2,505 行，126 锚点）
+
+第六批 components，按源行量取件：4 份共 2,505 行（645 / 637 / 631 / 592）。四份的主题是**「用户对话框的四种门面」**——向用户提问的权限表单（多问题页签加图片粘贴）、REPL 全屏布局壳（粘性滚动加未读 pill）、OAuth 登录状态机（八态加浏览器回跳兜底）、反馈上报对话框（四步流加脱敏与 GitHub issue 拼链）。四份都重交互、都靠状态机驱动画面，读法一致：先抓状态类型，再看动作分派，最后看渲染分支。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx) | 645 | 677 | 31 | 提问权限表单：语法高亮走 Suspense 加 use 挂起；尺寸预算（预览框分栏公式、chrome 15 行开销）；每问题独立粘贴图片；四种终点（取消 / 向 Claude 回话 / 结束计划访谈 / 提交回答）全部带遥测来源 |
+| [`components/FullscreenLayout.tsx`](annotated/src/components/FullscreenLayout.tsx) | 637 | 669 | 31 | 全屏布局壳：useUnseenDivider 的 count 与 scrollHeight 双快照；未读计数跳过纯工具条目并下限 1；pillVisible 用 useSyncExternalStore 订阅滚动；粘性头固定 1 行防位移；模态弹层包 ModalContext 下发尺寸 |
+| [`components/ConsoleOAuthFlow.tsx`](annotated/src/components/ConsoleOAuthFlow.tsx) | 631 | 662 | 30 | OAuth 登录状态机：八态联合类型加 switch 分派；toRetry 与 nextState 让失败回到正确状态；浏览器回跳 3 秒后出粘贴提示；单字符 c 复制 URL；企业 TLS 代理的 SSL 错误转可行动提示；setup-token 一年期令牌不进钥匙串 |
+| [`components/Feedback.tsx`](annotated/src/components/Feedback.tsx) | 592 | 627 | 34 | 反馈上报：四步流（输入 / 同意 / 提交 / 完成）；redactSensitiveInfo 逐类替换凭证；报告含转录、子代理转录、内存错误与环境信息；标题由 Haiku 生成带兜底；GitHub issue 链接按 7250 字符预算三段式截断；ZDR 组织专属文案 |
+
+横切观察：
+
+- **状态机形态两极，按「画面内多步」与「跨异步阶段」分工**：AskUserQuestion 用 hook 内的 reducer（useMultipleChoiceState），把当前问题下标、答案表、每问题文本状态塞进一个状态对象，四种终点动作彼此平级；ConsoleOAuthFlow 用联合类型加 switch，八态互斥，靠 toRetry 与 nextState 两个字段把失败引回正确的那一态。前者适合同一画面内翻页式多步，后者适合跨异步阶段（浏览器、交换令牌、建 key）的流转。
+- **拒绝不等于失败，权限通道被复用成澄清通道**：AskUserQuestion 的三种非提交终点全部走 toolUseConfirm 的 onReject，其中「向 Claude 回话」与「结束计划访谈」把拼好的反馈文本加图片块当作拒绝理由回传模型——工具调用被否，但上下文又塞回去了。这是整套权限框架里最巧的一处设计：一条通道同时承载「不同意」与「换个方式继续」。
+- **布局层的取舍全指向「滚动期间不产生位移」**：FullscreenLayout 的粘性头强制固定 1 行（注释写明变高会让 DECSTBM 区域顶跟着动、diff 引擎看到全部移动），pill 用 useSyncExternalStore 订阅滚动只在布尔翻转时重渲染，分隔线 y 存 ref 不存 state。三个决定共同服务于「用户滚动时画面不跳」。
+- **上传前的清洗是三道而非一道**：Feedback 先脱敏报告内容（API key、云厂商凭证、请求头、环境变量赋值），再在拼 GitHub 链接时对标题与描述二次脱敏，最后按 URL 长度预算截断且不切断百分号转义序列。日志、报告、外链三条出口各自过清洗，不共用结果——任何一条漏了都会把凭证带出去。
+
+踩坑：四份均为 React Compiler 产物（`_c()` 记忆槽加 `$[n]` 依赖比较），JSX 内部零插入，锚点全落语句行、`case` 行、`if` 行与函数签名行；多处 `/** */` 文档块（FullscreenLayout 19 / 22–25 / 69–85 / 461–467 / 539–550 / 591–598 / 618–620，AskUserQuestion 22–25、28）均用 `before` 落签名或常量行规避块内。Feedback 的模板字符串（bodyPrefix 399 行、generateTitle 系统提示 450 行）与 AskUserQuestion 的反馈模板（301–306、341–344）内部零锚点。预检 126 锚点一次全过（含块注释内部续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⟳`、零 `⚠`，四份各有 1 处长批注被自动折行，故增量（130 行）比锚点数（126）多 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1176 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2298 条加内链 675 条，0 失效；全仓 1176/1902 文件、362,571/513,237 行、71%。
+
+**下一批候选（components 降序，建议取 4 份约 2,200 行）**：`hooks/HooksConfigMenu.tsx`(578) · `agents/ToolSelector.tsx`(562) · `Spinner.tsx`(562) · `LogoV2/LogoV2.tsx`(543) · `mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487) …（components 已做 86/389，剩 303 份；全仓还剩 726 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
