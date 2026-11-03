@@ -67,14 +67,14 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 **怎么验证没改坏原文**：跑 `python scripts/check-fidelity.py`。它把批注版拆成「代码行 / 注释行 / 批注行」三堆，然后六条判据：
 
-| # | 判据 | 拦什么 |
-| --- | --- | --- |
-| 1【硬】 | 代码行与原文**逐行完全相等** | 少一个 `}` 也会被点名 |
-| 2【硬】 | 原文每行注释按原顺序出现在批注版里 | 英文被改写、被挤出顺序 |
-| 3【硬】 | 块注释内部不许出现中文 | `/** */` 被中文从中间截断（语法合法，但难读） |
-| 4【硬】 | 多行模板字符串内部不许出现中文 | 注释变成提示词正文（**代码行为被改变**） |
-| 5【硬】 | 不劈开未结束的多行表达式 | `const x =` 后面插一段再给值 |
-| 6【硬】 | 批注版不得含控制字符 | 批注里的 `\n`、`\0`、`\x1b` 被 Python 转义成真实字节（NUL 会让 `grep` 把文件当二进制，ESC 直接把转义序列写进源码） |
+| #    | 判据                | 拦什么                                                                           |
+| ---- | ----------------- | ----------------------------------------------------------------------------- |
+| 1【硬】 | 代码行与原文**逐行完全相等**  | 少一个 `}` 也会被点名                                                                 |
+| 2【硬】 | 原文每行注释按原顺序出现在批注版里 | 英文被改写、被挤出顺序                                                                   |
+| 3【硬】 | 块注释内部不许出现中文       | `/** */` 被中文从中间截断（语法合法，但难读）                                                   |
+| 4【硬】 | 多行模板字符串内部不许出现中文   | 注释变成提示词正文（**代码行为被改变**）                                                        |
+| 5【硬】 | 不劈开未结束的多行表达式      | `const x =` 后面插一段再给值                                                          |
+| 6【硬】 | 批注版不得含控制字符        | 批注里的 `\n`、`\0`、`\x1b` 被 Python 转义成真实字节（NUL 会让 `grep` 把文件当二进制，ESC 直接把转义序列写进源码） |
 
 另外还有一条软统计：每个文件多了多少行注释，用来发现「批注密度突然异常」。
 
@@ -91,22 +91,23 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 ---
 
+
 ## 进度总表
 
-| 学习路线的步骤                 | 涉及文件                                                                               | 批注版位置                                                                                                                                                                                                                                                                                                       | 状态     |
-| ----------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| **第 1 步** 先认门面（30 分钟）   | `package.json`                                                                     | [`package.json.annotated.md`](annotated/package.json.annotated.md)                                                                                                                                                                                                                                          | ✅ 完成   |
-|                         | `README.md`（仓库自带的）                                                                 | [`README.annotated.md`](annotated/README.annotated.md)                                                                                                                                                                                                                                                      | ✅ 完成   |
-|                         | `src/entrypoints/cli.tsx`（302 行，全文件）                                               | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx)                                                                                                                                                                                                                                              | ✅ 完成   |
-| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行）                                                | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts)                                                                                                                                                                                                                                      | ✅ 完成   |
-|                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                                                                                                                                | ✅ 完成   |
-| **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                    | ✅ 完成   |
-| **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅ | ✅ 完成   |
-| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                         | ✅ 完成   |
+| 学习路线的步骤                 | 涉及文件                                                                               | 批注版位置                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 状态                               |
+| ----------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **第 1 步** 先认门面（30 分钟）   | `package.json`                                                                     | [`package.json.annotated.md`](annotated/package.json.annotated.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ✅ 完成                             |
+|                         | `README.md`（仓库自带的）                                                                 | [`README.annotated.md`](annotated/README.annotated.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ✅ 完成                             |
+|                         | `src/entrypoints/cli.tsx`（302 行，全文件）                                               | [`src/entrypoints/cli.tsx`](annotated/src/entrypoints/cli.tsx)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ✅ 完成                             |
+| **第 2 步** 读一个最小模块（1 小时） | `src/commands/clear/index.ts`（19 行）                                                | [`src/commands/clear/index.ts`](annotated/src/commands/clear/index.ts)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ✅ 完成                             |
+|                         | `src/tools/BashTool/commandSemantics.ts`（141 行）                                    | [`src/tools/BashTool/commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | ✅ 完成                             |
+| **第 3 步** 读初始化流程（2 小时）  | `src/setup.ts`（477 行）                                                              | [`src/setup.ts`](annotated/src/setup.ts)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ✅ 完成                             |
+| **第 4 步** 读工具系统（半天）★    | `src/Tool.ts`、`src/tools.ts`、`BashTool/`                                           | [`Tool.ts`](annotated/src/Tool.ts) ✅<br />[`tools.ts`](annotated/src/tools.ts) ✅<br />[`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx) ✅<br />[`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts) ✅<br />[`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts) ✅                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ✅ 完成                             |
+| **第 5 步** 读主循环（1 天）★★   | `src/constants/prompts.ts`、`src/query.ts`、`src/QueryEngine.ts`、`src/services/api/` | [`prompts.ts`](annotated/src/constants/prompts.ts) ✅<br />[`query.ts`](annotated/src/query.ts) ✅<br />[`QueryEngine.ts`](annotated/src/QueryEngine.ts) ✅<br />[`claude.ts`](annotated/src/services/api/claude.ts) ✅                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | ✅ 完成                             |
 | **第 6 步** 读服务层（半天）      | `src/services/` 各模块                                                                | [`api/` 全 20 份](annotated/src/services/api/) ✅<br />[`compact/` 全 11 份](annotated/src/services/compact/) ✅<br />[`mcp/` 全 23 份](annotated/src/services/mcp/) ✅<br />[`oauth/` 全 5 份](annotated/src/services/oauth/) ✅<br />[`tools/` 全 4 份](annotated/src/services/tools/) ✅<br />[`lsp/` 全 7 份](annotated/src/services/lsp/) ✅<br />[`SessionMemory/` 全 3 份](annotated/src/services/SessionMemory/) ✅<br />[`analytics/` 全 9 份](annotated/src/services/analytics/) ✅<br />[`teamMemorySync/` 全 5 份](annotated/src/services/teamMemorySync/) ✅<br />[`PromptSuggestion/` 全 2 份](annotated/src/services/PromptSuggestion/) ✅<br />[`plugins/` 全 3 份](annotated/src/services/plugins/) ✅<br />[`extractMemories/` 全 2 份](annotated/src/services/extractMemories/) ✅<br />[`tips/` 全 3 份](annotated/src/services/tips/) ✅<br />[`settingsSync/` 全 2 份](annotated/src/services/settingsSync/) ✅<br />[`autoDream/` 全 4 份](annotated/src/services/autoDream/) ✅<br />[`MagicDocs/` 全 2 份](annotated/src/services/MagicDocs/) ✅<br />[`policyLimits/` 全 2 份](annotated/src/services/policyLimits/) ✅<br />[`AgentSummary/`](annotated/src/services/AgentSummary/) + [`toolUseSummary/`](annotated/src/services/toolUseSummary/) + 根目录 6 散件 ✅ | ✅ 全目录清零<br />130/130 文件（100% 行数） |
-| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅ | ✅ 多智能体主线完成 |
-| **第 8 步** 终端渲染器（进阶，可选） | `src/ink/`（自研 Ink，1.98 万行）                                                        | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅ | ✅ 九十六份全通<br />（`src/ink/` 清零） |
-| **第 9 步** 产品界面层（可选） | `src/components/`（8.2 万行，389 个文件） | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行） | 🚧 消息主链 + 输入框 + 消息体（66/389） |
+| **第 7 步** UI 与多智能体（可选）  | `src/components/`、`src/ink/`、`src/coordinator/`                                    | [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) ✅<br />[`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) ✅<br />[`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) ✅<br />[`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) ✅                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ✅ 多智能体主线完成                       |
+| **第 8 步** 终端渲染器（进阶，可选）  | `src/ink/`（自研 Ink，1.98 万行）                                                         | [`reconciler.ts`](annotated/src/ink/reconciler.ts) ✅<br />[`dom.ts`](annotated/src/ink/dom.ts) ✅<br />[`ink.tsx`](annotated/src/ink/ink.tsx) ✅<br />[`screen.ts`](annotated/src/ink/screen.ts) ✅<br />[`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) ✅<br />[`log-update.ts`](annotated/src/ink/log-update.ts) ✅<br />[`output.ts`](annotated/src/ink/output.ts) ✅<br />[`styles.ts`](annotated/src/ink/styles.ts) ✅<br />[`colorize.ts`](annotated/src/ink/colorize.ts) ✅<br />[`stringWidth.ts`](annotated/src/ink/stringWidth.ts) ✅<br />[`Ansi.tsx`](annotated/src/ink/Ansi.tsx) ✅<br />[`parse-keypress.ts`](annotated/src/ink/parse-keypress.ts) ✅<br />[`selection.ts`](annotated/src/ink/selection.ts) ✅<br />[`hit-test.ts`](annotated/src/ink/hit-test.ts) ✅<br />[`render-border.ts`](annotated/src/ink/render-border.ts) ✅<br />[`ink/` 其余 31 个小件](annotated/src/ink/) ✅<br />[`components/`](annotated/src/ink/components/) + [`hooks/`](annotated/src/ink/hooks/) + [`events/`](annotated/src/ink/events/) ✅                                                                                                                                                                                   | ✅ 九十六份全通<br />（`src/ink/` 清零）    |
+| **第 9 步** 产品界面层（可选）     | `src/components/`（8.2 万行，389 个文件）                                                  | [`Messages.tsx`](annotated/src/components/Messages.tsx) ✅<br />[`MessageRow.tsx`](annotated/src/components/MessageRow.tsx) ✅<br />[`Message.tsx`](annotated/src/components/Message.tsx) ✅<br />[`messageActions.tsx`](annotated/src/components/messageActions.tsx) ✅<br />[`PromptInput/` 全 21 份](annotated/src/components/PromptInput/) ✅（含 `PromptInput.tsx` 2,338 行）<br />[`messages/` 全 41 份](annotated/src/components/messages/) ✅（含 `SystemTextMessage.tsx` 827 行、`AttachmentMessage.tsx` 536 行）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 🚧 消息主链 + 输入框 + 消息体 + 任务 / 搜索 / 权限 / 设置组件等（120/389）      |
 
 ---
 
@@ -118,7 +119,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>\*\*只有 1 个\** —— 就是 \`cli.tsx\` 自己。</summary>
+<summary>\\\*\\\*只有 1 个\\\** —— 就是 \\\`cli.tsx\\\` 自己。</summary>
 
 `cli.tsx` 第 37-42 行：只要参数正好是一个 `--version` / `-v` / `-V`，直接 `console.log` 后 `return`，连 `startupProfiler` 都还没加载。文件头注释里那句 `Fast-path for --version has zero imports beyond this file`（译：--version 这条快速路径除了本文件之外零导入）说的就是这个。
 
@@ -128,7 +129,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>\*\*为了让「快速路径」不加载用不上的模块。\*\*</summary>
+<summary>\\\*\\\*为了让「快速路径」不加载用不上的模块。\\\*\\\*</summary>
 
 `main.js` 有 789 KB、4600 行。如果顶部就 `import { main } from '../main.js'`，那么连 `claude --version` 都得先把这 789 KB 解析、求值一遍，启动要慢上千毫秒。写成动态 `await import()`，只有真正走到那一步才加载。
 
@@ -140,7 +141,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>\*\*被打包器（Bun）内联进产物了。\*\*</summary>
+<summary>\\\*\\\*被打包器（Bun）内联进产物了。\\\*\\\*</summary>
 
 发布出去的是一个自包含的包，所有依赖的代码都被塞进了最终产物文件里，所以 `package.json` 不需要声明依赖。
 
@@ -158,7 +159,7 @@ process.env.COREPACK_ENABLE_AUTO_PIN = '0';
 
 <details>
 
-<summary>加载发生在 \*\*\`src/utils/processUserInput/processSlashCommand.tsx:668\`\*\*：</summary>
+<summary>加载发生在 \\\*\\\*\\\`src/utils/processUserInput/processSlashCommand.tsx:668\\\`\\\*\\\*：</summary>
 
 ```ts
 const mod = await command.load()   // ← 到这一行才真的去读 clear.js
@@ -175,7 +176,7 @@ const result = await mod.call(args, context)
 
 <details>
 
-<summary>后果：\*\*\`-p\`（headless / 管道脚本）模式下 \`/clear\` 根本不在命令列表里\*\*，敲了也匹配不到。</summary>
+<summary>后果：\\\*\\\*\\\`-p\\\`（headless / 管道脚本）模式下 \\\`/clear\\\` 根本不在命令列表里\\\*\\\*，敲了也匹配不到。</summary>
 
 管这事的是 `src/main.tsx:2622`：
 
@@ -195,7 +196,7 @@ commands.filter(command =>
 
 <details>
 
-<summary>\*\*退出码 1 → 算成功。\** 查表命中 \`grep\` 条目，\`isError = exitCode >= 2\` → \`1 >= 2\` 为 false，于是不抛错，输出照常交给模型。</summary>
+<summary>\\\*\\\*退出码 1 → 算成功。\\\** 查表命中 \\\`grep\\\` 条目，\\\`isError = exitCode >= 2\\\` → \\\`1 >= 2\\\` 为 false，于是不抛错，输出照常交给模型。</summary>
 
 **退出码 2 → 算失败。**（grep 的 2 通常是正则语法错误、文件读不了这类真问题。）此时 `isError` 为 true，`BashTool.tsx:714` 会：
 
@@ -211,7 +212,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>\*\*第一问\*\*：\`splitCommand_DEPRECATED\` 按 \`&&\` 拆成两段 → 取\*\*最后一段\** \`grep -r foo .\` → 取首词 \`grep\` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。</summary>
+<summary>\\\*\\\*第一问\\\*\\\*：\\\`splitCommand_DEPRECATED\\\` 按 \\\`&&\\\` 拆成两段 → 取\\\*\\\*最后一段\\\** \\\`grep -r foo .\\\` → 取首词 \\\`grep\\\` → 命中表。取最后一段是因为 shell 的退出码 = 最后执行的那条命令。</summary>
 
 **第二问**：`||` 的情况，最后一段是 `echo none`，于是查 `echo` → 查不到 → 走默认语义（非 0 即错）。但真实退出码是 `echo` 的 0，所以这次判断**碰巧不算错**；反过来 `grep foo x | head` 的退出码其实来自 `head`（管道最后一段），也会和直觉不同。
 
@@ -231,12 +232,11 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-因为 hook 配置是从 \*\*\`<cwd>/.claude/settings.json\`\** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。
+<summary>因为 hook 配置是从 \*\*\`<cwd>/.claude/settings.json\`\** 读的。cwd 没定就去抓快照，读到的可能是上一个目录的配置。</summary>
 
 症状很隐蔽：**不报错**，只表现为"我的 hook 有时候生效、有时候不生效"，或者"在 A 项目里配的 hook 在 B 项目也触发了"。这类"顺序错了但不崩"的 bug 最难查。
 
 源码里连写两行大写 `IMPORTANT` 就是在防这件事。
-
 
 </details>
 
@@ -244,7 +244,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>\*\*bug\*\*：内置技能/插件的注册原先写在 \`setup()\` 里，但它前面有约 20ms 的 \`await\`（UDS socket）。而并行的 \`getCommands()\` 已经跑完并 \*\*memoize\** 了结果 —— 缓存里没有内置技能。等 \`setup()\` 走到注册那一步，命令表早就定死了。</summary>
+<summary>\\\*\\\*bug\\\*\\\*：内置技能/插件的注册原先写在 \\\`setup()\\\` 里，但它前面有约 20ms 的 \\\`await\\\`（UDS socket）。而并行的 \\\`getCommands()\\\` 已经跑完并 \\\*\\\*memoize\\\** 了结果 —— 缓存里没有内置技能。等 \\\`setup()\\\` 走到注册那一步，命令表早就定死了。</summary>
 
 **修法**：不是加锁，而是把注册**挪到并行启动点之前**（`main.tsx:1923-1926`），让它变成纯内存的数组 push（<1ms、零 IO），必然先于 `getCommands()`。
 
@@ -258,7 +258,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>\`void\` \*\*不改变任何运行时行为\** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"</summary>
+<summary>\\\`void\\\` \\\*\\\*不改变任何运行时行为\\\** —— 它只是告诉读代码的人和 lint 工具："我知道这是个 Promise，我故意不等它。"</summary>
 
 目的：让"装监听器 / 抢锁 / 预热缓存"这类工作不拖慢启动。
 
@@ -270,7 +270,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>\*\*两道闸\*\*：</summary>
+<summary>\\\*\\\*两道闸\\\*\\\*：</summary>
 
 1. **root 检查**（对所有平台）：是 root 且不在沙箱（`IS_SANDBOX` / bubblewrap 都没有）→ 直接退出。
 2. **沙箱 + 断网检查**（仅内部员工、排除 Desktop 两个入口）：必须 `isSandboxed && !hasInternet`。也就是"不在沙箱"或"能上网"都拒绝 —— 因为在沙箱里且离线时，模型乱来的破坏范围被容器和断网限制住了。
@@ -289,7 +289,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>因为它是\*\*能力凭证\*\*，不是\*\*环境\*\*。</summary>
+<summary>因为它是\\\*\\\*能力凭证\\\*\\\*，不是\\\*\\\*环境\\\*\\\*。</summary>
 
 实测：没有任何一个工具在自己的 `call()` 里调用它（5 个工具直接把它命名为 `_canUseTool`，下划线表示不用）。它真正的用途是**往下传** —— `AgentTool`、`SendMessageTool`、`SkillTool` 把它递给子代理的 `runAgent()`，因为子代理执行工具时也要过权限关。
 
@@ -314,7 +314,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>不行，因为 `Infinity` 在这里是**哨兵值**，不是"一个很大的数"。</summary>
+<summary>不行，因为 \`Infinity\` 在这里是\*\*哨兵值\*\*，不是"一个很大的数"。</summary>
 
 `query.ts:391` 是这么筛的：
 
@@ -332,7 +332,7 @@ throw new ShellError('', outputWithSbFailures, result.code, result.interrupted)
 
 <details>
 
-<summary>它的 \`isConcurrencySafe()\` 返回了 \`true\`。</summary>
+<summary>它的 \\\`isConcurrencySafe()\\\` 返回了 \\\`true\\\`。</summary>
 
 `Tool.ts:329` 那句注释是全文最容易被忽略的一句：**"contextModifier is only honored for tools that aren't concurrency safe."**
 
@@ -493,7 +493,6 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 会话落盘有一个 100ms 延迟队列，它持有的是 `message.message` 的**引用**，真正序列化时才读值。写 `lastMsg.message = { ...lastMsg.message, usage }` 会换掉引用，队列里的旧引用仍然指向 `output_tokens: 0`、`stop_reason: null` 的版本 —— 落盘后成本统计全是 0，而且几乎无法排查。
 
-
 **④ 流式失败后降级到非流式，什么情况下**不允许**降级？**
 
 开了「流式工具执行」的时候（`inc-4258`）。流式那半截可能已经收到 `tool_use` 并开始执行工具，降级重放会让同一个工具跑第二遍 —— 写文件、发请求、删数据这类有副作用的操作被执行两次。所以宁可直接失败让 `withRetry` 重来。
@@ -524,222 +523,222 @@ if (!tool.isConcurrencySafe && contextModifiers.length > 0) {
 
 ## 第 6 步（服务层）做到哪了？——全目录清零，130/130
 
-`src/services/` 是整份源码里最大的目录：**130 个文件 / 53,683 行**。
-它不是「一个模块」，而是十几个互不相干的模块挤在同一个目录名下
-（API 客户端、压缩、MCP、OAuth、LSP、遥测、语音、插件管理……）。
+`src/services/` 是整份源码里最大的目录：**130 个文件 / 53,683 行**。  
+它不是「一个模块」，而是十几个互不相干的模块挤在同一个目录名下  
+（API 客户端、压缩、MCP、OAuth、LSP、遥测、语音、插件管理……）。  
 **这一目录已 100% 完成**：20 个子目录全部清零，根目录 6 份散件也已做完。
 
-所以这一节的进度**按子目录报，不按「第几步」报**。
-之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——
-当时全目录只做了 35 份，`services/api/` 还有 18 份没动，
-而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。
+所以这一节的进度**按子目录报，不按「第几步」报**。  
+之前这里写过「✅ 完成（含 16 个小件）」，那是不实的 ——  
+当时全目录只做了 35 份，`services/api/` 还有 18 份没动，  
+而「一次请求怎么发出去、怎么失败、怎么记账」这件事恰恰全在那 18 份里。  
 现在连根目录散件都清零了：
 
-| 子目录                     | 文件    | 原文行数      | 中文批注行 | 状态      |
-| ----------------------- | ----- | --------- | ----- | ------- |
-| `services/mcp/`         | 23/23 | 12,311    | 4,414 | ✅ 清零    |
-| `services/api/`         | 20/20 | 10,477    | 2,807 | ✅ 清零    |
-| `services/compact/`     | 11/11 | 3,960     | 3,407 | ✅ 清零    |
-| `services/lsp/`         | 7/7   | 2,460     | 642   | ✅ 清零    |
-| `services/oauth/`       | 5/5   | 1,051     | 325   | ✅ 清零    |
-| `services/tools/`       | 4/4   | 3,113     | 292   | ✅ 清零    |
-| `services/SessionMemory/` | 3/3 | 1,026     | 312   | ✅ 清零    |
-| `services/analytics/`    | 9/9   | 4,040     | 436   | ✅ 清零    |
-| `services/teamMemorySync/` | 5/5 | 2,167     | 266   | ✅ 清零    |
-| `services/PromptSuggestion/` | 2/2 | 1,514     | 34    | ✅ 清零    |
-| `services/plugins/`         | 3/3 | 1,616     | 39    | ✅ 清零    |
-| `services/remoteManagedSettings/` | 5/5 | 950     | 167   | ✅ 清零    |
-| `services/extractMemories/` | 2/2 | 769     | 32    | ✅ 清零    |
-| `services/tips/` | 3/3 | 761     | 25    | ✅ 清零    |
-| `services/settingsSync/` | 2/2 | 648     | 26    | ✅ 清零    |
-| `services/policyLimits/` | 2/2 | 690     | 27    | ✅ 清零    |
-| `services/autoDream/` | 4/4 | 550     | 33    | ✅ 清零    |
-| `services/MagicDocs/` | 2/2 | 381     | 19    | ✅ 清零    |
-| `services/AgentSummary/` | 1/1 | 179     | 13    | ✅ 清零    |
-| `services/toolUseSummary/` | 1/1 | 112     | 7     | ✅ 清零    |
-| `services/` 根目录 6 份散件 | 6/6 | 549     | 36    | ✅ 清零    |
-| **合计**                  | **130/130** | **53,683 / 53,683（100%）** | **13,381** | ✅ 全目录清零 |
+| 子目录                               | 文件          | 原文行数                      | 中文批注行      | 状态      |
+| --------------------------------- | ----------- | ------------------------- | ---------- | ------- |
+| `services/mcp/`                   | 23/23       | 12,311                    | 4,414      | ✅ 清零    |
+| `services/api/`                   | 20/20       | 10,477                    | 2,807      | ✅ 清零    |
+| `services/compact/`               | 11/11       | 3,960                     | 3,407      | ✅ 清零    |
+| `services/lsp/`                   | 7/7         | 2,460                     | 642        | ✅ 清零    |
+| `services/oauth/`                 | 5/5         | 1,051                     | 325        | ✅ 清零    |
+| `services/tools/`                 | 4/4         | 3,113                     | 292        | ✅ 清零    |
+| `services/SessionMemory/`         | 3/3         | 1,026                     | 312        | ✅ 清零    |
+| `services/analytics/`             | 9/9         | 4,040                     | 436        | ✅ 清零    |
+| `services/teamMemorySync/`        | 5/5         | 2,167                     | 266        | ✅ 清零    |
+| `services/PromptSuggestion/`      | 2/2         | 1,514                     | 34         | ✅ 清零    |
+| `services/plugins/`               | 3/3         | 1,616                     | 39         | ✅ 清零    |
+| `services/remoteManagedSettings/` | 5/5         | 950                       | 167        | ✅ 清零    |
+| `services/extractMemories/`       | 2/2         | 769                       | 32         | ✅ 清零    |
+| `services/tips/`                  | 3/3         | 761                       | 25         | ✅ 清零    |
+| `services/settingsSync/`          | 2/2         | 648                       | 26         | ✅ 清零    |
+| `services/policyLimits/`          | 2/2         | 690                       | 27         | ✅ 清零    |
+| `services/autoDream/`             | 4/4         | 550                       | 33         | ✅ 清零    |
+| `services/MagicDocs/`             | 2/2         | 381                       | 19         | ✅ 清零    |
+| `services/AgentSummary/`          | 1/1         | 179                       | 13         | ✅ 清零    |
+| `services/toolUseSummary/`        | 1/1         | 112                       | 7          | ✅ 清零    |
+| `services/` 根目录 6 份散件             | 6/6         | 549                       | 36         | ✅ 清零    |
+| **合计**                            | **130/130** | **53,683 / 53,683（100%）** | **13,381** | ✅ 全目录清零 |
 
-> 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；
-> 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计」大。
-> ⚠️ 2026-10-22 修掉了 check-fidelity 的一个**计数虚高 bug**：`ANN_PREFIXES` 里的
-> `// ─` / `// ═` 会撞上源码自带的同款英文分节符（如 `// ── Search materialized ──`），
-> 批注侧不看 CJK 占比就把它们算成「中文批注」——全仓 170 个文件、688 行被虚高
-> （`pluginOperations.ts` 一个文件就虚高 6 行）。修复后同一份脚本算出的 services
+> 中文批注行数由 `python scripts/check-fidelity.py` 逐文件统计后相加，可复算；  
+> 「原文行数」是源文件总行数（含注释与空行），所以比「代码行合计」大。  
+> ⚠️ 2026-10-22 修掉了 check-fidelity 的一个**计数虚高 bug**：`ANN_PREFIXES` 里的  
+> `// ─` / `// ═` 会撞上源码自带的同款英文分节符（如 `// ── Search materialized ──`），  
+> 批注侧不看 CJK 占比就把它们算成「中文批注」——全仓 170 个文件、688 行被虚高  
+> （`pluginOperations.ts` 一个文件就虚高 6 行）。修复后同一份脚本算出的 services  
 > 合计从 12,959 降到 12,768，差值正是这类英文分节符，不是批注变少了。
 
 ---
 
 ### `services/api/` —— 20 份（一次请求怎么发、怎么失败、怎么记账）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`claude.ts`](annotated/src/services/api/claude.ts) | 3,419 | 4,655 | SSE 解析、缓存打点、sticky latch、三级降级 |
-| [`errors.ts`](annotated/src/services/api/errors.ts) | 1,207 | 1,467 | 错误分类、**错误转 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵 |
-| [`withRetry.ts`](annotated/src/services/api/withRetry.ts) | 822 | 1,418 | 重试边界、退避曲线、529 白名单、无限重试模式 |
-| [`logging.ts`](annotated/src/services/api/logging.ts) | 788 | 988 | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` |
-| [`filesApi.ts`](annotated/src/services/api/filesApi.ts) | 748 | 889 | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越、30 行手写并发池 |
-| [`promptCacheBreakDetection.ts`](annotated/src/services/api/promptCacheBreakDetection.ts) | 727 | 925 | 缓存为什么碎、只追 5 个前缀、`stripCacheControl`、MCP 名脱敏 |
-| [`sessionIngress.ts`](annotated/src/services/api/sessionIngress.ts) | 514 | 618 | 链式追加 + 乐观并发、409 和解、会话级串行 |
-| [`client.ts`](annotated/src/services/api/client.ts) | 389 | 583 | 四级 region 优先级、SDK logger 全走 stderr、只记布尔不记凭据 |
-| [`grove.ts`](annotated/src/services/api/grove.ts) | 357 | 491 | 三态开关、**失败不缓存否则死锁** |
-| [`referral.ts`](annotated/src/services/api/referral.ts) | 281 | 404 | 单飞存 Promise、主入口三条路径都不同步等网络 |
-| [`errorUtils.ts`](annotated/src/services/api/errorUtils.ts) | 260 | 408 | 18 个 OpenSSL 码穷举、沿 `cause` 链挖、两级判断深优先 |
-| [`dumpPrompts.ts`](annotated/src/services/api/dumpPrompts.ts) | 226 | 362 | init 块 + 增量日志、0.01ms 判断省 300ms 序列化 |
-| [`metricsOptOut.ts`](annotated/src/services/api/metricsOptOut.ts) | 159 | 276 | 两层 TTL 的职责划分、**缓存投毒**防御 |
-| [`bootstrap.ts`](annotated/src/services/api/bootstrap.ts) | 141 | 230 | 四道门、重试回调里必须重读 token |
-| [`overageCreditGrant.ts`](annotated/src/services/api/overageCreditGrant.ts) | 137 | 243 | 三个相似缓存三种过期策略 —— 因为这是钱 |
-| [`adminRequests.ts`](annotated/src/services/api/adminRequests.ts) | 119 | 187 | 可辨识联合、交叉类型而非嵌套、幂等 POST |
-| [`usage.ts`](annotated/src/services/api/usage.ts) | 63 | 117 | 三个提前返回 = 失败语义分三级 |
-| [`firstTokenDate.ts`](annotated/src/services/api/firstTokenDate.ts) | 60 | 118 | `!== undefined` 而非 `!x`（null 是有效答案）、写端校验让读端放心 |
-| [`ultrareviewQuota.ts`](annotated/src/services/api/ultrareviewQuota.ts) | 38 | 83 | `X \| null` 不给 undefined/异常、`logForDebugging` 与 `logError` 反推严重性 |
-| [`emptyUsage.ts`](annotated/src/services/api/emptyUsage.ts) | 22 | 73 | 一段注释里的 import 链自白、共享常量必须 `Readonly` |
+| 文件                                                                                        | 原文    | 批注版   | 讲什么                                                              |
+| ----------------------------------------------------------------------------------------- | ----- | ----- | ---------------------------------------------------------------- |
+| [`claude.ts`](annotated/src/services/api/claude.ts)                                       | 3,419 | 4,655 | SSE 解析、缓存打点、sticky latch、三级降级                                    |
+| [`errors.ts`](annotated/src/services/api/errors.ts)                                       | 1,207 | 1,467 | 错误分类、**错误转 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵             |
+| [`withRetry.ts`](annotated/src/services/api/withRetry.ts)                                 | 822   | 1,418 | 重试边界、退避曲线、529 白名单、无限重试模式                                         |
+| [`logging.ts`](annotated/src/services/api/logging.ts)                                     | 788   | 988   | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS`     |
+| [`filesApi.ts`](annotated/src/services/api/filesApi.ts)                                   | 748   | 889   | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越、30 行手写并发池                  |
+| [`promptCacheBreakDetection.ts`](annotated/src/services/api/promptCacheBreakDetection.ts) | 727   | 925   | 缓存为什么碎、只追 5 个前缀、`stripCacheControl`、MCP 名脱敏                      |
+| [`sessionIngress.ts`](annotated/src/services/api/sessionIngress.ts)                       | 514   | 618   | 链式追加 + 乐观并发、409 和解、会话级串行                                         |
+| [`client.ts`](annotated/src/services/api/client.ts)                                       | 389   | 583   | 四级 region 优先级、SDK logger 全走 stderr、只记布尔不记凭据                      |
+| [`grove.ts`](annotated/src/services/api/grove.ts)                                         | 357   | 491   | 三态开关、**失败不缓存否则死锁**                                               |
+| [`referral.ts`](annotated/src/services/api/referral.ts)                                   | 281   | 404   | 单飞存 Promise、主入口三条路径都不同步等网络                                       |
+| [`errorUtils.ts`](annotated/src/services/api/errorUtils.ts)                               | 260   | 408   | 18 个 OpenSSL 码穷举、沿 `cause` 链挖、两级判断深优先                            |
+| [`dumpPrompts.ts`](annotated/src/services/api/dumpPrompts.ts)                             | 226   | 362   | init 块 + 增量日志、0.01ms 判断省 300ms 序列化                               |
+| [`metricsOptOut.ts`](annotated/src/services/api/metricsOptOut.ts)                         | 159   | 276   | 两层 TTL 的职责划分、**缓存投毒**防御                                          |
+| [`bootstrap.ts`](annotated/src/services/api/bootstrap.ts)                                 | 141   | 230   | 四道门、重试回调里必须重读 token                                              |
+| [`overageCreditGrant.ts`](annotated/src/services/api/overageCreditGrant.ts)               | 137   | 243   | 三个相似缓存三种过期策略 —— 因为这是钱                                            |
+| [`adminRequests.ts`](annotated/src/services/api/adminRequests.ts)                         | 119   | 187   | 可辨识联合、交叉类型而非嵌套、幂等 POST                                           |
+| [`usage.ts`](annotated/src/services/api/usage.ts)                                         | 63    | 117   | 三个提前返回 = 失败语义分三级                                                 |
+| [`firstTokenDate.ts`](annotated/src/services/api/firstTokenDate.ts)                       | 60    | 118   | `!== undefined` 而非 `!x`（null 是有效答案）、写端校验让读端放心                    |
+| [`ultrareviewQuota.ts`](annotated/src/services/api/ultrareviewQuota.ts)                   | 38    | 83    | `X \| null` 不给 undefined/异常、`logForDebugging` 与 `logError` 反推严重性 |
+| [`emptyUsage.ts`](annotated/src/services/api/emptyUsage.ts)                               | 22    | 73    | 一段注释里的 import 链自白、共享常量必须 `Readonly`                              |
 
-**这 20 份合起来回答一个问题**：一次 API 调用从发出到记账，中间要过哪些关。
-`client.ts` 造请求 → `claude.ts` 解流 → `withRetry.ts` 管重试 → `errors.ts` 决定
-失败长什么样 → `sessionIngress.ts` 把消息追加到会话 → `logging.ts` 记账。
+**这 20 份合起来回答一个问题**：一次 API 调用从发出到记账，中间要过哪些关。  
+`client.ts` 造请求 → `claude.ts` 解流 → `withRetry.ts` 管重试 → `errors.ts` 决定  
+失败长什么样 → `sessionIngress.ts` 把消息追加到会话 → `logging.ts` 记账。  
 中间那些 `*.ts` 每一份都是这条链上某个具体问题的补丁。
 
 ---
 
 ### `services/compact/` —— 11 份（上下文快满时怎么办）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`compact.ts`](annotated/src/services/compact/compact.ts) | 1,705 | 3,628 | 摘要压缩本体、PTL 逃生舱、七类附件重建 |
-| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630 | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐 |
-| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts) | 530 | 1,352 | 缓存热不热决定改不改本地内容 |
-| [`prompt.ts`](annotated/src/services/compact/prompt.ts) | 374 | 723 | 压缩提示词本体，三套模板的差异与理由 |
-| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts) | 351 | 668 | 阈值计算、四道抑制闸门、三振熔断、session memory 优先 |
-| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts) | 153 | 328 | 发给 API 的 `context_management` 指令（**不调模型**） |
-| [`postCompactCleanup.ts`](annotated/src/services/compact/postCompactCleanup.ts) | 77 | 339 | 压缩后清什么、清哪一层、什么故意不清 |
-| [`grouping.ts`](annotated/src/services/compact/grouping.ts) | 63 | 202 | 按 API 轮次切刀口，以及为什么只有一个判据 |
-| [`timeBasedMCConfig.ts`](annotated/src/services/compact/timeBasedMCConfig.ts) | 43 | 228 | 缓存注定要 miss 时顺手整理上下文 |
-| [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts) | 18 | 71 | 一个布尔量的时序问题 |
-| [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts) | 16 | 105 | 为什么 6 行 hook 要单独一个文件 |
+| 文件                                                                                  | 原文    | 批注版   | 讲什么                                        |
+| ----------------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------ |
+| [`compact.ts`](annotated/src/services/compact/compact.ts)                           | 1,705 | 3,628 | 摘要压缩本体、PTL 逃生舱、七类附件重建                      |
+| [`sessionMemoryCompact.ts`](annotated/src/services/compact/sessionMemoryCompact.ts) | 630   | 1,517 | 零 API 调用的拼接式压缩、82 行索引对齐                    |
+| [`microCompact.ts`](annotated/src/services/compact/microCompact.ts)                 | 530   | 1,352 | 缓存热不热决定改不改本地内容                             |
+| [`prompt.ts`](annotated/src/services/compact/prompt.ts)                             | 374   | 723   | 压缩提示词本体，三套模板的差异与理由                         |
+| [`autoCompact.ts`](annotated/src/services/compact/autoCompact.ts)                   | 351   | 668   | 阈值计算、四道抑制闸门、三振熔断、session memory 优先         |
+| [`apiMicrocompact.ts`](annotated/src/services/compact/apiMicrocompact.ts)           | 153   | 328   | 发给 API 的 `context_management` 指令（**不调模型**） |
+| [`postCompactCleanup.ts`](annotated/src/services/compact/postCompactCleanup.ts)     | 77    | 339   | 压缩后清什么、清哪一层、什么故意不清                         |
+| [`grouping.ts`](annotated/src/services/compact/grouping.ts)                         | 63    | 202   | 按 API 轮次切刀口，以及为什么只有一个判据                    |
+| [`timeBasedMCConfig.ts`](annotated/src/services/compact/timeBasedMCConfig.ts)       | 43    | 228   | 缓存注定要 miss 时顺手整理上下文                        |
+| [`compactWarningState.ts`](annotated/src/services/compact/compactWarningState.ts)   | 18    | 71    | 一个布尔量的时序问题                                 |
+| [`compactWarningHook.ts`](annotated/src/services/compact/compactWarningHook.ts)     | 16    | 105   | 为什么 6 行 hook 要单独一个文件                       |
 
 ---
 
 ### `services/mcp/` —— 23 份（MCP 从「允不允许连」到「接进 UI」）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`client.ts`](annotated/src/services/mcp/client.ts) | 3,348 | 4,775 | 七种 transport、错误桥接、MCP 工具封装 |
-| [`auth.ts`](annotated/src/services/mcp/auth.ts) | 2,465 | 4,355 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁 |
-| [`config.ts`](annotated/src/services/mcp/config.ts) | 1,578 | 3,076 | 六种配置来源、优先级、去重、白黑名单策略 |
-| [`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) | 1,141 | 1,630 | 异步事件 → AppState 的适配层、16ms 批处理 |
-| [`utils.ts`](annotated/src/services/mcp/utils.ts) | 575 | 651 | 名字过滤、配置哈希、过期客户端回收、项目级 server 信任判定 |
-| [`xaa.ts`](annotated/src/services/mcp/xaa.ts) | 511 | 811 | 两跳换票：id_token → ID-JAG → access_token、三道防混淆闸 |
-| [`xaaIdpLogin.ts`](annotated/src/services/mcp/xaaIdpLogin.ts) | 487 | 708 | 一次浏览器弹窗、id_token 按 issuer 缓存、URL 拼接两个坑 |
-| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts) | 316 | 360 | 通道的六道闸 + `<channel>` 标签怎么拼 |
-| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts) | 313 | 360 | server 向人提问（表单 / 打开链接）的整条链路 |
-| [`types.ts`](annotated/src/services/mcp/types.ts) | 258 | 296 | 八种 transport 的配置 schema、连接状态机 |
-| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts) | 240 | 287 | 把审批提示发到手机，等一句 "yes tbxkq" |
-| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts) | 164 | 195 | 从 claude.ai 拉组织下发的 server 列表 |
-| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts) | 138 | 166 | 连之前先跑一条本地命令，拿动态 header |
-| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts) | 136 | 159 | 把 JSON-RPC 套进 control 信封，跨进程 |
-| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts) | 112 | 135 | 和 VSCode 扩展之间的两条 notification |
-| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts) | 106 | 132 | `mcp__server__tool` 的拼与拆 |
-| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts) | 78 | 102 | 回调端口怎么挑（含 Windows 的坑） |
-| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts) | 76 | 90 | 哪些插件被批准可以当通道 |
-| [`MCPConnectionManager.tsx`](annotated/src/services/mcp/MCPConnectionManager.tsx) | 73 | 236 | **React Compiler 编译产物读法**：`_c(6)` 缓存槽、`t0` 临时名、连 JSX 元素也缓存 |
-| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts) | 72 | 92 | 官方 MCP 名单（只用于埋点） |
-| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts) | 63 | 83 | 同进程里的一对假传输 |
-| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts) | 38 | 56 | `${VAR:-默认值}` |
-| [`normalization.ts`](annotated/src/services/mcp/normalization.ts) | 23 | 44 | 把 server 名洗成 `^[a-zA-Z0-9_-]{1,64}$`，claude.ai 前缀额外塌缩下划线 |
+| 文件                                                                                    | 原文    | 批注版   | 讲什么                                                        |
+| ------------------------------------------------------------------------------------- | ----- | ----- | ---------------------------------------------------------- |
+| [`client.ts`](annotated/src/services/mcp/client.ts)                                   | 3,348 | 4,775 | 七种 transport、错误桥接、MCP 工具封装                                 |
+| [`auth.ts`](annotated/src/services/mcp/auth.ts)                                       | 2,465 | 4,355 | OAuth 全流程、XAA、step-up 补丁、跨进程刷新锁                            |
+| [`config.ts`](annotated/src/services/mcp/config.ts)                                   | 1,578 | 3,076 | 六种配置来源、优先级、去重、白黑名单策略                                       |
+| [`useManageMCPConnections.ts`](annotated/src/services/mcp/useManageMCPConnections.ts) | 1,141 | 1,630 | 异步事件 → AppState 的适配层、16ms 批处理                              |
+| [`utils.ts`](annotated/src/services/mcp/utils.ts)                                     | 575   | 651   | 名字过滤、配置哈希、过期客户端回收、项目级 server 信任判定                          |
+| [`xaa.ts`](annotated/src/services/mcp/xaa.ts)                                         | 511   | 811   | 两跳换票：id_token → ID-JAG → access_token、三道防混淆闸               |
+| [`xaaIdpLogin.ts`](annotated/src/services/mcp/xaaIdpLogin.ts)                         | 487   | 708   | 一次浏览器弹窗、id_token 按 issuer 缓存、URL 拼接两个坑                     |
+| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts)         | 316   | 360   | 通道的六道闸 + `<channel>` 标签怎么拼                                 |
+| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts)           | 313   | 360   | server 向人提问（表单 / 打开链接）的整条链路                                |
+| [`types.ts`](annotated/src/services/mcp/types.ts)                                     | 258   | 296   | 八种 transport 的配置 schema、连接状态机                              |
+| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts)           | 240   | 287   | 把审批提示发到手机，等一句 "yes tbxkq"                                  |
+| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts)                               | 164   | 195   | 从 claude.ai 拉组织下发的 server 列表                               |
+| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts)                     | 138   | 166   | 连之前先跑一条本地命令，拿动态 header                                     |
+| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts)         | 136   | 159   | 把 JSON-RPC 套进 control 信封，跨进程                               |
+| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts)                       | 112   | 135   | 和 VSCode 扩展之间的两条 notification                              |
+| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts)                   | 106   | 132   | `mcp__server__tool` 的拼与拆                                   |
+| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts)                             | 78    | 102   | 回调端口怎么挑（含 Windows 的坑）                                      |
+| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts)               | 76    | 90    | 哪些插件被批准可以当通道                                               |
+| [`MCPConnectionManager.tsx`](annotated/src/services/mcp/MCPConnectionManager.tsx)     | 73    | 236   | **React Compiler 编译产物读法**：`_c(6)` 缓存槽、`t0` 临时名、连 JSX 元素也缓存 |
+| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts)               | 72    | 92    | 官方 MCP 名单（只用于埋点）                                           |
+| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts)           | 63    | 83    | 同进程里的一对假传输                                                 |
+| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts)                       | 38    | 56    | `${VAR:-默认值}`                                              |
+| [`normalization.ts`](annotated/src/services/mcp/normalization.ts)                     | 23    | 44    | 把 server 名洗成 `^[a-zA-Z0-9_-]{1,64}$`，claude.ai 前缀额外塌缩下划线   |
 
-MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts`（连上怎么活）
-→ `auth.ts`（401 之后怎么办）→ `xaa*.ts`（不弹窗那条路怎么走），
+MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts`（连上怎么活）  
+→ `auth.ts`（401 之后怎么办）→ `xaa*.ts`（不弹窗那条路怎么走），  
 最后 `useManageMCPConnections.ts` 把它接进 UI，`MCPConnectionManager.tsx` 把两个动作递给组件树。
 
 ---
 
 ### `services/oauth/` —— 5 份（登录一次，之后靠刷新）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`client.ts`](annotated/src/services/oauth/client.ts) | 566 | 744 | 第 187 行注释 = 一次「省 7M 请求/天」的优化差点让订阅类型永久丢失；refresh 扩权依赖后端 `ALLOWED_SCOPE_EXPANSIONS` |
-| [`auth-code-listener.ts`](annotated/src/services/oauth/auth-code-listener.ts) | 211 | 315 | 延迟响应（攥着 `res` 等 token 换完再补 302）、`port ?? 0`、判路径防 favicon 打断 |
-| [`index.ts`](annotated/src/services/oauth/index.ts) | 198 | 323 | 浏览器内/外两条路径赛跑收敛成一个 Promise、`skipBrowserOpen` 由「谁拥有屏幕」决定 |
-| [`getOauthProfile.ts`](annotated/src/services/oauth/getOauthProfile.ts) | 53 | 93 | 两条路对应两种凭据，头组合不能互换 |
-| [`crypto.ts`](annotated/src/services/oauth/crypto.ts) | 23 | 86 | PKCE 三块拼图，base64URL 三次替换（删 `=` 最容易漏） |
+| 文件                                                                            | 原文  | 批注版 | 讲什么                                                                               |
+| ----------------------------------------------------------------------------- | --- | --- | --------------------------------------------------------------------------------- |
+| [`client.ts`](annotated/src/services/oauth/client.ts)                         | 566 | 744 | 第 187 行注释 = 一次「省 7M 请求/天」的优化差点让订阅类型永久丢失；refresh 扩权依赖后端 `ALLOWED_SCOPE_EXPANSIONS` |
+| [`auth-code-listener.ts`](annotated/src/services/oauth/auth-code-listener.ts) | 211 | 315 | 延迟响应（攥着 `res` 等 token 换完再补 302）、`port ?? 0`、判路径防 favicon 打断                       |
+| [`index.ts`](annotated/src/services/oauth/index.ts)                           | 198 | 323 | 浏览器内/外两条路径赛跑收敛成一个 Promise、`skipBrowserOpen` 由「谁拥有屏幕」决定                            |
+| [`getOauthProfile.ts`](annotated/src/services/oauth/getOauthProfile.ts)       | 53  | 93  | 两条路对应两种凭据，头组合不能互换                                                                 |
+| [`crypto.ts`](annotated/src/services/oauth/crypto.ts)                         | 23  | 86  | PKCE 三块拼图，base64URL 三次替换（删 `=` 最容易漏）                                              |
 
 ---
 
 ### `services/tools/` —— 4 份（工具怎么被执行）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`toolExecution.ts`](annotated/src/services/tools/toolExecution.ts) | 1,745 | 1,905 | 九道关；`500ms`/`2000ms` 两个阈值同源于「felt stuck」；`classifyToolError` 对付压缩后的类名 |
-| [`toolHooks.ts`](annotated/src/services/tools/toolHooks.ts) | 650 | 751 | #31301 重复显示 bug；**钩子 `allow` 不绕过 `settings.json` 的 deny**（inc-4788） |
-| [`StreamingToolExecutor.ts`](annotated/src/services/tools/StreamingToolExecutor.ts) | 530 | 649 | 并发 = 多个交错 pass，`status='executing'` 当互斥量；`getAbortReason` 检查顺序即优先级 |
-| [`toolOrchestration.ts`](annotated/src/services/tools/toolOrchestration.ts) | 188 | 284 | `\|\| 10` 兜 `parseInt` 的 NaN；并发批 `contextModifier` 排队后按 blocks 顺序回放 |
+| 文件                                                                                  | 原文    | 批注版   | 讲什么                                                                   |
+| ----------------------------------------------------------------------------------- | ----- | ----- | --------------------------------------------------------------------- |
+| [`toolExecution.ts`](annotated/src/services/tools/toolExecution.ts)                 | 1,745 | 1,905 | 九道关；`500ms`/`2000ms` 两个阈值同源于「felt stuck」；`classifyToolError` 对付压缩后的类名 |
+| [`toolHooks.ts`](annotated/src/services/tools/toolHooks.ts)                         | 650   | 751   | #31301 重复显示 bug；**钩子 `allow` 不绕过 `settings.json` 的 deny**（inc-4788）   |
+| [`StreamingToolExecutor.ts`](annotated/src/services/tools/StreamingToolExecutor.ts) | 530   | 649   | 并发 = 多个交错 pass，`status='executing'` 当互斥量；`getAbortReason` 检查顺序即优先级    |
+| [`toolOrchestration.ts`](annotated/src/services/tools/toolOrchestration.ts)         | 188   | 284   | `\|\| 10` 兜 `parseInt` 的 NaN；并发批 `contextModifier` 排队后按 blocks 顺序回放   |
 
 ---
 
 ### `services/lsp/` —— 7 份（从配置到诊断的完整链路）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`LSPServerInstance.ts`](annotated/src/services/lsp/LSPServerInstance.ts) | 511 | 672 | `-32801 ContentModified` 是可重试错误；duck typing 判错误码（依赖树里有两个版本的 `vscode-jsonrpc`）；`require()` 只为推迟 129KB；僵尸状态 |
-| [`LSPClient.ts`](annotated/src/services/lsp/LSPClient.ts) | 447 | 653 | **`spawn()` 返回 ≠ 启动成功**（ENOENT 是异步事件）；`isStopping` 一个布尔守四个入口；`stop` 里必须 `removeAllListeners` |
-| [`LSPServerManager.ts`](annotated/src/services/lsp/LSPServerManager.ts) | 420 | 583 | 三张 Map 对应三种问题（生命周期 / 路由 / 协议同步）；声明不支持、server 照样发请求；`version: 1` 恒不变的已知不规范 |
-| [`LSPDiagnosticRegistry.ts`](annotated/src/services/lsp/LSPDiagnosticRegistry.ts) | 386 | 521 | 跨轮去重靠 LRU(500)；「先标记已投递再删 pending」必须放在可能失败的去重**之后** |
-| [`passiveFeedback.ts`](annotated/src/services/lsp/passiveFeedback.ts) | 328 | 465 | 缺失 severity 默认 `Error`（漏报比误报贵），而 registry 里默认 `Hint`（排序用）——同一个「未知」在两个语境选相反默认值 |
-| [`manager.ts`](annotated/src/services/lsp/manager.ts) | 289 | 417 | 四态 + generation counter（过期 promise 不许改状态）；issue #15521：memoize + 早期调用 + 缺刷新路径 |
-| [`config.ts`](annotated/src/services/lsp/config.ts) | 79 | 140 | 「LSP 只能通过插件配置」= **安全边界**（配置里有 `command`，等于任意进程执行） |
+| 文件                                                                                | 原文  | 批注版 | 讲什么                                                                                                       |
+| --------------------------------------------------------------------------------- | --- | --- | --------------------------------------------------------------------------------------------------------- |
+| [`LSPServerInstance.ts`](annotated/src/services/lsp/LSPServerInstance.ts)         | 511 | 672 | `-32801 ContentModified` 是可重试错误；duck typing 判错误码（依赖树里有两个版本的 `vscode-jsonrpc`）；`require()` 只为推迟 129KB；僵尸状态 |
+| [`LSPClient.ts`](annotated/src/services/lsp/LSPClient.ts)                         | 447 | 653 | **`spawn()` 返回 ≠ 启动成功**（ENOENT 是异步事件）；`isStopping` 一个布尔守四个入口；`stop` 里必须 `removeAllListeners`              |
+| [`LSPServerManager.ts`](annotated/src/services/lsp/LSPServerManager.ts)           | 420 | 583 | 三张 Map 对应三种问题（生命周期 / 路由 / 协议同步）；声明不支持、server 照样发请求；`version: 1` 恒不变的已知不规范                                 |
+| [`LSPDiagnosticRegistry.ts`](annotated/src/services/lsp/LSPDiagnosticRegistry.ts) | 386 | 521 | 跨轮去重靠 LRU(500)；「先标记已投递再删 pending」必须放在可能失败的去重**之后**                                                        |
+| [`passiveFeedback.ts`](annotated/src/services/lsp/passiveFeedback.ts)             | 328 | 465 | 缺失 severity 默认 `Error`（漏报比误报贵），而 registry 里默认 `Hint`（排序用）——同一个「未知」在两个语境选相反默认值                             |
+| [`manager.ts`](annotated/src/services/lsp/manager.ts)                             | 289 | 417 | 四态 + generation counter（过期 promise 不许改状态）；issue #15521：memoize + 早期调用 + 缺刷新路径                             |
+| [`config.ts`](annotated/src/services/lsp/config.ts)                               | 79  | 140 | 「LSP 只能通过插件配置」= **安全边界**（配置里有 `command`，等于任意进程执行）                                                         |
 
-读这条线的顺序：`config.ts`（谁能配）→ `manager.ts`（什么时候起）→
-`LSPServerManager.ts`（按扩展名路由 + 文件同步）→ `LSPServerInstance.ts`（状态机 + 重试）→
-`LSPClient.ts`（子进程 + JSON-RPC）→ `passiveFeedback.ts`（诊断怎么回来）→
+读这条线的顺序：`config.ts`（谁能配）→ `manager.ts`（什么时候起）→  
+`LSPServerManager.ts`（按扩展名路由 + 文件同步）→ `LSPServerInstance.ts`（状态机 + 重试）→  
+`LSPClient.ts`（子进程 + JSON-RPC）→ `passiveFeedback.ts`（诊断怎么回来）→  
 `LSPDiagnosticRegistry.ts`（诊断怎么等到下一轮）。
 
 ---
 
 ### `services/SessionMemory/` —— 3 份（后台子代理替你记笔记）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`sessionMemory.ts`](annotated/src/services/SessionMemory/sessionMemory.ts) | 495 | 747 | 两处 `_CACHED_MAY_BE_STALE`；用 uuid 而非下标定位起点；token 阈值是永远必需的节流阀；**读文件必须发生在隔离 context**；`canUseTool` 削到「只能改这一个文件」 |
-| [`prompts.ts`](annotated/src/services/SessionMemory/prompts.ts) | 324 | 482 | 模板斜体行是给模型看的字段说明；「不许改斜体行」说三遍；单次 `replace` 防 `$` 反向引用；代码硬截断是「prompt 不可全信」的兜底 |
-| [`sessionMemoryUtils.ts`](annotated/src/services/SessionMemory/sessionMemoryUtils.ts) | 207 | 319 | 15s 等待上限 / 60s 判僵死；阈值用**增量**而非绝对值（否则恒真） |
+| 文件                                                                                    | 原文  | 批注版 | 讲什么                                                                                                          |
+| ------------------------------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------------------------------------------------ |
+| [`sessionMemory.ts`](annotated/src/services/SessionMemory/sessionMemory.ts)           | 495 | 747 | 两处 `_CACHED_MAY_BE_STALE`；用 uuid 而非下标定位起点；token 阈值是永远必需的节流阀；**读文件必须发生在隔离 context**；`canUseTool` 削到「只能改这一个文件」 |
+| [`prompts.ts`](annotated/src/services/SessionMemory/prompts.ts)                       | 324 | 482 | 模板斜体行是给模型看的字段说明；「不许改斜体行」说三遍；单次 `replace` 防 `$` 反向引用；代码硬截断是「prompt 不可全信」的兜底                                   |
+| [`sessionMemoryUtils.ts`](annotated/src/services/SessionMemory/sessionMemoryUtils.ts) | 207 | 319 | 15s 等待上限 / 60s 判僵死；阈值用**增量**而非绝对值（否则恒真）                                                                      |
 
-一句话串起来：`sessionMemoryUtils` 存状态和阈值 → `prompts` 决定「让模型改哪里、改多少」
-→ `sessionMemory` 在合适的时机派一个 forked 子代理去改那一个文件。
+一句话串起来：`sessionMemoryUtils` 存状态和阈值 → `prompts` 决定「让模型改哪里、改多少」  
+→ `sessionMemory` 在合适的时机派一个 forked 子代理去改那一个文件。  
 它是 `compact/sessionMemoryCompact.ts` 的上游。
 
 ---
 
 ### `services/analytics/` —— 9 份（数据怎么离得开本机 + 远端开关怎么下发）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`growthbook.ts`](annotated/src/services/analytics/growthbook.ts) | 1,155 | 1,240 | **引擎**：`processRemoteEvalPayload` 的 `{}` 真值判据（漏检查会让所有开关集体黑屏）；`syncRemoteEvalToDisk` 只在成功路径调用（超时投毒结构上不可能）；`getGrowthBookClient` 用 `client!==thisClient` 守卫处理异步重 init；`checkGate_CACHED_OR_BLOCKING` 的 stale-while-false-blocking；整文件 `@deprecated` 记录从 Statsig 迁到 GrowthBook 的迁移史 |
-| [`metadata.ts`](annotated/src/services/analytics/metadata.ts) | 973 | 1,045 | 所有遥测字段的单一事实来源；`to1PEventFormat` 用 proto 生成的 `EnvironmentMetadata` 类型让「漏字段」从运行时 bug 变编译错误（手写并行类型曾让 #11318/#13924/#19448 全没进 BQ）；`account_id` 故意省略只填 UUID；`kairosActive` 不进 memoized env |
-| [`firstPartyEventLoggingExporter.ts`](annotated/src/services/analytics/firstPartyEventLoggingExporter.ts) | 806 | 880 | 跨进程重启的失败事件恢复（BATCH_UUID+sessionId 隔离）；二次方退避（base*attempts²）；第一批失败即 short-circuit；401 退化为无 auth 重试；`_PROTO_*` hoist 到 proto 字段后再防御性 strip |
-| [`firstPartyEventLogger.ts`](annotated/src/services/analytics/firstPartyEventLogger.ts) | 449 | 512 | OTel logs SDK；自建独立 LoggerProvider 不与客户遥测混；`reinitialize` 三步走（null→forceFlush→swap）的事件丢失安全；`getEnvironmentForGrowthBook` 永远 production |
-| [`datadog.ts`](annotated/src/services/analytics/datadog.ts) | 307 | 364 | pub 公开 token 写死在客户端（只写不读）；44 事件白名单 + 二次基数归一（mcp→mcp / 罕见模型→other）；`status`→`http_status`/`http_status_range` 避开 DD 保留字段；`getUserBucket` 用 sha256 mod 30 代替真实 user id 计数 |
-| [`index.ts`](annotated/src/services/analytics/index.ts) | 173 | 210 | 零依赖防循环；`AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 用命名做 lint；`eventQueue` + `queueMicrotask` 先消费后连接，不阻塞启动 |
-| [`sink.ts`](annotated/src/services/analytics/sink.ts) | 114 | 146 | `shouldTrackDatadog` 三层回退（killswitch→模块态→跨 session 磁盘缓存）；`stripProtoFields` 只在非 1P 后端前调一次守 PII 边界 |
-| [`config.ts`](annotated/src/services/analytics/config.ts) | 38 | 59 | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript） |
-| [`sinkKillswitch.ts`](annotated/src/services/analytics/sinkKillswitch.ts) | 25 | 42 | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈） |
+| 文件                                                                                                        | 原文    | 批注版   | 讲什么                                                                                                                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------- | ----- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`growthbook.ts`](annotated/src/services/analytics/growthbook.ts)                                         | 1,155 | 1,240 | **引擎**：`processRemoteEvalPayload` 的 `{}` 真值判据（漏检查会让所有开关集体黑屏）；`syncRemoteEvalToDisk` 只在成功路径调用（超时投毒结构上不可能）；`getGrowthBookClient` 用 `client!==thisClient` 守卫处理异步重 init；`checkGate_CACHED_OR_BLOCKING` 的 stale-while-false-blocking；整文件 `@deprecated` 记录从 Statsig 迁到 GrowthBook 的迁移史 |
+| [`metadata.ts`](annotated/src/services/analytics/metadata.ts)                                             | 973   | 1,045 | 所有遥测字段的单一事实来源；`to1PEventFormat` 用 proto 生成的 `EnvironmentMetadata` 类型让「漏字段」从运行时 bug 变编译错误（手写并行类型曾让 #11318/#13924/#19448 全没进 BQ）；`account_id` 故意省略只填 UUID；`kairosActive` 不进 memoized env                                                                                           |
+| [`firstPartyEventLoggingExporter.ts`](annotated/src/services/analytics/firstPartyEventLoggingExporter.ts) | 806   | 880   | 跨进程重启的失败事件恢复（BATCH_UUID+sessionId 隔离）；二次方退避（base*attempts²）；第一批失败即 short-circuit；401 退化为无 auth 重试；`_PROTO_*` hoist 到 proto 字段后再防御性 strip                                                                                                                                         |
+| [`firstPartyEventLogger.ts`](annotated/src/services/analytics/firstPartyEventLogger.ts)                   | 449   | 512   | OTel logs SDK；自建独立 LoggerProvider 不与客户遥测混；`reinitialize` 三步走（null→forceFlush→swap）的事件丢失安全；`getEnvironmentForGrowthBook` 永远 production                                                                                                                                            |
+| [`datadog.ts`](annotated/src/services/analytics/datadog.ts)                                               | 307   | 364   | pub 公开 token 写死在客户端（只写不读）；44 事件白名单 + 二次基数归一（mcp→mcp / 罕见模型→other）；`status`→`http_status`/`http_status_range` 避开 DD 保留字段；`getUserBucket` 用 sha256 mod 30 代替真实 user id 计数                                                                                                          |
+| [`index.ts`](annotated/src/services/analytics/index.ts)                                                   | 173   | 210   | 零依赖防循环；`AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 用命名做 lint；`eventQueue` + `queueMicrotask` 先消费后连接，不阻塞启动                                                                                                                                                       |
+| [`sink.ts`](annotated/src/services/analytics/sink.ts)                                                     | 114   | 146   | `shouldTrackDatadog` 三层回退（killswitch→模块态→跨 session 磁盘缓存）；`stripProtoFields` 只在非 1P 后端前调一次守 PII 边界                                                                                                                                                                                |
+| [`config.ts`](annotated/src/services/analytics/config.ts)                                                 | 38    | 59    | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript）                                                                                                                                                                                          |
+| [`sinkKillswitch.ts`](annotated/src/services/analytics/sinkKillswitch.ts)                                 | 25    | 42    | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈）                                                                                                                                                                                                       |
 
 读这条线的顺序：`index.ts`（公共入口、零依赖）→ `config.ts` / `sinkKillswitch.ts`（总开关与熔断）→ `sink.ts`（路由中枢）→ `datadog.ts` + `firstPartyEventLogger.ts` / `firstPartyEventLoggingExporter.ts`（两个后端）→ `metadata.ts`（字段单一事实来源）→ `growthbook.ts`（远端开关引擎）。
 
-一句话串起来：`index.ts` 暴露 `logEvent`，`sink.ts` 决定去哪几个后端，`datadog.ts` / `firstPartyEventLogger.ts` 负责把事件**可靠地**发走，`metadata.ts` 决定**发什么字段**（含 PII 脱敏），`growthbook.ts` 决定**开关和动态配置从哪来**。
+一句话串起来：`index.ts` 暴露 `logEvent`，`sink.ts` 决定去哪几个后端，`datadog.ts` / `firstPartyEventLogger.ts` 负责把事件**可靠地**发走，`metadata.ts` 决定**发什么字段**（含 PII 脱敏），`growthbook.ts` 决定**开关和动态配置从哪来**。  
 它是 `api/logging.ts` 那套 `_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 命名约束的延伸—— 同一件事的两端。
 
 ---
 
 ### `services/teamMemorySync/` —— 5 份（多设备 / 多成员之间怎么同步记忆和设置）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`index.ts`](annotated/src/services/teamMemorySync/index.ts) | 1,256 | 1,386 | 本地文件 ↔ 服务器 API 双向同步；三个 HTTP 接口（拉全量 / 拉校验和探针 / 推 upsert）；delta 按字节贪心装箱；乐观锁 + 412 冲突重试（local-wins） |
-| [`watcher.ts`](annotated/src/services/teamMemorySync/watcher.ts) | 387 | 440 | 后台 `fs.watch` 守护（不依赖 chokidar，避免 kqueue fd 泄漏）；2 秒防抖；永久失败护栏 `pushSuppressedReason` 防无限重试 |
-| [`secretScanner.ts`](annotated/src/services/teamMemorySync/secretScanner.ts) | 324 | 359 | gitleaks 高置信度规则子集；`scanForSecrets` 整文件跳过、`redactSecrets` 命中替 `[REDACTED]`；匹配文本绝不返回 |
-| [`types.ts`](annotated/src/services/teamMemorySync/types.ts) | 156 | 188 | Zod v4 数据契约（`TeamMemoryDataSchema` / 各步结果类型）；`z.infer` 派生类型 |
-| [`teamMemSecretGuard.ts`](annotated/src/services/teamMemorySync/teamMemSecretGuard.ts) | 44 | 57 | 写入前第一道闸门 `checkTeamMemSecrets`；惰性 `require` 只在 `TEAMMEM` feature 开启时加载依赖 |
+| 文件                                                                                     | 原文    | 批注版   | 讲什么                                                                                              |
+| -------------------------------------------------------------------------------------- | ----- | ----- | ------------------------------------------------------------------------------------------------ |
+| [`index.ts`](annotated/src/services/teamMemorySync/index.ts)                           | 1,256 | 1,386 | 本地文件 ↔ 服务器 API 双向同步；三个 HTTP 接口（拉全量 / 拉校验和探针 / 推 upsert）；delta 按字节贪心装箱；乐观锁 + 412 冲突重试（local-wins） |
+| [`watcher.ts`](annotated/src/services/teamMemorySync/watcher.ts)                       | 387   | 440   | 后台 `fs.watch` 守护（不依赖 chokidar，避免 kqueue fd 泄漏）；2 秒防抖；永久失败护栏 `pushSuppressedReason` 防无限重试         |
+| [`secretScanner.ts`](annotated/src/services/teamMemorySync/secretScanner.ts)           | 324   | 359   | gitleaks 高置信度规则子集；`scanForSecrets` 整文件跳过、`redactSecrets` 命中替 `[REDACTED]`；匹配文本绝不返回               |
+| [`types.ts`](annotated/src/services/teamMemorySync/types.ts)                           | 156   | 188   | Zod v4 数据契约（`TeamMemoryDataSchema` / 各步结果类型）；`z.infer` 派生类型                                      |
+| [`teamMemSecretGuard.ts`](annotated/src/services/teamMemorySync/teamMemSecretGuard.ts) | 44    | 57    | 写入前第一道闸门 `checkTeamMemSecrets`；惰性 `require` 只在 `TEAMMEM` feature 开启时加载依赖                         |
 
 读这条线的顺序：`types.ts`（数据契约长什么样）→ `index.ts`（同步主流程：拉 / 算 delta / 推 / 冲突重试）→ `watcher.ts`（后台怎么感知文件变化并触发同步）→ `secretScanner.ts` + `teamMemSecretGuard.ts`（上传前怎么把密钥挡在门外）。
 
@@ -749,10 +748,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/PromptSuggestion/` —— 2 份（空闲时弹出的「下一句建议」从哪来）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`promptSuggestion.ts`](annotated/src/services/PromptSuggestion/promptSuggestion.ts) | 523 | 536 | 「猜用户会敲什么」的提示词与多级开关；fork 子代理生成建议、缓存冷抑制、十几种输出过滤器剔除不像人话的结果 |
-| [`speculation.ts`](annotated/src/services/PromptSuggestion/speculation.ts) | 991 | 1,012 | 进阶版：不仅猜，还 fork 子代理在 overlay 文件系统上**真预跑**；写时复制 + 工具白名单 + 边界中止；用户接受即注入对话、记「省了多少时间」 |
+| 文件                                                                                   | 原文  | 批注版   | 讲什么                                                                              |
+| ------------------------------------------------------------------------------------ | --- | ----- | -------------------------------------------------------------------------------- |
+| [`promptSuggestion.ts`](annotated/src/services/PromptSuggestion/promptSuggestion.ts) | 523 | 536   | 「猜用户会敲什么」的提示词与多级开关；fork 子代理生成建议、缓存冷抑制、十几种输出过滤器剔除不像人话的结果                          |
+| [`speculation.ts`](annotated/src/services/PromptSuggestion/speculation.ts)           | 991 | 1,012 | 进阶版：不仅猜，还 fork 子代理在 overlay 文件系统上**真预跑**；写时复制 + 工具白名单 + 边界中止；用户接受即注入对话、记「省了多少时间」 |
 
 读这条线的顺序：`promptSuggestion.ts`（建议怎么生成、什么时候不该生成）→ `speculation.ts`（建议被接受前的「后台预执行」）。
 
@@ -762,11 +761,11 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/plugins/` —— 3 份（用户装的扩展怎么被下载、校验、加载、卸载）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`pluginOperations.ts`](annotated/src/services/plugins/pluginOperations.ts) | 1,088 | 1,114 | 核心：install/uninstall/enable/disable/update 的纯库函数。settings-first 架构、四层 scope、delisted 兜底、卸载四层清理、非原地更新 |
-| [`pluginCliCommands.ts`](annotated/src/services/plugins/pluginCliCommands.ts) | 344 | 350 | CLI 薄包装：console + process.exit + 遥测。统一错误出口先发 `tengu_plugin_command_failed` 再退，dashboard 才算得出成功率 |
-| [`PluginInstallationManager.ts`](annotated/src/services/plugins/PluginInstallationManager.ts) | 184 | 191 | 启动期后台安装：从受信来源 reconcile 市场，把 onProgress 映射进 AppState；新装→自动刷新插件，仅更新→提示 `/reload-plugins` |
+| 文件                                                                                            | 原文    | 批注版   | 讲什么                                                                                                  |
+| --------------------------------------------------------------------------------------------- | ----- | ----- | ---------------------------------------------------------------------------------------------------- |
+| [`pluginOperations.ts`](annotated/src/services/plugins/pluginOperations.ts)                   | 1,088 | 1,114 | 核心：install/uninstall/enable/disable/update 的纯库函数。settings-first 架构、四层 scope、delisted 兜底、卸载四层清理、非原地更新 |
+| [`pluginCliCommands.ts`](annotated/src/services/plugins/pluginCliCommands.ts)                 | 344   | 350   | CLI 薄包装：console + process.exit + 遥测。统一错误出口先发 `tengu_plugin_command_failed` 再退，dashboard 才算得出成功率      |
+| [`PluginInstallationManager.ts`](annotated/src/services/plugins/PluginInstallationManager.ts) | 184   | 191   | 启动期后台安装：从受信来源 reconcile 市场，把 onProgress 映射进 AppState；新装→自动刷新插件，仅更新→提示 `/reload-plugins`              |
 
 读这条线的顺序：`pluginOperations.ts`（业务全在这）→ `pluginCliCommands.ts`（CLI 怎么包它）→ `PluginInstallationManager.ts`（启动时谁在背后自动装）。
 
@@ -776,8 +775,8 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/mockRateLimits.ts` —— 根目录散件（限流「挡板」，19 种场景的本地摹本）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
+| 文件                                                              | 原文  | 批注版 | 讲什么                                                                                                                                        |
+| --------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`mockRateLimits.ts`](annotated/src/services/mockRateLimits.ts) | 882 | 979 | `anthropic-ratelimit-unified-*` 全套响应头的 mock：代表 claim 取 reset 最远者、overage 月度重置、org/member/seat-tier 四种零额度、fast mode 20 秒冷却阈值、headerless 429 |
 
 读法：先看文件头的 19 个 `MockScenario`（按族分：普通 / 会话窗 / 周窗 / overage / org 额度 / 分模型 / fast mode / headerless），再挑 `setMockRateLimitScenario` 里三两个 case 看头是怎么摆的，最后看 `applyMockHeaders`（整个文件对生产的唯一出口）和 `getCurrentMockScenario`（从当前头反推场景的反向查找）。
@@ -788,8 +787,8 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/claudeAiLimits.ts` —— 根目录散件（真实限流状态的消费端，与 `mockRateLimits.ts` 是一对）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
+| 文件                                                              | 原文  | 批注版 | 讲什么                                                                                  |
+| --------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------------------------ |
 | [`claudeAiLimits.ts`](annotated/src/services/claudeAiLimits.ts) | 515 | 535 | 把 `anthropic-ratelimit-unified-*` 响应头翻译成状态对象：三态配额、12 种超额被禁原因、两级早期预警、跨 session 缓存被禁原因 |
 
 读法：先看文件头的 `EARLY_WARNING_CONFIGS`（两条窗的档位密度为什么完全不同）和 `OverageDisabledReason` 12 种原因，再走主链路 `computeNewLimitsFromHeaders`（头 → 状态对象的翻译核心），最后看两个入口 `extractQuotaStatusFromHeaders`（每个响应的常驻入口）和 `checkQuotaStatus`（启动时的主动探测）。
@@ -800,13 +799,13 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/remoteManagedSettings/` —— 5 份（企业管理员下发的设置怎么到达用户）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`index.ts`](annotated/src/services/remoteManagedSettings/index.ts) | 638 | 720 | 主编排：eligibility、checksum ETag 缓存（对齐服务端 Python 序列化）、fail-open 降级链、应用前安全检、后台轮询、cache-first 启动解阻塞 |
-| [`syncCache.ts`](annotated/src/services/remoteManagedSettings/syncCache.ts) | 112 | 140 | 资格判定（3p / 自定义 base URL / local-agent 三挡早退 + OAuth 先查的性能考量）+ 本地 mirror |
-| [`syncCacheState.ts`](annotated/src/services/remoteManagedSettings/syncCacheState.ts) | 96 | 126 | 叶子状态：三态 eligible、sync 读盘、首次命中时冲合并缓存（gh-23085 补丁） |
-| [`securityCheck.tsx`](annotated/src/services/remoteManagedSettings/securityCheck.tsx) | 74 | 96 | 应用前最后一道人工闸门：危险设置变更才弹阻塞对话框，拒绝即优雅退出 |
-| [`types.ts`](annotated/src/services/remoteManagedSettings/types.ts) | 31 | 41 | 响应信封 + FetchResult 契约：`settings: null` 表示 304，`skipRetry` 表示 auth 类不重试 |
+| 文件                                                                                    | 原文  | 批注版 | 讲什么                                                                                            |
+| ------------------------------------------------------------------------------------- | --- | --- | ---------------------------------------------------------------------------------------------- |
+| [`index.ts`](annotated/src/services/remoteManagedSettings/index.ts)                   | 638 | 720 | 主编排：eligibility、checksum ETag 缓存（对齐服务端 Python 序列化）、fail-open 降级链、应用前安全检、后台轮询、cache-first 启动解阻塞 |
+| [`syncCache.ts`](annotated/src/services/remoteManagedSettings/syncCache.ts)           | 112 | 140 | 资格判定（3p / 自定义 base URL / local-agent 三挡早退 + OAuth 先查的性能考量）+ 本地 mirror                          |
+| [`syncCacheState.ts`](annotated/src/services/remoteManagedSettings/syncCacheState.ts) | 96  | 126 | 叶子状态：三态 eligible、sync 读盘、首次命中时冲合并缓存（gh-23085 补丁）                                               |
+| [`securityCheck.tsx`](annotated/src/services/remoteManagedSettings/securityCheck.tsx) | 74  | 96  | 应用前最后一道人工闸门：危险设置变更才弹阻塞对话框，拒绝即优雅退出                                                              |
+| [`types.ts`](annotated/src/services/remoteManagedSettings/types.ts)                   | 31  | 41  | 响应信封 + FetchResult 契约：`settings: null` 表示 304，`skipRetry` 表示 auth 类不重试                         |
 
 读这条线的顺序：`syncCache.ts`（谁能用）→ `syncCacheState.ts`（状态放哪、为什么拆成叶子）→ `index.ts`（拉取/校验/降级/轮询全流程）→ `securityCheck.tsx`（应用前的闸门）→ `types.ts`（跨文件契约）。
 
@@ -816,10 +815,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/extractMemories/` —— 2 份（「值得长期记住的东西」怎么从对话里捞出来）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
+| 文件                                                                                | 原文  | 批注版 | 讲什么                                                                            |
+| --------------------------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------------------ |
 | [`extractMemories.ts`](annotated/src/services/extractMemories/extractMemories.ts) | 615 | 641 | 后台记忆抽取器：每轮 query loop 尾部 fork 子代理（共享 prompt 缓存）抽记忆；互斥跳过、节流、合并补跑、print 模式 drain |
-| [`prompts.ts`](annotated/src/services/extractMemories/prompts.ts) | 154 | 160 | 两套抽取提示词（auto-only / combined）：工具白名单文案、轮次预算策略、MEMORY.md 两步保存、禁验证兔子洞 |
+| [`prompts.ts`](annotated/src/services/extractMemories/prompts.ts)                 | 154 | 160 | 两套抽取提示词（auto-only / combined）：工具白名单文案、轮次预算策略、MEMORY.md 两步保存、禁验证兔子洞             |
 
 读这条线的顺序：`extractMemories.ts` 先看文件头和 `initExtractMemories()`（时机 + 闭包状态六件套）→ `runExtraction`（互斥/节流/fork/光标/trailing）→ 公共出口（gate 链 + drainer）；`prompts.ts` 对着 `runExtraction` 里组 prompt 的那几行看——白名单文案和 `canUseTool` 实际放行一一对应。
 
@@ -829,11 +828,11 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/tips/` —— 3 份（启动时轮播的「你可以试试……」从哪来）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`tipRegistry.ts`](annotated/src/services/tips/tipRegistry.ts) | 686 | 706 | 43 条内置 tip + 2 条 ANT-ONLY 内部 tip + 用户自定义覆盖。每条 = id + 异步文案 + 冷却启动数 + 异步相关性判定，按 14 个主题分组批注 |
-| [`tipScheduler.ts`](annotated/src/services/tips/tipScheduler.ts) | 58 | 61 | 调度：总开关 → 取相关列表 → 挑「最久没出现过的那条」；显示后落账 + 发遥测（只发 tipIdLength 不发 id） |
-| [`tipHistory.ts`](annotated/src/services/tips/tipHistory.ts) | 17 | 19 | 冷却账本：以 numStartups（第几次启动）为单位记录；从没显示过返回 Infinity 保证新 tip 优先 |
+| 文件                                                               | 原文  | 批注版 | 讲什么                                                                                      |
+| ---------------------------------------------------------------- | --- | --- | ---------------------------------------------------------------------------------------- |
+| [`tipRegistry.ts`](annotated/src/services/tips/tipRegistry.ts)   | 686 | 706 | 43 条内置 tip + 2 条 ANT-ONLY 内部 tip + 用户自定义覆盖。每条 = id + 异步文案 + 冷却启动数 + 异步相关性判定，按 14 个主题分组批注 |
+| [`tipScheduler.ts`](annotated/src/services/tips/tipScheduler.ts) | 58  | 61  | 调度：总开关 → 取相关列表 → 挑「最久没出现过的那条」；显示后落账 + 发遥测（只发 tipIdLength 不发 id）                          |
+| [`tipHistory.ts`](annotated/src/services/tips/tipHistory.ts)     | 17  | 19  | 冷却账本：以 numStartups（第几次启动）为单位记录；从没显示过返回 Infinity 保证新 tip 优先                               |
 
 读这条线的顺序：`tipHistory.ts`（17 行，五分钟看完冷却账本的单位约定）→ `tipScheduler.ts`（58 行，调度策略）→ `tipRegistry.ts`（686 行，按批注里的 14 个分组挑感兴趣的看）。
 
@@ -843,10 +842,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/policyLimits/` —— 2 份（组织级策略限额：哪些功能被管理员关掉）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
+| 文件                                                         | 原文  | 批注版 | 讲什么                                                                                     |
+| ---------------------------------------------------------- | --- | --- | --------------------------------------------------------------------------------------- |
 | [`index.ts`](annotated/src/services/policyLimits/index.ts) | 663 | 687 | 主编排：资格三挡早退、双认证取头、checksum ETag、重试与分类、fail-open 主链、唯一 fail-closed 例外、session+磁盘双层缓存、后台轮询 |
-| [`types.ts`](annotated/src/services/policyLimits/types.ts) | 27 | 30 | Zod v4 契约：只记录被禁策略（键缺失 = 允许）+ `restrictions: null` 表示 304 的魔法值信封 |
+| [`types.ts`](annotated/src/services/policyLimits/types.ts) | 27  | 30  | Zod v4 契约：只记录被禁策略（键缺失 = 允许）+ `restrictions: null` 表示 304 的魔法值信封                         |
 
 读这条线的顺序：`types.ts`（27 行，先建立「只记被禁」和「null=304」两个契约）→ `index.ts` 的 `isPolicyAllowed`（对外主问句，先看答案再倒推）→ `isPolicyLimitsEligible`（谁能用）→ `fetchAndLoadPolicyLimits`（拉取编排）→ 其余按需。
 
@@ -856,10 +855,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/settingsSync/` —— 2 份（设置跨端同步：CLI 推上去，CCR 拉下来）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
+| 文件                                                         | 原文  | 批注版 | 讲什么                                                                  |
+| ---------------------------------------------------------- | --- | --- | -------------------------------------------------------------------- |
 | [`index.ts`](annotated/src/services/settingsSync/index.ts) | 581 | 601 | 上传差量化、下载 promise 单例、`/reload-plugins` 强制刷新、404=空、retry 分诊、白名单落盘、缓存失效 |
-| [`types.ts`](annotated/src/services/settingsSync/types.ts) | 67 | 73 | Zod 契约：扁平 key-value 内容、version+checksum、`isEmpty` 单列、`SYNC_KEYS` 四键 |
+| [`types.ts`](annotated/src/services/settingsSync/types.ts) | 67  | 73  | Zod 契约：扁平 key-value 内容、version+checksum、`isEmpty` 单列、`SYNC_KEYS` 四键  |
 
 读这条线的顺序：`types.ts`（67 行，先建立「扁平 key-value」和「四个同步键」两个契约）→ `index.ts` 的 `uploadUserSettingsInBackground`（上传主链：先 GET 远端再差量）→ `downloadUserSettings` / `redownloadUserSettings`（下载的两个入口，区别在重试与缓存）→ `applyRemoteEntriesToLocal`（落盘的三层设计）。
 
@@ -869,11 +868,11 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/voice*.ts` —— 3 份（语音输入全链路：录音 → 流式转写 → 关键词提示）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`voice.ts`](annotated/src/services/voice.ts) | 525 | 546 | 原生 cpal 优先、Linux 三级兜底（arecord 探测 / SoX）、WSL 特殊判定、按住说话忽略静音结束 |
+| 文件                                                              | 原文  | 批注版 | 讲什么                                                                 |
+| --------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------- |
+| [`voice.ts`](annotated/src/services/voice.ts)                   | 525 | 546 | 原生 cpal 优先、Linux 三级兜底（arecord 探测 / SoX）、WSL 特殊判定、按住说话忽略静音结束         |
 | [`voiceStreamSTT.ts`](annotated/src/services/voiceStreamSTT.ts) | 544 | 573 | voice_stream WebSocket 协议、finalize 五条出口、Nova 3 差异、CF zone 选择、升级拒绝处理 |
-| [`voiceKeyterms.ts`](annotated/src/services/voiceKeyterms.ts) | 106 | 114 | Deepgram 关键词提升：14 个全局编程词 + 项目名 + 分支词 + 最近文件名，上限 50 |
+| [`voiceKeyterms.ts`](annotated/src/services/voiceKeyterms.ts)   | 106 | 114 | Deepgram 关键词提升：14 个全局编程词 + 项目名 + 分支词 + 最近文件名，上限 50                  |
 
 读这条线的顺序：`voiceKeyterms.ts`（106 行，最独立，先看「词从哪来」）→ `voice.ts`（录音后端选择与探测）→ `voiceStreamSTT.ts`（协议与收尾竞态，最难）。
 
@@ -883,9 +882,9 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/vcr.ts` + `services/diagnosticTracking.ts` —— 2 份（测试录制回放 / IDE 诊断差分）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`vcr.ts`](annotated/src/services/vcr.ts) | 406 | 419 | VCR 录制回放：四入口、输入哈希定文件名、脱敏四组替换、uuid 必须每次重生成 |
+| 文件                                                                      | 原文  | 批注版 | 讲什么                                        |
+| ----------------------------------------------------------------------- | --- | --- | ------------------------------------------ |
+| [`vcr.ts`](annotated/src/services/vcr.ts)                               | 406 | 419 | VCR 录制回放：四入口、输入哈希定文件名、脱敏四组替换、uuid 必须每次重生成  |
 | [`diagnosticTracking.ts`](annotated/src/services/diagnosticTracking.ts) | 397 | 415 | IDE 诊断：编辑前抓基线、磁盘版 vs 编辑器版取舍、差分语义、4000 字符预算 |
 
 这两份互不相关，凑成一批纯粹是按「剩余根目录散件」的体量打包。各自的一句话：
@@ -898,12 +897,12 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/autoDream/` 全 4 份（550 行 → 583 行，33 处批注）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`autoDream.ts`](annotated/src/services/autoDream/autoDream.ts) | 324 | 344 | 三道门（时间 / 会话 / 锁）+ fork 子代理 + 进度观察器 |
-| [`consolidationLock.ts`](annotated/src/services/autoDream/consolidationLock.ts) | 140 | 148 | 锁文件 mtime 兼任「上次整理时间」；PID 咨询锁、陈腐接管、回滚 |
-| [`consolidationPrompt.ts`](annotated/src/services/autoDream/consolidationPrompt.ts) | 65 | 68 | 四阶段 prompt（Orient → Gather → Consolidate → Prune） |
-| [`config.ts`](annotated/src/services/autoDream/config.ts) | 21 | 23 | 叶子配置模块，单独存在只为打断依赖链 |
+| 文件                                                                                  | 原文  | 批注版 | 讲什么                                               |
+| ----------------------------------------------------------------------------------- | --- | --- | ------------------------------------------------- |
+| [`autoDream.ts`](annotated/src/services/autoDream/autoDream.ts)                     | 324 | 344 | 三道门（时间 / 会话 / 锁）+ fork 子代理 + 进度观察器                |
+| [`consolidationLock.ts`](annotated/src/services/autoDream/consolidationLock.ts)     | 140 | 148 | 锁文件 mtime 兼任「上次整理时间」；PID 咨询锁、陈腐接管、回滚              |
+| [`consolidationPrompt.ts`](annotated/src/services/autoDream/consolidationPrompt.ts) | 65  | 68  | 四阶段 prompt（Orient → Gather → Consolidate → Prune） |
+| [`config.ts`](annotated/src/services/autoDream/config.ts)                           | 21  | 23  | 叶子配置模块，单独存在只为打断依赖链                                |
 
 一句话串起来：这是 `extractMemories/` 的**搭档**——那个在对话末尾当场把该记的**抽**出来，这个隔一段时间把散落的记忆**整理**一遍（合并、改错、剪枝、重写索引）。触发是个三道门的漏斗，**按开销从小到大排**：① 时间门，一次 `stat` 读锁文件 mtime，够了才往下；② 会话门，扫一次 transcript 目录数「上次整理之后被碰过的会话」够不够 5 个；③ 锁门，抢文件锁确认没有别的进程正在整理。三门全过才 `runForkedAgent`。
 
@@ -920,10 +919,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/rateLimitMessages.ts` + `services/rateLimitMocking.ts` —— 2 份（限流四件套的最后两块）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`rateLimitMessages.ts`](annotated/src/services/rateLimitMessages.ts) | 344 | 361 | 所有限流文案的唯一产地：错误 / 警告 / overage 通知三档 |
-| [`rateLimitMocking.ts`](annotated/src/services/rateLimitMocking.ts) | 144 | 155 | 门面：把 `/mock-limits` 的 mock 逻辑挡在生产代码之外 |
+| 文件                                                                    | 原文  | 批注版 | 讲什么                                   |
+| --------------------------------------------------------------------- | --- | --- | ------------------------------------- |
+| [`rateLimitMessages.ts`](annotated/src/services/rateLimitMessages.ts) | 344 | 361 | 所有限流文案的唯一产地：错误 / 警告 / overage 通知三档    |
+| [`rateLimitMocking.ts`](annotated/src/services/rateLimitMocking.ts)   | 144 | 155 | 门面：把 `/mock-limits` 的 mock 逻辑挡在生产代码之外 |
 
 这两份补齐了「限流四件套」——`mockRateLimits.ts`（造数据）+ `rateLimitMocking.ts`（把假数据接进请求路径）+ `claudeAiLimits.ts`（解真实响应头）+ `rateLimitMessages.ts`（把状态翻译成人话）。前两份是 `[ANT-ONLY]`，后两份是生产代码。
 
@@ -941,10 +940,10 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 ### `services/MagicDocs/` 全 2 份（381 行 → 400 行，19 处批注）
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`magicDocs.ts`](annotated/src/services/MagicDocs/magicDocs.ts) | 254 | 268 | 标记检测、读取即登记、空闲时 fork 子代理原地重写 |
-| [`prompts.ts`](annotated/src/services/MagicDocs/prompts.ts) | 127 | 132 | 更新 prompt 模板、自定义 prompt 覆盖、单遍变量替换 |
+| 文件                                                              | 原文  | 批注版 | 讲什么                               |
+| --------------------------------------------------------------- | --- | --- | --------------------------------- |
+| [`magicDocs.ts`](annotated/src/services/MagicDocs/magicDocs.ts) | 254 | 268 | 标记检测、读取即登记、空闲时 fork 子代理原地重写       |
+| [`prompts.ts`](annotated/src/services/MagicDocs/prompts.ts)     | 127 | 132 | 更新 prompt 模板、自定义 prompt 覆盖、单遍变量替换 |
 
 「后台 fork 子代理」的**第三种用法**集齐了：`extractMemories` 抽记忆、`autoDream` 整理记忆、`MagicDocs` **维护文档**。三者都挂在 `postSamplingHooks` 上，但触发条件各不相同——这个要求「上轮没有工具调用」（对话真的空闲了），因为把半成品状态写进文档等于留一份错误说明。
 
@@ -966,16 +965,16 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 最后一批分三块，共同点是「**和主链路耦合最弱**」（都是辅助能力，不参与一次对话的骨架）：
 
-| 文件 | 原文 → 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- |
-| [`AgentSummary/agentSummary.ts`](annotated/src/services/AgentSummary/agentSummary.ts) | 179 → 192 | 13 | 子代理的一行进度条，30 秒 fork 一次 |
-| [`toolUseSummary/toolUseSummaryGenerator.ts`](annotated/src/services/toolUseSummary/toolUseSummaryGenerator.ts) | 112 → 119 | 7 | 一批工具调用的 Haiku 短标签 |
-| [`preventSleep.ts`](annotated/src/services/preventSleep.ts) | 165 → 173 | 8 | macOS `caffeinate` 电源断言 + 自愈重启 |
-| [`notifier.ts`](annotated/src/services/notifier.ts) | 156 → 163 | 7 | 九种终端通知通道 + auto 探测 |
-| [`internalLogging.ts`](annotated/src/services/internalLogging.ts) | 90 → 95 | 5 | `[ANT-ONLY]` 内部埋点（k8s namespace / 容器 ID） |
-| [`awaySummary.ts`](annotated/src/services/awaySummary.ts) | 74 → 80 | 6 | 「离开回来」卡片的一句话回顾 |
-| [`mcpServerApproval.tsx`](annotated/src/services/mcpServerApproval.tsx) | 41 → 46 | 4 | 项目级 MCP server 的批准弹窗 |
-| [`claudeAiLimitsHook.ts`](annotated/src/services/claudeAiLimitsHook.ts) | 23 → 27 | 4 | `claudeAiLimits` 的 React 薄壳 |
+| 文件                                                                                                              | 原文 → 批注版  | 批注 | 讲什么                                      |
+| --------------------------------------------------------------------------------------------------------------- | --------- | -- | ---------------------------------------- |
+| [`AgentSummary/agentSummary.ts`](annotated/src/services/AgentSummary/agentSummary.ts)                           | 179 → 192 | 13 | 子代理的一行进度条，30 秒 fork 一次                   |
+| [`toolUseSummary/toolUseSummaryGenerator.ts`](annotated/src/services/toolUseSummary/toolUseSummaryGenerator.ts) | 112 → 119 | 7  | 一批工具调用的 Haiku 短标签                        |
+| [`preventSleep.ts`](annotated/src/services/preventSleep.ts)                                                     | 165 → 173 | 8  | macOS `caffeinate` 电源断言 + 自愈重启           |
+| [`notifier.ts`](annotated/src/services/notifier.ts)                                                             | 156 → 163 | 7  | 九种终端通知通道 + auto 探测                       |
+| [`internalLogging.ts`](annotated/src/services/internalLogging.ts)                                               | 90 → 95   | 5  | `[ANT-ONLY]` 内部埋点（k8s namespace / 容器 ID） |
+| [`awaySummary.ts`](annotated/src/services/awaySummary.ts)                                                       | 74 → 80   | 6  | 「离开回来」卡片的一句话回顾                           |
+| [`mcpServerApproval.tsx`](annotated/src/services/mcpServerApproval.tsx)                                         | 41 → 46   | 4  | 项目级 MCP server 的批准弹窗                     |
+| [`claudeAiLimitsHook.ts`](annotated/src/services/claudeAiLimitsHook.ts)                                         | 23 → 27   | 4  | `claudeAiLimits` 的 React 薄壳              |
 
 四个最值得记的点：
 
@@ -990,17 +989,17 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 `spawnMultiAgent.ts`（1,093 行）+ `gitOperationTracking.ts`（277 行），共 2 文件 1,370 行 → 批注版 1,436 行、66 处锚点。这两个文件都不属于任何具体工具：前者是「造一个队友」的完整逻辑（TeammateTool 抽出来给 AgentTool 复用），后者是跨 shell 的 git 操作埋点（Bash 和 PowerShell 共用）。
 
-| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
-| --- | --- | --- | --- | --- |
-| [`spawnMultiAgent.ts`](annotated/src/tools/shared/spawnMultiAgent.ts) | 1,093 | 1,135 | 42 | 三条 spawn 路径、身份走 CLI 参数、不传父对话 |
-| [`gitOperationTracking.ts`](annotated/src/tools/shared/gitOperationTracking.ts) | 277 | 301 | 24 | 容忍 git 全局选项的正则、push 进度在 stderr、curl 建 PR 三条件 |
+| 文件                                                                              | 原文行   | 批注版行  | 锚点 | 看点                                           |
+| ------------------------------------------------------------------------------- | ----- | ----- | -- | -------------------------------------------- |
+| [`spawnMultiAgent.ts`](annotated/src/tools/shared/spawnMultiAgent.ts)           | 1,093 | 1,135 | 42 | 三条 spawn 路径、身份走 CLI 参数、不传父对话                 |
+| [`gitOperationTracking.ts`](annotated/src/tools/shared/gitOperationTracking.ts) | 277   | 301   | 24 | 容忍 git 全局选项的正则、push 进度在 stderr、curl 建 PR 三条件 |
 
 七个值得记的点：
 
 1. **三条 spawn 路径一个路由器**。`handleSpawn` 先看 `isInProcessEnabled()`（进程内），否则预探测 pane 后端（tmux/iTerm2 split-pane），探测失败且 auto 模式才静默回退进程内——用户显式配了 `teammateMode: 'tmux'` 就让错误抛出去看安装指引。`markInProcessFallback()` 把回落写回状态，banner 不再显示错误的 tmux attach 命令。
 2. **spawn 命令不带 prompt**。队友二进制起来后，首条指令经 mailbox 投递（`writeToMailbox` from TEAM_LEAD_NAME），inbox poller 捡起来当第一轮提交——进程内队友则相反，prompt 直接由 `startInProcessTeammate` 给，双发会产生两条欢迎语（注释明说 Do NOT）。
 3. **清空 messages 是全文件最重要的注释**。传给队友的 toolUseContext 刻意 `messages: []`：父对话会钉住整个会话历史，`/clear` 和 auto-compact 都救不回来；队友自己经 inProcessRunner 的 allMessages 建历史。
-4. **身份四件套走 CLI 参数而非环境变量**。`--agent-id/--agent-name/--team-name/--agent-color`（注释明说 replaces CLAUDE_CODE_* env vars）；`sanitizeAgentName` 防 `@`——agentId 格式是 name@teamName；`formatAgentId` 确定性生成，同名同队幂等。
+4. **身份四件套走 CLI 参数而非环境变量**。`--agent-id/--agent-name/--team-name/--agent-color`（注释明说 replaces CLAUDE_CODE\_* env vars）；`sanitizeAgentName` 防 `@`——agentId 格式是 name@teamName；`formatAgentId` 确定性生成，同名同队幂等。
 5. **权限继承的安全优先级**。`buildInheritedCliFlags` 里 `plan_mode_required` 压过 `bypassPermissions`：plan 队友天生不继承跳过权限的 flag。auto 模式反而要传给队友——让它的分类器同样自动放行。
 6. **git 埋点的正则容忍真实世界的脏命令**。`gitCmdRe` 容忍 `git -c commit.gpgsign=false commit`（签名失败后重试的形态）；push 的 ref 更新写 **stderr**，所以检测函数必须收 stdout+stderr 拼接串；merge/rebase 要命令 + 输出双重确认（`git merge --abort` 不算合并）。
 7. **埋点失败不能拖垮主流程**。`getCommitCounter()?.add(1)` 可选链——计数器没初始化就静默跳过；`trackGitOperations` 第一道门是 exitCode !== 0 直接返回。建 PR 后关联会话用双层动态 import 规避循环依赖，sessionId 过模板字面量类型断言（UUID 形态才链）。
@@ -1011,23 +1010,23 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 15 个文件 5,917 行 → 批注版 6,187 行、340 处锚点。目录全清意味着 `src/tools/` 只剩 AgentTool 一个目录（17 份 / 4,889 行）。
 
-| 文件 | 原文行 | 锚点 | 看点 |
-| --- | --- | --- | --- |
-| [`readOnlyValidation.ts`](annotated/src/tools/BashTool/readOnlyValidation.ts) | 1,990 | 82 | 只读判定的两条腿：allowlist 旗标表 + 整命令正则 |
-| [`pathValidation.ts`](annotated/src/tools/BashTool/pathValidation.ts) | 1,303 | 49 | 38 条命令的路径提取规则 + `--` 处理 + 剥壳同步三处 |
-| [`sedValidation.ts`](annotated/src/tools/BashTool/sedValidation.ts) | 684 | 51 | 白名单（p/Np/N,Mp + s///）+ denylist 双层，同形字攻击 |
-| [`prompt.ts`](annotated/src/tools/BashTool/prompt.ts) | 369 | 29 | Bash 工具的完整系统提示：git 安全协议、沙箱段、工具偏好 |
-| [`sedEditParser.ts`](annotated/src/tools/BashTool/sedEditParser.ts) | 322 | 20 | sed -i 编辑的结构化解析 + BRE→ERE 转换 |
-| [`bashCommandHelpers.ts`](annotated/src/tools/BashTool/bashCommandHelpers.ts) | 265 | 16 | 管道分段权限聚合 + 跨段 cd+git 检测 |
-| [`utils.ts`](annotated/src/tools/BashTool/utils.ts) | 223 | 10 | 输出截断、data URI 图片、cwd 重置 |
-| [`BashToolResultMessage.tsx`](annotated/src/tools/BashTool/BashToolResultMessage.tsx) | 191 | 13 | 结果渲染（React Compiler 产物） |
-| [`UI.tsx`](annotated/src/tools/BashTool/UI.tsx) | 185 | 17 | 工具调用渲染：sed 只显路径、注释标签、截断两道线 |
-| [`shouldUseSandbox.ts`](annotated/src/tools/BashTool/shouldUseSandbox.ts) | 153 | 14 | excludedCommands 是便利功能不是安全边界 |
-| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts) | 140 | 12 | 退出码语义表：grep 1 = 没匹配不是错误 |
-| [`modeValidation.ts`](annotated/src/tools/BashTool/modeValidation.ts) | 115 | 8 | acceptEdits 放行七个文件命令 |
-| [`destructiveCommandWarning.ts`](annotated/src/tools/BashTool/destructiveCommandWarning.ts) | 102 | 14 | 破坏性命令警告表（纯展示） |
-| [`commentLabel.ts`](annotated/src/tools/BashTool/commentLabel.ts) | 13 | 4 | 首行注释当 UI 标签 |
-| [`toolName.ts`](annotated/src/tools/BashTool/toolName.ts) | 2 | 1 | 两行文件打破循环依赖 |
+| 文件                                                                                          | 原文行   | 锚点 | 看点                                       |
+| ------------------------------------------------------------------------------------------- | ----- | -- | ---------------------------------------- |
+| [`readOnlyValidation.ts`](annotated/src/tools/BashTool/readOnlyValidation.ts)               | 1,990 | 82 | 只读判定的两条腿：allowlist 旗标表 + 整命令正则           |
+| [`pathValidation.ts`](annotated/src/tools/BashTool/pathValidation.ts)                       | 1,303 | 49 | 38 条命令的路径提取规则 + `--` 处理 + 剥壳同步三处         |
+| [`sedValidation.ts`](annotated/src/tools/BashTool/sedValidation.ts)                         | 684   | 51 | 白名单（p/Np/N,Mp + s///）+ denylist 双层，同形字攻击 |
+| [`prompt.ts`](annotated/src/tools/BashTool/prompt.ts)                                       | 369   | 29 | Bash 工具的完整系统提示：git 安全协议、沙箱段、工具偏好         |
+| [`sedEditParser.ts`](annotated/src/tools/BashTool/sedEditParser.ts)                         | 322   | 20 | sed -i 编辑的结构化解析 + BRE→ERE 转换             |
+| [`bashCommandHelpers.ts`](annotated/src/tools/BashTool/bashCommandHelpers.ts)               | 265   | 16 | 管道分段权限聚合 + 跨段 cd+git 检测                  |
+| [`utils.ts`](annotated/src/tools/BashTool/utils.ts)                                         | 223   | 10 | 输出截断、data URI 图片、cwd 重置                  |
+| [`BashToolResultMessage.tsx`](annotated/src/tools/BashTool/BashToolResultMessage.tsx)       | 191   | 13 | 结果渲染（React Compiler 产物）                  |
+| [`UI.tsx`](annotated/src/tools/BashTool/UI.tsx)                                             | 185   | 17 | 工具调用渲染：sed 只显路径、注释标签、截断两道线               |
+| [`shouldUseSandbox.ts`](annotated/src/tools/BashTool/shouldUseSandbox.ts)                   | 153   | 14 | excludedCommands 是便利功能不是安全边界             |
+| [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)                   | 140   | 12 | 退出码语义表：grep 1 = 没匹配不是错误                  |
+| [`modeValidation.ts`](annotated/src/tools/BashTool/modeValidation.ts)                       | 115   | 8  | acceptEdits 放行七个文件命令                     |
+| [`destructiveCommandWarning.ts`](annotated/src/tools/BashTool/destructiveCommandWarning.ts) | 102   | 14 | 破坏性命令警告表（纯展示）                            |
+| [`commentLabel.ts`](annotated/src/tools/BashTool/commentLabel.ts)                           | 13    | 4  | 首行注释当 UI 标签                              |
+| [`toolName.ts`](annotated/src/tools/BashTool/toolName.ts)                                   | 2     | 1  | 两行文件打破循环依赖                               |
 
 九个值得记的点：
 
@@ -1047,25 +1046,25 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 17 个文件 4,889 行 → 批注版 5,123 行、308 处锚点。这一批做完，`src/tools/` 整个目录清零——工具层从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」全齐了。
 
-| 文件 | 原文行 | 锚点 | 看点 |
-| --- | --- | --- | --- |
-| [`runAgent.ts`](annotated/src/tools/AgentTool/runAgent.ts) | 973 | 57 | subagent 一次运行的完整生命周期：权限覆盖优先级、上下文瘦身、提示缓存三处设计 |
-| [`UI.tsx`](annotated/src/tools/AgentTool/UI.tsx) | 872 | 46 | React Compiler 产物（`_c(N)` memo cache）；进度折叠、condensed mode、分组渲染 |
-| [`loadAgentsDir.ts`](annotated/src/tools/AgentTool/loadAgentsDir.ts) | 755 | 42 | 四种 agent 来源的解析与覆盖优先级；frontmatter 全字段白名单校验 |
-| [`agentToolUtils.ts`](annotated/src/tools/AgentTool/agentToolUtils.ts) | 686 | 49 | 工具过滤链、通配符解析、后台生命周期驱动器、handoff 分类器 |
-| [`resumeAgent.ts`](annotated/src/tools/AgentTool/resumeAgent.ts) | 265 | 20 | 从磁盘 transcript 恢复 agent：三层消息清洗 + worktree 续命 |
-| [`built-in/claudeCodeGuideAgent.ts`](annotated/src/tools/AgentTool/built-in/claudeCodeGuideAgent.ts) | 205 | 13 | 文档向导：五段用户配置注入 + 3P 反馈导流 |
-| [`agentMemorySnapshot.ts`](annotated/src/tools/AgentTool/agentMemorySnapshot.ts) | 197 | 18 | 快照三动作（initialize/replace/markSynced）与同步标记机制 |
-| [`built-in/verificationAgent.ts`](annotated/src/tools/AgentTool/built-in/verificationAgent.ts) | 152 | 7 | 「反自欺手册」提示词 + criticalSystemReminder 重注入保活 |
-| [`agentMemory.ts`](annotated/src/tools/AgentTool/agentMemory.ts) | 177 | 12 | 三档 memory scope 路由 + isAgentMemoryPath 的 normalize 防穿越 |
-| [`built-in/statuslineSetup.ts`](annotated/src/tools/AgentTool/built-in/statuslineSetup.ts) | 144 | 3 | PS1→statusLine 转换 + stdin JSON 全字段契约 |
-| [`agentDisplay.ts`](annotated/src/tools/AgentTool/agentDisplay.ts) | 104 | 9 | /agents 命令的覆盖标注与 worktree 去重 |
-| [`built-in/planAgent.ts`](annotated/src/tools/AgentTool/built-in/planAgent.ts) | 92 | 4 | 四步流程 + Critical Files 输出契约 |
-| [`built-in/exploreAgent.ts`](annotated/src/tools/AgentTool/built-in/exploreAgent.ts) | 83 | 6 | READ-ONLY 七禁 + MIN_QUERIES=3 防摸鱼 |
-| [`builtInAgents.ts`](annotated/src/tools/AgentTool/builtInAgents.ts) | 72 | 10 | 内置清单的环境门控拼装 |
-| [`agentColorManager.ts`](annotated/src/tools/AgentTool/agentColorManager.ts) | 66 | 3 | 八色专用色板 + satisfies 编译期约束 |
-| [`built-in/generalPurposeAgent.ts`](annotated/src/tools/AgentTool/built-in/generalPurposeAgent.ts) | 34 | 6 | 「别镀金也别半吊子」+ 绝不主动建文件/文档 |
-| [`constants.ts`](annotated/src/tools/AgentTool/constants.ts) | 12 | 3 | Task→Agent 线名兼容 + one-shot 尾 trailer 省 token |
+| 文件                                                                                                   | 原文行 | 锚点 | 看点                                                             |
+| ---------------------------------------------------------------------------------------------------- | --- | -- | -------------------------------------------------------------- |
+| [`runAgent.ts`](annotated/src/tools/AgentTool/runAgent.ts)                                           | 973 | 57 | subagent 一次运行的完整生命周期：权限覆盖优先级、上下文瘦身、提示缓存三处设计                    |
+| [`UI.tsx`](annotated/src/tools/AgentTool/UI.tsx)                                                     | 872 | 46 | React Compiler 产物（`_c(N)` memo cache）；进度折叠、condensed mode、分组渲染 |
+| [`loadAgentsDir.ts`](annotated/src/tools/AgentTool/loadAgentsDir.ts)                                 | 755 | 42 | 四种 agent 来源的解析与覆盖优先级；frontmatter 全字段白名单校验                      |
+| [`agentToolUtils.ts`](annotated/src/tools/AgentTool/agentToolUtils.ts)                               | 686 | 49 | 工具过滤链、通配符解析、后台生命周期驱动器、handoff 分类器                              |
+| [`resumeAgent.ts`](annotated/src/tools/AgentTool/resumeAgent.ts)                                     | 265 | 20 | 从磁盘 transcript 恢复 agent：三层消息清洗 + worktree 续命                   |
+| [`built-in/claudeCodeGuideAgent.ts`](annotated/src/tools/AgentTool/built-in/claudeCodeGuideAgent.ts) | 205 | 13 | 文档向导：五段用户配置注入 + 3P 反馈导流                                        |
+| [`agentMemorySnapshot.ts`](annotated/src/tools/AgentTool/agentMemorySnapshot.ts)                     | 197 | 18 | 快照三动作（initialize/replace/markSynced）与同步标记机制                    |
+| [`built-in/verificationAgent.ts`](annotated/src/tools/AgentTool/built-in/verificationAgent.ts)       | 152 | 7  | 「反自欺手册」提示词 + criticalSystemReminder 重注入保活                      |
+| [`agentMemory.ts`](annotated/src/tools/AgentTool/agentMemory.ts)                                     | 177 | 12 | 三档 memory scope 路由 + isAgentMemoryPath 的 normalize 防穿越         |
+| [`built-in/statuslineSetup.ts`](annotated/src/tools/AgentTool/built-in/statuslineSetup.ts)           | 144 | 3  | PS1→statusLine 转换 + stdin JSON 全字段契约                           |
+| [`agentDisplay.ts`](annotated/src/tools/AgentTool/agentDisplay.ts)                                   | 104 | 9  | /agents 命令的覆盖标注与 worktree 去重                                   |
+| [`built-in/planAgent.ts`](annotated/src/tools/AgentTool/built-in/planAgent.ts)                       | 92  | 4  | 四步流程 + Critical Files 输出契约                                     |
+| [`built-in/exploreAgent.ts`](annotated/src/tools/AgentTool/built-in/exploreAgent.ts)                 | 83  | 6  | READ-ONLY 七禁 + MIN_QUERIES=3 防摸鱼                               |
+| [`builtInAgents.ts`](annotated/src/tools/AgentTool/builtInAgents.ts)                                 | 72  | 10 | 内置清单的环境门控拼装                                                    |
+| [`agentColorManager.ts`](annotated/src/tools/AgentTool/agentColorManager.ts)                         | 66  | 3  | 八色专用色板 + satisfies 编译期约束                                       |
+| [`built-in/generalPurposeAgent.ts`](annotated/src/tools/AgentTool/built-in/generalPurposeAgent.ts)   | 34  | 6  | 「别镀金也别半吊子」+ 绝不主动建文件/文档                                         |
+| [`constants.ts`](annotated/src/tools/AgentTool/constants.ts)                                         | 12  | 3  | Task→Agent 线名兼容 + one-shot 尾 trailer 省 token                   |
 
 值得记住的十个设计：
 
@@ -1086,13 +1085,13 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 这是 `src/hooks/` 的第一个子目录，也是整个权限体系里最接近「用户按下允许键」的一层。五个文件一条链：**上下文工厂 → 遥测单入口 → 三种角色处理器**。
 
-| 文件 | 行数 | 角色 |
-| --- | --- | --- |
-| `toolPermission/PermissionContext.ts` | 388 | 一次工具调用的权限上下文工厂：来源判别联合、队列桥、`createResolveOnce` 幂等锁 |
-| `toolPermission/permissionLogging.ts` | 238 | 遥测单入口：批准分事件名、拒绝分字段，扇出 Statsig/OTel/代码计数器三路 |
+| 文件                                              | 行数  | 角色                                                                     |
+| ----------------------------------------------- | --- | ---------------------------------------------------------------------- |
+| `toolPermission/PermissionContext.ts`           | 388 | 一次工具调用的权限上下文工厂：来源判别联合、队列桥、`createResolveOnce` 幂等锁                      |
+| `toolPermission/permissionLogging.ts`           | 238 | 遥测单入口：批准分事件名、拒绝分字段，扇出 Statsig/OTel/代码计数器三路                             |
 | `toolPermission/handlers/interactiveHandler.ts` | 536 | 主 agent 路径：本地用户 / CCR bridge / channel 中继 / hook / classifier **五方竞速** |
-| `toolPermission/handlers/swarmWorkerHandler.ts` | 159 | worker 路径：请求经 mailbox 转 leader 决定，worker 挂起等回信 |
-| `toolPermission/handlers/coordinatorHandler.ts` | 65 | coordinator 路径：自动化检查顺序 await 完，剩下的才问人 |
+| `toolPermission/handlers/swarmWorkerHandler.ts` | 159 | worker 路径：请求经 mailbox 转 leader 决定，worker 挂起等回信                         |
+| `toolPermission/handlers/coordinatorHandler.ts` | 65  | coordinator 路径：自动化检查顺序 await 完，剩下的才问人                                  |
 
 核心设计（读完这五个文件就能回答「一次权限请求到底经历什么」）：
 
@@ -1109,16 +1108,16 @@ MCP 这条线可以按四段读：`config.ts`（允不允许连）→ `client.ts
 
 `src/hooks/` 根目录的第一批，一次做齐「用户敲键盘到提交」之间的全部机制。八个文件一条链：**索引地基 → 三源合一 → 补全总线 → 文本编辑内核 → 三个输入模式**。
 
-| 文件 | 行数 | 角色 |
-| --- | --- | --- |
-| `fileSuggestions.ts` | 811 | @ 文件补全的索引层：git ls-files 优先 / ripgrep 兜底、签名跳过重建、5s 节流地板、后台合入未跟踪文件 |
-| `unifiedSuggestions.ts` | 202 | 文件 / MCP 资源 / subagent 三源合一：nucleo 与 Fuse 双引擎混排 |
-| `useTypeahead.tsx` | 1,385 | 补全总线：七类补全的优先级编排 + 五类 stale 丢弃 + ghost text 双模 |
-| `useTextInput.ts` | 529 | 文本编辑内核：emacs 键位 + kill ring + SSH/DEL 卫生 |
-| `useVimInput.ts` | 316 | vim 模式层：INSERT/NORMAL 状态机 + dot-repeat + operators 依赖注入 |
-| `useHistorySearch.ts` | 303 | Ctrl-R 历史反查：AsyncGenerator 逐行读 + 现场快照还原 |
-| `usePasteHandler.ts` | 285 | 粘贴卫生：bracketed paste 检测 + 多图路径切分 + 同步镜像 ref |
-| `useArrowKeyHistory.tsx` | 229 | 方向键翻历史：分块读盘 + 并发加载合并 + 草稿保全 |
+| 文件                       | 行数    | 角色                                                               |
+| ------------------------ | ----- | ---------------------------------------------------------------- |
+| `fileSuggestions.ts`     | 811   | @ 文件补全的索引层：git ls-files 优先 / ripgrep 兜底、签名跳过重建、5s 节流地板、后台合入未跟踪文件 |
+| `unifiedSuggestions.ts`  | 202   | 文件 / MCP 资源 / subagent 三源合一：nucleo 与 Fuse 双引擎混排                  |
+| `useTypeahead.tsx`       | 1,385 | 补全总线：七类补全的优先级编排 + 五类 stale 丢弃 + ghost text 双模                    |
+| `useTextInput.ts`        | 529   | 文本编辑内核：emacs 键位 + kill ring + SSH/DEL 卫生                         |
+| `useVimInput.ts`         | 316   | vim 模式层：INSERT/NORMAL 状态机 + dot-repeat + operators 依赖注入          |
+| `useHistorySearch.ts`    | 303   | Ctrl-R 历史反查：AsyncGenerator 逐行读 + 现场快照还原                          |
+| `usePasteHandler.ts`     | 285   | 粘贴卫生：bracketed paste 检测 + 多图路径切分 + 同步镜像 ref                      |
+| `useArrowKeyHistory.tsx` | 229   | 方向键翻历史：分块读盘 + 并发加载合并 + 草稿保全                                      |
 
 核心设计（这八个文件回答「一次击键从 stdin 到提交经历了什么」）：
 
@@ -1170,7 +1169,7 @@ hooks 根目录第五组：队友树导航、任务列表单例 store、远程�
 6. **`useDirectConnect.ts`（229 行，22 锚点）**——WebSocket 版远程会话，与上一份对照读最能看出「同接口两种传输」的差异点：effect 内自建 manager（SSH 版是外部交入）；onAllow 多带 updatedInput——用户可能在弹窗里改过参数（如权限建议追加的路径），要原样回传远端；WS 断了没有本地回退，两条路都 gracefulShutdown(1)。
 7. **`useTaskListWatcher.ts`（221 行，24 锚点）**——tasks mode 的发动机。ref 中转 props 的真实动机写在注释里：isLoading 每轮翻转会让 effect 逐轮 close()+watch()，而这正是 Bun PathWatcherManager 死锁的触发条件（oven-sh/bun#27469）——所以清理只允许在 taskListId 变化或卸载时发生。claimTask 是文件锁语义的原子抢占，抢失败安静等下次事件；提交被拒要主动释放 claim（owner 置 undefined），否则任务永远卡在「有人认领没人干」；「转空闲排一次检查」是依赖剃掉后显式补回的补偿效应；1s 去抖 vs useTasksV2 的 50ms——这里等的是人建任务，不是自己刚写完文件。
 8. **`useTurnDiffs.ts`（213 行，23 锚点）**——从消息流提取按回合的 diff。useMemo 内做增量累计（lastProcessedIndex 游标，同批消息重复渲染不重算）；回退检测：用户 rewound 对话后消息变短，全量缓存作废重来；tool_result 也是 user 型消息（API 结构如此），靠 toolUseResult 字段甄别不当新回合；新建文件没有 structuredPatch，合成一个「全是 +」的假 hunk（oldStart/oldLines 为 0）让 diff 视图无需特判；Map 按路径聚合同文件多次编辑，stats 全量重算不增量维护。
-9. **`useCanUseTool.tsx`（204 行，27 锚点）**——权限判定总入口，React Compiler 产物（_c(3) 槽位 + memo sentinel，锚点避开 JSX 区）。核心不变式：权限判定永远以 resolve 收场——AbortError/APIUserAbortError 是用户取消只记调试日志，其余进 logError，两者都 cancelAndAbort，异常绝不让 Promise 悬挂（否则工具调用永远卡在等待权限）。ask 三岔：coordinator 自动化检查（awaitAutomatedChecksBeforeDialog 门下）→ swarm worker 代答 → speculative classifier 2 秒竞速（有结果+命中规则+高置信三条件全中才免弹窗，命中后 consume 预跑结果并存档）；auto-mode 的批准与拒绝双向留痕（批准存 setYoloClassifierApproval，拒绝进 autoModeDenials 账本 + 立即通知）；deny 只 resolve(result) 不回传 updatedInput。
+9. **`useCanUseTool.tsx`（204 行，27 锚点）**——权限判定总入口，React Compiler 产物（\_c(3) 槽位 + memo sentinel，锚点避开 JSX 区）。核心不变式：权限判定永远以 resolve 收场——AbortError/APIUserAbortError 是用户取消只记调试日志，其余进 logError，两者都 cancelAndAbort，异常绝不让 Promise 悬挂（否则工具调用永远卡在等待权限）。ask 三岔：coordinator 自动化检查（awaitAutomatedChecksBeforeDialog 门下）→ swarm worker 代答 → speculative classifier 2 秒竞速（有结果+命中规则+高置信三条件全中才免弹窗，命中后 consume 预跑结果并存档）；auto-mode 的批准与拒绝双向留痕（批准存 setYoloClassifierApproval，拒绝进 autoModeDenials 账本 + 立即通知）；deny 只 resolve(result) 不回传 updatedInput。
 10. **`useLspPluginRecommendation.tsx`（194 行，28 锚点）**——LSP 插件推荐，同样 React Compiler 产物。推荐触发三保险：会话级一次性格子 + checkedFilesRef 差分（同文件只送一次匹配）+ tryResolve 基座互斥；28 秒阈值对应菜单 30 秒自动消失——超时被 dismiss 的计 ignored count 降温，用户真点的 no 不计（明确负反馈走 never 永久拉黑）；四选一响应用带标签的 switch 汇到同一收尾；useAppState 选择器编译期拆成独立函数，窄订阅只取 fileHistory.trackedFiles。
 
 流程账：预检三断言一次通过（261 锚点）、零合并错误（硬规矩连续第 16 批生效）；check-fidelity 首轮 1 文件 FAIL——useTurnDiffs 锚点 (125,'after') 落在多行表达式 `const isToolResult =` 首行中间（把注释行 124 数成了 125，规矩 7 的新变体：多行语句的首行同样会劈开表达式），挪到 124 后复验 0 失败；两条 ⟳ 自动挪位均为 `//` 注释段中部 → 段尾（useGlobalKeybindings 99→101、useTaskListWatcher 42→46），人眼确认落点正确；check-links 0 失效。
@@ -1198,7 +1197,6 @@ hooks/notifs 整目录清零（16/16）。这一层是「启动/状态变更类�
 
 流程账：预检四断言一次通过（98 锚点）、零合并错误（硬规矩连续第 17 批生效）；annotate.py 零 ⟳ 外移（块注释锚点全部正确落在 `/**` 开头行）；check-fidelity 535 文件 0 失败；check-links 0 失效。
 
-
 ### 根目录输入/会话/选区等十件套（第 40 批，10 份 1,372 行）
 
 hooks 根目录行数前十清零（root 39/83）。这一批是「输入/会话生命周期/选区/记录」类钩子，零散但都挂在主链路的关键节点上：提示建议、后台会话、IDE 选区、定时任务、issue 反馈、输入缓冲、插件 hint、失焦摘要、消息落盘、diff 获取。hooks 到 60/104（74% 行数）。
@@ -1207,7 +1205,7 @@ hooks 根目录行数前十清零（root 39/83）。这一批是「输入/会话
 2. **`useSessionBackgrounding.ts`（158 行，7 锚点）**——Ctrl+B 把会话挂后台 / 把前台任务重新挂起。handleBackgroundSession 区分「重新挂起前台任务」与「发起后台查询」；useEffect 同步前台任务的消息与 loading 到主视图，仅消息数变化才回写（避免冗余渲染）；运行中任务把 abort 控制权交给前台任务自身，使 Escape 能中止后台任务。
 3. **`useIdeSelection.ts`（150 行，6 锚点）**——经 MCP 通知直接注册 IDE 选区监听。IDE client 变化把 undefined 归一化 null 防误重置；选中行数 = 末行-首行+1，末字符在行首（character===0）不计入；闭包守卫（currentIDERef !== 当前 client 则丢弃过期通知）防旧 client 回调污染新 client。
 4. **`useScheduledTasks.ts`（139 行，7 锚点）**——cron 调度器的 REPL 封装。isLoadingRef 避免闭包捕获过期值；runtime gate 在 effect 内检查而非调用点（保证 hook 无条件挂载，rules-of-hooks 要求）；enqueueForLead 系统生成 isMeta + WORKLOAD_CRON 低 QoS；onFireTask 按 agentId 路由队友 cron，队友消失则清理孤儿 cron；isKilled 每 tick 轮询提供会话中段实时关闭。
-5. **`useIssueFlagBanner.ts`（133 行，9 锚点）**——ant 内部环境的「反馈问题」提示条。isSessionContainerCompatible 扫描 assistant 工具调用，mcp__ 工具或危险外部命令（curl/ssh/docker/aws/git push 等）一律判不兼容；hasFrictionSignal 从末尾向前找最近 user 消息用正则判摩擦；阈值（≥3 次提交 + 30min 冷却）+ useMemo 缓存 O(messages) 扫描（每次按键都跑但打字时 messages 稳定）。
+5. **`useIssueFlagBanner.ts`（133 行，9 锚点）**——ant 内部环境的「反馈问题」提示条。isSessionContainerCompatible 扫描 assistant 工具调用，mcp\__ 工具或危险外部命令（curl/ssh/docker/aws/git push 等）一律判不兼容；hasFrictionSignal 从末尾向前找最近 user 消息用正则判摩擦；阈值（≥3 次提交 + 30min 冷却）+ useMemo 缓存 O(messages) 扫描（每次按键都跑但打字时 messages 稳定）。
 6. **`useInputBuffer.ts`（132 行，6 锚点）**——输入撤销缓冲。pushToBuffer 合并快速变更（debounce）+ 截断未来（撤销后再输入即新分支）+ 去重 + 限长；undo 回退 currentIndex 到上一条；canUndo 至少 2 条且不在首条。
 7. **`useClaudeCodeHintRecommendation.tsx`（129 行，8 锚点，React Compiler 产物）**——`<claude-code-hint />` 标签驱动的插件安装提示（show-once）。复用 usePluginRecommendationBase；tryResolve 异步解析，成功标记本会话已展示并清理 pending（防竞态）；handleResponse 三路：yes→安装 / disable→永久关闭推荐 / no→仅清理。
 8. **`useAwaySummary.ts`（125 行，7 锚点）**——终端失焦满 5 分钟追加「while you were away」摘要。双门控（编译期 feature + 运行时 GB）；generate 先中止在途再生成，文本非空且未中止才插入；回合进行中定时器触发则等回合结束（仍失焦）再补发；unknown 焦点态为 no-op。
@@ -1215,7 +1213,6 @@ hooks 根目录行数前十清零（root 39/83）。这一批是「输入/会话
 10. **`useDiffData.ts`（110 行，6 锚点）**——按需获取 git diff（stats + hunks）。挂载并行拉取两份数据；cancelled 防卸载后 setState；useMemo 识别 large（在 perFileStats 但不在 hunks）/ truncated（超 400 行上限）/ binary / untracked。
 
 流程账：预检四断言一次通过（71 锚点）、零合并错误（硬规矩连续第 18 批生效）；annotate.py 仅 1 处 ⟳（useIdeSelection 锚点误落 `//` 注释段中部，自动挪到段边界——落点经人眼确认在语句边界，未劈开英文）；check-fidelity 545 文件 0 失败；check-links 0 失效。
-
 
 ### 根目录快捷键/退出/剪贴板等十件套（第 41 批，10 份 944 行）
 
@@ -1234,7 +1231,6 @@ hooks 根目录行数前十清零（root 49/83）。这一批是「快捷键 / �
 
 流程账：预检四断言一次通过（50 锚点）、零合并错误（硬规矩连续第 19 批生效）；annotate.py 零 ⟳ 外移（7 处 `/**` 行 after 锚自动挪到块后，落点人眼确认在 import/语句之前，未劈开英文）；check-fidelity 555 文件 0 失败；check-links 0 失效。
 
-
 ### 根目录 @提及/队列/队友视图等十件套（第 42 批，10 份 638 行）
 
 hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 / Chrome 扩展 prompt / IDE 自动集成 / 命令队列处理 / 超时通知 / 队友视图自动退出 / 双按检测 / 技能变更 / 占位渲染 / Chrome 扩展通知」类钩子，偏向 IDE 集成与命令队列驱动。hooks 到 80/104（82% 行数）。
@@ -1251,7 +1247,6 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 10. **`useChromeExtensionNotification.tsx`（50 行，4 锚点，含 sourcemap）**——Chrome 扩展通知。--chrome/--no-chrome/默认三态；壳 hook 把 compute 委托给 useStartupNotification 基座；`if (true && ...)` 的 `true &&` 是 feature flag 移除后的恒真残留（值得清理）；扩展未装且非 Homespace 弹安装提示。
 
 流程账：预检四断言一次通过（43 锚点）、零合并错误（硬规矩连续第 20 批生效）；annotate.py 良性 ⟳ 外移 9 处（我的 `after` 锚落在 `//` 注释段首行，自动挪到段尾，落点人眼确认在代码之前，未劈开英文）；首轮 1 FAIL——useDoublePress 锚点 (33,'after') 落在多行表达式 `const isDoublePress =` 首行中间（规矩 7 变体：多行语句首行同性质），挪到 35 后复验 0 失败；check-links 0 失效。
-
 
 ### hooks 根目录收尾 24 件（第 43 批，24 份 683 行，69 锚点，hooks 104/104 全清）
 
@@ -1284,20 +1279,19 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 流程账：预检四断言一次通过（69 锚点）、零合并错误（硬规矩连续第 21 批生效）；annotate.py 良性 ⟳ 外移 1 处（useSettingsChange 锚点原落 `//` 注释段中部，自动挪到段尾，落点人眼确认在英文注释块之后、代码之前，未劈开英文）；首轮 1 FAIL——useIdeConnectionStatus 锚点 (21,'after') 落在多行赋值 `const ideName =` 首行（规矩 7 变体：行尾 `=` 触发「未结束多行表达式」判据），挪到三元收尾行 (24,'after') 后复验 0 失败；check-links 0 失效。
 
-
 ### 服务层之后读什么（按「对理解主链路的价值 / 体量」排）
 
-`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 974 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
+`services/`、`src/tools/`、`src/hooks/`（含 toolPermission / notifs / 根目录）**均已清零**（tools 184/184，hooks 104/104）。`src/` 还剩 692 份。候选目标（数字来自 `python scripts/check-coverage.py src`）：
 
-| 目录 | 规模 | 为什么是下一步 |
-| --- | --- | --- |
-| `src/tools/` | 184 份 / 50,863 行（**184/184 全清**） | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了 |
-| `src/hooks/` | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件） | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零** |
-| `src/utils/` | 564 份 / 180,487 行（**已做 321**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor + theme + plugins/mcpPluginIntegration + doctorDiagnostic + model/model + handlePromptSubmit + processUserInput/processUserInput + cleanup + markdownConfigLoader + conversationRecovery + plugins/pluginInstallationHelpers + deepLink/terminalLauncher + queryHelpers + sessionRestore + messageQueueManager + model/modelOptions + claudeInChrome/common + fastMode + gitDiff + gracefulShutdown + claudeInChrome/chromeNativeHost + nativeInstaller/download + bash/treeSitterAnalysis + telemetry/betaSessionTracing + settings/changeDetector + permissions/pathValidation + Shell + teleport/api + ShellCommand + swarm/backends/registry + cronTasks + listSessionsImpl + task/diskOutput + hooks/sessionHooks + plugins/officialMarketplaceStartupCheck + betas + statsCache + nativeInstaller/pidLock + tmuxSocket + proxy + imagePaste + plugins/zipCache + claudeInChrome/setup + hooks/hooksConfigManager + plugins/pluginOptionsStorage + plans，165,750 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 550–590 行档：file(584)/bash/ShellSnapshot(582)/suggestions/commandSuggestions(567)/cronScheduler(565)/autoUpdater(561)/deepLink/terminalLauncher(557)… |
-| `src/components/` | 389 份 / 81,892 行（已做 66） | TUI 组件。已经做了一部分，剩下的是各面板 |
+| 目录                | 规模                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 为什么是下一步                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/tools/`      | 184 份 / 50,863 行（**184/184 全清**）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 工具层已完成——从 Read/Glob/Grep 到 Bash 安全核心到 agent 编排，主链路的「执行侧」齐了                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `src/hooks/`      | 104 份 / 19,232 行（**104/104 全清**，toolPermission 5 + 输入补全八件套 + 通信远程五件套 + 交互插件六件套 + 任务管理与远程缝合十件套 + notifs 16 全清 + 根目录输入/会话/选区等十件套 + 根目录快捷键/退出/剪贴板等十件套 + 根目录 @提及/队列/队友视图等十件套 + 根目录收尾 24 件）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 生命周期钩子（PreToolUse / PostSampling 等），前面几个模块反复引用，读完能把 fork 时机的谜团全部收口。**整目录已清零**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/utils/`      | 564 份 / 180,487 行（**已做 321**：messages + sessionStorage + hooks + bashParser + attachments + pluginLoader + ast + marketplaceManager + auth + readOnlyCommandValidation + config + powershell/parser + filesystem + installer + schemas + inProcessRunner + permissionSetup + Cursor + worktree + yoloClassifier + ide + permissions/permissions + claudemd + analyzeContext + settings + sandbox-adapter + mcpbHandler + commitAttribution + loadPluginCommands + permissionSync + sessionTracing + git + processSlashCommand + validatePlugin + bash/commands + installedPluginsManager + settings/types + teammateMailbox + teleport + perfettoTracing + fileHistory + collapseReadSearch + stats + toolResultStorage + imageResizer + tasks + telemetry/instrumentation + words + sessionStoragePortable + fsOperations + swarm/backends/TmuxBackend + toolSearch + bash/heredoc + api + git/gitFilesystem + forkedAgent + swarm/teamHelpers + ripgrep + computerUse/executor + theme + plugins/mcpPluginIntegration + doctorDiagnostic + model/model + handlePromptSubmit + processUserInput/processUserInput + cleanup + markdownConfigLoader + conversationRecovery + plugins/pluginInstallationHelpers + deepLink/terminalLauncher + queryHelpers + sessionRestore + messageQueueManager + model/modelOptions + claudeInChrome/common + fastMode + gitDiff + gracefulShutdown + claudeInChrome/chromeNativeHost + nativeInstaller/download + bash/treeSitterAnalysis + telemetry/betaSessionTracing + settings/changeDetector + permissions/pathValidation + Shell + teleport/api + ShellCommand + swarm/backends/registry + cronTasks + listSessionsImpl + task/diskOutput + hooks/sessionHooks + plugins/officialMarketplaceStartupCheck + betas + statsCache + nativeInstaller/pidLock + tmuxSocket + proxy + imagePaste + plugins/zipCache + claudeInChrome/setup + hooks/hooksConfigManager + plugins/pluginOptionsStorage + plans，165,750 行） | 最大的一块，但最杂。1,300 行档的十巨兽（bash/commands、installedPluginsManager、teleport、teammateMailbox、settings/types、perfettoTracing、fileHistory、collapseReadSearch、stats、toolResultStorage）已全数吃掉，并顺手把 800–880 行档的 imageResizer/tasks/instrumentation 一并做了；第 54 批又吃掉 800 行档余下五巨兽（words/sessionStoragePortable/fsOperations/swarm/backends/TmuxBackend/toolSearch）连同 heredoc/api/gitFilesystem/forkedAgent/teamHelpers/ripgrep/computerUse-executor 等 12 份；下一批接 550–590 行档：file(584)/bash/ShellSnapshot(582)/suggestions/commandSuggestions(567)/cronScheduler(565)/autoUpdater(561)/deepLink/terminalLauncher(557)… |
+| `src/components/` | 389 份 / 81,892 行（已做 120）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | TUI 组件。已经做了一部分，剩下的是各面板                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
-> 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。
-> **两个大目录清零 ≠ 全仓完成**——全仓还有 974 份没动（约 51% 文件、35% 行数）。
+> 这里的进度是脚本算的（`python scripts/check-coverage.py <目录>`）。  
+> **两个大目录清零 ≠ 全仓完成**——全仓还有 692 份没动（约 36% 文件、约 27% 行数）。
 
 ---
 
@@ -1305,9 +1299,9 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 `src/utils/` 是最后一个「体量可怕」的目录（564 份 / 180,487 行），根目录就占 298 份、90,767 行。按行数降序，前两名是 5,512 行的 `messages.ts` 与 5,105 行的 `sessionStorage.ts`——单份体量约等于此前 hooks 批次里 20 份小文件之和，因此本批只取这两份（流水线允许「大文件少取」，优先级仍是行数降序）。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/messages.ts`](annotated/src/utils/messages.ts) | 5,512 | 5,596 | 84 | 消息装配线：工厂 → 归一化 → 重排 → 附件翻译 → 发送前总装 |
+| 文件                                                                 | 原文    | 批注版   | 批注  | 讲什么                                      |
+| ------------------------------------------------------------------ | ----- | ----- | --- | ---------------------------------------- |
+| [`utils/messages.ts`](annotated/src/utils/messages.ts)             | 5,512 | 5,596 | 84  | 消息装配线：工厂 → 归一化 → 重排 → 附件翻译 → 发送前总装       |
 | [`utils/sessionStorage.ts`](annotated/src/utils/sessionStorage.ts) | 5,105 | 5,247 | 142 | 会话 JSONL 的读写层：追加、去重、链恢复、标题元数据、/resume 列表 |
 
 两份文件正好是主链路的两端：`messages.ts` 管「发给模型的是什么形状」，`sessionStorage.ts` 管「磁盘上留下的是什么形状」。四个最值得记的点：
@@ -1331,9 +1325,9 @@ hooks 根目录行数前十清零（root 59/83）。这一批是「IDE @提及 /
 
 utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 `bash/bashParser.ts`（4,436 行）。一个管「生命周期钩子怎么执行」，一个管「bash 命令怎么被读懂」——后者是 Bash 工具安全判定的地基。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/hooks.ts`](annotated/src/utils/hooks.ts) | 5,022 | 5,158 | 136 | Hook 执行引擎：五类 hook（命令/提示/代理/HTTP/回调）的匹配、执行、输出协议与结果聚合 |
+| 文件                                                                   | 原文    | 批注版   | 批注  | 讲什么                                                                   |
+| -------------------------------------------------------------------- | ----- | ----- | --- | --------------------------------------------------------------------- |
+| [`utils/hooks.ts`](annotated/src/utils/hooks.ts)                     | 5,022 | 5,158 | 136 | Hook 执行引擎：五类 hook（命令/提示/代理/HTTP/回调）的匹配、执行、输出协议与结果聚合                   |
 | [`utils/bash/bashParser.ts`](annotated/src/utils/bash/bashParser.ts) | 4,436 | 4,607 | 171 | 纯 TS 手写 bash 解析器：词法 → 递归下降语法 → tree-sitter-bash 兼容 AST（3449 条金标准语料对齐） |
 
 **`hooks.ts` 的四个要点**：
@@ -1359,9 +1353,9 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 `attachments.ts`（3,997 行）与 `plugins/pluginLoader.ts`（3,302 行）。一个管「每个回合往对话里悄悄塞什么」，一个管「插件从哪来、怎么装、怎么不被恶意条目坑」。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/attachments.ts`](annotated/src/utils/attachments.ts) | 3,997 | 4,155 | 158 | 附件系统总装：40 余种 Attachment 类型的生产、节流与消息化 |
+| 文件                                                                             | 原文    | 批注版   | 批注  | 讲什么                                   |
+| ------------------------------------------------------------------------------ | ----- | ----- | --- | ------------------------------------- |
+| [`utils/attachments.ts`](annotated/src/utils/attachments.ts)                   | 3,997 | 4,155 | 158 | 附件系统总装：40 余种 Attachment 类型的生产、节流与消息化  |
 | [`utils/plugins/pluginLoader.ts`](annotated/src/utils/plugins/pluginLoader.ts) | 3,302 | 3,470 | 168 | 插件装载线：发现 → 版本化缓存 → 策略校验 → 组件装配 → 三源合并 |
 
 **`attachments.ts` 的四个要点**：
@@ -1388,11 +1382,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 `bash/ast.ts`（2,679 行）、`plugins/marketplaceManager.ts`（2,643 行）、`auth.ts`（2,002 行）。三份都在 `bashParser` 与 `pluginLoader` 的下游：一个把语法树变成可信 argv，一个管市场的落盘与对账，一个管凭证从哪来、什么时候刷新。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/bash/ast.ts`](annotated/src/utils/bash/ast.ts) | 2,679 | 2,783 | 104 | AST 安全分析：白名单遍历、作用域传播、argv 后置语义检查 |
-| [`utils/plugins/marketplaceManager.ts`](annotated/src/utils/plugins/marketplaceManager.ts) | 2,643 | 2,746 | 103 | 市场管理器：意图层/状态层、种子同步、git 与 URL 缓存、对账刷新 |
-| [`utils/auth.ts`](annotated/src/utils/auth.ts) | 2,002 | 2,116 | 114 | 凭证层：八种 token 来源、apiKeyHelper 的 SWR、OAuth 跨进程刷新锁 |
+| 文件                                                                                         | 原文    | 批注版   | 批注  | 讲什么                                             |
+| ------------------------------------------------------------------------------------------ | ----- | ----- | --- | ----------------------------------------------- |
+| [`utils/bash/ast.ts`](annotated/src/utils/bash/ast.ts)                                     | 2,679 | 2,783 | 104 | AST 安全分析：白名单遍历、作用域传播、argv 后置语义检查                |
+| [`utils/plugins/marketplaceManager.ts`](annotated/src/utils/plugins/marketplaceManager.ts) | 2,643 | 2,746 | 103 | 市场管理器：意图层/状态层、种子同步、git 与 URL 缓存、对账刷新            |
+| [`utils/auth.ts`](annotated/src/utils/auth.ts)                                             | 2,002 | 2,116 | 114 | 凭证层：八种 token 来源、apiKeyHelper 的 SWR、OAuth 跨进程刷新锁 |
 
 **`ast.ts` 的五个要点**：
 
@@ -1426,11 +1420,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 `shell/readOnlyCommandValidation.ts`（1,893 行）、`config.ts`（1,817 行）、`powershell/parser.ts`（1,804 行）。三份分别对应「判定能不能自动跑」「把状态存到哪」「另一种 shell 的语法怎么读」——都在权限链的上游。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
+| 文件                                                                                                   | 原文    | 批注版   | 批注 | 讲什么                                                         |
+| ---------------------------------------------------------------------------------------------------- | ----- | ----- | -- | ----------------------------------------------------------- |
 | [`utils/shell/readOnlyCommandValidation.ts`](annotated/src/utils/shell/readOnlyCommandValidation.ts) | 1,893 | 1,959 | 66 | 只读命令白名单：git/gh/docker/rg/pyright 的标志表、位置参数回调、UNC 检测、标志校验主循环 |
-| [`utils/config.ts`](annotated/src/utils/config.ts) | 1,817 | 1,873 | 49 | 配置层：单文件 JSON、文件锁、mtime 缓存、备份轮转、历史迁移、auth 丢失守卫 |
-| [`utils/powershell/parser.ts`](annotated/src/utils/powershell/parser.ts) | 1,804 | 1,876 | 58 | PowerShell AST 解析：调真 pwsh 解析、PS1 脚本内联、argv 字节预算、别名表与危险标记 |
+| [`utils/config.ts`](annotated/src/utils/config.ts)                                                   | 1,817 | 1,873 | 49 | 配置层：单文件 JSON、文件锁、mtime 缓存、备份轮转、历史迁移、auth 丢失守卫               |
+| [`utils/powershell/parser.ts`](annotated/src/utils/powershell/parser.ts)                             | 1,804 | 1,876 | 58 | PowerShell AST 解析：调真 pwsh 解析、PS1 脚本内联、argv 字节预算、别名表与危险标记    |
 
 **`readOnlyCommandValidation.ts` 的五个要点**：
 
@@ -1466,11 +1460,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 `permissions/filesystem.ts`（1,777 行）、`nativeInstaller/installer.ts`（1,708 行）、`plugins/schemas.ts`（1,681 行）。三份的共同点是「判据本身」：文件能不能写、装的东西能不能用、配置算不算合法——都不是业务逻辑，而是把模糊的人类意图钉成可执行的规则。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/permissions/filesystem.ts`](annotated/src/utils/permissions/filesystem.ts) | 1,777 | 1,837 | 60 | 路径级权限判定：读/写两条有序检查链、规则根解析、gitignore 模式匹配、危险路径清单、内部路径白名单 |
-| [`utils/nativeInstaller/installer.ts`](annotated/src/utils/nativeInstaller/installer.ts) | 1,708 | 1,764 | 56 | 原生安装器：目录分层、版本锁、原子落盘、Windows 复制与回滚、旧版本清理、npm 卸载兜底 |
-| [`utils/plugins/schemas.ts`](annotated/src/utils/plugins/schemas.ts) | 1,681 | 1,735 | 54 | 插件与市场 schema：冒名防护、manifest 全字段、市场源九种形态、已安装记录 V1→V2 |
+| 文件                                                                                       | 原文    | 批注版   | 批注 | 讲什么                                                    |
+| ---------------------------------------------------------------------------------------- | ----- | ----- | -- | ------------------------------------------------------ |
+| [`utils/permissions/filesystem.ts`](annotated/src/utils/permissions/filesystem.ts)       | 1,777 | 1,837 | 60 | 路径级权限判定：读/写两条有序检查链、规则根解析、gitignore 模式匹配、危险路径清单、内部路径白名单 |
+| [`utils/nativeInstaller/installer.ts`](annotated/src/utils/nativeInstaller/installer.ts) | 1,708 | 1,764 | 56 | 原生安装器：目录分层、版本锁、原子落盘、Windows 复制与回滚、旧版本清理、npm 卸载兜底       |
+| [`utils/plugins/schemas.ts`](annotated/src/utils/plugins/schemas.ts)                     | 1,681 | 1,735 | 54 | 插件与市场 schema：冒名防护、manifest 全字段、市场源九种形态、已安装记录 V1→V2     |
 
 **`filesystem.ts` 的五个要点**：
 
@@ -1504,13 +1498,13 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 `inProcessRunner.ts` 负责把队友真正跑起来（AsyncLocalStorage 上下文 + runAgent 主循环 + 权限轮询），`yoloClassifier.ts` 与 `permissionSetup.ts` 负责 auto 模式下「这次动作该不该拦」的判断与模式切换，`Cursor.ts` 是终端输入框的光标与字素原语，`worktree.ts` 则是把这一切隔离进独立 git worktree 的底层机制。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/swarm/inProcessRunner.ts`](annotated/src/utils/swarm/inProcessRunner.ts) | 1,552 | 1,601 | 49 | 进程内队友运行器：AsyncLocalStorage 上下文、runAgent 主循环、队友权限轮询、计划模式状态协调 |
-| [`utils/permissions/permissionSetup.ts`](annotated/src/utils/permissions/permissionSetup.ts) | 1,532 | 1,599 | 67 | 权限模式初始化与切换：auto 模式危险规则剥离、YOLO 分类器装配、计划模式状态协调 |
-| [`utils/Cursor.ts`](annotated/src/utils/Cursor.ts) | 1,530 | 1,592 | 62 | 终端光标与文本编辑原语：Unicode 归一化、字素簇边界、kill ring、可视换行对齐 |
-| [`utils/worktree.ts`](annotated/src/utils/worktree.ts) | 1,519 | 1,596 | 77 | git worktree 隔离：slug 校验、创建与快速恢复、符号链接大目录、钩子、过期清理、tmux 快速路径 |
-| [`utils/permissions/yoloClassifier.ts`](annotated/src/utils/permissions/yoloClassifier.ts) | 1,495 | 1,576 | 81 | auto 模式 YOLO 安全分类器：系统提示拼装、转录压缩、两阶段 XML 分类、工具调用分类 |
+| 文件                                                                                           | 原文    | 批注版   | 批注 | 讲什么                                                         |
+| -------------------------------------------------------------------------------------------- | ----- | ----- | -- | ----------------------------------------------------------- |
+| [`utils/swarm/inProcessRunner.ts`](annotated/src/utils/swarm/inProcessRunner.ts)             | 1,552 | 1,601 | 49 | 进程内队友运行器：AsyncLocalStorage 上下文、runAgent 主循环、队友权限轮询、计划模式状态协调 |
+| [`utils/permissions/permissionSetup.ts`](annotated/src/utils/permissions/permissionSetup.ts) | 1,532 | 1,599 | 67 | 权限模式初始化与切换：auto 模式危险规则剥离、YOLO 分类器装配、计划模式状态协调                |
+| [`utils/Cursor.ts`](annotated/src/utils/Cursor.ts)                                           | 1,530 | 1,592 | 62 | 终端光标与文本编辑原语：Unicode 归一化、字素簇边界、kill ring、可视换行对齐              |
+| [`utils/worktree.ts`](annotated/src/utils/worktree.ts)                                       | 1,519 | 1,596 | 77 | git worktree 隔离：slug 校验、创建与快速恢复、符号链接大目录、钩子、过期清理、tmux 快速路径   |
+| [`utils/permissions/yoloClassifier.ts`](annotated/src/utils/permissions/yoloClassifier.ts)   | 1,495 | 1,576 | 81 | auto 模式 YOLO 安全分类器：系统提示拼装、转录压缩、两阶段 XML 分类、工具调用分类            |
 
 **`inProcessRunner.ts` 的四个要点**：
 
@@ -1556,12 +1550,12 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 四份都是「环境的入口」而不是业务逻辑：`ide.ts` 找编辑器、`permissions.ts` 判能不能动手、`claudemd.ts` 装指令、`analyzeContext.ts` 量窗口。放在一批读的好处是能看清它们共用同一条判据链——**显式声明压过一切隐式推导**。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/ide.ts`](annotated/src/utils/ide.ts) | 1,494 | 1,540 | 46 | IDE 集成发现层：锁文件扫描、端口探活、工作区前缀匹配、进程祖先链、扩展安装 |
-| [`utils/permissions/permissions.ts`](annotated/src/utils/permissions/permissions.ts) | 1,486 | 1,532 | 45 | 权限主流水线：1a–1g 规则层 → 2a/2b 模式层 → dontAsk/auto 两个后处理 |
-| [`utils/claudemd.ts`](annotated/src/utils/claudemd.ts) | 1,479 | 1,530 | 51 | CLAUDE.md 装载：四类记忆优先级、@include 递归与防环、条件规则 glob 匹配、排除项 |
-| [`utils/analyzeContext.ts`](annotated/src/utils/analyzeContext.ts) | 1,382 | 1,428 | 46 | 上下文用量分析：七个并行计数器、延迟工具记账、保留缓冲语义、10×10 字符网格 |
+| 文件                                                                                   | 原文    | 批注版   | 批注 | 讲什么                                                  |
+| ------------------------------------------------------------------------------------ | ----- | ----- | -- | ---------------------------------------------------- |
+| [`utils/ide.ts`](annotated/src/utils/ide.ts)                                         | 1,494 | 1,540 | 46 | IDE 集成发现层：锁文件扫描、端口探活、工作区前缀匹配、进程祖先链、扩展安装              |
+| [`utils/permissions/permissions.ts`](annotated/src/utils/permissions/permissions.ts) | 1,486 | 1,532 | 45 | 权限主流水线：1a–1g 规则层 → 2a/2b 模式层 → dontAsk/auto 两个后处理    |
+| [`utils/claudemd.ts`](annotated/src/utils/claudemd.ts)                               | 1,479 | 1,530 | 51 | CLAUDE.md 装载：四类记忆优先级、@include 递归与防环、条件规则 glob 匹配、排除项 |
+| [`utils/analyzeContext.ts`](annotated/src/utils/analyzeContext.ts)                   | 1,382 | 1,428 | 46 | 上下文用量分析：七个并行计数器、延迟工具记账、保留缓冲语义、10×10 字符网格             |
 
 **`ide.ts` 的四个要点**：
 
@@ -1599,18 +1593,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 十份分散在 utils 各处的「工具基础设施」：设置装载、沙箱适配、插件下载与命令加载、提交归因、swarm 权限同步、遥测会话追踪、git 根定位与工作树安全校验、斜杠命令分发、插件校验器。没有统一主题，但都是上层反复依赖的底座。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/settings/settings.ts`](annotated/src/utils/settings/settings.ts) | 1,015 | 1,043 | 28 | 设置加载/合并/策略来源/写回/自动模式配置 |
-| [`utils/sandbox/sandbox-adapter.ts`](annotated/src/utils/sandbox/sandbox-adapter.ts) | 985 | 1,018 | 33 | 沙箱适配器（内置 SECURITY 块，H1 漏洞修复） |
-| [`utils/plugins/mcpbHandler.ts`](annotated/src/utils/plugins/mcpbHandler.ts) | 968 | 991 | 23 | MCPB 下载/解压/缓存/用户配置分流（H1 #3617646 修复） |
-| [`utils/commitAttribution.ts`](annotated/src/utils/commitAttribution.ts) | 961 | 994 | 33 | 提交归因系统（谁改了哪段代码） |
-| [`utils/plugins/loadPluginCommands.ts`](annotated/src/utils/plugins/loadPluginCommands.ts) | 946 | 963 | 17 | 插件命令/技能加载与分发 |
-| [`utils/swarm/permissionSync.ts`](annotated/src/utils/swarm/permissionSync.ts) | 928 | 957 | 29 | swarm 权限同步（文件式 + 邮箱式两条链路） |
-| [`utils/telemetry/sessionTracing.ts`](annotated/src/utils/telemetry/sessionTracing.ts) | 927 | 958 | 31 | OpenTelemetry 会话追踪：interaction/llm/tool/hook span |
-| [`utils/git.ts`](annotated/src/utils/git.ts) | 926 | 957 | 31 | git 根定位/worktree 安全校验/issue 状态保留 |
-| [`utils/processUserInput/processSlashCommand.tsx`](annotated/src/utils/processUserInput/processSlashCommand.tsx) | 922 | 953 | 31 | 斜杠命令分发：fork 子代理 / 本地 / 提示词三路 |
-| [`utils/plugins/validatePlugin.ts`](annotated/src/utils/plugins/validatePlugin.ts) | 903 | 928 | 25 | `claude plugin validate` 校验器（manifest/frontmatter/hooks） |
+| 文件                                                                                                               | 原文    | 批注版   | 批注 | 讲什么                                                      |
+| ---------------------------------------------------------------------------------------------------------------- | ----- | ----- | -- | -------------------------------------------------------- |
+| [`utils/settings/settings.ts`](annotated/src/utils/settings/settings.ts)                                         | 1,015 | 1,043 | 28 | 设置加载/合并/策略来源/写回/自动模式配置                                   |
+| [`utils/sandbox/sandbox-adapter.ts`](annotated/src/utils/sandbox/sandbox-adapter.ts)                             | 985   | 1,018 | 33 | 沙箱适配器（内置 SECURITY 块，H1 漏洞修复）                             |
+| [`utils/plugins/mcpbHandler.ts`](annotated/src/utils/plugins/mcpbHandler.ts)                                     | 968   | 991   | 23 | MCPB 下载/解压/缓存/用户配置分流（H1 #3617646 修复）                     |
+| [`utils/commitAttribution.ts`](annotated/src/utils/commitAttribution.ts)                                         | 961   | 994   | 33 | 提交归因系统（谁改了哪段代码）                                          |
+| [`utils/plugins/loadPluginCommands.ts`](annotated/src/utils/plugins/loadPluginCommands.ts)                       | 946   | 963   | 17 | 插件命令/技能加载与分发                                             |
+| [`utils/swarm/permissionSync.ts`](annotated/src/utils/swarm/permissionSync.ts)                                   | 928   | 957   | 29 | swarm 权限同步（文件式 + 邮箱式两条链路）                                |
+| [`utils/telemetry/sessionTracing.ts`](annotated/src/utils/telemetry/sessionTracing.ts)                           | 927   | 958   | 31 | OpenTelemetry 会话追踪：interaction/llm/tool/hook span        |
+| [`utils/git.ts`](annotated/src/utils/git.ts)                                                                     | 926   | 957   | 31 | git 根定位/worktree 安全校验/issue 状态保留                         |
+| [`utils/processUserInput/processSlashCommand.tsx`](annotated/src/utils/processUserInput/processSlashCommand.tsx) | 922   | 953   | 31 | 斜杠命令分发：fork 子代理 / 本地 / 提示词三路                             |
+| [`utils/plugins/validatePlugin.ts`](annotated/src/utils/plugins/validatePlugin.ts)                               | 903   | 928   | 25 | `claude plugin validate` 校验器（manifest/frontmatter/hooks） |
 
 **几个值得记住的点**：
 
@@ -1626,21 +1620,21 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 十三份按行数降序取 utils 里体量最大的梯队（1,339 行档的 bash/commands 到 825 行的 instrumentation），主题横跨「Bash 执行核心 / 插件管理 / 设置类型 / 多智能体协作 / 终端渲染 / 遥测 / 大结果落盘 / 图片预处理 / 任务与统计」。没有统一主线，但全是上层反复依赖的底座。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/bash/commands.ts`](annotated/src/utils/bash/commands.ts) | 1,339 | 1,381 | 42 | Bash 命令解析与执行核心：拆命令/危险命令确认/输出截断/超时与信号终止 |
-| [`utils/plugins/installedPluginsManager.ts`](annotated/src/utils/plugins/installedPluginsManager.ts) | 1,268 | 1,310 | 42 | 已安装插件管理：marketplace 列表/安装·更新·卸载/manifest/命令技能注册 |
-| [`utils/settings/types.ts`](annotated/src/utils/settings/types.ts) | 1,148 | 1,200 | 52 | 设置系统类型定义：配置项 TS 类型/默认值/schema/覆盖层级 |
-| [`utils/teammateMailbox.ts`](annotated/src/utils/teammateMailbox.ts) | 1,183 | 1,213 | 30 | 队友邮箱：agent 间异步消息收发/持久化/回执 |
-| [`utils/teleport.tsx`](annotated/src/utils/teleport.tsx) | 1,225 | 1,259 | 33 | 终端输出 TUI 渲染：命令结果虚拟化/ANSI 转义/滚动 |
-| [`utils/telemetry/perfettoTracing.ts`](annotated/src/utils/telemetry/perfettoTracing.ts) | 1,120 | 1,166 | 46 | Perfetto 性能追踪：trace 采集/写盘/与 OpenTelemetry 桥接 |
-| [`utils/fileHistory.ts`](annotated/src/utils/fileHistory.ts) | 1,115 | 1,147 | 32 | 文件历史：变更快照/撤销栈/历史查询 |
-| [`utils/collapseReadSearch.ts`](annotated/src/utils/collapseReadSearch.ts) | 1,109 | 1,143 | 34 | 折叠相邻 Read/Search：合成摘要组，抑制上下文膨胀 |
-| [`utils/stats.ts`](annotated/src/utils/stats.ts) | 1,061 | 1,094 | 33 | 会话统计：使用量/token/活跃时段/聚合持久化 |
-| [`utils/toolResultStorage.ts`](annotated/src/utils/toolResultStorage.ts) | 1,040 | 1,090 | 50 | 大工具结果落盘：超长输出写临时文件/引用返回/清理策略 |
-| [`utils/imageResizer.ts`](annotated/src/utils/imageResizer.ts) | 880 | 930 | 50 | 图片缩放压缩：sharp 重采样/格式转换/上传预处理 |
-| [`utils/tasks.ts`](annotated/src/utils/tasks.ts) | 862 | 912 | 50 | 任务列表管理：swarm 待办增删改查/状态迁移/依赖 |
-| [`utils/telemetry/instrumentation.ts`](annotated/src/utils/telemetry/instrumentation.ts) | 825 | 860 | 35 | OpenTelemetry 启动引导：SDK 初始化/exporter/采样/全局 tracer |
+| 文件                                                                                                   | 原文    | 批注版   | 批注 | 讲什么                                              |
+| ---------------------------------------------------------------------------------------------------- | ----- | ----- | -- | ------------------------------------------------ |
+| [`utils/bash/commands.ts`](annotated/src/utils/bash/commands.ts)                                     | 1,339 | 1,381 | 42 | Bash 命令解析与执行核心：拆命令/危险命令确认/输出截断/超时与信号终止           |
+| [`utils/plugins/installedPluginsManager.ts`](annotated/src/utils/plugins/installedPluginsManager.ts) | 1,268 | 1,310 | 42 | 已安装插件管理：marketplace 列表/安装·更新·卸载/manifest/命令技能注册  |
+| [`utils/settings/types.ts`](annotated/src/utils/settings/types.ts)                                   | 1,148 | 1,200 | 52 | 设置系统类型定义：配置项 TS 类型/默认值/schema/覆盖层级               |
+| [`utils/teammateMailbox.ts`](annotated/src/utils/teammateMailbox.ts)                                 | 1,183 | 1,213 | 30 | 队友邮箱：agent 间异步消息收发/持久化/回执                        |
+| [`utils/teleport.tsx`](annotated/src/utils/teleport.tsx)                                             | 1,225 | 1,259 | 33 | 终端输出 TUI 渲染：命令结果虚拟化/ANSI 转义/滚动                   |
+| [`utils/telemetry/perfettoTracing.ts`](annotated/src/utils/telemetry/perfettoTracing.ts)             | 1,120 | 1,166 | 46 | Perfetto 性能追踪：trace 采集/写盘/与 OpenTelemetry 桥接     |
+| [`utils/fileHistory.ts`](annotated/src/utils/fileHistory.ts)                                         | 1,115 | 1,147 | 32 | 文件历史：变更快照/撤销栈/历史查询                               |
+| [`utils/collapseReadSearch.ts`](annotated/src/utils/collapseReadSearch.ts)                           | 1,109 | 1,143 | 34 | 折叠相邻 Read/Search：合成摘要组，抑制上下文膨胀                   |
+| [`utils/stats.ts`](annotated/src/utils/stats.ts)                                                     | 1,061 | 1,094 | 33 | 会话统计：使用量/token/活跃时段/聚合持久化                        |
+| [`utils/toolResultStorage.ts`](annotated/src/utils/toolResultStorage.ts)                             | 1,040 | 1,090 | 50 | 大工具结果落盘：超长输出写临时文件/引用返回/清理策略                      |
+| [`utils/imageResizer.ts`](annotated/src/utils/imageResizer.ts)                                       | 880   | 930   | 50 | 图片缩放压缩：sharp 重采样/格式转换/上传预处理                      |
+| [`utils/tasks.ts`](annotated/src/utils/tasks.ts)                                                     | 862   | 912   | 50 | 任务列表管理：swarm 待办增删改查/状态迁移/依赖                      |
+| [`utils/telemetry/instrumentation.ts`](annotated/src/utils/telemetry/instrumentation.ts)             | 825   | 860   | 35 | OpenTelemetry 启动引导：SDK 初始化/exporter/采样/全局 tracer |
 
 **几个值得记住的点**：
 
@@ -1659,20 +1653,20 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 十二份继续按行数降序吃 utils 里 800 行档余下的五巨兽（words / sessionStoragePortable / fsOperations / swarm 的 TmuxBackend / toolSearch），并顺手把 660–730 行档的 heredoc / api / gitFilesystem / forkedAgent / teamHelpers / ripgrep / computerUse-executor 一并做了。主题横跨「随机命名 / 会话存储 / 文件系统 / 多智能体运行与协作 / 工具搜索 / heredoc 安全 / API schema / git 文件系统 / 分叉智能体 / ripgrep 搜索 / 计算机操控执行器」。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/words.ts`](annotated/src/utils/words.ts) | 800 | 821 | 21 | 随机词 slug 生成器：形容词-动词-名词三段式，给计划 ID 等产出可读名 |
-| [`utils/sessionStoragePortable.ts`](annotated/src/utils/sessionStoragePortable.ts) | 793 | 829 | 36 | 可移植会话存储工具集：UUID 校验 / JSON 字段抽取 / 首提示提取 / 头尾分块读写 / 路径消毒 / swarm 工作树 |
-| [`utils/fsOperations.ts`](annotated/src/utils/fsOperations.ts) | 770 | 794 | 24 | 文件系统操作封装：安全路径解析 / 符号链接权限 / 区间读取 / tail / 倒序读行 |
-| [`utils/swarm/backends/TmuxBackend.ts`](annotated/src/utils/swarm/backends/TmuxBackend.ts) | 764 | 793 | 29 | swarm 的 tmux 后端：user/swarm 双会话运行 / 窗格创建隐藏与重排 / 自注册 |
-| [`utils/toolSearch.ts`](annotated/src/utils/toolSearch.ts) | 756 | 784 | 28 | 工具搜索模式：模型是否支持工具引用 / 自动阈值 / 已发现工具差异计算 |
-| [`utils/bash/heredoc.ts`](annotated/src/utils/bash/heredoc.ts) | 733 | 766 | 33 | heredoc 提取与还原：防命令走私的多处安全校验 |
-| [`utils/api.ts`](annotated/src/utils/api.ts) | 718 | 740 | 22 | 工具 → API schema 转换与上下文归一化：系统 / 用户上下文拼装 / 输入归一 |
-| [`utils/git/gitFilesystem.ts`](annotated/src/utils/git/gitFilesystem.ts) | 699 | 734 | 35 | git 文件系统层：ref 解析 / 分支缓存 / 工作树 / 浅克隆检测 |
-| [`utils/forkedAgent.ts`](annotated/src/utils/forkedAgent.ts) | 689 | 713 | 24 | 分叉智能体查询循环：缓存安全参数 / 隔离上下文 / 用量上报 |
-| [`utils/swarm/teamHelpers.ts`](annotated/src/utils/swarm/teamHelpers.ts) | 683 | 712 | 29 | 团队本地状态读写与清理：config.json / 成员模式 / 工作树销毁 |
-| [`utils/ripgrep.ts`](annotated/src/utils/ripgrep.ts) | 679 | 710 | 31 | ripgrep 搜索后端封装：三模式 / 超时 / 重试 / 流式 / 错误分级 |
-| [`utils/computerUse/executor.ts`](annotated/src/utils/computerUse/executor.ts) | 658 | 693 | 35 | computer-use CLI 执行器：鼠标 / 键盘 / 截图 / 应用管理 |
+| 文件                                                                                         | 原文  | 批注版 | 批注 | 讲什么                                                                |
+| ------------------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------------------------------------ |
+| [`utils/words.ts`](annotated/src/utils/words.ts)                                           | 800 | 821 | 21 | 随机词 slug 生成器：形容词-动词-名词三段式，给计划 ID 等产出可读名                            |
+| [`utils/sessionStoragePortable.ts`](annotated/src/utils/sessionStoragePortable.ts)         | 793 | 829 | 36 | 可移植会话存储工具集：UUID 校验 / JSON 字段抽取 / 首提示提取 / 头尾分块读写 / 路径消毒 / swarm 工作树 |
+| [`utils/fsOperations.ts`](annotated/src/utils/fsOperations.ts)                             | 770 | 794 | 24 | 文件系统操作封装：安全路径解析 / 符号链接权限 / 区间读取 / tail / 倒序读行                      |
+| [`utils/swarm/backends/TmuxBackend.ts`](annotated/src/utils/swarm/backends/TmuxBackend.ts) | 764 | 793 | 29 | swarm 的 tmux 后端：user/swarm 双会话运行 / 窗格创建隐藏与重排 / 自注册                 |
+| [`utils/toolSearch.ts`](annotated/src/utils/toolSearch.ts)                                 | 756 | 784 | 28 | 工具搜索模式：模型是否支持工具引用 / 自动阈值 / 已发现工具差异计算                               |
+| [`utils/bash/heredoc.ts`](annotated/src/utils/bash/heredoc.ts)                             | 733 | 766 | 33 | heredoc 提取与还原：防命令走私的多处安全校验                                         |
+| [`utils/api.ts`](annotated/src/utils/api.ts)                                               | 718 | 740 | 22 | 工具 → API schema 转换与上下文归一化：系统 / 用户上下文拼装 / 输入归一                      |
+| [`utils/git/gitFilesystem.ts`](annotated/src/utils/git/gitFilesystem.ts)                   | 699 | 734 | 35 | git 文件系统层：ref 解析 / 分支缓存 / 工作树 / 浅克隆检测                              |
+| [`utils/forkedAgent.ts`](annotated/src/utils/forkedAgent.ts)                               | 689 | 713 | 24 | 分叉智能体查询循环：缓存安全参数 / 隔离上下文 / 用量上报                                    |
+| [`utils/swarm/teamHelpers.ts`](annotated/src/utils/swarm/teamHelpers.ts)                   | 683 | 712 | 29 | 团队本地状态读写与清理：config.json / 成员模式 / 工作树销毁                             |
+| [`utils/ripgrep.ts`](annotated/src/utils/ripgrep.ts)                                       | 679 | 710 | 31 | ripgrep 搜索后端封装：三模式 / 超时 / 重试 / 流式 / 错误分级                           |
+| [`utils/computerUse/executor.ts`](annotated/src/utils/computerUse/executor.ts)             | 658 | 693 | 35 | computer-use CLI 执行器：鼠标 / 键盘 / 截图 / 应用管理                           |
 
 **几个值得记住的点**：
 
@@ -1691,18 +1685,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 十份按行数降序吃 utils 里 600 到 640 行档的收口：theme / plugins/mcpPluginIntegration / doctorDiagnostic / model/model / handlePromptSubmit / processUserInput/processUserInput / cleanup / markdownConfigLoader / conversationRecovery / plugins/pluginInstallationHelpers。主题横跨「UI 主题与 chalk 着色 / MCP 插件集成 / 安装自检诊断 / 模型抽象与 provider 选型 / 提示提交处理 / 用户输入处理 / 过期文件清理 / Markdown 配置装载 / 会话恢复 / 插件安装辅助」。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/theme.ts`](annotated/src/utils/theme.ts) | 639 | 655 | 16 | 终端 UI 颜色主题系统：命名主题（浅色/深色/ANSI/色盲友好）+ 主题色转 ANSI 转义码，全用显式 RGB/命名色避免被终端配色干扰 |
-| [`utils/plugins/mcpPluginIntegration.ts`](annotated/src/utils/plugins/mcpPluginIntegration.ts) | 634 | 650 | 16 | 从插件加载解析 MCP 服务器配置：多来源（MCPB 压缩包/插件清单/.mcp.json/.mcpb）收集、环境变量与用户配置替换、加插件作用域前缀防命名冲突 |
-| [`utils/doctorDiagnostic.ts`](annotated/src/utils/doctorDiagnostic.ts) | 625 | 639 | 14 | `claude doctor` 自检核心：诊断安装类型/版本/路径/自动更新权限/多重安装冲突/配置问题，给可执行修复建议 |
-| [`utils/model/model.ts`](annotated/src/utils/model/model.ts) | 618 | 641 | 23 | 模型选择中枢：按会话覆盖/启动参数/环境变量/设置/订阅/1M 上下文多重来源解析当前主循环模型，含别名解析/规范名/显示名整套工具（含 ANT 专用防泄漏标记） |
-| [`utils/handlePromptSubmit.ts`](annotated/src/utils/handlePromptSubmit.ts) | 610 | 627 | 17 | 用户提交提示词总入口：分流退出命令/本地 JSX 即时命令/队列/直接执行；真正执行在 executeUserInput，统一走 processUserInput→onQuery 循环 |
-| [`utils/processUserInput/processUserInput.ts`](annotated/src/utils/processUserInput/processUserInput.ts) | 605 | 623 | 18 | 用户单条输入处理基座：图片缩放/附件抽取/粘贴图处理/斜杠命令与 ultraplan 关键词与 bash 路由，最终交 processTextPrompt 生成用户消息 |
-| [`utils/cleanup.ts`](annotated/src/utils/cleanup.ts) | 602 | 620 | 18 | 过期文件清理逻辑：消息日志/会话/计划/文件历史备份/调试日志/npm 缓存/旧版本按保留天数（默认 30 天）删除，后台一键清理组合调用 |
-| [`utils/markdownConfigLoader.ts`](annotated/src/utils/markdownConfigLoader.ts) | 600 | 613 | 13 | 加载解析 Markdown 配置（命令/智能体/技能/工作流）：多级目录收集 .md、frontmatter 解析、inode 去重、git 根截断与软链处理、工具列表解析 |
-| [`utils/conversationRecovery.ts`](annotated/src/utils/conversationRecovery.ts) | 597 | 613 | 16 | 会话恢复：transcript jsonl 反序列化成 REPL 消息，遗留附件类型迁移/未解析工具调用过滤/中断检测/技能状态恢复，多来源加载 |
-| [`utils/plugins/pluginInstallationHelpers.ts`](annotated/src/utils/plugins/pluginInstallationHelpers.ts) | 595 | 614 | 19 | 插件安装共享辅助层：路径穿越防护/缓存登记插件/解析插件 ID/依赖闭包解析/结构化错误格式化/CLI 与交互 UI 共用安装逻辑 |
+| 文件                                                                                                       | 原文  | 批注版 | 批注 | 讲什么                                                                                          |
+| -------------------------------------------------------------------------------------------------------- | --- | --- | -- | -------------------------------------------------------------------------------------------- |
+| [`utils/theme.ts`](annotated/src/utils/theme.ts)                                                         | 639 | 655 | 16 | 终端 UI 颜色主题系统：命名主题（浅色/深色/ANSI/色盲友好）+ 主题色转 ANSI 转义码，全用显式 RGB/命名色避免被终端配色干扰                      |
+| [`utils/plugins/mcpPluginIntegration.ts`](annotated/src/utils/plugins/mcpPluginIntegration.ts)           | 634 | 650 | 16 | 从插件加载解析 MCP 服务器配置：多来源（MCPB 压缩包/插件清单/.mcp.json/.mcpb）收集、环境变量与用户配置替换、加插件作用域前缀防命名冲突             |
+| [`utils/doctorDiagnostic.ts`](annotated/src/utils/doctorDiagnostic.ts)                                   | 625 | 639 | 14 | `claude doctor` 自检核心：诊断安装类型/版本/路径/自动更新权限/多重安装冲突/配置问题，给可执行修复建议                                |
+| [`utils/model/model.ts`](annotated/src/utils/model/model.ts)                                             | 618 | 641 | 23 | 模型选择中枢：按会话覆盖/启动参数/环境变量/设置/订阅/1M 上下文多重来源解析当前主循环模型，含别名解析/规范名/显示名整套工具（含 ANT 专用防泄漏标记）            |
+| [`utils/handlePromptSubmit.ts`](annotated/src/utils/handlePromptSubmit.ts)                               | 610 | 627 | 17 | 用户提交提示词总入口：分流退出命令/本地 JSX 即时命令/队列/直接执行；真正执行在 executeUserInput，统一走 processUserInput→onQuery 循环 |
+| [`utils/processUserInput/processUserInput.ts`](annotated/src/utils/processUserInput/processUserInput.ts) | 605 | 623 | 18 | 用户单条输入处理基座：图片缩放/附件抽取/粘贴图处理/斜杠命令与 ultraplan 关键词与 bash 路由，最终交 processTextPrompt 生成用户消息         |
+| [`utils/cleanup.ts`](annotated/src/utils/cleanup.ts)                                                     | 602 | 620 | 18 | 过期文件清理逻辑：消息日志/会话/计划/文件历史备份/调试日志/npm 缓存/旧版本按保留天数（默认 30 天）删除，后台一键清理组合调用                        |
+| [`utils/markdownConfigLoader.ts`](annotated/src/utils/markdownConfigLoader.ts)                           | 600 | 613 | 13 | 加载解析 Markdown 配置（命令/智能体/技能/工作流）：多级目录收集 .md、frontmatter 解析、inode 去重、git 根截断与软链处理、工具列表解析       |
+| [`utils/conversationRecovery.ts`](annotated/src/utils/conversationRecovery.ts)                           | 597 | 613 | 16 | 会话恢复：transcript jsonl 反序列化成 REPL 消息，遗留附件类型迁移/未解析工具调用过滤/中断检测/技能状态恢复，多来源加载                     |
+| [`utils/plugins/pluginInstallationHelpers.ts`](annotated/src/utils/plugins/pluginInstallationHelpers.ts) | 595 | 614 | 19 | 插件安装共享辅助层：路径穿越防护/缓存登记插件/解析插件 ID/依赖闭包解析/结构化错误格式化/CLI 与交互 UI 共用安装逻辑                            |
 
 **几个值得记住的点**：
 
@@ -1721,14 +1715,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是**上一轮自动化运行被中断后遗留的半成品**：6 份数据文件（`scripts/_annot/*_p1.py`）与 1 份已生成的 `annotated/src/utils/file.ts` 以未提交状态留在工作树，其余 5 份只写到数据文件、尚未跑 `annotate.py`。本批先把这批孤儿文件接完——重跑预检（importlib 加载 + `ast.parse` + 引号/反斜杠/行号/重复锚点断言）确认 6 份全部有效，再对 6 份统一跑 `annotate.py` 补齐产出。六份都是 utils 里 560–592 行的中型文件，主题横跨「文件 IO/路径 / 自动更新与版本门槛 / bash 快照 / 定时任务调度 / 插件市场策略 / 斜杠命令建议」。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/file.ts`](annotated/src/utils/file.ts) | 584 | 610 | 26 | 文件读写与路径展示工具箱：可替换文件系统实现（getFsImplementation）、存在性/读写/编码与换行探测/行号前缀/符号链接安全写入/桌面路径解析 |
-| [`utils/autoUpdater.ts`](annotated/src/utils/autoUpdater.ts) | 561 | 581 | 20 | 自动更新模块：版本门槛校验（assertMinVersion）/ 服务端封顶（getMaxVersion，事故时当开关暂停更新）/ 从 npm 或 GCS 拉最新版 / 全局安装（installGlobalPackage），刻意从 home 跑 npm 避开项目级 .npmrc |
-| [`utils/bash/ShellSnapshot.ts`](annotated/src/utils/bash/ShellSnapshot.ts) | 582 | 597 | 15 | bash 快照：source 用户 rc 后把函数/选项/别名/PATH dump 进快照文件，后续命令 source 快照以「像在用户交互 shell 里跑」而无需每条新建登录 shell |
-| [`utils/cronScheduler.ts`](annotated/src/utils/cronScheduler.ts) | 565 | 576 | 11 | 非 React 定时任务调度内核：管 `.claude/scheduled_tasks.json`，难点是「多 Claude 共享 cwd 时防重复触发」与「进程崩溃后接手」 |
-| [`utils/plugins/marketplaceHelpers.ts`](annotated/src/utils/plugins/marketplaceHelpers.ts) | 592 | 615 | 23 | 插件市场策略与判定层：源解析成可展示形态 + 企业策略（黑名单/白名单）拦截，isSourceAllowedByPolicy 是下载前守门员 |
-| [`utils/suggestions/commandSuggestions.ts`](annotated/src/utils/suggestions/commandSuggestions.ts) | 567 | 584 | 17 | 斜杠命令搜索与建议引擎：fuse.js 模糊匹配 + 技能使用频率排序，识别行中斜杠命令/前缀补全/按来源分类展示，是 PromptInput 底部建议条底层 |
+| 文件                                                                                                 | 原文  | 批注版 | 批注 | 讲什么                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`utils/file.ts`](annotated/src/utils/file.ts)                                                     | 584 | 610 | 26 | 文件读写与路径展示工具箱：可替换文件系统实现（getFsImplementation）、存在性/读写/编码与换行探测/行号前缀/符号链接安全写入/桌面路径解析                                                             |
+| [`utils/autoUpdater.ts`](annotated/src/utils/autoUpdater.ts)                                       | 561 | 581 | 20 | 自动更新模块：版本门槛校验（assertMinVersion）/ 服务端封顶（getMaxVersion，事故时当开关暂停更新）/ 从 npm 或 GCS 拉最新版 / 全局安装（installGlobalPackage），刻意从 home 跑 npm 避开项目级 .npmrc |
+| [`utils/bash/ShellSnapshot.ts`](annotated/src/utils/bash/ShellSnapshot.ts)                         | 582 | 597 | 15 | bash 快照：source 用户 rc 后把函数/选项/别名/PATH dump 进快照文件，后续命令 source 快照以「像在用户交互 shell 里跑」而无需每条新建登录 shell                                             |
+| [`utils/cronScheduler.ts`](annotated/src/utils/cronScheduler.ts)                                   | 565 | 576 | 11 | 非 React 定时任务调度内核：管 `.claude/scheduled_tasks.json`，难点是「多 Claude 共享 cwd 时防重复触发」与「进程崩溃后接手」                                                     |
+| [`utils/plugins/marketplaceHelpers.ts`](annotated/src/utils/plugins/marketplaceHelpers.ts)         | 592 | 615 | 23 | 插件市场策略与判定层：源解析成可展示形态 + 企业策略（黑名单/白名单）拦截，isSourceAllowedByPolicy 是下载前守门员                                                                      |
+| [`utils/suggestions/commandSuggestions.ts`](annotated/src/utils/suggestions/commandSuggestions.ts) | 567 | 584 | 17 | 斜杠命令搜索与建议引擎：fuse.js 模糊匹配 + 技能使用频率排序，识别行中斜杠命令/前缀补全/按来源分类展示，是 PromptInput 底部建议条底层                                                             |
 
 **几个值得记住的点**：
 
@@ -1746,17 +1740,17 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 上一批留下的候选目标一口气清掉十个，`src/utils/` 推进到 79/564、全仓 674/1902（52.5%）。十份都停在 530–560 行，是真正的「横向生态」层：深链唤起、查询辅助、会话恢复、命令队列、模型选择器、浏览器扩展、快速模式、git diff、优雅退出、Chrome 原生宿主。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`deepLink/terminalLauncher.ts`](annotated/src/utils/deepLink/terminalLauncher.ts) | 557 | 580 | 32 | 深链唤起时检测并启动用户偏好的终端（macOS/Linux/Windows 多款终端清单） |
-| [`queryHelpers.ts`](annotated/src/utils/queryHelpers.ts) | 552 | 568 | 16 | 查询流程辅助：结果判定、SDK 消息规范化、孤儿权限、已读文件提取 |
-| [`sessionRestore.ts`](annotated/src/utils/sessionRestore.ts) | 551 | 571 | 20 | 会话恢复：从转录还原文件历史/归属/待办/折叠/worktree，交互与 SDK 双路复用 |
-| [`messageQueueManager.ts`](annotated/src/utils/messageQueueManager.ts) | 547 | 575 | 28 | 统一命令队列：输入/任务通知/孤儿权限同队列，now > next > later 三级优先 |
-| [`model/modelOptions.ts`](annotated/src/utils/model/modelOptions.ts) | 540 | 582 | 42 | `/model` 选择器：按用户档位（ant/Max/Pro/PAYG）给不同可选模型与描述 |
-| [`claudeInChrome/common.ts`](annotated/src/utils/claudeInChrome/common.ts) | 540 | 568 | 29 | Chrome 扩展通用层：Chromium 系浏览器清单、各平台数据路径与套接字工具 |
-| [`fastMode.ts`](annotated/src/utils/fastMode.ts) | 532 | 579 | 47 | 快速模式运行时：特性开关/档位/组织设置/额外计费/冷却退避，API 拒绝即永久关闭 |
-| [`gitDiff.ts`](annotated/src/utils/gitDiff.ts) | 532 | 558 | 26 | git diff 封装：工作树对 HEAD 的统计与分块、未跟踪文件合成、瞬态跳过 |
-| [`gracefulShutdown.ts`](annotated/src/utils/gracefulShutdown.ts) | 529 | 549 | 20 | 优雅退出：终端模式清理、恢复提示、清理函数与钩子、失败保护定时器 |
+| 文件                                                                                             | 原文  | 批注版 | 锚点 | 讲什么                                                 |
+| ---------------------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------------------------- |
+| [`deepLink/terminalLauncher.ts`](annotated/src/utils/deepLink/terminalLauncher.ts)             | 557 | 580 | 32 | 深链唤起时检测并启动用户偏好的终端（macOS/Linux/Windows 多款终端清单）       |
+| [`queryHelpers.ts`](annotated/src/utils/queryHelpers.ts)                                       | 552 | 568 | 16 | 查询流程辅助：结果判定、SDK 消息规范化、孤儿权限、已读文件提取                   |
+| [`sessionRestore.ts`](annotated/src/utils/sessionRestore.ts)                                   | 551 | 571 | 20 | 会话恢复：从转录还原文件历史/归属/待办/折叠/worktree，交互与 SDK 双路复用       |
+| [`messageQueueManager.ts`](annotated/src/utils/messageQueueManager.ts)                         | 547 | 575 | 28 | 统一命令队列：输入/任务通知/孤儿权限同队列，now > next > later 三级优先      |
+| [`model/modelOptions.ts`](annotated/src/utils/model/modelOptions.ts)                           | 540 | 582 | 42 | `/model` 选择器：按用户档位（ant/Max/Pro/PAYG）给不同可选模型与描述      |
+| [`claudeInChrome/common.ts`](annotated/src/utils/claudeInChrome/common.ts)                     | 540 | 568 | 29 | Chrome 扩展通用层：Chromium 系浏览器清单、各平台数据路径与套接字工具          |
+| [`fastMode.ts`](annotated/src/utils/fastMode.ts)                                               | 532 | 579 | 47 | 快速模式运行时：特性开关/档位/组织设置/额外计费/冷却退避，API 拒绝即永久关闭          |
+| [`gitDiff.ts`](annotated/src/utils/gitDiff.ts)                                                 | 532 | 558 | 26 | git diff 封装：工作树对 HEAD 的统计与分块、未跟踪文件合成、瞬态跳过           |
+| [`gracefulShutdown.ts`](annotated/src/utils/gracefulShutdown.ts)                               | 529 | 549 | 20 | 优雅退出：终端模式清理、恢复提示、清理函数与钩子、失败保护定时器                    |
 | [`claudeInChrome/chromeNativeHost.ts`](annotated/src/utils/claudeInChrome/chromeNativeHost.ts) | 527 | 549 | 25 | Chrome 原生消息宿主的纯 TS 实现（原 Rust NAPI）：stdio 通信 + 套接字转发 |
 
 要点摘录：① `gracefulShutdown` 的顺序是承重的——先关鼠标追踪、退 alt 屏再卸载 Ink，否则恢复提示会被覆盖；所有清理失败一律忽略，因为进程马上就退。② `fastMode` 在 API 拒绝时**永久**关闭并预取组织状态，冷却退避防抖。③ `messageQueueManager` 独立于 React 状态（`useSyncExternalStore` 只是订阅视图），打印循环这类非 React 代码直接读。④ `gitDiff` 在合并/变基/挑选/回退等瞬态下故意跳过计算，防止把中间态当改动误报。⑤ Chrome 宿主从 Rust NAPI 迁回纯 TS，单条消息上限 1MB。
@@ -1767,18 +1761,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 上一轮 550 行档清完后，自然落到 520–460 行这一档：原生安装器下载、bash 安全树解析、Beta 会话追踪、设置变更检测、路径权限校验、Shell 封装与命令对象、Teleport/CCR API、swarm 面板后端注册、定时任务。清掉后 `src/utils/` 推进到 95/564、全仓 684/1902（53.5%）。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`nativeInstaller/download.ts`](annotated/src/utils/nativeInstaller/download.ts) | 523 | 548 | 25 | 原生安装器下载 Claude 二进制：Artifactory NPM 包 + GCS 公开桶两条源，含哈希校验、写盘、chmod、重试 |
-| [`bash/treeSitterAnalysis.ts`](annotated/src/utils/bash/treeSitterAnalysis.ts) | 506 | 526 | 20 | bash 命令安全校验的 tree-sitter AST 分析：抽取引号上下文、复合结构、重定向等，比正则更准；NAPI 解析器返回纯 JS 对象无需清理 |
-| [`telemetry/betaSessionTracing.ts`](annotated/src/utils/telemetry/betaSessionTracing.ts) | 491 | 511 | 20 | Beta 会话追踪：按 agent 消息哈希去重、系统提示按唯一哈希只记一次、hook span，外部/Ant 两套可见性规则 |
-| [`settings/changeDetector.ts`](annotated/src/utils/settings/changeDetector.ts) | 488 | 509 | 21 | 设置文件变更检测（chokidar）：DELETION_GRACE_MS 防误删/瞬态、内部写入标记、配置变更钩子、MDM 刷新 |
-| [`permissions/pathValidation.ts`](annotated/src/utils/permissions/pathValidation.ts) | 485 | 508 | 23 | 路径权限校验（read/write/create）：allow/deny 规则匹配、路径穿越检测、UNC 漏洞路径、沙箱与工作路径边界 |
-| [`Shell.ts`](annotated/src/utils/Shell.ts) | 474 | 491 | 17 | Shell 封装：spawn 子进程、cwd 追踪（Windows POSIX→native 路径转换）、沙箱幽灵挂载点清理、命令后更新 cwd |
-| [`teleport/api.ts`](annotated/src/utils/teleport/api.ts) | 466 | 481 | 15 | Teleport/CCR BYOC API 客户端（axios）：指数退避重试 [2/4/8/16s]、瞬态网络错误判定、OAuth、GitHub 仓库解析 |
-| [`ShellCommand.ts`](annotated/src/utils/ShellCommand.ts) | 465 | 482 | 17 | ShellCommand 命令对象：封装子进程、ExecResult（stdout/stderr/code/中断/后台）、超大输出落盘、tree-kill |
-| [`swarm/backends/registry.ts`](annotated/src/utils/swarm/backends/registry.ts) | 464 | 482 | 18 | swarm 面板后端注册表：进程生命周期内固定检测（iTerm2/tmux/InProcess），后端选择结果缓存 |
-| [`cronTasks.ts`](annotated/src/utils/cronTasks.ts) | 458 | 481 | 23 | 定时任务（scheduled_tasks.json）：一次性自动删除 vs 循环重排、cron 表达式解析与下次运行计算、自动过期 |
+| 文件                                                                                       | 原文  | 批注版 | 锚点 | 讲什么                                                                            |
+| ---------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------------------------------------------------------ |
+| [`nativeInstaller/download.ts`](annotated/src/utils/nativeInstaller/download.ts)         | 523 | 548 | 25 | 原生安装器下载 Claude 二进制：Artifactory NPM 包 + GCS 公开桶两条源，含哈希校验、写盘、chmod、重试            |
+| [`bash/treeSitterAnalysis.ts`](annotated/src/utils/bash/treeSitterAnalysis.ts)           | 506 | 526 | 20 | bash 命令安全校验的 tree-sitter AST 分析：抽取引号上下文、复合结构、重定向等，比正则更准；NAPI 解析器返回纯 JS 对象无需清理  |
+| [`telemetry/betaSessionTracing.ts`](annotated/src/utils/telemetry/betaSessionTracing.ts) | 491 | 511 | 20 | Beta 会话追踪：按 agent 消息哈希去重、系统提示按唯一哈希只记一次、hook span，外部/Ant 两套可见性规则                |
+| [`settings/changeDetector.ts`](annotated/src/utils/settings/changeDetector.ts)           | 488 | 509 | 21 | 设置文件变更检测（chokidar）：DELETION_GRACE_MS 防误删/瞬态、内部写入标记、配置变更钩子、MDM 刷新               |
+| [`permissions/pathValidation.ts`](annotated/src/utils/permissions/pathValidation.ts)     | 485 | 508 | 23 | 路径权限校验（read/write/create）：allow/deny 规则匹配、路径穿越检测、UNC 漏洞路径、沙箱与工作路径边界            |
+| [`Shell.ts`](annotated/src/utils/Shell.ts)                                               | 474 | 491 | 17 | Shell 封装：spawn 子进程、cwd 追踪（Windows POSIX→native 路径转换）、沙箱幽灵挂载点清理、命令后更新 cwd       |
+| [`teleport/api.ts`](annotated/src/utils/teleport/api.ts)                                 | 466 | 481 | 15 | Teleport/CCR BYOC API 客户端（axios）：指数退避重试 [2/4/8/16s]、瞬态网络错误判定、OAuth、GitHub 仓库解析 |
+| [`ShellCommand.ts`](annotated/src/utils/ShellCommand.ts)                                 | 465 | 482 | 17 | ShellCommand 命令对象：封装子进程、ExecResult（stdout/stderr/code/中断/后台）、超大输出落盘、tree-kill  |
+| [`swarm/backends/registry.ts`](annotated/src/utils/swarm/backends/registry.ts)           | 464 | 482 | 18 | swarm 面板后端注册表：进程生命周期内固定检测（iTerm2/tmux/InProcess），后端选择结果缓存                      |
+| [`cronTasks.ts`](annotated/src/utils/cronTasks.ts)                                       | 458 | 481 | 23 | 定时任务（scheduled_tasks.json）：一次性自动删除 vs 循环重排、cron 表达式解析与下次运行计算、自动过期              |
 
 要点摘录：① `download` 的二进制来自两条互不相同的源——Artifactory（内部 npm 镜像）与 GCS 公开桶——靠 `getBinaryName`/`getPlatform` 拼出版本化路径，下载后 `createHash` 校验完整性再 `chmod` +x，失败走指数重试。② `Shell.ts` 的 cwd 追踪文件在 Windows 下是 POSIX 路径（`pwd -P` 输出），必须经 `posixPathToWindowsPath` 转成原生路径才能喂给 `readFileSync`/`unlinkSync`；命令结束后才更新全局 cwd 并失效环境缓存。③ `changeDetector` 的 `DELETION_GRACE_MS` 是一道防抖闸门——编辑器保存常是「删后重建」两步，没有宽限窗口会被当成删除触发配置回滚，所以先延迟再判定。④ `teleport/api` 用 `[2000,4000,8000,16000]` 四档退避只重试「无响应/5xx」这类瞬态错误，认证失败（4xx 带响应）不重试，避免无意义循环。⑤ `cronTasks` 分两种生命周期：一次性任务触发后自删，循环任务从「现在」重排并受 `recurringMaxAgeMs` 自动过期约束；jitter 防止同一 cron 的多个任务同时开火。
 
@@ -1792,11 +1786,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 重构学习路线时发现一个硬伤：路线里 L1-6（`clear.ts` 7 行）、L2-3（`conversation.ts` 第 150–166 行）、L3-1（整个 `commands/clear/` 四个文件）都要求「看批注版」，但这个目录只有 `index.ts` 批注过——另外三份在 `annotated/` 里根本不存在，路线一落地就是死链。于是先补这三份，让路线能真的走通。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`clear/clear.ts`](annotated/src/commands/clear/clear.ts) | 7 | 20 | 4 | 命令的「身体」：7 行把契约说全（收什么/做什么/返回什么形状） |
-| [`clear/caches.ts`](annotated/src/commands/clear/caches.ts) | 144 | 223 | 23 | 清缓存总闸：七类缓存、四类「有后台 agent 时故意不清」 |
-| [`clear/conversation.ts`](annotated/src/commands/clear/conversation.ts) | 251 | 374 | 28 | `/clear` 主体：十五步时序，每步顺序都有原因 |
+| 文件                                                                      | 原文  | 批注版 | 锚点 | 讲什么                              |
+| ----------------------------------------------------------------------- | --- | --- | -- | -------------------------------- |
+| [`clear/clear.ts`](annotated/src/commands/clear/clear.ts)               | 7   | 20  | 4  | 命令的「身体」：7 行把契约说全（收什么/做什么/返回什么形状） |
+| [`clear/caches.ts`](annotated/src/commands/clear/caches.ts)             | 144 | 223 | 23 | 清缓存总闸：七类缓存、四类「有后台 agent 时故意不清」   |
+| [`clear/conversation.ts`](annotated/src/commands/clear/conversation.ts) | 251 | 374 | 28 | `/clear` 主体：十五步时序，每步顺序都有原因       |
 
 **`src/commands/clear/` 4/4 全清。**
 
@@ -1818,23 +1812,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 的「450 行档」收口——按行数降序，上一档（550/520）已清零，这一档 15 份全是 397–454 行的「运行时外围」模块：会话列表、任务落盘、钩子注册表、代理、图片粘贴、插件缓存/选项/市场自检、计划文件。彼此独立，但共同撑起主链路之外的那圈「能力装配层」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/listSessionsImpl.ts`](annotated/src/utils/listSessionsImpl.ts) | 454 | 499 | 45 | 会话列表实现：`listSessionsImpl` 扫 projects 目录 JSONL、解析 `SessionInfo`、按 mtime 排序过滤，供 `/resume` 与 `--list` 用 |
-| [`utils/task/diskOutput.ts`](annotated/src/utils/task/diskOutput.ts) | 451 | 485 | 34 | 任务磁盘输出：`DiskTaskOutput` 类 + 全局 append/flush/evict/getTaskOutputDelta，5GB 上限，后台 agent 长输出的落盘与增量读 |
-| [`utils/hooks/sessionHooks.ts`](annotated/src/utils/hooks/sessionHooks.ts) | 447 | 482 | 35 | 会话级钩子注册表：`addSessionHook`/`removeSessionHook` 按 matcher 派发，生命周期钩子的内存索引 |
-| [`utils/plugins/officialMarketplaceStartupCheck.ts`](annotated/src/utils/plugins/officialMarketplaceStartupCheck.ts) | 439 | 480 | 41 | 启动期官方市场自检：`checkAndInstallOfficialMarketplace` 带重试拉取并安装官方 marketplace，含跳过原因枚举与退避配置 |
-| [`utils/betas.ts`](annotated/src/utils/betas.ts) | 434 | 477 | 43 | Beta 标头装配厂：`getMergedBetas`/`getModelBetas` 按模型 memoize 合并 SDK/ISP/结构化输出等 beta 头，决定能力开关 |
-| [`utils/statsCache.ts`](annotated/src/utils/statsCache.ts) | 434 | 476 | 42 | 用量统计缓存：`withStatsCacheLock` 加锁读写 `PersistedStatsCache`，按日期合并新统计，跨会话累计 token/成本 |
-| [`utils/nativeInstaller/pidLock.ts`](annotated/src/utils/nativeInstaller/pidLock.ts) | 433 | 473 | 40 | 原生安装器 PID 锁：`tryAcquireLock`/`acquireProcessLifetimeLock` 用进程存活探测防并发安装，`cleanupStaleLocks` 清僵尸锁 |
-| [`utils/tmuxSocket.ts`](annotated/src/utils/tmuxSocket.ts) | 427 | 467 | 40 | tmux 套接字：`getClaudeSocketPath`/`ensureSocketInitialized` 为 swarm agent 建 socket 与环境变量，记录 tmux 是否被用过 |
-| [`utils/proxy.ts`](annotated/src/utils/proxy.ts) | 426 | 476 | 50 | 代理层：`getProxyUrl`/`shouldBypassProxy`/`createAxiosInstance`/`configureGlobalAgents` 统一 HTTP/WS/_fetch 代理与 no_proxy 旁路 |
-| [`utils/imagePaste.ts`](annotated/src/utils/imagePaste.ts) | 416 | 459 | 43 | 图片粘贴：`getImageFromClipboard`/`getImagePathFromClipboard` 跨平台读剪贴板图片（含阈值与路径回退），喂给多模态输入 |
-| [`utils/plugins/zipCache.ts`](annotated/src/utils/plugins/zipCache.ts) | 406 | 442 | 36 | 插件 ZIP 缓存：`atomicWriteToZipCache`/`createZipFromDirectory`/`extractZipToDirectory` 会话级原子缓存已下载插件包 |
-| [`utils/claudeInChrome/setup.ts`](annotated/src/utils/claudeInChrome/setup.ts) | 400 | 440 | 40 | Claude-in-Chrome 装配：`setupClaudeInChrome`/`installChromeNativeHostManifest` 装原生消息宿主清单，接通浏览器扩展 |
-| [`utils/hooks/hooksConfigManager.ts`](annotated/src/utils/hooks/hooksConfigManager.ts) | 400 | 425 | 25 | 钩子配置管理：`getHookEventMetadata`/`groupHooksByEventAndMatcher`/`getHooksForMatcher` 加载、去重、按事件+matcher 排序钩子 |
-| [`utils/plugins/pluginOptionsStorage.ts`](annotated/src/utils/plugins/pluginOptionsStorage.ts) | 400 | 443 | 43 | 插件选项存储：`loadPluginOptions`/`savePluginOptions` 把敏感项与 `settings` 项分离落盘，`substitutePluginVariables` 注入 `${CLAUDE_PLUGIN_ROOT}` |
-| [`utils/plans.ts`](annotated/src/utils/plans.ts) | 397 | 450 | 53 | 计划文件管理：`getPlanSlug`/`getPlanFilePath`/`getPlan`/`copyPlanForResume`/`copyPlanForFork` 管理 `/plan` 文件与恢复 |
+| 文件                                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------------------------------------------------------- |
+| [`utils/listSessionsImpl.ts`](annotated/src/utils/listSessionsImpl.ts)                                               | 454 | 499 | 45 | 会话列表实现：`listSessionsImpl` 扫 projects 目录 JSONL、解析 `SessionInfo`、按 mtime 排序过滤，供 `/resume` 与 `--list` 用                         |
+| [`utils/task/diskOutput.ts`](annotated/src/utils/task/diskOutput.ts)                                                 | 451 | 485 | 34 | 任务磁盘输出：`DiskTaskOutput` 类 + 全局 append/flush/evict/getTaskOutputDelta，5GB 上限，后台 agent 长输出的落盘与增量读                              |
+| [`utils/hooks/sessionHooks.ts`](annotated/src/utils/hooks/sessionHooks.ts)                                           | 447 | 482 | 35 | 会话级钩子注册表：`addSessionHook`/`removeSessionHook` 按 matcher 派发，生命周期钩子的内存索引                                                       |
+| [`utils/plugins/officialMarketplaceStartupCheck.ts`](annotated/src/utils/plugins/officialMarketplaceStartupCheck.ts) | 439 | 480 | 41 | 启动期官方市场自检：`checkAndInstallOfficialMarketplace` 带重试拉取并安装官方 marketplace，含跳过原因枚举与退避配置                                           |
+| [`utils/betas.ts`](annotated/src/utils/betas.ts)                                                                     | 434 | 477 | 43 | Beta 标头装配厂：`getMergedBetas`/`getModelBetas` 按模型 memoize 合并 SDK/ISP/结构化输出等 beta 头，决定能力开关                                      |
+| [`utils/statsCache.ts`](annotated/src/utils/statsCache.ts)                                                           | 434 | 476 | 42 | 用量统计缓存：`withStatsCacheLock` 加锁读写 `PersistedStatsCache`，按日期合并新统计，跨会话累计 token/成本                                               |
+| [`utils/nativeInstaller/pidLock.ts`](annotated/src/utils/nativeInstaller/pidLock.ts)                                 | 433 | 473 | 40 | 原生安装器 PID 锁：`tryAcquireLock`/`acquireProcessLifetimeLock` 用进程存活探测防并发安装，`cleanupStaleLocks` 清僵尸锁                              |
+| [`utils/tmuxSocket.ts`](annotated/src/utils/tmuxSocket.ts)                                                           | 427 | 467 | 40 | tmux 套接字：`getClaudeSocketPath`/`ensureSocketInitialized` 为 swarm agent 建 socket 与环境变量，记录 tmux 是否被用过                          |
+| [`utils/proxy.ts`](annotated/src/utils/proxy.ts)                                                                     | 426 | 476 | 50 | 代理层：`getProxyUrl`/`shouldBypassProxy`/`createAxiosInstance`/`configureGlobalAgents` 统一 HTTP/WS/\_fetch 代理与 no_proxy 旁路       |
+| [`utils/imagePaste.ts`](annotated/src/utils/imagePaste.ts)                                                           | 416 | 459 | 43 | 图片粘贴：`getImageFromClipboard`/`getImagePathFromClipboard` 跨平台读剪贴板图片（含阈值与路径回退），喂给多模态输入                                         |
+| [`utils/plugins/zipCache.ts`](annotated/src/utils/plugins/zipCache.ts)                                               | 406 | 442 | 36 | 插件 ZIP 缓存：`atomicWriteToZipCache`/`createZipFromDirectory`/`extractZipToDirectory` 会话级原子缓存已下载插件包                             |
+| [`utils/claudeInChrome/setup.ts`](annotated/src/utils/claudeInChrome/setup.ts)                                       | 400 | 440 | 40 | Claude-in-Chrome 装配：`setupClaudeInChrome`/`installChromeNativeHostManifest` 装原生消息宿主清单，接通浏览器扩展                                |
+| [`utils/hooks/hooksConfigManager.ts`](annotated/src/utils/hooks/hooksConfigManager.ts)                               | 400 | 425 | 25 | 钩子配置管理：`getHookEventMetadata`/`groupHooksByEventAndMatcher`/`getHooksForMatcher` 加载、去重、按事件+matcher 排序钩子                      |
+| [`utils/plugins/pluginOptionsStorage.ts`](annotated/src/utils/plugins/pluginOptionsStorage.ts)                       | 400 | 443 | 43 | 插件选项存储：`loadPluginOptions`/`savePluginOptions` 把敏感项与 `settings` 项分离落盘，`substitutePluginVariables` 注入 `${CLAUDE_PLUGIN_ROOT}` |
+| [`utils/plans.ts`](annotated/src/utils/plans.ts)                                                                     | 397 | 450 | 53 | 计划文件管理：`getPlanSlug`/`getPlanFilePath`/`getPlan`/`copyPlanForResume`/`copyPlanForFork` 管理 `/plan` 文件与恢复                      |
 
 四套并发安全写法值得对照：`pidLock.ts` 的进程存活探测（轮询判断 PID 是否真在跑）、`statsCache.ts` 的 `withStatsCacheLock` 文件锁、zipCache 的 `atomicWriteToZipCache`（写临时文件再 rename）、tmuxSocket 的 socket 初始化——同一个「别让我和别的进程/自己抢同一份资源」问题，四份各写各的，是读 utils 时最能体会「没有统一基础设施」的一段。
 
@@ -1853,22 +1847,22 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 的「390 行档」收口——按行数降序，上一档（450）已清零，这一档 15 份全是 354–393 行的「类型与小程序」模块：署名类型、任务输出常量、权限类型抽取、LSP 插件集成、文件区间读取、Markdown 渲染、swarm 安装向导 / 分屏后端、frontmatter 解析、shell 前缀安全、日志标题、状态类型、更新日志、插件推荐。彼此独立，但共同补齐 utils 中层的「小积木」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/attribution.ts`](annotated/src/utils/attribution.ts) | 393 | 448 | 55 | 定义 `AttributionTexts` 类型（仅 `commit` / `pr` 两个字段），对应提交信息与 PR 描述里要插入的署名 |
-| [`utils/task/TaskOutput.ts`](annotated/src/utils/task/TaskOutput.ts) | 390 | 431 | 41 | 后台任务输出的三个核心常量：内存上限 8MB、轮询间隔 1 秒、进度尾巴采样 4KB |
-| [`utils/permissions/PermissionUpdate.ts`](annotated/src/utils/permissions/PermissionUpdate.ts) | 389 | 423 | 34 | 权限更新相关类型，抽取到 `src/types/permissions.ts` 以打破导入循环 |
-| [`utils/plugins/lspPluginIntegration.ts`](annotated/src/utils/plugins/lspPluginIntegration.ts) | 387 | 425 | 38 | LSP 插件集成的接入层：导入 zod、LSP 类型、插件类型与若干工具函数 |
-| [`utils/readFileInRange.ts`](annotated/src/utils/readFileInRange.ts) | 383 | 419 | 36 | 文件区间读取：小文件走 readFile 快路径、大文件 / 管道走流式路径，二者都去 BOM 与回车符 |
-| [`utils/markdown.ts`](annotated/src/utils/markdown.ts) | 381 | 415 | 34 | 把 Markdown 渲染成带终端样式的字符串（标题 / 列表 / 代码 / 链接 / 表格对齐），统一以换行符作行尾 |
-| [`utils/swarm/It2SetupPrompt.tsx`](annotated/src/utils/swarm/It2SetupPrompt.tsx) | 379 | 405 | 25 | `SetupStep` 联合类型枚举了 swarm 安装向导的全部步骤状态（React Compiler 编译产物） |
-| [`utils/plugins/lspRecommendation.ts`](annotated/src/utils/plugins/lspRecommendation.ts) | 374 | 403 | 29 | `LspPluginRecommendation`：返回给调用方的 LSP 插件推荐结构 |
-| [`utils/swarm/backends/ITermBackend.ts`](annotated/src/utils/swarm/backends/ITermBackend.ts) | 370 | 397 | 27 | swarm iTerm2 分屏后端：`teammateSessionIds` 追踪已创建队友分屏的会话 ID |
-| [`utils/frontmatterParser.ts`](annotated/src/utils/frontmatterParser.ts) | 370 | 397 | 27 | `FrontmatterData` 定义 frontmatter 各字段的类型与含义说明 |
-| [`utils/shell/prefix.ts`](annotated/src/utils/shell/prefix.ts) | 367 | 399 | 32 | `DANGEROUS_SHELL_PREFIXES` 列出绝不可作裸前缀接受的 shell 可执行文件，避免绕过权限系统 |
-| [`utils/log.ts`](annotated/src/utils/log.ts) | 362 | 392 | 30 | `getLogDisplayTitle` 按优先级拼出日志 / 会话的显示标题，并去除不友好标签 |
-| [`utils/status.tsx`](annotated/src/utils/status.tsx) | 361 | 387 | 25 | `Property` 类型：标签加值，值可为 React 节点或字符串数组（状态展示用） |
-| [`utils/releaseNotes.ts`](annotated/src/utils/releaseNotes.ts) | 360 | 391 | 31 | 更新日志展示：`MAX_RELEASE_NOTES_SHOWN` 每次最多展示的版本更新条数 |
+| 文件                                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                                                          |
+| ---------------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------- |
+| [`utils/attribution.ts`](annotated/src/utils/attribution.ts)                                               | 393 | 448 | 55 | 定义 `AttributionTexts` 类型（仅 `commit` / `pr` 两个字段），对应提交信息与 PR 描述里要插入的署名        |
+| [`utils/task/TaskOutput.ts`](annotated/src/utils/task/TaskOutput.ts)                                       | 390 | 431 | 41 | 后台任务输出的三个核心常量：内存上限 8MB、轮询间隔 1 秒、进度尾巴采样 4KB                                   |
+| [`utils/permissions/PermissionUpdate.ts`](annotated/src/utils/permissions/PermissionUpdate.ts)             | 389 | 423 | 34 | 权限更新相关类型，抽取到 `src/types/permissions.ts` 以打破导入循环                              |
+| [`utils/plugins/lspPluginIntegration.ts`](annotated/src/utils/plugins/lspPluginIntegration.ts)             | 387 | 425 | 38 | LSP 插件集成的接入层：导入 zod、LSP 类型、插件类型与若干工具函数                                       |
+| [`utils/readFileInRange.ts`](annotated/src/utils/readFileInRange.ts)                                       | 383 | 419 | 36 | 文件区间读取：小文件走 readFile 快路径、大文件 / 管道走流式路径，二者都去 BOM 与回车符                         |
+| [`utils/markdown.ts`](annotated/src/utils/markdown.ts)                                                     | 381 | 415 | 34 | 把 Markdown 渲染成带终端样式的字符串（标题 / 列表 / 代码 / 链接 / 表格对齐），统一以换行符作行尾                  |
+| [`utils/swarm/It2SetupPrompt.tsx`](annotated/src/utils/swarm/It2SetupPrompt.tsx)                           | 379 | 405 | 25 | `SetupStep` 联合类型枚举了 swarm 安装向导的全部步骤状态（React Compiler 编译产物）                   |
+| [`utils/plugins/lspRecommendation.ts`](annotated/src/utils/plugins/lspRecommendation.ts)                   | 374 | 403 | 29 | `LspPluginRecommendation`：返回给调用方的 LSP 插件推荐结构                                 |
+| [`utils/swarm/backends/ITermBackend.ts`](annotated/src/utils/swarm/backends/ITermBackend.ts)               | 370 | 397 | 27 | swarm iTerm2 分屏后端：`teammateSessionIds` 追踪已创建队友分屏的会话 ID                       |
+| [`utils/frontmatterParser.ts`](annotated/src/utils/frontmatterParser.ts)                                   | 370 | 397 | 27 | `FrontmatterData` 定义 frontmatter 各字段的类型与含义说明                                 |
+| [`utils/shell/prefix.ts`](annotated/src/utils/shell/prefix.ts)                                             | 367 | 399 | 32 | `DANGEROUS_SHELL_PREFIXES` 列出绝不可作裸前缀接受的 shell 可执行文件，避免绕过权限系统                 |
+| [`utils/log.ts`](annotated/src/utils/log.ts)                                                               | 362 | 392 | 30 | `getLogDisplayTitle` 按优先级拼出日志 / 会话的显示标题，并去除不友好标签                             |
+| [`utils/status.tsx`](annotated/src/utils/status.tsx)                                                       | 361 | 387 | 25 | `Property` 类型：标签加值，值可为 React 节点或字符串数组（状态展示用）                                 |
+| [`utils/releaseNotes.ts`](annotated/src/utils/releaseNotes.ts)                                             | 360 | 391 | 31 | 更新日志展示：`MAX_RELEASE_NOTES_SHOWN` 每次最多展示的版本更新条数                               |
 | [`utils/swarm/backends/PaneBackendExecutor.ts`](annotated/src/utils/swarm/backends/PaneBackendExecutor.ts) | 354 | 383 | 29 | `PaneBackendExecutor` 把 `PaneBackend` 适配为 `TeammateExecutor` 接口，使分屏后端接入队友执行器 |
 
 两条横切观察：
@@ -1886,23 +1880,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 的「350 行档」收口——按行数降序，上一档（390）已清零，这一档 15 份全是 318–350 行的「探测与适配」工具：LogoV2 启动布局、ultraplan 会话轮询、深链协议注册、插件智能体加载 / 启动自检、运行环境探测、包管理器探测、swarm 进程内后端 / 队友生成、智能体式钩子、Computer Use 桥接、MCP 询问校验、ANSI 转 PNG、effort 推理强度、bash 命令解析。彼此独立，但共同补齐 utils 中层的「自省与适配」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/logoV2Utils.ts`](annotated/src/utils/logoV2Utils.ts) | 350 | 361 | 11 | LogoV2 启动界面的布局与文案工具：按终端宽度选布局、算面板尺寸、截断路径 / 欢迎语、收集版本与计费信息、格式化最近活动 |
-| [`utils/ultraplan/ccrSession.ts`](annotated/src/utils/ultraplan/ccrSession.ts) | 349 | 360 | 11 | /ultraplan 的 CCR 会话轮询：等用户在浏览器批准 ExitPlanMode 后抽取计划文本，含轮询状态机与传送哨兵串解析 |
-| [`utils/deepLink/registerProtocol.ts`](annotated/src/utils/deepLink/registerProtocol.ts) | 348 | 358 | 10 | 注册 `claude-cli://` 自定义协议（macOS / Linux / Windows 三套实现），让浏览器深链唤起 `claude --handle-uri` |
-| [`utils/plugins/loadPluginAgents.ts`](annotated/src/utils/plugins/loadPluginAgents.ts) | 348 | 354 | 6 | 从插件目录与 frontmatter 加载智能体定义并记忆化并行加载，故意不越过用户授予的信任边界 |
-| [`utils/env.ts`](annotated/src/utils/env.ts) | 347 | 355 | 8 | 运行环境探测：终端类型、部署平台、WSL、包管理器、宿主平台，统一聚合给全应用读取 |
-| [`utils/plugins/pluginStartupCheck.ts`](annotated/src/utils/plugins/pluginStartupCheck.ts) | 341 | 348 | 7 | 插件启动检查：合并设置判定启用、计算可写回范围、读已安装列表并补齐缺失插件安装 |
-| [`utils/swarm/backends/InProcessBackend.ts`](annotated/src/utils/swarm/backends/InProcessBackend.ts) | 339 | 347 | 8 | 多智能体进程内执行后端：队友与 leader 同进程、AsyncLocalStorage 隔离、文件信箱通信与终止 |
-| [`utils/hooks/execAgentHook.ts`](annotated/src/utils/hooks/execAgentHook.ts) | 339 | 346 | 7 | 智能体式钩子执行：多轮 LLM 读取转录判断停止条件，以结构化输出返回 ok / 阻断 |
+| 文件                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                                     |
+| ---------------------------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------------------------------------------------------------- |
+| [`utils/logoV2Utils.ts`](annotated/src/utils/logoV2Utils.ts)                                         | 350 | 361 | 11 | LogoV2 启动界面的布局与文案工具：按终端宽度选布局、算面板尺寸、截断路径 / 欢迎语、收集版本与计费信息、格式化最近活动                         |
+| [`utils/ultraplan/ccrSession.ts`](annotated/src/utils/ultraplan/ccrSession.ts)                       | 349 | 360 | 11 | /ultraplan 的 CCR 会话轮询：等用户在浏览器批准 ExitPlanMode 后抽取计划文本，含轮询状态机与传送哨兵串解析                     |
+| [`utils/deepLink/registerProtocol.ts`](annotated/src/utils/deepLink/registerProtocol.ts)             | 348 | 358 | 10 | 注册 `claude-cli://` 自定义协议（macOS / Linux / Windows 三套实现），让浏览器深链唤起 `claude --handle-uri`   |
+| [`utils/plugins/loadPluginAgents.ts`](annotated/src/utils/plugins/loadPluginAgents.ts)               | 348 | 354 | 6  | 从插件目录与 frontmatter 加载智能体定义并记忆化并行加载，故意不越过用户授予的信任边界                                       |
+| [`utils/env.ts`](annotated/src/utils/env.ts)                                                         | 347 | 355 | 8  | 运行环境探测：终端类型、部署平台、WSL、包管理器、宿主平台，统一聚合给全应用读取                                               |
+| [`utils/plugins/pluginStartupCheck.ts`](annotated/src/utils/plugins/pluginStartupCheck.ts)           | 341 | 348 | 7  | 插件启动检查：合并设置判定启用、计算可写回范围、读已安装列表并补齐缺失插件安装                                                 |
+| [`utils/swarm/backends/InProcessBackend.ts`](annotated/src/utils/swarm/backends/InProcessBackend.ts) | 339 | 347 | 8  | 多智能体进程内执行后端：队友与 leader 同进程、AsyncLocalStorage 隔离、文件信箱通信与终止                               |
+| [`utils/hooks/execAgentHook.ts`](annotated/src/utils/hooks/execAgentHook.ts)                         | 339 | 346 | 7  | 智能体式钩子执行：多轮 LLM 读取转录判断停止条件，以结构化输出返回 ok / 阻断                                             |
 | [`utils/nativeInstaller/packageManagers.ts`](annotated/src/utils/nativeInstaller/packageManagers.ts) | 336 | 347 | 11 | 探测 Claude 由哪个包管理器安装（mise / asdf / brew / winget / pacman / deb / rpm / apk），按家族门控与优先级回退 |
-| [`utils/computerUse/wrapper.tsx`](annotated/src/utils/computerUse/wrapper.tsx) | 336 | 343 | 6 | 把 ToolUseContext 桥接到 computer-use-mcp 会话，绑定 dispatcher、渲染覆盖与授权弹窗（.tsx 源映射行省略） |
-| [`utils/mcp/elicitationValidation.ts`](annotated/src/utils/mcp/elicitationValidation.ts) | 336 | 346 | 10 | MCP elicitation 输入校验：schema→Zod、枚举 / 格式占位提示、同步与异步（Haiku 自然语言日期）校验 |
-| [`utils/ansiToPng.ts`](annotated/src/utils/ansiToPng.ts) | 334 | 341 | 7 | 把 ANSI 终端文本栅格化为 PNG：内嵌位图字体、零依赖最小 PNG 编码器、圆角与字形 alpha 合成 |
-| [`utils/effort.ts`](annotated/src/utils/effort.ts) | 329 | 337 | 8 | effort 推理强度解析与持久化：环境覆盖→应用状态→模型默认优先级链、档位映射与默认取值 |
-| [`utils/swarm/spawnInProcess.ts`](annotated/src/utils/swarm/spawnInProcess.ts) | 328 | 333 | 5 | 进程内队友生成与强制终止：独立 AbortController、队友身份注册到 AppState、清理回收 |
-| [`utils/bash/ParsedCommand.ts`](annotated/src/utils/bash/ParsedCommand.ts) | 318 | 326 | 8 | 解析 shell 命令（管道 / 重定向）：tree-sitter 字节偏移解析加正则兜底，避免多字节切半字符 |
+| [`utils/computerUse/wrapper.tsx`](annotated/src/utils/computerUse/wrapper.tsx)                       | 336 | 343 | 6  | 把 ToolUseContext 桥接到 computer-use-mcp 会话，绑定 dispatcher、渲染覆盖与授权弹窗（.tsx 源映射行省略）           |
+| [`utils/mcp/elicitationValidation.ts`](annotated/src/utils/mcp/elicitationValidation.ts)             | 336 | 346 | 10 | MCP elicitation 输入校验：schema→Zod、枚举 / 格式占位提示、同步与异步（Haiku 自然语言日期）校验                       |
+| [`utils/ansiToPng.ts`](annotated/src/utils/ansiToPng.ts)                                             | 334 | 341 | 7  | 把 ANSI 终端文本栅格化为 PNG：内嵌位图字体、零依赖最小 PNG 编码器、圆角与字形 alpha 合成                                 |
+| [`utils/effort.ts`](annotated/src/utils/effort.ts)                                                   | 329 | 337 | 8  | effort 推理强度解析与持久化：环境覆盖→应用状态→模型默认优先级链、档位映射与默认取值                                          |
+| [`utils/swarm/spawnInProcess.ts`](annotated/src/utils/swarm/spawnInProcess.ts)                       | 328 | 333 | 5  | 进程内队友生成与强制终止：独立 AbortController、队友身份注册到 AppState、清理回收                                   |
+| [`utils/bash/ParsedCommand.ts`](annotated/src/utils/bash/ParsedCommand.ts)                           | 318 | 326 | 8  | 解析 shell 命令（管道 / 重定向）：tree-sitter 字节偏移解析加正则兜底，避免多字节切半字符                                 |
 
 两条横切观察：
 
@@ -1917,18 +1911,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 的「300 行档」收口——按行数降序，上一档（350）已清零，这一档 10 份是 305–316 行的「配置解析 / 调度 / 类型契约 / 格式化」工具：PowerShell 静态前缀提取、MDM 企业配置强制、技能变更监听、swarm 后端类型契约、异步钩子注册表、纯展示格式化、cron 解析、任务框架轮询、智能会话搜索、插件依赖解析。彼此独立，但共同补齐 utils 中层的「配置接入、调度循环、契约定义」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/powershell/staticPrefix.ts`](annotated/src/utils/powershell/staticPrefix.ts) | 316 | 324 | 8 | PowerShell 静态命令前缀提取（镜像 bash 版），用 AST 解析器取命令名与参数，套 fig spec 走深度规则，逐词校验防止动态表达式混入前缀 |
-| [`utils/settings/mdm/settings.ts`](annotated/src/utils/settings/mdm/settings.ts) | 316 | 327 | 11 | MDM 企业配置强制读取与「首个源胜出」合并，解析 plist / HKLM / managed 文件 / HKCU 四类来源 |
-| [`utils/skills/skillChangeDetector.ts`](annotated/src/utils/skills/skillChangeDetector.ts) | 311 | 321 | 10 | 技能与命令目录文件监听（chokidar），变更去抖后触发重载并清空缓存，Bun 下改用 stat 轮询规避死锁 |
-| [`utils/swarm/backends/types.ts`](annotated/src/utils/swarm/backends/types.ts) | 311 | 322 | 11 | swarm 队友执行后端类型契约：pane 后端与进程内后端两套接口，及身份 / 生成 / 消息数据结构与类型守卫 |
-| [`utils/hooks/AsyncHookRegistry.ts`](annotated/src/utils/hooks/AsyncHookRegistry.ts) | 309 | 318 | 9 | 全局异步钩子注册表：在途 async hook 按 processId 索引，收集响应、终态化与清理 |
-| [`utils/format.ts`](annotated/src/utils/format.ts) | 308 | 319 | 11 | 纯展示格式化集合（叶子级无 Ink）：文件大小 / 时长 / 数字 / 相对时间 / 日志元数据，截断工具转交 truncate.ts |
-| [`utils/cron.ts`](annotated/src/utils/cron.ts) | 308 | 317 | 9 | 轻量 cron 表达式解析与下次运行计算，支持 5 字段子集，正确处理日/星期 OR 语义与 DST |
-| [`utils/task/framework.ts`](annotated/src/utils/task/framework.ts) | 308 | 318 | 10 | 任务框架层：AppState 中登记 / 更新 / 驱逐任务，轮询产出并生成推送通知附件 |
-| [`utils/agenticSessionSearch.ts`](annotated/src/utils/agenticSessionSearch.ts) | 307 | 315 | 8 | 基于 Claude 语义的智能会话搜索：关键词粗筛 + 模型挑索引，含转录抽取与索引回映射 |
-| [`utils/plugins/dependencyResolver.ts`](annotated/src/utils/plugins/dependencyResolver.ts) | 305 | 316 | 11 | 插件依赖解析纯函数：apt 风格存在性语义，安装期闭包遍历与加载期定点降级 |
+| 文件                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                                                              |
+| ------------------------------------------------------------------------------------------ | --- | --- | -- | -------------------------------------------------------------------------------- |
+| [`utils/powershell/staticPrefix.ts`](annotated/src/utils/powershell/staticPrefix.ts)       | 316 | 324 | 8  | PowerShell 静态命令前缀提取（镜像 bash 版），用 AST 解析器取命令名与参数，套 fig spec 走深度规则，逐词校验防止动态表达式混入前缀 |
+| [`utils/settings/mdm/settings.ts`](annotated/src/utils/settings/mdm/settings.ts)           | 316 | 327 | 11 | MDM 企业配置强制读取与「首个源胜出」合并，解析 plist / HKLM / managed 文件 / HKCU 四类来源                  |
+| [`utils/skills/skillChangeDetector.ts`](annotated/src/utils/skills/skillChangeDetector.ts) | 311 | 321 | 10 | 技能与命令目录文件监听（chokidar），变更去抖后触发重载并清空缓存，Bun 下改用 stat 轮询规避死锁                         |
+| [`utils/swarm/backends/types.ts`](annotated/src/utils/swarm/backends/types.ts)             | 311 | 322 | 11 | swarm 队友执行后端类型契约：pane 后端与进程内后端两套接口，及身份 / 生成 / 消息数据结构与类型守卫                        |
+| [`utils/hooks/AsyncHookRegistry.ts`](annotated/src/utils/hooks/AsyncHookRegistry.ts)       | 309 | 318 | 9  | 全局异步钩子注册表：在途 async hook 按 processId 索引，收集响应、终态化与清理                               |
+| [`utils/format.ts`](annotated/src/utils/format.ts)                                         | 308 | 319 | 11 | 纯展示格式化集合（叶子级无 Ink）：文件大小 / 时长 / 数字 / 相对时间 / 日志元数据，截断工具转交 truncate.ts              |
+| [`utils/cron.ts`](annotated/src/utils/cron.ts)                                             | 308 | 317 | 9  | 轻量 cron 表达式解析与下次运行计算，支持 5 字段子集，正确处理日/星期 OR 语义与 DST                               |
+| [`utils/task/framework.ts`](annotated/src/utils/task/framework.ts)                         | 308 | 318 | 10 | 任务框架层：AppState 中登记 / 更新 / 驱逐任务，轮询产出并生成推送通知附件                                     |
+| [`utils/agenticSessionSearch.ts`](annotated/src/utils/agenticSessionSearch.ts)             | 307 | 315 | 8  | 基于 Claude 语义的智能会话搜索：关键词粗筛 + 模型挑索引，含转录抽取与索引回映射                                    |
+| [`utils/plugins/dependencyResolver.ts`](annotated/src/utils/plugins/dependencyResolver.ts) | 305 | 316 | 11 | 插件依赖解析纯函数：apt 风格存在性语义，安装期闭包遍历与加载期定点降级                                            |
 
 两条横切观察：
 
@@ -1945,18 +1939,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「300 行档」的下沿收口——292–304 行的十份独立工具：shell 引号安全包装、堆转储服务、查询剖析器、PDF 处理、权限装载、Chrome 桥接服务器、队友身份判定、git bundle 播种、管道重排、SSRF 防护。与前一批的「配置与调度」不同，这一批更偏「防御与外围通道」：一半文件在防出错（引号、SSRF、管道语义），一半在搭旁路通道（堆转储、剖析、桥接、播种）。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/bash/shellQuote.ts`](annotated/src/utils/bash/shellQuote.ts) | 304 | 314 | 10 | shell-quote 库的安全包装：把库函数换成「出错不炸、降级处理」的 drop-in 替身，注入类输入不会把解析器带崩 |
-| [`utils/heapDumpService.ts`](annotated/src/utils/heapDumpService.ts) | 303 | 313 | 10 | 堆转储捕获服务（`/heapdump` 命令的后端）：把当前内存快照写到临时目录并列出历史转储 |
-| [`utils/queryProfiler.ts`](annotated/src/utils/queryProfiler.ts) | 301 | 311 | 10 | 查询流水线剖析器：从用户输入到首 token 的分段计时，`CLAUDE_CODE_PROFILE_QUERY=1` 开启 |
-| [`utils/pdf.ts`](annotated/src/utils/pdf.ts) | 300 | 311 | 11 | PDF 附件处理：临时目录落盘、按内容寻址的缓存命中与读取 |
-| [`utils/permissions/permissionsLoader.ts`](annotated/src/utils/permissions/permissionsLoader.ts) | 296 | 307 | 11 | 权限规则装载：从各层 settings 读 allow/deny 规则并安全解析，是权限主流水线的「进货口」 |
-| [`utils/claudeInChrome/mcpServer.ts`](annotated/src/utils/claudeInChrome/mcpServer.ts) | 293 | 303 | 10 | Claude in Chrome 桥接：stdio 传输的 MCP 服务器，把浏览器扩展的标签页/读取能力暴露给主进程 |
-| [`utils/teammate.ts`](annotated/src/utils/teammate.ts) | 292 | 303 | 11 | 队友身份判定：判断当前实例是否作为 swarm 队友运行，及对应的名字/团队上下文读取 |
-| [`utils/teleport/gitBundle.ts`](annotated/src/utils/teleport/gitBundle.ts) | 292 | 303 | 11 | git bundle 创建 + 上传：CCR seed-bundle 播种流程，把工程历史打成单文件包传到云端 |
-| [`utils/bash/bashPipeCommand.ts`](annotated/src/utils/bash/bashPipeCommand.ts) | 294 | 305 | 11 | 管道重排：把 stdin 重定向移到首个命令之后，修掉「eval 把整条管道当成一个单元」的语义偏差 |
-| [`utils/hooks/ssrfGuard.ts`](annotated/src/utils/hooks/ssrfGuard.ts) | 294 | 304 | 10 | SSRF 防护：自定义 DNS lookup 钩子，解析出的 IP 逐一校验，挡住「域名合法、指向内网」的绕过 |
+| 文件                                                                                               | 原文  | 批注版 | 锚点 | 讲什么                                                            |
+| ------------------------------------------------------------------------------------------------ | --- | --- | -- | -------------------------------------------------------------- |
+| [`utils/bash/shellQuote.ts`](annotated/src/utils/bash/shellQuote.ts)                             | 304 | 314 | 10 | shell-quote 库的安全包装：把库函数换成「出错不炸、降级处理」的 drop-in 替身，注入类输入不会把解析器带崩 |
+| [`utils/heapDumpService.ts`](annotated/src/utils/heapDumpService.ts)                             | 303 | 313 | 10 | 堆转储捕获服务（`/heapdump` 命令的后端）：把当前内存快照写到临时目录并列出历史转储                |
+| [`utils/queryProfiler.ts`](annotated/src/utils/queryProfiler.ts)                                 | 301 | 311 | 10 | 查询流水线剖析器：从用户输入到首 token 的分段计时，`CLAUDE_CODE_PROFILE_QUERY=1` 开启  |
+| [`utils/pdf.ts`](annotated/src/utils/pdf.ts)                                                     | 300 | 311 | 11 | PDF 附件处理：临时目录落盘、按内容寻址的缓存命中与读取                                  |
+| [`utils/permissions/permissionsLoader.ts`](annotated/src/utils/permissions/permissionsLoader.ts) | 296 | 307 | 11 | 权限规则装载：从各层 settings 读 allow/deny 规则并安全解析，是权限主流水线的「进货口」         |
+| [`utils/claudeInChrome/mcpServer.ts`](annotated/src/utils/claudeInChrome/mcpServer.ts)           | 293 | 303 | 10 | Claude in Chrome 桥接：stdio 传输的 MCP 服务器，把浏览器扩展的标签页/读取能力暴露给主进程    |
+| [`utils/teammate.ts`](annotated/src/utils/teammate.ts)                                           | 292 | 303 | 11 | 队友身份判定：判断当前实例是否作为 swarm 队友运行，及对应的名字/团队上下文读取                    |
+| [`utils/teleport/gitBundle.ts`](annotated/src/utils/teleport/gitBundle.ts)                       | 292 | 303 | 11 | git bundle 创建 + 上传：CCR seed-bundle 播种流程，把工程历史打成单文件包传到云端        |
+| [`utils/bash/bashPipeCommand.ts`](annotated/src/utils/bash/bashPipeCommand.ts)                   | 294 | 305 | 11 | 管道重排：把 stdin 重定向移到首个命令之后，修掉「eval 把整条管道当成一个单元」的语义偏差             |
+| [`utils/hooks/ssrfGuard.ts`](annotated/src/utils/hooks/ssrfGuard.ts)                             | 294 | 304 | 10 | SSRF 防护：自定义 DNS lookup 钩子，解析出的 IP 逐一校验，挡住「域名合法、指向内网」的绕过        |
 
 两条横切观察：
 
@@ -1971,18 +1965,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「290 行档」的下沿收口——277–292 行的十份独立工具：插件安装量缓存、SDK/内部消息双向映射、记忆文件识别、插件遥测字段、插件钩子加载与热重载、回合结束文件持久化、慢操作埋点封装、插件后台自动更新、.git/config 轻量解析、JSON/JSONL 安全解析。主题横跨「插件生命周期（遥测/钩子/自动更新/安装量）、会话与记忆文件识别、JSON 解析与持久化、性能埋点」——彼此独立，但共同补齐 utils 中层的「插件生态 + 数据格式 + 性能观测」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/plugins/installCounts.ts`](annotated/src/utils/plugins/installCounts.ts) | 292 | 307 | 10 | 插件安装量数据层：官方统计仓库拉取 → 本地 24h 缓存 → Map 输出，出错返回 null 让界面隐藏数字 |
-| [`utils/messages/mappers.ts`](annotated/src/utils/messages/mappers.ts) | 290 | 304 | 8 | SDK 消息与内部 Message 双向映射，含压缩边界与本地命令输出的特殊处理 |
-| [`utils/memoryFileDetection.ts`](annotated/src/utils/memoryFileDetection.ts) | 289 | 308 | 12 | 会话/记忆类文件识别：区分自动托管记忆与用户自管指令，供权限与折叠徽标使用 |
-| [`utils/telemetry/pluginTelemetry.ts`](annotated/src/utils/telemetry/pluginTelemetry.ts) | 289 | 302 | 9 | 插件遥测字段：双列隐私（原始值 + 脱敏孪生）+ 不依赖隐私的标识哈希 |
-| [`utils/plugins/loadPluginHooks.ts`](annotated/src/utils/plugins/loadPluginHooks.ts) | 287 | 299 | 8 | 插件钩子加载：原子清空再注册，外加热重载与卸载剪枝 |
-| [`utils/filePersistence/filePersistence.ts`](annotated/src/utils/filePersistence/filePersistence.ts) | 287 | 299 | 7 | 回合结束文件持久化编排：BYOC 与云端模式分支，仅公开会话用户启用 |
-| [`utils/slowOperations.ts`](annotated/src/utils/slowOperations.ts) | 286 | 300 | 11 | 慢操作埋点封装：JSON/克隆/深拷贝/同步写计时，重入守卫防自触发 |
-| [`utils/plugins/pluginAutoupdate.ts`](annotated/src/utils/plugins/pluginAutoupdate.ts) | 284 | 294 | 8 | 插件后台自动更新：刷新开启自动更新的市场后更新相关插件，非原地落盘 |
-| [`utils/json.ts`](annotated/src/utils/json.ts) | 277 | 289 | 9 | JSON/JSONL 安全解析与就地修改：LRU 缓存、jsonc、超大文件尾部读取 |
-| [`utils/git/gitConfigParser.ts`](annotated/src/utils/git/gitConfigParser.ts) | 277 | 288 | 8 | 轻量 .git/config 解析器：对照 git config.c 的段/键/值/转义规则 |
+| 文件                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                      |
+| ---------------------------------------------------------------------------------------------------- | --- | --- | -- | -------------------------------------------------------- |
+| [`utils/plugins/installCounts.ts`](annotated/src/utils/plugins/installCounts.ts)                     | 292 | 307 | 10 | 插件安装量数据层：官方统计仓库拉取 → 本地 24h 缓存 → Map 输出，出错返回 null 让界面隐藏数字 |
+| [`utils/messages/mappers.ts`](annotated/src/utils/messages/mappers.ts)                               | 290 | 304 | 8  | SDK 消息与内部 Message 双向映射，含压缩边界与本地命令输出的特殊处理                 |
+| [`utils/memoryFileDetection.ts`](annotated/src/utils/memoryFileDetection.ts)                         | 289 | 308 | 12 | 会话/记忆类文件识别：区分自动托管记忆与用户自管指令，供权限与折叠徽标使用                    |
+| [`utils/telemetry/pluginTelemetry.ts`](annotated/src/utils/telemetry/pluginTelemetry.ts)             | 289 | 302 | 9  | 插件遥测字段：双列隐私（原始值 + 脱敏孪生）+ 不依赖隐私的标识哈希                      |
+| [`utils/plugins/loadPluginHooks.ts`](annotated/src/utils/plugins/loadPluginHooks.ts)                 | 287 | 299 | 8  | 插件钩子加载：原子清空再注册，外加热重载与卸载剪枝                                |
+| [`utils/filePersistence/filePersistence.ts`](annotated/src/utils/filePersistence/filePersistence.ts) | 287 | 299 | 7  | 回合结束文件持久化编排：BYOC 与云端模式分支，仅公开会话用户启用                       |
+| [`utils/slowOperations.ts`](annotated/src/utils/slowOperations.ts)                                   | 286 | 300 | 11 | 慢操作埋点封装：JSON/克隆/深拷贝/同步写计时，重入守卫防自触发                       |
+| [`utils/plugins/pluginAutoupdate.ts`](annotated/src/utils/plugins/pluginAutoupdate.ts)               | 284 | 294 | 8  | 插件后台自动更新：刷新开启自动更新的市场后更新相关插件，非原地落盘                        |
+| [`utils/json.ts`](annotated/src/utils/json.ts)                                                       | 277 | 289 | 9  | JSON/JSONL 安全解析与就地修改：LRU 缓存、jsonc、超大文件尾部读取               |
+| [`utils/git/gitConfigParser.ts`](annotated/src/utils/git/gitConfigParser.ts)                         | 277 | 288 | 8  | 轻量 .git/config 解析器：对照 git config.c 的段/键/值/转义规则           |
 
 两条横切观察：
 
@@ -1995,18 +1989,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「272 行档」的十份独立工具，主题横跨「运行态观测诊断（上下文用量 / 调试日志 / doctor 告警）、配置治理（设置校验 / 钩子归一 / 市场对账）、缓存与渲染、AWS Bedrock 封装、技能自我改进钩子」——彼此独立，但共同补齐 utils 中层的「可观测性 + 配置校验 + 云/AI 集成」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/contextAnalysis.ts`](annotated/src/utils/contextAnalysis.ts) | 272 | 281 | 9 | 上下文用量分析：把对话消息的 token 消耗按来源（工具请求/结果、人类/助手、附件、重复读）拆解成统计项，再摊平成上报指标 |
-| [`utils/ansiToSvg.ts`](annotated/src/utils/ansiToSvg.ts) | 272 | 283 | 11 | 把带 ANSI 转义码的终端文本渲染成 SVG：解析颜色与加粗、按 span 拼 tspan，保留彩色命令行输出 |
-| [`utils/hooks/hooksSettings.ts`](annotated/src/utils/hooks/hooksSettings.ts) | 271 | 280 | 9 | 钩子设置汇总与展示：多来源钩子（用户/项目/本地/会话/插件/内置）归一，提供等价判断与排序展示文案 |
-| [`utils/memoize.ts`](annotated/src/utils/memoize.ts) | 269 | 277 | 8 | 三种记忆化缓存：TTL 写穿透（同步/异步，异步含并发冷未命中去重）、LRU 限容，附清空等管理方法 |
-| [`utils/debug.ts`](annotated/src/utils/debug.ts) | 268 | 278 | 10 | 调试日志系统：按级别过滤、多开关判定开启、同步/缓冲写文件并维护最新日志符号链接 |
-| [`utils/hooks/skillImprovement.ts`](annotated/src/utils/hooks/skillImprovement.ts) | 267 | 275 | 8 | 技能自我改进钩子：采样后从近期对话抽改进点，侧信道模型可选回写 SKILL.md |
-| [`utils/model/bedrock.ts`](annotated/src/utils/model/bedrock.ts) | 265 | 276 | 11 | AWS Bedrock 封装：列出推理配置、构建客户端、从 ARN 抽模型名与跨区前缀、加/换区域前缀 |
-| [`utils/plugins/reconciler.ts`](annotated/src/utils/plugins/reconciler.ts) | 265 | 273 | 8 | 市场对账器：让 known_marketplaces.json 与设置声明一致，只读 diff + 幂等只增安装 |
-| [`utils/doctorContextWarnings.ts`](annotated/src/utils/doctorContextWarnings.ts) | 265 | 274 | 9 | doctor 上下文告警：CLAUDE.md 过大 / 智能体描述过长 / MCP 工具过多 / 不可达权限规则四类检查 |
-| [`utils/settings/validation.ts`](annotated/src/utils/settings/validation.ts) | 265 | 273 | 8 | 设置校验翻译：把 Zod v4 错误翻成可读中文提示并给修复建议，校验前先剔除非法权限规则 |
+| 文件                                                                                 | 原文  | 批注版 | 锚点 | 讲什么                                                             |
+| ---------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------------------------------------- |
+| [`utils/contextAnalysis.ts`](annotated/src/utils/contextAnalysis.ts)               | 272 | 281 | 9  | 上下文用量分析：把对话消息的 token 消耗按来源（工具请求/结果、人类/助手、附件、重复读）拆解成统计项，再摊平成上报指标 |
+| [`utils/ansiToSvg.ts`](annotated/src/utils/ansiToSvg.ts)                           | 272 | 283 | 11 | 把带 ANSI 转义码的终端文本渲染成 SVG：解析颜色与加粗、按 span 拼 tspan，保留彩色命令行输出        |
+| [`utils/hooks/hooksSettings.ts`](annotated/src/utils/hooks/hooksSettings.ts)       | 271 | 280 | 9  | 钩子设置汇总与展示：多来源钩子（用户/项目/本地/会话/插件/内置）归一，提供等价判断与排序展示文案              |
+| [`utils/memoize.ts`](annotated/src/utils/memoize.ts)                               | 269 | 277 | 8  | 三种记忆化缓存：TTL 写穿透（同步/异步，异步含并发冷未命中去重）、LRU 限容，附清空等管理方法              |
+| [`utils/debug.ts`](annotated/src/utils/debug.ts)                                   | 268 | 278 | 10 | 调试日志系统：按级别过滤、多开关判定开启、同步/缓冲写文件并维护最新日志符号链接                        |
+| [`utils/hooks/skillImprovement.ts`](annotated/src/utils/hooks/skillImprovement.ts) | 267 | 275 | 8  | 技能自我改进钩子：采样后从近期对话抽改进点，侧信道模型可选回写 SKILL.md                        |
+| [`utils/model/bedrock.ts`](annotated/src/utils/model/bedrock.ts)                   | 265 | 276 | 11 | AWS Bedrock 封装：列出推理配置、构建客户端、从 ARN 抽模型名与跨区前缀、加/换区域前缀             |
+| [`utils/plugins/reconciler.ts`](annotated/src/utils/plugins/reconciler.ts)         | 265 | 273 | 8  | 市场对账器：让 known_marketplaces.json 与设置声明一致，只读 diff + 幂等只增安装        |
+| [`utils/doctorContextWarnings.ts`](annotated/src/utils/doctorContextWarnings.ts)   | 265 | 274 | 9  | doctor 上下文告警：CLAUDE.md 过大 / 智能体描述过长 / MCP 工具过多 / 不可达权限规则四类检查    |
+| [`utils/settings/validation.ts`](annotated/src/utils/settings/validation.ts)       | 265 | 273 | 8  | 设置校验翻译：把 Zod v4 错误翻成可读中文提示并给修复建议，校验前先剔除非法权限规则                   |
 
 两条横切观察：
 
@@ -2021,18 +2015,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「260 行上下」的十份独立工具，主题横跨「路径补全（目录/文件/shell）、Claude-in-Chrome 工具渲染、权限规则校验、token 计数、Bash 执行提供器、遥测导出、权限解释生成、会话文件访问埋点、iTerm2 安装校验」——彼此独立，但共同补齐 utils 中层的「输入补全 + 权限/安全治理 + 遥测/可观测 + 外部工具集成」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/suggestions/directoryCompletion.ts`](annotated/src/utils/suggestions/directoryCompletion.ts) | 263 | 271 | 8 | 路径补全：把未写完的路径拆成「目录+前缀」，用 LRU 缓存避免反复读盘，目录与文件路径分别匹配 |
-| [`utils/claudeInChrome/toolRendering.tsx`](annotated/src/utils/claudeInChrome/toolRendering.tsx) | 262 | 273 | 10 | Chrome 工具渲染：把浏览器工具调用显示成可点击的 View Tab 链接与一句话成功摘要，verbose 模式走默认渲染 |
-| [`utils/settings/permissionValidation.ts`](annotated/src/utils/settings/permissionValidation.ts) | 262 | 271 | 9 | 权限规则校验：括号配对、转义感知的空括号检测、MCP 规则格式、Bash 的 :* 前缀与 File 通配边界约束 |
-| [`utils/tokens.ts`](annotated/src/utils/tokens.ts) | 261 | 271 | 10 | token 计数：从 API usage 算上下文窗口，处理并行工具调用拆片对齐与跨压缩边界的最终窗口 |
-| [`utils/bash/shellCompletion.ts`](annotated/src/utils/bash/shellCompletion.ts) | 259 | 269 | 10 | shell 补全：解析光标前输入判断补「命令/变量/文件」，调 bash/zsh 原生 compgen 并防命令注入 |
-| [`utils/shell/bashProvider.ts`](annotated/src/utils/shell/bashProvider.ts) | 255 | 264 | 9 | Bash 执行提供器：拼「source 快照+会话环境+关 extglob+eval」，并处理 tmux socket 隔离 |
-| [`utils/telemetry/bigqueryExporter.ts`](annotated/src/utils/telemetry/bigqueryExporter.ts) | 252 | 263 | 11 | 遥测导出：把 OTel 指标转成 BigQuery 上传格式，校验信任态与组织开关后 POST 上报 |
-| [`utils/permissions/permissionExplainer.ts`](annotated/src/utils/permissions/permissionExplainer.ts) | 250 | 262 | 12 | 权限解释生成：用 Haiku 通过强制结构化输出，给每条命令生成「做什么/为什么/风险」三段说明 |
-| [`utils/sessionFileAccessHooks.ts`](annotated/src/utils/sessionFileAccessHooks.ts) | 250 | 258 | 8 | 会话文件访问埋点：拦截 Read/Grep/Glob/Edit/Write，统计对会话记忆/transcript/memdir/团队记忆的访问 |
-| [`utils/swarm/backends/it2Setup.ts`](annotated/src/utils/swarm/backends/it2Setup.ts) | 245 | 255 | 10 | iTerm2 安装校验：检测 Python 包管理器、安装 it2、验证能否连上 iTerm2 的 Python API |
+| 文件                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                     |
+| ---------------------------------------------------------------------------------------------------- | --- | --- | -- | ----------------------------------------------------------------------- |
+| [`utils/suggestions/directoryCompletion.ts`](annotated/src/utils/suggestions/directoryCompletion.ts) | 263 | 271 | 8  | 路径补全：把未写完的路径拆成「目录+前缀」，用 LRU 缓存避免反复读盘，目录与文件路径分别匹配                        |
+| [`utils/claudeInChrome/toolRendering.tsx`](annotated/src/utils/claudeInChrome/toolRendering.tsx)     | 262 | 273 | 10 | Chrome 工具渲染：把浏览器工具调用显示成可点击的 View Tab 链接与一句话成功摘要，verbose 模式走默认渲染         |
+| [`utils/settings/permissionValidation.ts`](annotated/src/utils/settings/permissionValidation.ts)     | 262 | 271 | 9  | 权限规则校验：括号配对、转义感知的空括号检测、MCP 规则格式、Bash 的 :* 前缀与 File 通配边界约束               |
+| [`utils/tokens.ts`](annotated/src/utils/tokens.ts)                                                   | 261 | 271 | 10 | token 计数：从 API usage 算上下文窗口，处理并行工具调用拆片对齐与跨压缩边界的最终窗口                     |
+| [`utils/bash/shellCompletion.ts`](annotated/src/utils/bash/shellCompletion.ts)                       | 259 | 269 | 10 | shell 补全：解析光标前输入判断补「命令/变量/文件」，调 bash/zsh 原生 compgen 并防命令注入              |
+| [`utils/shell/bashProvider.ts`](annotated/src/utils/shell/bashProvider.ts)                           | 255 | 264 | 9  | Bash 执行提供器：拼「source 快照+会话环境+关 extglob+eval」，并处理 tmux socket 隔离          |
+| [`utils/telemetry/bigqueryExporter.ts`](annotated/src/utils/telemetry/bigqueryExporter.ts)           | 252 | 263 | 11 | 遥测导出：把 OTel 指标转成 BigQuery 上传格式，校验信任态与组织开关后 POST 上报                      |
+| [`utils/permissions/permissionExplainer.ts`](annotated/src/utils/permissions/permissionExplainer.ts) | 250 | 262 | 12 | 权限解释生成：用 Haiku 通过强制结构化输出，给每条命令生成「做什么/为什么/风险」三段说明                        |
+| [`utils/sessionFileAccessHooks.ts`](annotated/src/utils/sessionFileAccessHooks.ts)                   | 250 | 258 | 8  | 会话文件访问埋点：拦截 Read/Grep/Glob/Edit/Write，统计对会话记忆/transcript/memdir/团队记忆的访问 |
+| [`utils/swarm/backends/it2Setup.ts`](annotated/src/utils/swarm/backends/it2Setup.ts)                 | 245 | 255 | 10 | iTerm2 安装校验：检测 Python 包管理器、安装 it2、验证能否连上 iTerm2 的 Python API            |
 
 两条横切观察：
 
@@ -2047,18 +2041,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「240 行上下」的十份独立工具，横跨「HTTP 钩子治理、命令前缀截断、终端录制、错误处理体系、桌面接力深链、上下文用量建议、远程操作前置条件、字符串工具、错误落盘、权限规则遮蔽检测」——彼此独立，但共同补齐 utils 中层的「对外调用安全 / 终端与录制 / 错误归一 / 桌面与远程衔接 / 权限规则体检」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/hooks/execHttpHook.ts`](annotated/src/utils/hooks/execHttpHook.ts) | 242 | 255 | 13 | HTTP 钩子：URL 白名单 + 环境变量插值白名单 + SSRF 防护，把钩子输入 POST 出去并兜成错误回传 |
-| [`utils/shell/specPrefix.ts`](annotated/src/utils/shell/specPrefix.ts) | 241 | 253 | 12 | 命令前缀截断：按规约给定的深度把命令拼成「命令+子命令」前缀，文件/URL 处截断以保护参数 |
-| [`utils/asciicast.ts`](annotated/src/utils/asciicast.ts) | 239 | 251 | 12 | 终端录制：包住 stdout.write 抓带时间戳输出，写 asciicast v2 协议，会话切换时改名续接 |
-| [`utils/errors.ts`](annotated/src/utils/errors.ts) | 238 | 250 | 12 | 错误体系：自研 Abort/ConfigParse 基类 + 中止判定 + axios 错误分桶 + 堆栈帧截断省 token |
-| [`utils/desktopDeepLink.ts`](annotated/src/utils/desktopDeepLink.ts) | 236 | 247 | 11 | 桌面接力：跨平台探测 Claude.app/xdg/注册表，版本兼容性三态判定，拼 claude://resume 深链打开 |
-| [`utils/contextSuggestions.ts`](annotated/src/utils/contextSuggestions.ts) | 235 | 245 | 10 | 上下文建议：五类阈值检查（容量/工具占比/读文件/记忆/自动压缩），告警优先 + 可省 token 降序 |
-| [`utils/background/remote/preconditions.ts`](annotated/src/utils/background/remote/preconditions.ts) | 235 | 246 | 11 | 远程前置：分层判定 GitHub App / 令牌同步 / 凭据三选一，决定是否可做远程操作 |
-| [`utils/stringUtils.ts`](annotated/src/utils/stringUtils.ts) | 235 | 247 | 12 | 字符串工具：转义/首字母大写/单复数/全角归一/累加器截断上限，集中复用的小函数集 |
-| [`utils/errorLogSink.ts`](annotated/src/utils/errorLogSink.ts) | 235 | 247 | 12 | 错误落盘：按日期生成 JSONL 缓冲写入器，分常规错误与 MCP 错误两路，幂等挂载 |
-| [`utils/permissions/shadowedRuleDetection.ts`](annotated/src/utils/permissions/shadowedRuleDetection.ts) | 234 | 245 | 11 | 规则遮蔽检测：逐条 allow 先查 deny 再查 ask 遮蔽，生成「规则不可达」告警与修复建议 |
+| 文件                                                                                                       | 原文  | 批注版 | 锚点 | 讲什么                                                             |
+| -------------------------------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------------------------------------- |
+| [`utils/hooks/execHttpHook.ts`](annotated/src/utils/hooks/execHttpHook.ts)                               | 242 | 255 | 13 | HTTP 钩子：URL 白名单 + 环境变量插值白名单 + SSRF 防护，把钩子输入 POST 出去并兜成错误回传      |
+| [`utils/shell/specPrefix.ts`](annotated/src/utils/shell/specPrefix.ts)                                   | 241 | 253 | 12 | 命令前缀截断：按规约给定的深度把命令拼成「命令+子命令」前缀，文件/URL 处截断以保护参数                  |
+| [`utils/asciicast.ts`](annotated/src/utils/asciicast.ts)                                                 | 239 | 251 | 12 | 终端录制：包住 stdout.write 抓带时间戳输出，写 asciicast v2 协议，会话切换时改名续接        |
+| [`utils/errors.ts`](annotated/src/utils/errors.ts)                                                       | 238 | 250 | 12 | 错误体系：自研 Abort/ConfigParse 基类 + 中止判定 + axios 错误分桶 + 堆栈帧截断省 token |
+| [`utils/desktopDeepLink.ts`](annotated/src/utils/desktopDeepLink.ts)                                     | 236 | 247 | 11 | 桌面接力：跨平台探测 Claude.app/xdg/注册表，版本兼容性三态判定，拼 claude://resume 深链打开  |
+| [`utils/contextSuggestions.ts`](annotated/src/utils/contextSuggestions.ts)                               | 235 | 245 | 10 | 上下文建议：五类阈值检查（容量/工具占比/读文件/记忆/自动压缩），告警优先 + 可省 token 降序            |
+| [`utils/background/remote/preconditions.ts`](annotated/src/utils/background/remote/preconditions.ts)     | 235 | 246 | 11 | 远程前置：分层判定 GitHub App / 令牌同步 / 凭据三选一，决定是否可做远程操作                  |
+| [`utils/stringUtils.ts`](annotated/src/utils/stringUtils.ts)                                             | 235 | 247 | 12 | 字符串工具：转义/首字母大写/单复数/全角归一/累加器截断上限，集中复用的小函数集                       |
+| [`utils/errorLogSink.ts`](annotated/src/utils/errorLogSink.ts)                                           | 235 | 247 | 12 | 错误落盘：按日期生成 JSONL 缓冲写入器，分常规错误与 MCP 错误两路，幂等挂载                     |
+| [`utils/permissions/shadowedRuleDetection.ts`](annotated/src/utils/permissions/shadowedRuleDetection.ts) | 234 | 245 | 11 | 规则遮蔽检测：逐条 allow 先查 deny 再查 ask 遮蔽，生成「规则不可达」告警与修复建议              |
 
 三条横切观察：
 
@@ -2074,18 +2068,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「230 行上下」的十份独立工具，横跨「Chrome 扩展便携探测、会话启动钩子、模型费用折算、macOS 钥匙串、bash 命令解析、权限通配匹配、编辑上下文扫描、zip 解压防御、notebook 解析、旁路 API 封装」——彼此独立，但共同补齐 utils 中层的「跨平台适配 / 动作前治理（计费·放行·归因·安全读）/ 内容解析底座」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/claudeInChrome/setupPortable.ts`](annotated/src/utils/claudeInChrome/setupPortable.ts) | 233 | 246 | 13 | Chrome 便携探测：按 process.platform 拼各浏览器数据目录，遍历 Default/Profile 找扩展 ID 判定安装 |
-| [`utils/sessionStart.ts`](annotated/src/utils/sessionStart.ts) | 232 | 243 | 11 | 会话启动钩子：bare 跳过、插件钩子加载失败降级、收集消息/上下文/监视路径 |
-| [`utils/modelCost.ts`](annotated/src/utils/modelCost.ts) | 231 | 244 | 13 | 费用模型：各档价位常量、按模型名解析价位、token 折算成美元 |
-| [`utils/secureStorage/macOsKeychainStorage.ts`](annotated/src/utils/secureStorage/macOsKeychainStorage.ts) | 231 | 240 | 9 | macOS 钥匙串：TTL 缓存、stale-while-error、stdin/argv 双路径与可执行位 |
-| [`utils/bash/parser.ts`](annotated/src/utils/bash/parser.ts) | 230 | 241 | 11 | bash 解析：tree-sitter 特性门控、解析中止哨兵、命令节点定位与参数抽取 |
-| [`utils/permissions/shellRuleMatching.ts`](annotated/src/utils/permissions/shellRuleMatching.ts) | 228 | 238 | 10 | 权限匹配：精确/前缀/通配三种规则，转义感知的通配匹配 |
-| [`utils/readEditContext.ts`](annotated/src/utils/readEditContext.ts) | 227 | 237 | 10 | 编辑上下文：8KB 分块跨块重叠扫描、CRLF 兼容、±上下文切片 |
-| [`utils/dxt/zip.ts`](annotated/src/utils/dxt/zip.ts) | 226 | 236 | 10 | zip 解压：路径穿越/体积/数量/压缩比四重防御、中央目录权限位恢复 |
-| [`utils/notebook.ts`](annotated/src/utils/notebook.ts) | 224 | 236 | 12 | notebook 解析：cell 处理、大输出截断、图片抽取、相邻文本块合并 |
-| [`utils/sideQuery.ts`](annotated/src/utils/sideQuery.ts) | 222 | 234 | 12 | 侧查询封装：OAuth 指纹、归属头、CLI 前缀、思考预算、结构化输出 |
+| 文件                                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                                                     |
+| ---------------------------------------------------------------------------------------------------------- | --- | --- | -- | ----------------------------------------------------------------------- |
+| [`utils/claudeInChrome/setupPortable.ts`](annotated/src/utils/claudeInChrome/setupPortable.ts)             | 233 | 246 | 13 | Chrome 便携探测：按 process.platform 拼各浏览器数据目录，遍历 Default/Profile 找扩展 ID 判定安装 |
+| [`utils/sessionStart.ts`](annotated/src/utils/sessionStart.ts)                                             | 232 | 243 | 11 | 会话启动钩子：bare 跳过、插件钩子加载失败降级、收集消息/上下文/监视路径                                 |
+| [`utils/modelCost.ts`](annotated/src/utils/modelCost.ts)                                                   | 231 | 244 | 13 | 费用模型：各档价位常量、按模型名解析价位、token 折算成美元                                        |
+| [`utils/secureStorage/macOsKeychainStorage.ts`](annotated/src/utils/secureStorage/macOsKeychainStorage.ts) | 231 | 240 | 9  | macOS 钥匙串：TTL 缓存、stale-while-error、stdin/argv 双路径与可执行位                  |
+| [`utils/bash/parser.ts`](annotated/src/utils/bash/parser.ts)                                               | 230 | 241 | 11 | bash 解析：tree-sitter 特性门控、解析中止哨兵、命令节点定位与参数抽取                             |
+| [`utils/permissions/shellRuleMatching.ts`](annotated/src/utils/permissions/shellRuleMatching.ts)           | 228 | 238 | 10 | 权限匹配：精确/前缀/通配三种规则，转义感知的通配匹配                                             |
+| [`utils/readEditContext.ts`](annotated/src/utils/readEditContext.ts)                                       | 227 | 237 | 10 | 编辑上下文：8KB 分块跨块重叠扫描、CRLF 兼容、±上下文切片                                       |
+| [`utils/dxt/zip.ts`](annotated/src/utils/dxt/zip.ts)                                                       | 226 | 236 | 10 | zip 解压：路径穿越/体积/数量/压缩比四重防御、中央目录权限位恢复                                     |
+| [`utils/notebook.ts`](annotated/src/utils/notebook.ts)                                                     | 224 | 236 | 12 | notebook 解析：cell 处理、大输出截断、图片抽取、相邻文本块合并                                  |
+| [`utils/sideQuery.ts`](annotated/src/utils/sideQuery.ts)                                                   | 222 | 234 | 12 | 侧查询封装：OAuth 指纹、归属头、CLI 前缀、思考预算、结构化输出                                    |
 
 两条横切观察：
 
@@ -2102,18 +2096,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「210 行上下」的十份独立工具，横跨「上下文窗口解析、官方市场 GCS 镜像拉取、ComputerUse 锁、插件激活刷新、提示词式 hook、Slack 频道建议、MCP 输出截断、插件下架标记、代码索引识别、bash 命令前缀推导」——彼此独立，但共同补齐 utils 中层的「模型上下文与配额 / 插件生命周期治理 / 外部工具集成 / 命令理解」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/context.ts`](annotated/src/utils/context.ts) | 221 | 233 | 12 | 上下文窗口：默认 20 万、1M 检测、max output token 分桶、压缩占比计算 |
-| [`utils/plugins/officialMarketplaceGcs.ts`](annotated/src/utils/plugins/officialMarketplaceGcs.ts) | 216 | 229 | 13 | 官方市场 GCS 镜像：latest 指针、哨兵比对、原子下载解压、遥测分桶 |
-| [`utils/computerUse/computerUseLock.ts`](annotated/src/utils/computerUse/computerUseLock.ts) | 215 | 228 | 13 | CU 锁：O_EXCL 原子抢锁、陈旧 PID 回收、只查不抢契约、关机清理 |
-| [`utils/plugins/refresh.ts`](annotated/src/utils/plugins/refresh.ts) | 215 | 226 | 11 | 插件激活刷新：清缓存→全量加载→填 mcp/lsp→更新 AppState→LSP 重初始化 |
-| [`utils/hooks/execPromptHook.ts`](annotated/src/utils/hooks/execPromptHook.ts) | 211 | 224 | 13 | 提示词式 hook：用 LLM 判条件、超时/中止组合信号、blocking/error 结果 |
-| [`utils/suggestions/slackChannelSuggestions.ts`](annotated/src/utils/suggestions/slackChannelSuggestions.ts) | 209 | 222 | 13 | Slack 频道建议：MCP 搜索、信封解包、前缀缓存复用、前 10 截断 |
-| [`utils/mcpValidation.ts`](annotated/src/utils/mcpValidation.ts) | 208 | 220 | 12 | MCP 输出校验：token 上限优先级、字符预算、文本/图片块截断与提示 |
-| [`utils/plugins/pluginFlagging.ts`](annotated/src/utils/plugins/pluginFlagging.ts) | 208 | 220 | 12 | 插件下架标记：flagged-plugins.json、48h 过期、原子写与缓存同步 |
-| [`utils/codeIndexing.ts`](annotated/src/utils/codeIndexing.ts) | 206 | 214 | 8 | 代码索引识别：CLI 首词映射、MCP 服务器名正则、三类检测入口 |
-| [`utils/bash/prefix.ts`](annotated/src/utils/bash/prefix.ts) | 204 | 215 | 11 | bash 前缀推导：包装命令递归解析、复合命令词对齐最长公共前缀折叠 |
+| 文件                                                                                                           | 原文  | 批注版 | 锚点 | 讲什么                                             |
+| ------------------------------------------------------------------------------------------------------------ | --- | --- | -- | ----------------------------------------------- |
+| [`utils/context.ts`](annotated/src/utils/context.ts)                                                         | 221 | 233 | 12 | 上下文窗口：默认 20 万、1M 检测、max output token 分桶、压缩占比计算  |
+| [`utils/plugins/officialMarketplaceGcs.ts`](annotated/src/utils/plugins/officialMarketplaceGcs.ts)           | 216 | 229 | 13 | 官方市场 GCS 镜像：latest 指针、哨兵比对、原子下载解压、遥测分桶          |
+| [`utils/computerUse/computerUseLock.ts`](annotated/src/utils/computerUse/computerUseLock.ts)                 | 215 | 228 | 13 | CU 锁：O_EXCL 原子抢锁、陈旧 PID 回收、只查不抢契约、关机清理          |
+| [`utils/plugins/refresh.ts`](annotated/src/utils/plugins/refresh.ts)                                         | 215 | 226 | 11 | 插件激活刷新：清缓存→全量加载→填 mcp/lsp→更新 AppState→LSP 重初始化  |
+| [`utils/hooks/execPromptHook.ts`](annotated/src/utils/hooks/execPromptHook.ts)                               | 211 | 224 | 13 | 提示词式 hook：用 LLM 判条件、超时/中止组合信号、blocking/error 结果 |
+| [`utils/suggestions/slackChannelSuggestions.ts`](annotated/src/utils/suggestions/slackChannelSuggestions.ts) | 209 | 222 | 13 | Slack 频道建议：MCP 搜索、信封解包、前缀缓存复用、前 10 截断           |
+| [`utils/mcpValidation.ts`](annotated/src/utils/mcpValidation.ts)                                             | 208 | 220 | 12 | MCP 输出校验：token 上限优先级、字符预算、文本/图片块截断与提示           |
+| [`utils/plugins/pluginFlagging.ts`](annotated/src/utils/plugins/pluginFlagging.ts)                           | 208 | 220 | 12 | 插件下架标记：flagged-plugins.json、48h 过期、原子写与缓存同步     |
+| [`utils/codeIndexing.ts`](annotated/src/utils/codeIndexing.ts)                                               | 206 | 214 | 8  | 代码索引识别：CLI 首词映射、MCP 服务器名正则、三类检测入口               |
+| [`utils/bash/prefix.ts`](annotated/src/utils/bash/prefix.ts)                                                 | 204 | 215 | 11 | bash 前缀推导：包装命令递归解析、复合命令词对齐最长公共前缀折叠              |
 
 两条横切观察：
 
@@ -2130,18 +2124,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「200 行上下」的十份独立工具，横跨「并发会话登记与计数、终端全屏/tmux 探测、终端字符密度可视化、受管配置注入环境变量、MCP 的 WebSocket 传输、权限规则解析、设置来源枚举与解析、状态提示横幅定义、流式输出精简转换、转录搜索文本提取」——彼此独立，但共同补齐 utils 中层的「运行时配置与来源 / 终端渲染与远端传输 / 会话与检索」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/concurrentSessions.ts`](annotated/src/utils/concurrentSessions.ts) | 204 | 216 | 12 | 并发会话登记与计数：SessionKind/Status 类型、bg/daemon 判定、registerSession、并发数 countConcurrentSessions、活动/桥接 ID 更新 |
-| [`utils/fullscreen.ts`](annotated/src/utils/fullscreen.ts) | 202 | 214 | 12 | 全屏与 tmux 终端环境探测：tmux control mode 探测、fullscreen 开关、鼠标跟踪/点击禁用、tmux 鼠标提示 |
-| [`utils/heatmap.ts`](annotated/src/utils/heatmap.ts) | 198 | 209 | 11 | 终端热力图生成：HeatmapOptions + generateHeatmap 把字符频次渲染成可视化密度图 |
-| [`utils/managedEnv.ts`](annotated/src/utils/managedEnv.ts) | 199 | 212 | 13 | 受管环境（Managed<T> 注入配置）变量应用：safe 与常规两套 applyConfigEnvironmentVariables |
-| [`utils/mcpWebSocketTransport.ts`](annotated/src/utils/mcpWebSocketTransport.ts) | 200 | 214 | 14 | MCP 的 WebSocket 传输实现：WebSocketTransport 类实现 Transport 接口（连接/收发/关闭） |
-| [`utils/permissions/permissionRuleParser.ts`](annotated/src/utils/permissions/permissionRuleParser.ts) | 198 | 210 | 12 | 权限规则解析：legacy 工具名归一/反查、规则内容转义/反转义、字符串⇄值互转 |
-| [`utils/settings/constants.ts`](annotated/src/utils/settings/constants.ts) | 202 | 214 | 12 | 设置来源常量与解析：SETTING_SOURCES、来源名展示、parseSettingSourcesFlag、getEnabledSettingSources |
-| [`utils/statusNoticeDefinitions.tsx`](annotated/src/utils/statusNoticeDefinitions.tsx) | 198 | 211 | 14 | 状态提示横幅定义：StatusNotice 类型族 + 6 条定义（大内存文件/大 agent 描述/外部 token/API key 冲突/双认证/JetBrains 插件）+ getActiveNotices 过滤 |
-| [`utils/streamlinedTransform.ts`](annotated/src/utils/streamlinedTransform.ts) | 201 | 213 | 12 | 流式精简转换器：createStreamlinedTransformer 把消息流折叠成精简 Stdout、shouldIncludeInStreamlined 判定保留 |
-| [`utils/transcriptSearch.ts`](annotated/src/utils/transcriptSearch.ts) | 202 | 213 | 11 | 转录搜索文本提取：renderableSearchText / toolUseSearchText / toolResultSearchText 把各类消息转成可搜索纯文本 |
+| 文件                                                                                                     | 原文  | 批注版 | 锚点 | 讲什么                                                                                                           |
+| ------------------------------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------------------------------------------------------------------------------- |
+| [`utils/concurrentSessions.ts`](annotated/src/utils/concurrentSessions.ts)                             | 204 | 216 | 12 | 并发会话登记与计数：SessionKind/Status 类型、bg/daemon 判定、registerSession、并发数 countConcurrentSessions、活动/桥接 ID 更新          |
+| [`utils/fullscreen.ts`](annotated/src/utils/fullscreen.ts)                                             | 202 | 214 | 12 | 全屏与 tmux 终端环境探测：tmux control mode 探测、fullscreen 开关、鼠标跟踪/点击禁用、tmux 鼠标提示                                        |
+| [`utils/heatmap.ts`](annotated/src/utils/heatmap.ts)                                                   | 198 | 209 | 11 | 终端热力图生成：HeatmapOptions + generateHeatmap 把字符频次渲染成可视化密度图                                                       |
+| [`utils/managedEnv.ts`](annotated/src/utils/managedEnv.ts)                                             | 199 | 212 | 13 | 受管环境（Managed<T> 注入配置）变量应用：safe 与常规两套 applyConfigEnvironmentVariables                                          |
+| [`utils/mcpWebSocketTransport.ts`](annotated/src/utils/mcpWebSocketTransport.ts)                       | 200 | 214 | 14 | MCP 的 WebSocket 传输实现：WebSocketTransport 类实现 Transport 接口（连接/收发/关闭）                                            |
+| [`utils/permissions/permissionRuleParser.ts`](annotated/src/utils/permissions/permissionRuleParser.ts) | 198 | 210 | 12 | 权限规则解析：legacy 工具名归一/反查、规则内容转义/反转义、字符串⇄值互转                                                                     |
+| [`utils/settings/constants.ts`](annotated/src/utils/settings/constants.ts)                             | 202 | 214 | 12 | 设置来源常量与解析：SETTING_SOURCES、来源名展示、parseSettingSourcesFlag、getEnabledSettingSources                              |
+| [`utils/statusNoticeDefinitions.tsx`](annotated/src/utils/statusNoticeDefinitions.tsx)                 | 198 | 211 | 14 | 状态提示横幅定义：StatusNotice 类型族 + 6 条定义（大内存文件/大 agent 描述/外部 token/API key 冲突/双认证/JetBrains 插件）+ getActiveNotices 过滤 |
+| [`utils/streamlinedTransform.ts`](annotated/src/utils/streamlinedTransform.ts)                         | 201 | 213 | 12 | 流式精简转换器：createStreamlinedTransformer 把消息流折叠成精简 Stdout、shouldIncludeInStreamlined 判定保留                         |
+| [`utils/transcriptSearch.ts`](annotated/src/utils/transcriptSearch.ts)                                 | 202 | 213 | 11 | 转录搜索文本提取：renderableSearchText / toolUseSearchText / toolResultSearchText 把各类消息转成可搜索纯文本                        |
 
 两条横切观察：
 
@@ -2158,18 +2152,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「190 行上下」的十份独立工具，横跨「已装 App 名过滤净化、插件缓存清理与孤儿版本回收、CCR 容器 token 落地、调度器租约锁、启动期性能剖析、用户核心数据聚合、hints 标签协议、hook 事件广播、JetBrains 插件探测、早期输入捕获」——彼此独立，但共同补齐 utils 中层的「环境边界身份注入 / 资源与调度协调 / 外部信号消化」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
+| 文件                                                                             | 原文  | 批注版 | 锚点 | 讲什么                                                                                         |
+| ------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------------------------------------------------------------- |
 | [`utils/computerUse/appNames.ts`](annotated/src/utils/computerUse/appNames.ts) | 196 | 210 | 14 | 已装 App 名过滤与净化，供 request_access 工具描述；路径白名单 + 显示名黑名单 + 提示注入加固（Unicode 字符集 / 长度 40 / 数量 50 上限） |
-| [`utils/plugins/cacheUtils.ts`](annotated/src/utils/plugins/cacheUtils.ts) | 196 | 208 | 12 | 插件缓存清理与孤儿版本 7 天惰性清理（两趟扫描、zip 缓存模式整体跳过） |
-| [`utils/authFileDescriptor.ts`](annotated/src/utils/authFileDescriptor.ts) | 196 | 208 | 12 | CCR 容器里把 FD 传入的 OAuth token / API key 落地到已知文件，供子进程（FD 无法跨 tmux/exec）读取 |
-| [`utils/cronTasksLock.ts`](annotated/src/utils/cronTasksLock.ts) | 195 | 207 | 12 | scheduled_tasks.json 的调度器租约锁：O_EXCL 原子创建、PID 存活探测、陈旧锁恢复 |
-| [`utils/startupProfiler.ts`](annotated/src/utils/startupProfiler.ts) | 194 | 207 | 13 | 启动期性能剖析：采样上报 Statsig + 详细模式写含内存快照的报告 |
-| [`utils/user.ts`](annotated/src/utils/user.ts) | 194 | 206 | 12 | 用户核心数据聚合：设备/会话/平台/订阅/CI 元数据，OAuth 邮箱异步预取 |
-| [`utils/claudeCodeHints.ts`](annotated/src/utils/claudeCodeHints.ts) | 193 | 206 | 13 | Claude Code hints 协议：扫描工具输出里的 <claude-code-hint /> 标签、剥离并弹安装提示，单槽存储 |
-| [`utils/hooks/hookEvents.ts`](annotated/src/utils/hooks/hookEvents.ts) | 192 | 205 | 13 | hook 执行事件广播系统：started/progress/response 三类事件，与主消息流解耦 |
-| [`utils/jetbrains.ts`](annotated/src/utils/jetbrains.ts) | 191 | 202 | 11 | JetBrains IDE 插件探测：按 IDE 名映射各平台插件目录，检测 claude-code-jetbrains-plugin 是否安装 |
-| [`utils/earlyInput.ts`](annotated/src/utils/earlyInput.ts) | 191 | 202 | 11 | 早期输入捕获：REPL 初始化前捕获终端键入，避免用户 prompt 字符丢失 |
+| [`utils/plugins/cacheUtils.ts`](annotated/src/utils/plugins/cacheUtils.ts)     | 196 | 208 | 12 | 插件缓存清理与孤儿版本 7 天惰性清理（两趟扫描、zip 缓存模式整体跳过）                                                      |
+| [`utils/authFileDescriptor.ts`](annotated/src/utils/authFileDescriptor.ts)     | 196 | 208 | 12 | CCR 容器里把 FD 传入的 OAuth token / API key 落地到已知文件，供子进程（FD 无法跨 tmux/exec）读取                      |
+| [`utils/cronTasksLock.ts`](annotated/src/utils/cronTasksLock.ts)               | 195 | 207 | 12 | scheduled_tasks.json 的调度器租约锁：O_EXCL 原子创建、PID 存活探测、陈旧锁恢复                                     |
+| [`utils/startupProfiler.ts`](annotated/src/utils/startupProfiler.ts)           | 194 | 207 | 13 | 启动期性能剖析：采样上报 Statsig + 详细模式写含内存快照的报告                                                        |
+| [`utils/user.ts`](annotated/src/utils/user.ts)                                 | 194 | 206 | 12 | 用户核心数据聚合：设备/会话/平台/订阅/CI 元数据，OAuth 邮箱异步预取                                                    |
+| [`utils/claudeCodeHints.ts`](annotated/src/utils/claudeCodeHints.ts)           | 193 | 206 | 13 | Claude Code hints 协议：扫描工具输出里的 <claude-code-hint /> 标签、剥离并弹安装提示，单槽存储                         |
+| [`utils/hooks/hookEvents.ts`](annotated/src/utils/hooks/hookEvents.ts)         | 192 | 205 | 13 | hook 执行事件广播系统：started/progress/response 三类事件，与主消息流解耦                                        |
+| [`utils/jetbrains.ts`](annotated/src/utils/jetbrains.ts)                       | 191 | 202 | 11 | JetBrains IDE 插件探测：按 IDE 名映射各平台插件目录，检测 claude-code-jetbrains-plugin 是否安装                    |
+| [`utils/earlyInput.ts`](annotated/src/utils/earlyInput.ts)                     | 191 | 202 | 11 | 早期输入捕获：REPL 初始化前捕获终端键入，避免用户 prompt 字符丢失                                                     |
 
 两条横切观察：
 
@@ -2184,18 +2178,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「190 行上下」的十份独立工具，横跨「宿主托管/安全环境变量清单、文件变化钩子监听、内置终端面板、MCP 大输出与二进制落盘、外部编辑器接入、PowerShell 危险 cmdlet 清单、进程树探查、示例命令生成、环境变量工具集、提示词内嵌 shell 执行」——彼此独立，但共同补齐 utils 中层的「运行环境来源 / 进程与 shell 生命周期 / 产物落盘」积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/managedEnvConstants.ts`](annotated/src/utils/managedEnvConstants.ts) | 191 | 201 | 10 | 宿主托管环境变量与安全环境变量两份清单——决定远端托管配置能否覆盖用户设置、哪些变量可信任对话框前安全应用 |
-| [`utils/hooks/fileChangedWatcher.ts`](annotated/src/utils/hooks/fileChangedWatcher.ts) | 191 | 203 | 12 | 基于 chokidar 监听 cwd 下 env/hook 相关文件变化，触发 FileChanged/CwdChanged 钩子并通知 UI |
-| [`utils/terminalPanel.ts`](annotated/src/utils/terminalPanel.ts) | 191 | 202 | 11 | 内置终端面板，Meta+J 切换，tmux 持久会话按实例隔离，无 tmux 退回非持久 shell |
-| [`utils/mcpOutputStorage.ts`](annotated/src/utils/mcpOutputStorage.ts) | 189 | 198 | 9 | MCP 大输出与二进制结果的落盘、mime→扩展名映射、给模型的读取指引 |
-| [`utils/promptEditor.ts`](annotated/src/utils/promptEditor.ts) | 188 | 199 | 11 | 把提示词/文件交给外部编辑器编辑，suspend-Ink 模式兼容 GUI 与终端编辑器 |
-| [`utils/powershell/dangerousCmdlets.ts`](annotated/src/utils/powershell/dangerousCmdlets.ts) | 185 | 196 | 11 | 会执行任意代码的 PowerShell cmdlet 清单，供权限校验与 UI 建议门控共用 |
-| [`utils/genericProcessUtils.ts`](annotated/src/utils/genericProcessUtils.ts) | 184 | 192 | 8 | 平台无关查询进程树（是否运行/祖先 PID/子进程），Windows 走 PowerShell、Unix 走 sh |
-| [`utils/exampleCommands.ts`](annotated/src/utils/exampleCommands.ts) | 184 | 196 | 12 | 按最近修改文件生成「尝试这些命令」式示例提示，过滤非核心文件 |
-| [`utils/envUtils.ts`](annotated/src/utils/envUtils.ts) | 183 | 197 | 14 | 环境变量工具集——配置主目录、布尔/选项判断、裸模式、env 解析、AWS/Vertex 区域推导 |
-| [`utils/promptShellExecution.ts`](annotated/src/utils/promptShellExecution.ts) | 183 | 193 | 10 | 解析提示词内嵌 shell 命令（```! 与 !`），选 bash/powershell 路由执行并回填 |
+| 文件                                                                                           | 原文  | 批注版 | 锚点 | 讲什么                                                                     |
+| -------------------------------------------------------------------------------------------- | --- | --- | -- | ----------------------------------------------------------------------- |
+| [`utils/managedEnvConstants.ts`](annotated/src/utils/managedEnvConstants.ts)                 | 191 | 201 | 10 | 宿主托管环境变量与安全环境变量两份清单——决定远端托管配置能否覆盖用户设置、哪些变量可信任对话框前安全应用                   |
+| [`utils/hooks/fileChangedWatcher.ts`](annotated/src/utils/hooks/fileChangedWatcher.ts)       | 191 | 203 | 12 | 基于 chokidar 监听 cwd 下 env/hook 相关文件变化，触发 FileChanged/CwdChanged 钩子并通知 UI |
+| [`utils/terminalPanel.ts`](annotated/src/utils/terminalPanel.ts)                             | 191 | 202 | 11 | 内置终端面板，Meta+J 切换，tmux 持久会话按实例隔离，无 tmux 退回非持久 shell                      |
+| [`utils/mcpOutputStorage.ts`](annotated/src/utils/mcpOutputStorage.ts)                       | 189 | 198 | 9  | MCP 大输出与二进制结果的落盘、mime→扩展名映射、给模型的读取指引                                    |
+| [`utils/promptEditor.ts`](annotated/src/utils/promptEditor.ts)                               | 188 | 199 | 11 | 把提示词/文件交给外部编辑器编辑，suspend-Ink 模式兼容 GUI 与终端编辑器                            |
+| [`utils/powershell/dangerousCmdlets.ts`](annotated/src/utils/powershell/dangerousCmdlets.ts) | 185 | 196 | 11 | 会执行任意代码的 PowerShell cmdlet 清单，供权限校验与 UI 建议门控共用                          |
+| [`utils/genericProcessUtils.ts`](annotated/src/utils/genericProcessUtils.ts)                 | 184 | 192 | 8  | 平台无关查询进程树（是否运行/祖先 PID/子进程），Windows 走 PowerShell、Unix 走 sh               |
+| [`utils/exampleCommands.ts`](annotated/src/utils/exampleCommands.ts)                         | 184 | 196 | 12 | 按最近修改文件生成「尝试这些命令」式示例提示，过滤非核心文件                                          |
+| [`utils/envUtils.ts`](annotated/src/utils/envUtils.ts)                                       | 183 | 197 | 14 | 环境变量工具集——配置主目录、布尔/选项判断、裸模式、env 解析、AWS/Vertex 区域推导                       |
+| [`utils/promptShellExecution.ts`](annotated/src/utils/promptShellExecution.ts)               | 183 | 193 | 10 | 解析提示词内嵌 shell 命令（\`\`\`! 与 !\`），选 bash/powershell 路由执行并回填               |
 
 两条横切观察：
 
@@ -2212,23 +2206,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「180 行上下」的十五份独立工具，横跨「外部编辑器启动、工具调用分组渲染、mTLS 证书装配、宽度感知截断、query 缓存键前缀、插件输出样式加载、仓库 remote 解析、插件目录真相、智能体上下文隔离、无界面剖析、结构化 diff、无界面插件安装、Windows/POSIX 路径互转、树形渲染、深链 URI 解析」——彼此独立，但共同补齐 utils 中层的「对外桥接 / 无头环境自处 / 通用文本与渲染积木」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/editor.ts`](annotated/src/utils/editor.ts) | 183 | 204 | 11 | 把文件交给外部编辑器：GUI 用 detached 子进程、终端用 Ink alt-screen 接管 |
-| [`utils/groupToolUses.ts`](annotated/src/utils/groupToolUses.ts) | 182 | 201 | 11 | 把同一条响应里的多个同类工具调用聚合成一条 grouped 消息 |
-| [`utils/mtls.ts`](annotated/src/utils/mtls.ts) | 179 | 196 | 12 | mTLS 客户端证书/私钥/口令读取、HTTPS Agent 与 undici dispatcher 装配 |
-| [`utils/truncate.ts`](annotated/src/utils/truncate.ts) | 179 | 196 | 12 | 宽度感知的截断与换行，grapheme 边界切分避免劈坏 CJK/emoji |
-| [`utils/queryContext.ts`](annotated/src/utils/queryContext.ts) | 179 | 192 | 9 | 构建 query 缓存键前缀的三段上下文，SDK 侧追问回建缓存安全参数 |
-| [`utils/plugins/loadPluginOutputStyles.ts`](annotated/src/utils/plugins/loadPluginOutputStyles.ts) | 178 | 187 | 9 | 从插件目录加载输出样式并以插件名做命名空间 |
-| [`utils/detectRepository.ts`](annotated/src/utils/detectRepository.ts) | 178 | 194 | 13 | 把任意主机 remote URL 解析为 host/owner/name，过滤 SSH 别名 |
-| [`utils/plugins/pluginDirectories.ts`](annotated/src/utils/plugins/pluginDirectories.ts) | 178 | 194 | 13 | 插件目录唯一真相来源，cowork 切换与只读种子层 |
-| [`utils/agentContext.ts`](annotated/src/utils/agentContext.ts) | 178 | 191 | 12 | 用 AsyncLocalStorage 跟踪子智能体与队友身份，跨并发隔离 |
-| [`utils/headlessProfiler.ts`](annotated/src/utils/headlessProfiler.ts) | 178 | 189 | 9 | 无界面模式每轮延迟剖析与采样上报 |
-| [`utils/diff.ts`](annotated/src/utils/diff.ts) | 177 | 187 | 10 | 结构化 diff 生成、行数统计与 &/$ 特殊字符转义 |
-| [`utils/plugins/headlessPluginInstall.ts`](annotated/src/utils/plugins/headlessPluginInstall.ts) | 174 | 185 | 10 | 无界面（CCR）模式插件安装，不更新 AppState |
-| [`utils/windowsPaths.ts`](annotated/src/utils/windowsPaths.ts) | 173 | 186 | 13 | Windows 与 POSIX 路径互转，git-bash 定位与当前目录恶意过滤 |
-| [`utils/treeify.ts`](annotated/src/utils/treeify.ts) | 170 | 180 | 10 | 带 Ink 主题色的树形渲染实现 |
-| [`utils/deepLink/parseDeepLink.ts`](annotated/src/utils/deepLink/parseDeepLink.ts) | 170 | 185 | 14 | 解析 claude-cli 深链 URI，校验 cwd/repo/query 防注入 |
+| 文件                                                                                                 | 原文  | 批注版 | 锚点 | 讲什么                                                   |
+| -------------------------------------------------------------------------------------------------- | --- | --- | -- | ----------------------------------------------------- |
+| [`utils/editor.ts`](annotated/src/utils/editor.ts)                                                 | 183 | 204 | 11 | 把文件交给外部编辑器：GUI 用 detached 子进程、终端用 Ink alt-screen 接管   |
+| [`utils/groupToolUses.ts`](annotated/src/utils/groupToolUses.ts)                                   | 182 | 201 | 11 | 把同一条响应里的多个同类工具调用聚合成一条 grouped 消息                      |
+| [`utils/mtls.ts`](annotated/src/utils/mtls.ts)                                                     | 179 | 196 | 12 | mTLS 客户端证书/私钥/口令读取、HTTPS Agent 与 undici dispatcher 装配 |
+| [`utils/truncate.ts`](annotated/src/utils/truncate.ts)                                             | 179 | 196 | 12 | 宽度感知的截断与换行，grapheme 边界切分避免劈坏 CJK/emoji                |
+| [`utils/queryContext.ts`](annotated/src/utils/queryContext.ts)                                     | 179 | 192 | 9  | 构建 query 缓存键前缀的三段上下文，SDK 侧追问回建缓存安全参数                  |
+| [`utils/plugins/loadPluginOutputStyles.ts`](annotated/src/utils/plugins/loadPluginOutputStyles.ts) | 178 | 187 | 9  | 从插件目录加载输出样式并以插件名做命名空间                                 |
+| [`utils/detectRepository.ts`](annotated/src/utils/detectRepository.ts)                             | 178 | 194 | 13 | 把任意主机 remote URL 解析为 host/owner/name，过滤 SSH 别名        |
+| [`utils/plugins/pluginDirectories.ts`](annotated/src/utils/plugins/pluginDirectories.ts)           | 178 | 194 | 13 | 插件目录唯一真相来源，cowork 切换与只读种子层                            |
+| [`utils/agentContext.ts`](annotated/src/utils/agentContext.ts)                                     | 178 | 191 | 12 | 用 AsyncLocalStorage 跟踪子智能体与队友身份，跨并发隔离                 |
+| [`utils/headlessProfiler.ts`](annotated/src/utils/headlessProfiler.ts)                             | 178 | 189 | 9  | 无界面模式每轮延迟剖析与采样上报                                      |
+| [`utils/diff.ts`](annotated/src/utils/diff.ts)                                                     | 177 | 187 | 10 | 结构化 diff 生成、行数统计与 &/$ 特殊字符转义                          |
+| [`utils/plugins/headlessPluginInstall.ts`](annotated/src/utils/plugins/headlessPluginInstall.ts)   | 174 | 185 | 10 | 无界面（CCR）模式插件安装，不更新 AppState                           |
+| [`utils/windowsPaths.ts`](annotated/src/utils/windowsPaths.ts)                                     | 173 | 186 | 13 | Windows 与 POSIX 路径互转，git-bash 定位与当前目录恶意过滤             |
+| [`utils/treeify.ts`](annotated/src/utils/treeify.ts)                                               | 170 | 180 | 10 | 带 Ink 主题色的树形渲染实现                                      |
+| [`utils/deepLink/parseDeepLink.ts`](annotated/src/utils/deepLink/parseDeepLink.ts)                 | 170 | 185 | 14 | 解析 claude-cli 深链 URI，校验 cwd/repo/query 防注入            |
 
 两条横切观察：
 
@@ -2243,19 +2237,19 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「170 行上下」的十一份独立工具，横跨「模型白名单判定、shell 配置别名管理、图片磁盘缓存、会话环境脚本聚合、文本高亮分段、shell 补全缓存、模型 ID 字符串解析、活跃时间统计、插件安装提示、settings 校验建议、插件 zip 缓存 I/O」——彼此独立，但共同补齐 utils 中层的「配置 / 缓存 / 环境 / 模型路由」四类积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/model/modelAllowlist.ts`](annotated/src/utils/model/modelAllowlist.ts) | 170 | 181 | 11 | availableModels 白名单的三层匹配：精确 / 家族通配 / 版本前缀，别名双向解析 |
-| [`utils/shellConfig.ts`](annotated/src/utils/shellConfig.ts) | 167 | 177 | 10 | shell rc 文件里 claude 别名的安装、查找、可执行校验 |
-| [`utils/imageStore.ts`](annotated/src/utils/imageStore.ts) | 167 | 178 | 11 | 粘贴图片落盘缓存、内存索引与 LRU 淘汰、跨会话清理 |
-| [`utils/sessionEnvironment.ts`](annotated/src/utils/sessionEnvironment.ts) | 166 | 176 | 10 | 会话级 env 脚本读写、钩子脚本按类型/序号确定性排序 |
-| [`utils/textHighlighting.ts`](annotated/src/utils/textHighlighting.ts) | 166 | 176 | 10 | 含 ANSI 转义文本的高亮分段，可见坐标与原始坐标双体系 |
-| [`utils/completionCache.ts`](annotated/src/utils/completionCache.ts) | 166 | 176 | 10 | 生成并缓存 shell 补全脚本，写入各 shell 的 rc 文件 |
-| [`utils/model/modelStrings.ts`](annotated/src/utils/model/modelStrings.ts) | 166 | 176 | 10 | 模型键到提供商特定 ID 的解析，Bedrock 推理配置叠加 overrides |
-| [`utils/activityManager.ts`](annotated/src/utils/activityManager.ts) | 164 | 175 | 11 | 通用活跃时间统计，区分用户活跃与 CLI 活跃、单例管理 |
-| [`utils/plugins/hintRecommendation.ts`](annotated/src/utils/plugins/hintRecommendation.ts) | 164 | 174 | 10 | 插件安装提示推荐，同步预存闸门加异步市场解析 |
-| [`utils/settings/validationTips.ts`](annotated/src/utils/settings/validationTips.ts) | 164 | 174 | 10 | 基于 Zod 校验错误的修复建议与文档链接匹配表 |
-| [`utils/plugins/zipCacheAdapters.ts`](annotated/src/utils/plugins/zipCacheAdapters.ts) | 164 | 173 | 9 | 插件 zip 缓存的元数据 I/O 与单市场 JSON 读写 |
+| 文件                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                              |
+| ------------------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------------------ |
+| [`utils/model/modelAllowlist.ts`](annotated/src/utils/model/modelAllowlist.ts)             | 170 | 181 | 11 | availableModels 白名单的三层匹配：精确 / 家族通配 / 版本前缀，别名双向解析 |
+| [`utils/shellConfig.ts`](annotated/src/utils/shellConfig.ts)                               | 167 | 177 | 10 | shell rc 文件里 claude 别名的安装、查找、可执行校验               |
+| [`utils/imageStore.ts`](annotated/src/utils/imageStore.ts)                                 | 167 | 178 | 11 | 粘贴图片落盘缓存、内存索引与 LRU 淘汰、跨会话清理                      |
+| [`utils/sessionEnvironment.ts`](annotated/src/utils/sessionEnvironment.ts)                 | 166 | 176 | 10 | 会话级 env 脚本读写、钩子脚本按类型/序号确定性排序                     |
+| [`utils/textHighlighting.ts`](annotated/src/utils/textHighlighting.ts)                     | 166 | 176 | 10 | 含 ANSI 转义文本的高亮分段，可见坐标与原始坐标双体系                    |
+| [`utils/completionCache.ts`](annotated/src/utils/completionCache.ts)                       | 166 | 176 | 10 | 生成并缓存 shell 补全脚本，写入各 shell 的 rc 文件               |
+| [`utils/model/modelStrings.ts`](annotated/src/utils/model/modelStrings.ts)                 | 166 | 176 | 10 | 模型键到提供商特定 ID 的解析，Bedrock 推理配置叠加 overrides        |
+| [`utils/activityManager.ts`](annotated/src/utils/activityManager.ts)                       | 164 | 175 | 11 | 通用活跃时间统计，区分用户活跃与 CLI 活跃、单例管理                     |
+| [`utils/plugins/hintRecommendation.ts`](annotated/src/utils/plugins/hintRecommendation.ts) | 164 | 174 | 10 | 插件安装提示推荐，同步预存闸门加异步市场解析                           |
+| [`utils/settings/validationTips.ts`](annotated/src/utils/settings/validationTips.ts)       | 164 | 174 | 10 | 基于 Zod 校验错误的修复建议与文档链接匹配表                         |
+| [`utils/plugins/zipCacheAdapters.ts`](annotated/src/utils/plugins/zipCacheAdapters.ts)     | 164 | 173 | 9  | 插件 zip 缓存的元数据 I/O 与单市场 JSON 读写                   |
 
 两条横切观察：
 
@@ -2272,18 +2266,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「160 行上下」的十份独立工具，横跨「思考模式判定与彩虹色板、插件源字符串解析、本地安装器、GitHub 仓库路径映射、模型在线校验、调试过滤器、插件版本计算、子代理模型选择、路径工具集、bypass 权限与 auto 模式开关」——彼此独立，但共同补齐 utils 中层的「模型路由 / 插件生态 / 路径与环境 / 权限门控」四类积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/thinking.ts`](annotated/src/utils/thinking.ts) | 162 | 171 | 9 | ThinkingConfig 联合类型、ultrathink 关键词检测与高亮定位、彩虹色板、模型是否支持思考/自适应思考、默认思考开关 |
-| [`utils/plugins/parseMarketplaceInput.ts`](annotated/src/utils/plugins/parseMarketplaceInput.ts) | 162 | 170 | 8 | 插件源字符串总入口：git SSH / http(s) / 本地路径 / GitHub 简写 五类源解析，错误降级而非抛错 |
-| [`utils/localInstaller.ts`](annotated/src/utils/localInstaller.ts) | 162 | 170 | 8 | 受管本地安装环境：原子写、wrapper 脚本、npm 安装、shell 类型推断 |
-| [`utils/githubRepoPathMapping.ts`](annotated/src/utils/githubRepoPathMapping.ts) | 162 | 170 | 8 | 全局配置里的仓库对本地路径映射：启动期无阻塞写入、前排置顶、失效清理 |
-| [`utils/model/validateModel.ts`](annotated/src/utils/model/validateModel.ts) | 159 | 166 | 7 | 通过真实 API 调用校验模型有效性，404 给 3P 回退建议，结果缓存 |
-| [`utils/debugFilter.ts`](annotated/src/utils/debugFilter.ts) | 157 | 166 | 9 | 调试过滤字符串解析、消息分类抽取、包含/排他两种过滤模式 |
-| [`utils/plugins/pluginVersioning.ts`](annotated/src/utils/plugins/pluginVersioning.ts) | 157 | 166 | 9 | 插件版本计算：清单版本到提供版本到 git SHA 到 unknown，git-subdir 把子目录哈希进版本串防缓存串台 |
-| [`utils/model/agent.ts`](annotated/src/utils/model/agent.ts) | 157 | 166 | 9 | 子代理模型选择：inherit 默认、Bedrock 跨区域前缀继承、裸家族别名同档匹配 |
-| [`utils/path.ts`](annotated/src/utils/path.ts) | 155 | 167 | 12 | 路径工具集：波浪号展开、绝对对相对、目录探测、穿越检测、配置键归一化 |
-| [`utils/permissions/bypassPermissionsKillswitch.ts`](annotated/src/utils/permissions/bypassPermissionsKillswitch.ts) | 155 | 165 | 10 | bypass 权限与 auto 模式的灰度门开关守卫，一次性标志加 /login 后重置 |
+| 文件                                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                  |
+| -------------------------------------------------------------------------------------------------------------------- | --- | --- | -- | -------------------------------------------------------------------- |
+| [`utils/thinking.ts`](annotated/src/utils/thinking.ts)                                                               | 162 | 171 | 9  | ThinkingConfig 联合类型、ultrathink 关键词检测与高亮定位、彩虹色板、模型是否支持思考/自适应思考、默认思考开关 |
+| [`utils/plugins/parseMarketplaceInput.ts`](annotated/src/utils/plugins/parseMarketplaceInput.ts)                     | 162 | 170 | 8  | 插件源字符串总入口：git SSH / http(s) / 本地路径 / GitHub 简写 五类源解析，错误降级而非抛错        |
+| [`utils/localInstaller.ts`](annotated/src/utils/localInstaller.ts)                                                   | 162 | 170 | 8  | 受管本地安装环境：原子写、wrapper 脚本、npm 安装、shell 类型推断                            |
+| [`utils/githubRepoPathMapping.ts`](annotated/src/utils/githubRepoPathMapping.ts)                                     | 162 | 170 | 8  | 全局配置里的仓库对本地路径映射：启动期无阻塞写入、前排置顶、失效清理                                   |
+| [`utils/model/validateModel.ts`](annotated/src/utils/model/validateModel.ts)                                         | 159 | 166 | 7  | 通过真实 API 调用校验模型有效性，404 给 3P 回退建议，结果缓存                                |
+| [`utils/debugFilter.ts`](annotated/src/utils/debugFilter.ts)                                                         | 157 | 166 | 9  | 调试过滤字符串解析、消息分类抽取、包含/排他两种过滤模式                                         |
+| [`utils/plugins/pluginVersioning.ts`](annotated/src/utils/plugins/pluginVersioning.ts)                               | 157 | 166 | 9  | 插件版本计算：清单版本到提供版本到 git SHA 到 unknown，git-subdir 把子目录哈希进版本串防缓存串台       |
+| [`utils/model/agent.ts`](annotated/src/utils/model/agent.ts)                                                         | 157 | 166 | 9  | 子代理模型选择：inherit 默认、Bedrock 跨区域前缀继承、裸家族别名同档匹配                         |
+| [`utils/path.ts`](annotated/src/utils/path.ts)                                                                       | 155 | 167 | 12 | 路径工具集：波浪号展开、绝对对相对、目录探测、穿越检测、配置键归一化                                   |
+| [`utils/permissions/bypassPermissionsKillswitch.ts`](annotated/src/utils/permissions/bypassPermissionsKillswitch.ts) | 155 | 165 | 10 | bypass 权限与 auto 模式的灰度门开关守卫，一次性标志加 /login 后重置                         |
 
 两条横切观察：
 
@@ -2302,18 +2296,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「150 行上下」的十份独立工具，横跨「侧问派生智能体、Claude Desktop MCP 配置桥接、登录前连通性闸门、动态环境探测、容错子进程封装、平台与 VCS 探测、会话状态机、teammate 派生工具、advisor 工具门控、占位符替换」——彼此独立，但共同补齐 utils 中层的「环境探测 / 进程封装 / 状态与门控 / 提示词占位」四类积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/sideQuestion.ts`](annotated/src/utils/sideQuestion.ts) | 155 | 161 | 6 | 「/btw」侧问功能：用 forked agent 复用父级提示缓存、隔离响应、禁止工具、单轮回答 |
-| [`utils/claudeDesktop.ts`](annotated/src/utils/claudeDesktop.ts) | 152 | 160 | 8 | 桥接 Claude Desktop 的 MCP 配置：macOS/WSL 路径定位、安全解析、容错返回空 |
-| [`utils/preflightChecks.tsx`](annotated/src/utils/preflightChecks.tsx) | 151 | 159 | 7 | 登录/鉴权前的连通性闸门：并探测两端点、React Compiler 记忆化组件、失败退出 |
-| [`utils/envDynamic.ts`](annotated/src/utils/envDynamic.ts) | 151 | 159 | 8 | 在静态 env 上叠加运行时探测：Docker、JetBrains 终端、musl，汇成 envDynamic |
-| [`utils/execFileNoThrow.ts`](annotated/src/utils/execFileNoThrow.ts) | 150 | 158 | 8 | 容错子进程封装：execa 跨平台、始终 resolve、错误优先级解析 |
-| [`utils/platform.ts`](annotated/src/utils/platform.ts) | 150 | 158 | 8 | 平台探测：操作系统、WSL 版本、Linux 发行版、VCS 标记 |
-| [`utils/sessionState.ts`](annotated/src/utils/sessionState.ts) | 150 | 159 | 9 | 会话状态机：idle/running/requires_action，镜像 external_metadata 与 SDK 事件 |
-| [`utils/swarm/spawnUtils.ts`](annotated/src/utils/swarm/spawnUtils.ts) | 146 | 152 | 6 | 跨后端派生 teammate：命令路径、继承 CLI 标志、转发环境变量 |
-| [`utils/advisor.ts`](annotated/src/utils/advisor.ts) | 145 | 155 | 10 | advisor 工具类型与门控：GrowthBook + 环境变量 + beta 头决定启用 |
-| [`utils/argumentSubstitution.ts`](annotated/src/utils/argumentSubstitution.ts) | 145 | 151 | 6 | 技能/命令提示的 $ARGUMENTS 占位符替换：全量/索引/简写/具名四类 |
+| 文件                                                                             | 原文  | 批注版 | 锚点 | 讲什么                                                              |
+| ------------------------------------------------------------------------------ | --- | --- | -- | ---------------------------------------------------------------- |
+| [`utils/sideQuestion.ts`](annotated/src/utils/sideQuestion.ts)                 | 155 | 161 | 6  | 「/btw」侧问功能：用 forked agent 复用父级提示缓存、隔离响应、禁止工具、单轮回答                |
+| [`utils/claudeDesktop.ts`](annotated/src/utils/claudeDesktop.ts)               | 152 | 160 | 8  | 桥接 Claude Desktop 的 MCP 配置：macOS/WSL 路径定位、安全解析、容错返回空             |
+| [`utils/preflightChecks.tsx`](annotated/src/utils/preflightChecks.tsx)         | 151 | 159 | 7  | 登录/鉴权前的连通性闸门：并探测两端点、React Compiler 记忆化组件、失败退出                    |
+| [`utils/envDynamic.ts`](annotated/src/utils/envDynamic.ts)                     | 151 | 159 | 8  | 在静态 env 上叠加运行时探测：Docker、JetBrains 终端、musl，汇成 envDynamic          |
+| [`utils/execFileNoThrow.ts`](annotated/src/utils/execFileNoThrow.ts)           | 150 | 158 | 8  | 容错子进程封装：execa 跨平台、始终 resolve、错误优先级解析                             |
+| [`utils/platform.ts`](annotated/src/utils/platform.ts)                         | 150 | 158 | 8  | 平台探测：操作系统、WSL 版本、Linux 发行版、VCS 标记                                |
+| [`utils/sessionState.ts`](annotated/src/utils/sessionState.ts)                 | 150 | 159 | 9  | 会话状态机：idle/running/requires_action，镜像 external_metadata 与 SDK 事件 |
+| [`utils/swarm/spawnUtils.ts`](annotated/src/utils/swarm/spawnUtils.ts)         | 146 | 152 | 6  | 跨后端派生 teammate：命令路径、继承 CLI 标志、转发环境变量                             |
+| [`utils/advisor.ts`](annotated/src/utils/advisor.ts)                           | 145 | 155 | 10 | advisor 工具类型与门控：GrowthBook + 环境变量 + beta 头决定启用                   |
+| [`utils/argumentSubstitution.ts`](annotated/src/utils/argumentSubstitution.ts) | 145 | 151 | 6  | 技能/命令提示的 $ARGUMENTS 占位符替换：全量/索引/简写/具名四类                          |
 
 两条横切观察：
 
@@ -2330,18 +2324,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「130 行上下」的十份独立工具，横跨「MDM 子进程读取、MCP 指令增量、文件 glob、swarm 队友初始化、会话标题生成、运行环境检测、shell 安全引用、关键词触发、权限提示结果解析、插件下架清理」——体量小但各自补齐一个独立能力，彼此无依赖。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/settings/mdm/rawRead.ts`](annotated/src/utils/settings/mdm/rawRead.ts) | 130 | 139 | 9 | MDM 子进程读取：不阻塞事件循环触发 plutil/reg query，启动期缓存 Promise |
-| [`utils/mcpInstructionsDelta.ts`](annotated/src/utils/mcpInstructionsDelta.ts) | 130 | 142 | 12 | MCP 指令增量附件：diff 已连接服务器与已播报附件，产出新增/移除指令块 |
-| [`utils/glob.ts`](annotated/src/utils/glob.ts) | 130 | 142 | 12 | 基于 ripgrep 的 glob：抽静态基目录、绝对路径转相对、忽略模式与隐藏开关 |
-| [`utils/swarm/teammateInit.ts`](annotated/src/utils/swarm/teammateInit.ts) | 129 | 141 | 12 | swarm 队友初始化：注册 Stop 钩子在队友空闲时通知 leader |
-| [`utils/sessionTitle.ts`](annotated/src/utils/sessionTitle.ts) | 129 | 144 | 15 | 用 Haiku 生成 sentence-case 会话标题，独立模块便于 SDK print 引入 |
-| [`utils/swarm/backends/detection.ts`](annotated/src/utils/swarm/backends/detection.ts) | 128 | 141 | 13 | 运行环境检测：tmux/iTerm2 内否、tmux/it2 可用性，结果缓存 |
-| [`utils/bash/shellQuoting.ts`](annotated/src/utils/bash/shellQuoting.ts) | 128 | 139 | 11 | shell 命令安全引用：保留 heredoc/多行字符串，改写 Windows 的 >nul |
-| [`utils/ultraplan/keyword.ts`](annotated/src/utils/ultraplan/keyword.ts) | 127 | 143 | 16 | ultraplan/ultrareview 关键词触发定位，跳过字符串/路径/斜杠命令 |
-| [`utils/permissions/PermissionPromptToolResultSchema.ts`](annotated/src/utils/permissions/PermissionPromptToolResultSchema.ts) | 127 | 142 | 15 | 权限提示工具结果 schema 与规整成内部 PermissionDecision |
-| [`utils/plugins/pluginBlocklist.ts`](annotated/src/utils/plugins/pluginBlocklist.ts) | 127 | 140 | 13 | 插件下架检测：跨市场找已移除插件并自动卸载、标记 flagged |
+| 文件                                                                                                                             | 原文  | 批注版 | 锚点 | 讲什么                                                |
+| ------------------------------------------------------------------------------------------------------------------------------ | --- | --- | -- | -------------------------------------------------- |
+| [`utils/settings/mdm/rawRead.ts`](annotated/src/utils/settings/mdm/rawRead.ts)                                                 | 130 | 139 | 9  | MDM 子进程读取：不阻塞事件循环触发 plutil/reg query，启动期缓存 Promise |
+| [`utils/mcpInstructionsDelta.ts`](annotated/src/utils/mcpInstructionsDelta.ts)                                                 | 130 | 142 | 12 | MCP 指令增量附件：diff 已连接服务器与已播报附件，产出新增/移除指令块            |
+| [`utils/glob.ts`](annotated/src/utils/glob.ts)                                                                                 | 130 | 142 | 12 | 基于 ripgrep 的 glob：抽静态基目录、绝对路径转相对、忽略模式与隐藏开关         |
+| [`utils/swarm/teammateInit.ts`](annotated/src/utils/swarm/teammateInit.ts)                                                     | 129 | 141 | 12 | swarm 队友初始化：注册 Stop 钩子在队友空闲时通知 leader              |
+| [`utils/sessionTitle.ts`](annotated/src/utils/sessionTitle.ts)                                                                 | 129 | 144 | 15 | 用 Haiku 生成 sentence-case 会话标题，独立模块便于 SDK print 引入  |
+| [`utils/swarm/backends/detection.ts`](annotated/src/utils/swarm/backends/detection.ts)                                         | 128 | 141 | 13 | 运行环境检测：tmux/iTerm2 内否、tmux/it2 可用性，结果缓存            |
+| [`utils/bash/shellQuoting.ts`](annotated/src/utils/bash/shellQuoting.ts)                                                       | 128 | 139 | 11 | shell 命令安全引用：保留 heredoc/多行字符串，改写 Windows 的 >nul    |
+| [`utils/ultraplan/keyword.ts`](annotated/src/utils/ultraplan/keyword.ts)                                                       | 127 | 143 | 16 | ultraplan/ultrareview 关键词触发定位，跳过字符串/路径/斜杠命令        |
+| [`utils/permissions/PermissionPromptToolResultSchema.ts`](annotated/src/utils/permissions/PermissionPromptToolResultSchema.ts) | 127 | 142 | 15 | 权限提示工具结果 schema 与规整成内部 PermissionDecision          |
+| [`utils/plugins/pluginBlocklist.ts`](annotated/src/utils/plugins/pluginBlocklist.ts)                                           | 127 | 140 | 13 | 插件下架检测：跨市场找已移除插件并自动卸载、标记 flagged                   |
 
 三条横切观察：
 
@@ -2351,7 +2345,7 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 踩坑：本批 10 份预检五断言一次通过、零合并错误（slug 与源路径一一对应、行号全在 [1, len] 内、无重复锚点、无英文双引号与反斜杠、ast.parse 全过）；annotate.py 良性 ⟳ 外移两处——glob.ts 3 个锚点原落 // 注释段中部（50→51、56→58、91→97）、permissions/PermissionPromptToolResultSchema.ts 2 个锚点（30→32、107→109），均自动挪到段尾、落点人眼确认在英文注释块之后、未劈开英文；首轮 1 FAIL——permissions/PermissionPromptToolResultSchema.ts 锚点 (110,'after') 落在多行赋值 const updatedInput = 首行（规矩 7 变体：行尾 = 触发「未结束多行表达式」判据），挪到三元收尾行 (111,'after') 后复验 0 失败；check-fidelity.py 本批 10 份 0 失败（合计 913 份全仓 0 失败）；check-links.py 源码链接 2029 条加内链 599 条，0 失效。
 
-流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，三处 /** */ 文件头锚点经 after 自动外移到块后、无块内中文；detection.ts 两处 /** */ 常量注释头经 after 自动外移）；预检 10 份全过、零合并错误；annotate.py 十次（含 5 处 ⟳ 外移）零 ⚠；check-fidelity.py 本批 10 份 0 失败（+128 处锚点、代码行与原文逐行相等）；check-links.py 源码链接 2029 条加内链 599 条，0 失效。
+流程账：本批 10 个数据文件逐一对齐源文件（硬规矩连续生效，三处 /\** */ 文件头锚点经 after 自动外移到块后、无块内中文；detection.ts 两处 /** \*/ 常量注释头经 after 自动外移）；预检 10 份全过、零合并错误；annotate.py 十次（含 5 处 ⟳ 外移）零 ⚠；check-fidelity.py 本批 10 份 0 失败（+128 处锚点、代码行与原文逐行相等）；check-links.py 源码链接 2029 条加内链 599 条，0 失效。
 
 **下一批候选（utils 剩余，按行数降序）**：`mcp/dateTimeParser.ts`(121) · `warningHandler.ts`(121) · `QueryGuard.ts`(121) · `teleport/environments.ts`(120) · `suggestions/shellHistoryCompletion.ts`(119) · `swarm/reconnection.ts`(119) · `systemTheme.ts`(119) · `model/modelCapabilities.ts`(118) · `model/configs.ts`(118) · `secureStorage/keychainPrefetch.ts`(116) …（utils 还剩 243 份；全仓还剩 989 份）。
 
@@ -2359,23 +2353,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「125 行上下」的十五份独立工具，横跨「outputs 目录扫描、computer-use 渲染覆盖、macOS 终端备份恢复、stream-json 标准输出守护、深链来源横幅、插件标识符映射、PowerShell 外壳提供者、系统提示词组装、自动运行 issue 判定、自然语言时间解析、截图写剪贴板、全局警告处理、查询生命周期状态机、云环境获取创建、终端明暗主题探测」——体量小但各自补齐一个独立能力，彼此无依赖。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/filePersistence/outputsScanner.ts`](annotated/src/utils/filePersistence/outputsScanner.ts) | 127 | 134 | 11 | outputs 目录扫描器：依环境变量判定会话环境、扫描本回合被修改文件（findModifiedFiles），目录读取失败与空结果均安全降级 |
-| [`utils/computerUse/toolRendering.tsx`](annotated/src/utils/computerUse/toolRendering.tsx) | 125 | 134 | 7 | computer-use 工具渲染覆盖层：坐标格式化、动作结果摘要映射、verbose 兜底（base64 sourceMappingURL 按惯例省略） |
-| [`utils/appleTerminalBackup.ts`](annotated/src/utils/appleTerminalBackup.ts) | 125 | 134 | 10 | macOS Terminal.plist 备份与恢复：初始化前后标记、defaults export 备份、恢复结果联合类型、无备份不报错 |
-| [`utils/streamJsonStdoutGuard.ts`](annotated/src/utils/streamJsonStdoutGuard.ts) | 123 | 130 | 7 | stream-json 标准输出守护：拦截 process.stdout.write，按行 JSON 解析合法转发、残留半行冲刷到 stderr |
-| [`utils/deepLink/banner.ts`](annotated/src/utils/deepLink/banner.ts) | 123 | 132 | 9 | 深链来源横幅：claude-cli:// 打开时提示工作目录/分支/过期 fetch，阈值常量与 tildify 路径缩写 |
-| [`utils/plugins/pluginIdentifier.ts`](annotated/src/utils/plugins/pluginIdentifier.ts) | 123 | 134 | 11 | 插件标识符与来源映射：name@marketplace 解析、Extended/Persistable 作用域、设置来源↔作用域双向映射 |
-| [`utils/shell/powershellProvider.ts`](annotated/src/utils/shell/powershellProvider.ts) | 123 | 130 | 7 | PowerShell 外壳提供者：固定 pwsh 参数、UTF-16LE base64 编码、退出码捕获、/env 环境变量注入 |
-| [`utils/systemPrompt.ts`](annotated/src/utils/systemPrompt.ts) | 123 | 130 | 7 | 有效系统提示词组装：覆盖提示最高优先、协调器/主动模式分支、兜底组合 appendSystemPrompt |
-| [`utils/autoRunIssue.tsx`](annotated/src/utils/autoRunIssue.tsx) | 122 | 133 | 10 | 自动运行 /issue 通知与判定：反馈后自动触发问题上报的 UI 与原因判定，当前默认不自动运行（sourceMappingURL 省略） |
-| [`utils/mcp/dateTimeParser.ts`](annotated/src/utils/mcp/dateTimeParser.ts) | 121 | 131 | 10 | 自然语言日期时间解析：调 Haiku 转 ISO 8601，带符号时区拼接、INVALID 兜底、looksLikeISO8601 校验 |
-| [`utils/screenshotClipboard.ts`](annotated/src/utils/screenshotClipboard.ts) | 121 | 129 | 8 | 截图写入剪贴板：ANSI 渲染为 PNG 后按平台（macOS osascript / Linux xclip / Windows PowerShell）复制 |
-| [`utils/warningHandler.ts`](annotated/src/utils/warningHandler.ts) | 121 | 129 | 8 | 全局警告处理器：拦截 Node warning 事件，外部用户屏蔽、内部告警上报，计数上限与重复安装防护 |
-| [`utils/QueryGuard.ts`](annotated/src/utils/QueryGuard.ts) | 121 | 133 | 12 | 查询生命周期同步状态机：兼容 useSyncExternalStore，reserve/cancelReservation/tryStart/end/forceEnd 并发保护 |
-| [`utils/teleport/environments.ts`](annotated/src/utils/teleport/environments.ts) | 120 | 128 | 8 | 云环境获取与创建：Environment API 拉取列表、为无环境用户创建默认云环境（python3.11/node20） |
-| [`utils/systemTheme.ts`](annotated/src/utils/systemTheme.ts) | 119 | 128 | 9 | 终端明暗主题探测：auto 主题经 OSC 11 背景色判定，BT.709 亮度阈值、rgb 解析与 COLORFGBG 兜底 |
+| 文件                                                                                                 | 原文  | 批注版 | 锚点 | 讲什么                                                                                      |
+| -------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------------------- |
+| [`utils/filePersistence/outputsScanner.ts`](annotated/src/utils/filePersistence/outputsScanner.ts) | 127 | 134 | 11 | outputs 目录扫描器：依环境变量判定会话环境、扫描本回合被修改文件（findModifiedFiles），目录读取失败与空结果均安全降级                  |
+| [`utils/computerUse/toolRendering.tsx`](annotated/src/utils/computerUse/toolRendering.tsx)         | 125 | 134 | 7  | computer-use 工具渲染覆盖层：坐标格式化、动作结果摘要映射、verbose 兜底（base64 sourceMappingURL 按惯例省略）            |
+| [`utils/appleTerminalBackup.ts`](annotated/src/utils/appleTerminalBackup.ts)                       | 125 | 134 | 10 | macOS Terminal.plist 备份与恢复：初始化前后标记、defaults export 备份、恢复结果联合类型、无备份不报错                    |
+| [`utils/streamJsonStdoutGuard.ts`](annotated/src/utils/streamJsonStdoutGuard.ts)                   | 123 | 130 | 7  | stream-json 标准输出守护：拦截 process.stdout.write，按行 JSON 解析合法转发、残留半行冲刷到 stderr                 |
+| [`utils/deepLink/banner.ts`](annotated/src/utils/deepLink/banner.ts)                               | 123 | 132 | 9  | 深链来源横幅：claude-cli:// 打开时提示工作目录/分支/过期 fetch，阈值常量与 tildify 路径缩写                            |
+| [`utils/plugins/pluginIdentifier.ts`](annotated/src/utils/plugins/pluginIdentifier.ts)             | 123 | 134 | 11 | 插件标识符与来源映射：name@marketplace 解析、Extended/Persistable 作用域、设置来源↔作用域双向映射                     |
+| [`utils/shell/powershellProvider.ts`](annotated/src/utils/shell/powershellProvider.ts)             | 123 | 130 | 7  | PowerShell 外壳提供者：固定 pwsh 参数、UTF-16LE base64 编码、退出码捕获、/env 环境变量注入                         |
+| [`utils/systemPrompt.ts`](annotated/src/utils/systemPrompt.ts)                                     | 123 | 130 | 7  | 有效系统提示词组装：覆盖提示最高优先、协调器/主动模式分支、兜底组合 appendSystemPrompt                                    |
+| [`utils/autoRunIssue.tsx`](annotated/src/utils/autoRunIssue.tsx)                                   | 122 | 133 | 10 | 自动运行 /issue 通知与判定：反馈后自动触发问题上报的 UI 与原因判定，当前默认不自动运行（sourceMappingURL 省略）                   |
+| [`utils/mcp/dateTimeParser.ts`](annotated/src/utils/mcp/dateTimeParser.ts)                         | 121 | 131 | 10 | 自然语言日期时间解析：调 Haiku 转 ISO 8601，带符号时区拼接、INVALID 兜底、looksLikeISO8601 校验                     |
+| [`utils/screenshotClipboard.ts`](annotated/src/utils/screenshotClipboard.ts)                       | 121 | 129 | 8  | 截图写入剪贴板：ANSI 渲染为 PNG 后按平台（macOS osascript / Linux xclip / Windows PowerShell）复制          |
+| [`utils/warningHandler.ts`](annotated/src/utils/warningHandler.ts)                                 | 121 | 129 | 8  | 全局警告处理器：拦截 Node warning 事件，外部用户屏蔽、内部告警上报，计数上限与重复安装防护                                     |
+| [`utils/QueryGuard.ts`](annotated/src/utils/QueryGuard.ts)                                         | 121 | 133 | 12 | 查询生命周期同步状态机：兼容 useSyncExternalStore，reserve/cancelReservation/tryStart/end/forceEnd 并发保护 |
+| [`utils/teleport/environments.ts`](annotated/src/utils/teleport/environments.ts)                   | 120 | 128 | 8  | 云环境获取与创建：Environment API 拉取列表、为无环境用户创建默认云环境（python3.11/node20）                           |
+| [`utils/systemTheme.ts`](annotated/src/utils/systemTheme.ts)                                       | 119 | 128 | 9  | 终端明暗主题探测：auto 主题经 OSC 11 背景色判定，BT.709 亮度阈值、rgb 解析与 COLORFGBG 兜底                          |
 
 三条横切观察：
 
@@ -2393,23 +2387,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「119→104 行」的十五份独立工具，横跨「蜂群重连与会话恢复、shell 历史行内补全、模型配置表与能力缓存、组件静态渲染、macOS 钥匙串预取与辅助、CA 证书加载、孤立插件排除、PowerShell 探查、队友布局管理、computer-use MCP 服务、PR 状态查询、粘贴缓存、图像校验」——体量小但各自补齐一个独立能力，彼此无依赖。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/swarm/reconnection.ts`](annotated/src/utils/swarm/reconnection.ts) | 119 | 124 | 5 | 蜂群重连：冷启动从 CLI 动态上下文装配 teamContext，会话恢复从 transcript 重建队友上下文 |
-| [`utils/suggestions/shellHistoryCompletion.ts`](annotated/src/utils/suggestions/shellHistoryCompletion.ts) | 119 | 127 | 8 | shell 历史行内补全：按精确前缀匹配历史命令返回幽灵文本后缀，带 60 秒缓存与去重 |
-| [`utils/model/configs.ts`](annotated/src/utils/model/configs.ts) | 118 | 127 | 9 | 模型配置表：各 firstParty/bedrock/vertex/foundry 标识汇总，提供规范标识↔短名映射 |
-| [`utils/model/modelCapabilities.ts`](annotated/src/utils/model/modelCapabilities.ts) | 118 | 127 | 9 | 模型能力缓存：从 API 拉取并缓存上下文窗口等能力，仅内部蚂蚁用户启用 |
-| [`utils/staticRender.tsx`](annotated/src/utils/staticRender.tsx) | 116 | 123 | 6 | 组件静态渲染：把 React 节点渲染成 ANSI/纯文本字符串，绕开 Ink 多 Static 限制（base64 sourceMappingURL 省略） |
-| [`utils/secureStorage/keychainPrefetch.ts`](annotated/src/utils/secureStorage/keychainPrefetch.ts) | 116 | 124 | 8 | 钥匙串预取：main 顶层并行触发 macOS 钥匙串读取，与导入期重叠隐藏约 65 毫秒开销 |
-| [`utils/caCerts.ts`](annotated/src/utils/caCerts.ts) | 115 | 120 | 5 | CA 证书加载：按 NODE_EXTRA_CA_CERTS 与系统 CA 组合加载，保持配置无关 |
-| [`utils/plugins/orphanedPluginFilter.ts`](annotated/src/utils/plugins/orphanedPluginFilter.ts) | 114 | 121 | 7 | 孤立插件排除：用 ripgrep 找 .orphaned_at 生成排除 glob，避免用到旧版本代码 |
-| [`utils/secureStorage/macOsKeychainHelpers.ts`](annotated/src/utils/secureStorage/macOsKeychainHelpers.ts) | 111 | 119 | 8 | 钥匙串辅助：服务名构造、缓存 TTL/代际、预取写入，严禁拖入 execa 重依赖 |
-| [`utils/shell/powershellDetection.ts`](annotated/src/utils/shell/powershellDetection.ts) | 107 | 114 | 7 | PowerShell 探查：优先 pwsh、规避 Linux snap 启动器、按二进制名判 core/desktop 版本 |
-| [`utils/swarm/teammateLayoutManager.ts`](annotated/src/utils/swarm/teammateLayoutManager.ts) | 107 | 116 | 9 | 队友布局管理：颜色轮转分配、tmux/iTerm2 后端抽象、窗格创建与命令发送 |
-| [`utils/computerUse/mcpServer.ts`](annotated/src/utils/computerUse/mcpServer.ts) | 106 | 111 | 5 | computer-use MCP 服务：替换 ListTools 处理器注入已装应用名，子进程入口冲刷分析 |
-| [`utils/ghPrStatus.ts`](annotated/src/utils/ghPrStatus.ts) | 106 | 111 | 5 | PR 状态查询：调 gh pr view 推导评审态，默认分支/已合并不显示 |
-| [`utils/pasteStore.ts`](annotated/src/utils/pasteStore.ts) | 104 | 109 | 5 | 粘贴缓存：内容寻址的跨会话文本缓存，按修改时间清理 |
-| [`utils/imageValidation.ts`](annotated/src/utils/imageValidation.ts) | 104 | 108 | 4 | 图像校验：API 边界按 base64 串长判超限，超限抛 ImageSizeError |
+| 文件                                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                                                             |
+| ---------------------------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------------------------------------------------------- |
+| [`utils/swarm/reconnection.ts`](annotated/src/utils/swarm/reconnection.ts)                                 | 119 | 124 | 5  | 蜂群重连：冷启动从 CLI 动态上下文装配 teamContext，会话恢复从 transcript 重建队友上下文                      |
+| [`utils/suggestions/shellHistoryCompletion.ts`](annotated/src/utils/suggestions/shellHistoryCompletion.ts) | 119 | 127 | 8  | shell 历史行内补全：按精确前缀匹配历史命令返回幽灵文本后缀，带 60 秒缓存与去重                                    |
+| [`utils/model/configs.ts`](annotated/src/utils/model/configs.ts)                                           | 118 | 127 | 9  | 模型配置表：各 firstParty/bedrock/vertex/foundry 标识汇总，提供规范标识↔短名映射                      |
+| [`utils/model/modelCapabilities.ts`](annotated/src/utils/model/modelCapabilities.ts)                       | 118 | 127 | 9  | 模型能力缓存：从 API 拉取并缓存上下文窗口等能力，仅内部蚂蚁用户启用                                            |
+| [`utils/staticRender.tsx`](annotated/src/utils/staticRender.tsx)                                           | 116 | 123 | 6  | 组件静态渲染：把 React 节点渲染成 ANSI/纯文本字符串，绕开 Ink 多 Static 限制（base64 sourceMappingURL 省略） |
+| [`utils/secureStorage/keychainPrefetch.ts`](annotated/src/utils/secureStorage/keychainPrefetch.ts)         | 116 | 124 | 8  | 钥匙串预取：main 顶层并行触发 macOS 钥匙串读取，与导入期重叠隐藏约 65 毫秒开销                                 |
+| [`utils/caCerts.ts`](annotated/src/utils/caCerts.ts)                                                       | 115 | 120 | 5  | CA 证书加载：按 NODE_EXTRA_CA_CERTS 与系统 CA 组合加载，保持配置无关                                |
+| [`utils/plugins/orphanedPluginFilter.ts`](annotated/src/utils/plugins/orphanedPluginFilter.ts)             | 114 | 121 | 7  | 孤立插件排除：用 ripgrep 找 .orphaned_at 生成排除 glob，避免用到旧版本代码                             |
+| [`utils/secureStorage/macOsKeychainHelpers.ts`](annotated/src/utils/secureStorage/macOsKeychainHelpers.ts) | 111 | 119 | 8  | 钥匙串辅助：服务名构造、缓存 TTL/代际、预取写入，严禁拖入 execa 重依赖                                       |
+| [`utils/shell/powershellDetection.ts`](annotated/src/utils/shell/powershellDetection.ts)                   | 107 | 114 | 7  | PowerShell 探查：优先 pwsh、规避 Linux snap 启动器、按二进制名判 core/desktop 版本                  |
+| [`utils/swarm/teammateLayoutManager.ts`](annotated/src/utils/swarm/teammateLayoutManager.ts)               | 107 | 116 | 9  | 队友布局管理：颜色轮转分配、tmux/iTerm2 后端抽象、窗格创建与命令发送                                        |
+| [`utils/computerUse/mcpServer.ts`](annotated/src/utils/computerUse/mcpServer.ts)                           | 106 | 111 | 5  | computer-use MCP 服务：替换 ListTools 处理器注入已装应用名，子进程入口冲刷分析                           |
+| [`utils/ghPrStatus.ts`](annotated/src/utils/ghPrStatus.ts)                                                 | 106 | 111 | 5  | PR 状态查询：调 gh pr view 推导评审态，默认分支/已合并不显示                                          |
+| [`utils/pasteStore.ts`](annotated/src/utils/pasteStore.ts)                                                 | 104 | 109 | 5  | 粘贴缓存：内容寻址的跨会话文本缓存，按修改时间清理                                                       |
+| [`utils/imageValidation.ts`](annotated/src/utils/imageValidation.ts)                                       | 104 | 108 | 4  | 图像校验：API 边界按 base64 串长判超限，超限抛 ImageSizeError                                    |
 
 三条横切观察：
 
@@ -2427,18 +2421,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「103→99 行」的十份独立工具，横跨「工具校验配置声明、进程内队友辅助、同步文件读取叶子、Shift+Tab 权限模式循环、模型弃用提示、带缓冲写入器、用户输入整理、确定式 agent/请求 ID、gitignore 自动忽略、子进程环境机密剥离」——体量小但各自补齐一个独立能力，彼此无依赖。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/settings/toolValidationConfig.ts`](annotated/src/utils/settings/toolValidationConfig.ts) | 103 | 110 | 7 | 工具校验配置：filePattern/bashPrefix/customValidation 三类，多数工具无需配置 |
-| [`utils/inProcessTeammateHelpers.ts`](annotated/src/utils/inProcessTeammateHelpers.ts) | 102 | 108 | 6 | 进程内队友辅助：按名找任务 ID、计划审批状态、权限消息判定 |
-| [`utils/fileRead.ts`](annotated/src/utils/fileRead.ts) | 102 | 108 | 6 | 同步读文件叶子：编码/行尾探测、一次读取带回元数据、避免拖入长依赖链 |
-| [`utils/permissions/getNextPermissionMode.ts`](annotated/src/utils/permissions/getNextPermissionMode.ts) | 101 | 106 | 5 | Shift+Tab 循环权限模式：default→acceptEdits→plan→bypass/auto，蚂蚁账号特殊处理 |
-| [`utils/model/deprecation.ts`](annotated/src/utils/model/deprecation.ts) | 101 | 106 | 5 | 模型弃用信息：按 ID 子串匹配各 provider 下线日期，拼出提示语 |
-| [`utils/bufferedWriter.ts`](annotated/src/utils/bufferedWriter.ts) | 100 | 105 | 5 | 带缓冲写入器：按时间/条数/字节阈值冲刷，setImmediate 延后阻塞写入 |
-| [`utils/processUserInput/processTextPrompt.ts`](annotated/src/utils/processUserInput/processTextPrompt.ts) | 100 | 106 | 6 | 用户输入整理成消息：字符串与内容块两形态、图片/附件、OTEL 埋点 |
-| [`utils/agentId.ts`](annotated/src/utils/agentId.ts) | 99 | 104 | 5 | 确定式 agent/请求 ID 拼接与解析：agentName@teamName 与 type-timestamp@id |
-| [`utils/git/gitignore.ts`](annotated/src/utils/git/gitignore.ts) | 99 | 105 | 6 | git check-ignore 封装与全局 gitignore 写入：敏感文件自动忽略 |
-| [`utils/subprocessEnv.ts`](annotated/src/utils/subprocessEnv.ts) | 99 | 104 | 5 | 子进程环境组装：GitHub Actions 下剥离敏感变量，注入 CCR 代理变量 |
+| 文件                                                                                                         | 原文  | 批注版 | 锚点 | 讲什么                                                            |
+| ---------------------------------------------------------------------------------------------------------- | --- | --- | -- | -------------------------------------------------------------- |
+| [`utils/settings/toolValidationConfig.ts`](annotated/src/utils/settings/toolValidationConfig.ts)           | 103 | 110 | 7  | 工具校验配置：filePattern/bashPrefix/customValidation 三类，多数工具无需配置     |
+| [`utils/inProcessTeammateHelpers.ts`](annotated/src/utils/inProcessTeammateHelpers.ts)                     | 102 | 108 | 6  | 进程内队友辅助：按名找任务 ID、计划审批状态、权限消息判定                                 |
+| [`utils/fileRead.ts`](annotated/src/utils/fileRead.ts)                                                     | 102 | 108 | 6  | 同步读文件叶子：编码/行尾探测、一次读取带回元数据、避免拖入长依赖链                             |
+| [`utils/permissions/getNextPermissionMode.ts`](annotated/src/utils/permissions/getNextPermissionMode.ts)   | 101 | 106 | 5  | Shift+Tab 循环权限模式：default→acceptEdits→plan→bypass/auto，蚂蚁账号特殊处理 |
+| [`utils/model/deprecation.ts`](annotated/src/utils/model/deprecation.ts)                                   | 101 | 106 | 5  | 模型弃用信息：按 ID 子串匹配各 provider 下线日期，拼出提示语                          |
+| [`utils/bufferedWriter.ts`](annotated/src/utils/bufferedWriter.ts)                                         | 100 | 105 | 5  | 带缓冲写入器：按时间/条数/字节阈值冲刷，setImmediate 延后阻塞写入                       |
+| [`utils/processUserInput/processTextPrompt.ts`](annotated/src/utils/processUserInput/processTextPrompt.ts) | 100 | 106 | 6  | 用户输入整理成消息：字符串与内容块两形态、图片/附件、OTEL 埋点                             |
+| [`utils/agentId.ts`](annotated/src/utils/agentId.ts)                                                       | 99  | 104 | 5  | 确定式 agent/请求 ID 拼接与解析：agentName@teamName 与 type-timestamp@id   |
+| [`utils/git/gitignore.ts`](annotated/src/utils/git/gitignore.ts)                                           | 99  | 105 | 6  | git check-ignore 封装与全局 gitignore 写入：敏感文件自动忽略                   |
+| [`utils/subprocessEnv.ts`](annotated/src/utils/subprocessEnv.ts)                                           | 99  | 104 | 5  | 子进程环境组装：GitHub Actions 下剥离敏感变量，注入 CCR 代理变量                     |
 
 三条横切观察：
 
@@ -2456,18 +2450,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份覆盖「取消传播、远程会话资格、导出渲染、分类器白名单、SDK 首帧、队友上下文、文件读缓存、计划模式配额、队列消费、诊断日志」——都是小体量的机制件，但每一份都独自承担一条完整语义，没有一份是胶水。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/abortController.ts`](annotated/src/utils/abortController.ts) | 99 | 108 | 9 | 取消控制器工厂与父子联动：调高监听器上限，双向弱引用避免父级滞留子级 |
-| [`utils/background/remote/remoteSession.ts`](annotated/src/utils/background/remote/remoteSession.ts) | 98 | 107 | 9 | 后台远程会话资格：策略短路 + 三检查并行 + bundle 播种放宽 + App 安装判定 |
-| [`utils/exportRenderer.tsx`](annotated/src/utils/exportRenderer.tsx) | 98 | 107 | 8 | 导出渲染：无头环境下分块渲染成 ANSI，按块分配布局树换取内存下降 |
-| [`utils/permissions/classifierDecision.ts`](annotated/src/utils/permissions/classifierDecision.ts) | 98 | 105 | 7 | 自动模式免分类白名单：只读与纯元数据工具直放，Ant 工具条件 require 供 DCE |
-| [`utils/messages/systemInit.ts`](annotated/src/utils/messages/systemInit.ts) | 96 | 103 | 7 | SDK 首帧 system/init：会话元数据全字段、工具名兼容层、UDS 字段旁挂 |
-| [`utils/teammateContext.ts`](annotated/src/utils/teammateContext.ts) | 96 | 104 | 8 | 进程内队友上下文：AsyncLocalStorage 承载身份，run 而非 enterWith 防泄漏 |
-| [`utils/fileReadCache.ts`](annotated/src/utils/fileReadCache.ts) | 96 | 104 | 8 | 文件读缓存：mtime 精确失效、CRLF 入库前归一、超限删最早插入项 |
-| [`utils/planModeV2.ts`](annotated/src/utils/planModeV2.ts) | 95 | 102 | 7 | 计划模式配额与实验：agent 数按订阅分层、访谈三级开关、计划长度变体分组 |
-| [`utils/queueProcessor.ts`](annotated/src/utils/queueProcessor.ts) | 95 | 103 | 8 | 队列消费：主线程过滤防卡死、斜杠与 bash 逐条、同 mode 批量取走 |
-| [`utils/diagLogs.ts`](annotated/src/utils/diagLogs.ts) | 94 | 101 | 7 | 诊断日志：固定四字段 JSONL、同步追加一次重试、started/completed/failed 计时 |
+| 文件                                                                                                   | 原文 | 批注版 | 锚点 | 讲什么                                                   |
+| ---------------------------------------------------------------------------------------------------- | -- | --- | -- | ----------------------------------------------------- |
+| [`utils/abortController.ts`](annotated/src/utils/abortController.ts)                                 | 99 | 108 | 9  | 取消控制器工厂与父子联动：调高监听器上限，双向弱引用避免父级滞留子级                    |
+| [`utils/background/remote/remoteSession.ts`](annotated/src/utils/background/remote/remoteSession.ts) | 98 | 107 | 9  | 后台远程会话资格：策略短路 + 三检查并行 + bundle 播种放宽 + App 安装判定        |
+| [`utils/exportRenderer.tsx`](annotated/src/utils/exportRenderer.tsx)                                 | 98 | 107 | 8  | 导出渲染：无头环境下分块渲染成 ANSI，按块分配布局树换取内存下降                    |
+| [`utils/permissions/classifierDecision.ts`](annotated/src/utils/permissions/classifierDecision.ts)   | 98 | 105 | 7  | 自动模式免分类白名单：只读与纯元数据工具直放，Ant 工具条件 require 供 DCE         |
+| [`utils/messages/systemInit.ts`](annotated/src/utils/messages/systemInit.ts)                         | 96 | 103 | 7  | SDK 首帧 system/init：会话元数据全字段、工具名兼容层、UDS 字段旁挂           |
+| [`utils/teammateContext.ts`](annotated/src/utils/teammateContext.ts)                                 | 96 | 104 | 8  | 进程内队友上下文：AsyncLocalStorage 承载身份，run 而非 enterWith 防泄漏  |
+| [`utils/fileReadCache.ts`](annotated/src/utils/fileReadCache.ts)                                     | 96 | 104 | 8  | 文件读缓存：mtime 精确失效、CRLF 入库前归一、超限删最早插入项                  |
+| [`utils/planModeV2.ts`](annotated/src/utils/planModeV2.ts)                                           | 95 | 102 | 7  | 计划模式配额与实验：agent 数按订阅分层、访谈三级开关、计划长度变体分组                |
+| [`utils/queueProcessor.ts`](annotated/src/utils/queueProcessor.ts)                                   | 95 | 103 | 8  | 队列消费：主线程过滤防卡死、斜杠与 bash 逐条、同 mode 批量取走                 |
+| [`utils/diagLogs.ts`](annotated/src/utils/diagLogs.ts)                                               | 94 | 101 | 7  | 诊断日志：固定四字段 JSONL、同步追加一次重试、started/completed/failed 计时 |
 
 三条横切观察：
 
@@ -2485,18 +2479,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份覆盖「Intl 实例缓存、后台杂务、设置变更应用、ANSI 切片、Unicode 清洗、命令规格声明、IDE 路径换算、隐身模式、同步执行外壳、CA 证书配置」——小体量但每份都在回答一个具体问题：慢的东西怎么不挡路、看不见的字符怎么防、两套环境怎么对路径、对外输出怎么不泄密。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/intl.ts`](annotated/src/utils/intl.ts) | 94 | 102 | 8 | 共享 Intl 实例惰性缓存：分词器、相对时间格式化、时区、系统语言只建一次 |
-| [`utils/backgroundHousekeeping.ts`](annotated/src/utils/backgroundHousekeeping.ts) | 94 | 104 | 10 | 后台杂务总入口：启动批 fire-and-forget、10 分钟延迟慢清理、Ant 专属 24 小时循环 |
-| [`utils/settings/applySettingsChange.ts`](annotated/src/utils/settings/applySettingsChange.ts) | 92 | 101 | 9 | 设置变更应用器：权限规则重读、hooks 快照重建、AppState 同步、effort 值防覆盖 |
-| [`utils/sliceAnsi.ts`](annotated/src/utils/sliceAnsi.ts) | 91 | 101 | 10 | 按显示宽度切 ANSI 字符串：零宽组合符边界、OSC 8 超链接、undo 复位序列 |
-| [`utils/sanitization.ts`](annotated/src/utils/sanitization.ts) | 91 | 101 | 10 | Unicode 隐形字符清洗：NFKC 归一、属性类与显式码点段双层删除、迭代到不动点 |
-| [`utils/bash/specs/pyright.ts`](annotated/src/utils/bash/specs/pyright.ts) | 91 | 98 | 7 | pyright 命令规格：21 项选项纯数据声明，satisfies 编译期结构校验 |
-| [`utils/idePathConversion.ts`](annotated/src/utils/idePathConversion.ts) | 90 | 98 | 8 | Windows IDE 与 WSL 的路径互转：wslpath 优先、失败手写兜底、跨发行版判定 |
-| [`utils/undercover.ts`](annotated/src/utils/undercover.ts) | 89 | 97 | 8 | 隐身模式：公开仓库提交抹除内部痕迹，默认开、无强制关、外部构建整体折叠 |
-| [`utils/execFileNoThrowPortable.ts`](annotated/src/utils/execFileNoThrowPortable.ts) | 89 | 99 | 10 | 同步执行外壳：execaSync 包成永不抛错的 execSync 替身，三重历史签名兼容 |
-| [`utils/caCertsConfig.ts`](annotated/src/utils/caCertsConfig.ts) | 88 | 96 | 8 | CA 证书配置填充：从用户级设置读 NODE_EXTRA_CA_CERTS 垫进环境，依赖图隔离防包体膨胀 |
+| 文件                                                                                             | 原文 | 批注版 | 锚点 | 讲什么                                                   |
+| ---------------------------------------------------------------------------------------------- | -- | --- | -- | ----------------------------------------------------- |
+| [`utils/intl.ts`](annotated/src/utils/intl.ts)                                                 | 94 | 102 | 8  | 共享 Intl 实例惰性缓存：分词器、相对时间格式化、时区、系统语言只建一次                |
+| [`utils/backgroundHousekeeping.ts`](annotated/src/utils/backgroundHousekeeping.ts)             | 94 | 104 | 10 | 后台杂务总入口：启动批 fire-and-forget、10 分钟延迟慢清理、Ant 专属 24 小时循环 |
+| [`utils/settings/applySettingsChange.ts`](annotated/src/utils/settings/applySettingsChange.ts) | 92 | 101 | 9  | 设置变更应用器：权限规则重读、hooks 快照重建、AppState 同步、effort 值防覆盖     |
+| [`utils/sliceAnsi.ts`](annotated/src/utils/sliceAnsi.ts)                                       | 91 | 101 | 10 | 按显示宽度切 ANSI 字符串：零宽组合符边界、OSC 8 超链接、undo 复位序列           |
+| [`utils/sanitization.ts`](annotated/src/utils/sanitization.ts)                                 | 91 | 101 | 10 | Unicode 隐形字符清洗：NFKC 归一、属性类与显式码点段双层删除、迭代到不动点           |
+| [`utils/bash/specs/pyright.ts`](annotated/src/utils/bash/specs/pyright.ts)                     | 91 | 98  | 7  | pyright 命令规格：21 项选项纯数据声明，satisfies 编译期结构校验            |
+| [`utils/idePathConversion.ts`](annotated/src/utils/idePathConversion.ts)                       | 90 | 98  | 8  | Windows IDE 与 WSL 的路径互转：wslpath 优先、失败手写兜底、跨发行版判定      |
+| [`utils/undercover.ts`](annotated/src/utils/undercover.ts)                                     | 89 | 97  | 8  | 隐身模式：公开仓库提交抹除内部痕迹，默认开、无强制关、外部构建整体折叠                   |
+| [`utils/execFileNoThrowPortable.ts`](annotated/src/utils/execFileNoThrowPortable.ts)           | 89 | 99  | 10 | 同步执行外壳：execaSync 包成永不抛错的 execSync 替身，三重历史签名兼容         |
+| [`utils/caCertsConfig.ts`](annotated/src/utils/caCertsConfig.ts)                               | 88 | 96  | 8  | CA 证书配置填充：从用户级设置读 NODE_EXTRA_CA_CERTS 垫进环境，依赖图隔离防包体膨胀 |
 
 三条横切观察：
 
@@ -2514,18 +2508,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份是「机制小件」：异步生成器工具、DXT 清单校验、团队记忆摘要、分类器放行记账、队友模式快照、计算机操控收尾、通知折叠、明文凭据存储、可中止 sleep、环形缓冲。单个都不大，但每一份都在处理一个具体的边界问题。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/generators.ts`](annotated/src/utils/generators.ts) | 88 | 97 | 9 | 异步生成器工具集：取末值、取返回值、带上限并发合并、数组互转 |
-| [`utils/dxt/helpers.ts`](annotated/src/utils/dxt/helpers.ts) | 88 | 95 | 7 | DXT 清单校验与扩展 ID 生成：懒加载 zod、三入口共用校验、五拍清洗 |
-| [`utils/teamMemoryOps.ts`](annotated/src/utils/teamMemoryOps.ts) | 88 | 96 | 8 | 团队记忆判定与摘要文案：搜索与写入识别、四态动词、单复数变形 |
-| [`utils/classifierApprovals.ts`](annotated/src/utils/classifierApprovals.ts) | 88 | 97 | 9 | 分类器自动放行记账：approvals 与 checking 两容器，信号驱动 UI 重渲 |
-| [`utils/swarm/backends/teammateModeSnapshot.ts`](annotated/src/utils/swarm/backends/teammateModeSnapshot.ts) | 87 | 95 | 8 | 队友模式启动快照：CLI 覆盖优先，运行期改配置不影响本次会话 |
-| [`utils/computerUse/cleanup.ts`](annotated/src/utils/computerUse/cleanup.ts) | 86 | 94 | 8 | 计算机操控回合收尾：恢复隐藏应用（5 秒兜底）后释放文件锁 |
-| [`utils/collapseBackgroundBashNotifications.ts`](annotated/src/utils/collapseBackgroundBashNotifications.ts) | 84 | 92 | 8 | 折叠连续的后台 bash 完成通知为一条汇总，失败与流式事件不折叠 |
-| [`utils/secureStorage/plainTextStorage.ts`](annotated/src/utils/secureStorage/plainTextStorage.ts) | 84 | 92 | 8 | 明文凭据降级后端：读失败即 null、0600 权限、成功时带明文警告 |
-| [`utils/sleep.ts`](annotated/src/utils/sleep.ts) | 84 | 92 | 8 | 可中止 sleep 与超时竞速：TDZ 顺序、once 监听、定时器 unref |
-| [`utils/CircularBuffer.ts`](annotated/src/utils/CircularBuffer.ts) | 84 | 92 | 8 | 定长环形缓冲：覆盖写 O(1)、取模绕圈、最近 N 条与全量导出 |
+| 文件                                                                                                           | 原文 | 批注版 | 锚点 | 讲什么                                           |
+| ------------------------------------------------------------------------------------------------------------ | -- | --- | -- | --------------------------------------------- |
+| [`utils/generators.ts`](annotated/src/utils/generators.ts)                                                   | 88 | 97  | 9  | 异步生成器工具集：取末值、取返回值、带上限并发合并、数组互转                |
+| [`utils/dxt/helpers.ts`](annotated/src/utils/dxt/helpers.ts)                                                 | 88 | 95  | 7  | DXT 清单校验与扩展 ID 生成：懒加载 zod、三入口共用校验、五拍清洗        |
+| [`utils/teamMemoryOps.ts`](annotated/src/utils/teamMemoryOps.ts)                                             | 88 | 96  | 8  | 团队记忆判定与摘要文案：搜索与写入识别、四态动词、单复数变形                |
+| [`utils/classifierApprovals.ts`](annotated/src/utils/classifierApprovals.ts)                                 | 88 | 97  | 9  | 分类器自动放行记账：approvals 与 checking 两容器，信号驱动 UI 重渲 |
+| [`utils/swarm/backends/teammateModeSnapshot.ts`](annotated/src/utils/swarm/backends/teammateModeSnapshot.ts) | 87 | 95  | 8  | 队友模式启动快照：CLI 覆盖优先，运行期改配置不影响本次会话               |
+| [`utils/computerUse/cleanup.ts`](annotated/src/utils/computerUse/cleanup.ts)                                 | 86 | 94  | 8  | 计算机操控回合收尾：恢复隐藏应用（5 秒兜底）后释放文件锁                 |
+| [`utils/collapseBackgroundBashNotifications.ts`](annotated/src/utils/collapseBackgroundBashNotifications.ts) | 84 | 92  | 8  | 折叠连续的后台 bash 完成通知为一条汇总，失败与流式事件不折叠             |
+| [`utils/secureStorage/plainTextStorage.ts`](annotated/src/utils/secureStorage/plainTextStorage.ts)           | 84 | 92  | 8  | 明文凭据降级后端：读失败即 null、0600 权限、成功时带明文警告           |
+| [`utils/sleep.ts`](annotated/src/utils/sleep.ts)                                                             | 84 | 92  | 8  | 可中止 sleep 与超时竞速：TDZ 顺序、once 监听、定时器 unref      |
+| [`utils/CircularBuffer.ts`](annotated/src/utils/CircularBuffer.ts)                                           | 84 | 92  | 8  | 定长环形缓冲：覆盖写 O(1)、取模绕圈、最近 N 条与全量导出              |
 
 三条横切观察：
 
@@ -2543,18 +2537,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份全是「边界定义一个模块」的类型：钩子的结构化输出强制、浏览器提示词的分块注入、命令查找的四条路径、团队状态的缺字段兜底、时间标签的区域变量、MDM 路径的优先级、认证状态的成功/失败两分支、危险前缀表、三层设置缓存的三态语义、工具池的分区排序。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/hooks/hookHelpers.ts`](annotated/src/utils/hooks/hookHelpers.ts) | 83 | 88 | 5 | 钩子返回值统一成结构化输出；Stop 钩子强制调用合成输出工具，5 秒超时 |
-| [`utils/claudeInChrome/prompt.ts`](annotated/src/utils/claudeInChrome/prompt.ts) | 83 | 88 | 5 | 浏览器自动化系统提示分块；工具搜索说明与 WebBrowser 职责切分按状态注入 |
-| [`utils/which.ts`](annotated/src/utils/which.ts) | 82 | 88 | 6 | 命令路径查找四条路径：异步/同步 × Windows/POSIX，外加 Bun 原生快速路径 |
-| [`utils/teamDiscovery.ts`](annotated/src/utils/teamDiscovery.ts) | 81 | 86 | 5 | 团队与队友状态发现；跳过 team-lead，缺字段默认算活跃，后端类型过守卫 |
-| [`utils/formatBriefTimestamp.ts`](annotated/src/utils/formatBriefTimestamp.ts) | 81 | 86 | 5 | 时间标签三档粒度；自解析 POSIX 区域变量并转 BCP 47，Intl 构造即校验 |
-| [`utils/settings/mdm/constants.ts`](annotated/src/utils/settings/mdm/constants.ts) | 81 | 86 | 5 | MDM 常量与 plist 路径优先级；零重依赖，注册表必须留在策略分支 |
-| [`utils/awsAuthStatusManager.ts`](annotated/src/utils/awsAuthStatusManager.ts) | 81 | 87 | 6 | 云厂商认证状态单例；成功时清空状态，失败时保留输出供排查 |
-| [`utils/permissions/dangerousPatterns.ts`](annotated/src/utils/permissions/dangerousPatterns.ts) | 80 | 84 | 4 | 危险允许规则前缀表；跨平台清单抽常量防两份漂移，内部构建专属加段 |
-| [`utils/settings/settingsCache.ts`](annotated/src/utils/settings/settingsCache.ts) | 80 | 85 | 5 | 三层设置缓存；未命中与「确认为空」用 undefined 与 null 区分 |
-| [`utils/toolPool.ts`](annotated/src/utils/toolPool.ts) | 79 | 85 | 6 | 工具池合并去重；分区排序保提示词缓存，协调者模式裁到允许清单 |
+| 文件                                                                                               | 原文 | 批注版 | 锚点 | 讲什么                                            |
+| ------------------------------------------------------------------------------------------------ | -- | --- | -- | ---------------------------------------------- |
+| [`utils/hooks/hookHelpers.ts`](annotated/src/utils/hooks/hookHelpers.ts)                         | 83 | 88  | 5  | 钩子返回值统一成结构化输出；Stop 钩子强制调用合成输出工具，5 秒超时          |
+| [`utils/claudeInChrome/prompt.ts`](annotated/src/utils/claudeInChrome/prompt.ts)                 | 83 | 88  | 5  | 浏览器自动化系统提示分块；工具搜索说明与 WebBrowser 职责切分按状态注入      |
+| [`utils/which.ts`](annotated/src/utils/which.ts)                                                 | 82 | 88  | 6  | 命令路径查找四条路径：异步/同步 × Windows/POSIX，外加 Bun 原生快速路径 |
+| [`utils/teamDiscovery.ts`](annotated/src/utils/teamDiscovery.ts)                                 | 81 | 86  | 5  | 团队与队友状态发现；跳过 team-lead，缺字段默认算活跃，后端类型过守卫        |
+| [`utils/formatBriefTimestamp.ts`](annotated/src/utils/formatBriefTimestamp.ts)                   | 81 | 86  | 5  | 时间标签三档粒度；自解析 POSIX 区域变量并转 BCP 47，Intl 构造即校验    |
+| [`utils/settings/mdm/constants.ts`](annotated/src/utils/settings/mdm/constants.ts)               | 81 | 86  | 5  | MDM 常量与 plist 路径优先级；零重依赖，注册表必须留在策略分支           |
+| [`utils/awsAuthStatusManager.ts`](annotated/src/utils/awsAuthStatusManager.ts)                   | 81 | 87  | 6  | 云厂商认证状态单例；成功时清空状态，失败时保留输出供排查                   |
+| [`utils/permissions/dangerousPatterns.ts`](annotated/src/utils/permissions/dangerousPatterns.ts) | 80 | 84  | 4  | 危险允许规则前缀表；跨平台清单抽常量防两份漂移，内部构建专属加段               |
+| [`utils/settings/settingsCache.ts`](annotated/src/utils/settings/settingsCache.ts)               | 80 | 85  | 5  | 三层设置缓存；未命中与「确认为空」用 undefined 与 null 区分         |
+| [`utils/toolPool.ts`](annotated/src/utils/toolPool.ts)                                           | 79 | 85  | 6  | 工具池合并去重；分区排序保提示词缓存，协调者模式裁到允许清单                 |
 
 三条横切观察：
 
@@ -2572,18 +2566,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份的共同点是「一个延迟/一个缓存/一个降级」：主队列泵把不归自己管的队列抽干、渲染参数替管道输入找回按键、设置与环境的默认值在异常时退回安全值、遥测缺记录器就安静丢弃。十份里没有一份做业务逻辑，全在处理运行环境的边界。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/computerUse/drainRunLoop.ts`](annotated/src/utils/computerUse/drainRunLoop.ts) | 79 | 84 | 5 | 主队列泵；引用计数共享单个 1 毫秒定时器，同步抛错也要释放 |
-| [`utils/permissions/PermissionUpdateSchema.ts`](annotated/src/utils/permissions/PermissionUpdateSchema.ts) | 78 | 83 | 5 | 权限更新 schema；六个判别分支，三种规则操作同形不同 type |
-| [`utils/billing.ts`](annotated/src/utils/billing.ts) | 78 | 84 | 6 | 计费可见性双路径；控制台账号看角色，订阅制按档位分流 |
-| [`utils/teleport/environmentSelection.ts`](annotated/src/utils/teleport/environmentSelection.ts) | 77 | 83 | 6 | 远程环境选择推导；非桥接优先，来源按优先级倒查 |
-| [`utils/renderOptions.ts`](annotated/src/utils/renderOptions.ts) | 77 | 82 | 5 | 管道输入改用终端设备读；三态缓存，一次探测终身复用 |
-| [`utils/fingerprint.ts`](annotated/src/utils/fingerprint.ts) | 76 | 81 | 5 | 会话指纹；盐加固定三位字符加版本做 SHA256 取前三位 |
-| [`utils/stream.ts`](annotated/src/utils/stream.ts) | 76 | 83 | 7 | 最小异步可迭代队列；直通优先，错误只投递一次，只许迭代一次 |
-| [`utils/cronJitterConfig.ts`](annotated/src/utils/cronJitterConfig.ts) | 75 | 80 | 5 | 抖动配置读取；一处越界整份作废，一分钟内收敛 |
-| [`utils/crossProjectResume.ts`](annotated/src/utils/crossProjectResume.ts) | 75 | 81 | 6 | 跨项目恢复三分支；工作树判定带分隔符，灰度限制在内部账号 |
-| [`utils/telemetry/events.ts`](annotated/src/utils/telemetry/events.ts) | 75 | 82 | 7 | 遥测事件出口；缺记录器只告警一次，路径只进事件不进指标 |
+| 文件                                                                                                         | 原文 | 批注版 | 锚点 | 讲什么                                |
+| ---------------------------------------------------------------------------------------------------------- | -- | --- | -- | ---------------------------------- |
+| [`utils/computerUse/drainRunLoop.ts`](annotated/src/utils/computerUse/drainRunLoop.ts)                     | 79 | 84  | 5  | 主队列泵；引用计数共享单个 1 毫秒定时器，同步抛错也要释放     |
+| [`utils/permissions/PermissionUpdateSchema.ts`](annotated/src/utils/permissions/PermissionUpdateSchema.ts) | 78 | 83  | 5  | 权限更新 schema；六个判别分支，三种规则操作同形不同 type |
+| [`utils/billing.ts`](annotated/src/utils/billing.ts)                                                       | 78 | 84  | 6  | 计费可见性双路径；控制台账号看角色，订阅制按档位分流         |
+| [`utils/teleport/environmentSelection.ts`](annotated/src/utils/teleport/environmentSelection.ts)           | 77 | 83  | 6  | 远程环境选择推导；非桥接优先，来源按优先级倒查            |
+| [`utils/renderOptions.ts`](annotated/src/utils/renderOptions.ts)                                           | 77 | 82  | 5  | 管道输入改用终端设备读；三态缓存，一次探测终身复用          |
+| [`utils/fingerprint.ts`](annotated/src/utils/fingerprint.ts)                                               | 76 | 81  | 5  | 会话指纹；盐加固定三位字符加版本做 SHA256 取前三位      |
+| [`utils/stream.ts`](annotated/src/utils/stream.ts)                                                         | 76 | 83  | 7  | 最小异步可迭代队列；直通优先，错误只投递一次，只许迭代一次      |
+| [`utils/cronJitterConfig.ts`](annotated/src/utils/cronJitterConfig.ts)                                     | 75 | 80  | 5  | 抖动配置读取；一处越界整份作废，一分钟内收敛             |
+| [`utils/crossProjectResume.ts`](annotated/src/utils/crossProjectResume.ts)                                 | 75 | 81  | 6  | 跨项目恢复三分支；工作树判定带分隔符，灰度限制在内部账号       |
+| [`utils/telemetry/events.ts`](annotated/src/utils/telemetry/events.ts)                                     | 75 | 82  | 7  | 遥测事件出口；缺记录器只告警一次，路径只进事件不进指标        |
 
 三条横切观察：
 
@@ -2601,18 +2595,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份的共同点是「在运行环境边界上做翻译与保护」：把平台/凭证/坐标/上下文窗口这些外部差异统一成内部一致的事实，把真实路径与内容替换成去标识哈希，把「异常输入」翻译成明确的安全行为。十份里没有一份做业务逻辑，全在回答「外部不确定时，内部该信什么」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/systemDirectories.ts`](annotated/src/utils/systemDirectories.ts) | 74 | 80 | 6 | 跨平台系统目录（桌面/文档/下载）解析；家目录 + `USERPROFILE` + XDG 三套平台分支，未知平台回落默认并记日志 |
-| [`utils/aws.ts`](annotated/src/utils/aws.ts) | 74 | 80 | 6 | AWS 短期凭证工具集：凭证形状、STS 输出校验、调用者身份、清 ini 缓存 |
-| [`utils/iTermBackup.ts`](annotated/src/utils/iTermBackup.ts) | 73 | 79 | 6 | iTerm2 设置备份/恢复：备份 plist、失败回滚、维护「安装进行中」标记 |
-| [`utils/mailbox.ts`](annotated/src/utils/mailbox.ts) | 73 | 80 | 7 | 轻量点对点消息信箱；队列 + 等待者列表 + 信号；send/poll/receive 三件套 |
-| [`utils/tokenBudget.ts`](annotated/src/utils/tokenBudget.ts) | 73 | 79 | 6 | 从自然语言解析 token 预算；简写（`+500k`）与完整说法两路，千分位续写提示 |
-| [`utils/computerUse/gates.ts`](annotated/src/utils/computerUse/gates.ts) | 72 | 79 | 7 | 计算机操控（Chicago）门控：启用/坐标模式/子开关，首次冻结坐标语义 |
-| [`utils/model/check1mAccess.ts`](annotated/src/utils/model/check1mAccess.ts) | 72 | 77 | 5 | 百万上下文资格判定；订阅看额外用量、API/按量直接放行，Opus/Sonnet 两入口 |
-| [`utils/apiPreconnect.ts`](annotated/src/utils/apiPreconnect.ts) | 71 | 76 | 5 | 启动预连接 Anthropic API；TCP+TLS 并行、一次性旗标、HEAD 即弃、十秒超时 |
-| [`utils/telemetryAttributes.ts`](annotated/src/utils/telemetryAttributes.ts) | 71 | 77 | 6 | 遥测属性入口；会话 id/版本/账户 uuid 基数控制，OAuth 才附账户维度 |
-| [`utils/fileOperationAnalytics.ts`](annotated/src/utils/fileOperationAnalytics.ts) | 71 | 77 | 6 | 文件操作隐私分析；截断/完整 SHA256 代真实路径与内容，百 KB 上限防内存耗尽 |
+| 文件                                                                                 | 原文 | 批注版 | 锚点 | 讲什么                                                               |
+| ---------------------------------------------------------------------------------- | -- | --- | -- | ----------------------------------------------------------------- |
+| [`utils/systemDirectories.ts`](annotated/src/utils/systemDirectories.ts)           | 74 | 80  | 6  | 跨平台系统目录（桌面/文档/下载）解析；家目录 + `USERPROFILE` + XDG 三套平台分支，未知平台回落默认并记日志 |
+| [`utils/aws.ts`](annotated/src/utils/aws.ts)                                       | 74 | 80  | 6  | AWS 短期凭证工具集：凭证形状、STS 输出校验、调用者身份、清 ini 缓存                          |
+| [`utils/iTermBackup.ts`](annotated/src/utils/iTermBackup.ts)                       | 73 | 79  | 6  | iTerm2 设置备份/恢复：备份 plist、失败回滚、维护「安装进行中」标记                          |
+| [`utils/mailbox.ts`](annotated/src/utils/mailbox.ts)                               | 73 | 80  | 7  | 轻量点对点消息信箱；队列 + 等待者列表 + 信号；send/poll/receive 三件套                   |
+| [`utils/tokenBudget.ts`](annotated/src/utils/tokenBudget.ts)                       | 73 | 79  | 6  | 从自然语言解析 token 预算；简写（`+500k`）与完整说法两路，千分位续写提示                       |
+| [`utils/computerUse/gates.ts`](annotated/src/utils/computerUse/gates.ts)           | 72 | 79  | 7  | 计算机操控（Chicago）门控：启用/坐标模式/子开关，首次冻结坐标语义                             |
+| [`utils/model/check1mAccess.ts`](annotated/src/utils/model/check1mAccess.ts)       | 72 | 77  | 5  | 百万上下文资格判定；订阅看额外用量、API/按量直接放行，Opus/Sonnet 两入口                      |
+| [`utils/apiPreconnect.ts`](annotated/src/utils/apiPreconnect.ts)                   | 71 | 76  | 5  | 启动预连接 Anthropic API；TCP+TLS 并行、一次性旗标、HEAD 即弃、十秒超时                 |
+| [`utils/telemetryAttributes.ts`](annotated/src/utils/telemetryAttributes.ts)       | 71 | 77  | 6  | 遥测属性入口；会话 id/版本/账户 uuid 基数控制，OAuth 才附账户维度                         |
+| [`utils/fileOperationAnalytics.ts`](annotated/src/utils/fileOperationAnalytics.ts) | 71 | 77  | 6  | 文件操作隐私分析；截断/完整 SHA256 代真实路径与内容，百 KB 上限防内存耗尽                       |
 
 三条横切观察：
 
@@ -2630,18 +2624,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 小文件收尾梯队（≤71 行）的头十份，内容横跨「插件设置聚合、启动信任门控、采样后钩子、PDF 预处理、git 工作树与可用性、安全存储回退、插件目录遍历、团队直发消息、计算机操控宿主适配」——各自把一个外部关注点（插件/git/OS/PDF/队友）收敛成一个稳定的内部 API，没有一份做业务主流程。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/plugins/addDirPluginSettings.ts`](annotated/src/utils/plugins/addDirPluginSettings.ts) | 71 | 77 | 6 | 从各 --add-dir 目录读取 enabledPlugins 与 extraKnownMarketplaces，优先级最低，调用方须在其上 spread 标准设置 |
-| [`utils/hooks/postSamplingHooks.ts`](annotated/src/utils/hooks/postSamplingHooks.ts) | 70 | 78 | 8 | 采样后钩子的注册表与执行器（注册/清空/执行），单钩子出错只记录不阻断 |
-| [`utils/pdfUtils.ts`](annotated/src/utils/pdfUtils.ts) | 70 | 77 | 7 | PDF 页码范围解析、模型 PDF 能力探测、扩展名判定三件套 |
-| [`utils/plugins/performStartupChecks.tsx`](annotated/src/utils/plugins/performStartupChecks.tsx) | 70 | 78 | 7 | 插件启动检查入口，确认信任目录后才后台安装市场与插件，种子注册改状态即清缓存并提示 /reload-plugins |
-| [`utils/getWorktreePaths.ts`](annotated/src/utils/getWorktreePaths.ts) | 70 | 77 | 7 | 调 git worktree list 找所有工作树，当前优先、其余字母序返回，带埋点 |
-| [`utils/secureStorage/fallbackStorage.ts`](annotated/src/utils/secureStorage/fallbackStorage.ts) | 70 | 79 | 9 | 主备双存储回退封装，迁移时互删避免凭据重复或 /login 死循环 |
-| [`utils/plugins/walkPluginMarkdown.ts`](annotated/src/utils/plugins/walkPluginMarkdown.ts) | 69 | 77 | 8 | 递归遍历插件目录的 .md 文件，遇 SKILL.md 即停为叶子，readdir 出错不中断 |
-| [`utils/directMemberMessage.ts`](annotated/src/utils/directMemberMessage.ts) | 69 | 77 | 8 | @成员名 消息 语法解析与绕过模型的直发信箱，无团队上下文即报错 |
-| [`utils/computerUse/hostAdapter.ts`](annotated/src/utils/computerUse/hostAdapter.ts) | 69 | 77 | 8 | Computer Use 宿主适配器单例，装配日志/执行器/权限/像素裁剪等原生能力 |
-| [`utils/plugins/gitAvailability.ts`](annotated/src/utils/plugins/gitAvailability.ts) | 69 | 77 | 8 | git 可用性记忆化探测，含强制不可用与清缓存，覆盖 macOS xcrun 垫片场景 |
+| 文件                                                                                               | 原文 | 批注版 | 锚点 | 讲什么                                                                                 |
+| ------------------------------------------------------------------------------------------------ | -- | --- | -- | ----------------------------------------------------------------------------------- |
+| [`utils/plugins/addDirPluginSettings.ts`](annotated/src/utils/plugins/addDirPluginSettings.ts)   | 71 | 77  | 6  | 从各 --add-dir 目录读取 enabledPlugins 与 extraKnownMarketplaces，优先级最低，调用方须在其上 spread 标准设置 |
+| [`utils/hooks/postSamplingHooks.ts`](annotated/src/utils/hooks/postSamplingHooks.ts)             | 70 | 78  | 8  | 采样后钩子的注册表与执行器（注册/清空/执行），单钩子出错只记录不阻断                                                 |
+| [`utils/pdfUtils.ts`](annotated/src/utils/pdfUtils.ts)                                           | 70 | 77  | 7  | PDF 页码范围解析、模型 PDF 能力探测、扩展名判定三件套                                                     |
+| [`utils/plugins/performStartupChecks.tsx`](annotated/src/utils/plugins/performStartupChecks.tsx) | 70 | 78  | 7  | 插件启动检查入口，确认信任目录后才后台安装市场与插件，种子注册改状态即清缓存并提示 /reload-plugins                           |
+| [`utils/getWorktreePaths.ts`](annotated/src/utils/getWorktreePaths.ts)                           | 70 | 77  | 7  | 调 git worktree list 找所有工作树，当前优先、其余字母序返回，带埋点                                         |
+| [`utils/secureStorage/fallbackStorage.ts`](annotated/src/utils/secureStorage/fallbackStorage.ts) | 70 | 79  | 9  | 主备双存储回退封装，迁移时互删避免凭据重复或 /login 死循环                                                   |
+| [`utils/plugins/walkPluginMarkdown.ts`](annotated/src/utils/plugins/walkPluginMarkdown.ts)       | 69 | 77  | 8  | 递归遍历插件目录的 .md 文件，遇 SKILL.md 即停为叶子，readdir 出错不中断                                     |
+| [`utils/directMemberMessage.ts`](annotated/src/utils/directMemberMessage.ts)                     | 69 | 77  | 8  | @成员名 消息 语法解析与绕过模型的直发信箱，无团队上下文即报错                                                    |
+| [`utils/computerUse/hostAdapter.ts`](annotated/src/utils/computerUse/hostAdapter.ts)             | 69 | 77  | 8  | Computer Use 宿主适配器单例，装配日志/执行器/权限/像素裁剪等原生能力                                          |
+| [`utils/plugins/gitAvailability.ts`](annotated/src/utils/plugins/gitAvailability.ts)             | 69 | 77  | 8  | git 可用性记忆化探测，含强制不可用与清缓存，覆盖 macOS xcrun 垫片场景                                         |
 
 踩坑：本批第一份 `addDirPluginSettings.ts` 第 1 行是 `/**` 文档块开头，文件级锚点用 `(1,after)` 落在块注释之后（脚本自动外移到块后、不进注释内部）；`performStartupChecks.tsx` 末尾 base64 sourceMappingURL 按惯例省略、fidelity 标 `OK*`；`fallbackStorage.ts` 是纯对象字面量工厂，9 个锚点全部取方法 `}` 或字段行，零块内中文；`postSamplingHooks.ts` 三处 `/** */` 函数头用 `(函数首行,before)` 落在块后，零外移。
 
@@ -2653,18 +2647,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是 utils 小文件收尾梯队（≤68 行）的头十份，内容横跨「系统程序拉起（浏览器/文件）、进程输出与管道防护、frontmatter 钩子注册（agent/skill 两种入口）、XDG 目录规范、会话恢复标识符解析、ant 内部模型定义、计算机使用公共能力、命令分类器对外桩、定制面插件锁定策略」——各自把一个小关注点收敛成稳定 API，没有一份做业务主流程。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/browser.ts`](annotated/src/utils/browser.ts) | 68 | 72 | 4 | 用系统默认程序打开文件/文件夹、用默认浏览器打开 URL，平台分发到 explorer/open/xdg-open |
-| [`utils/process.ts`](annotated/src/utils/process.ts) | 68 | 73 | 5 | 进程输出/错误的辅助：EPIPE 防护、统一写 stdout/stderr、快速失败退出、探测 stdin 是否真有数据 |
-| [`utils/hooks/registerFrontmatterHooks.ts`](annotated/src/utils/hooks/registerFrontmatterHooks.ts) | 67 | 72 | 5 | 把 agent/skill 的 frontmatter 钩子注册为会话作用域钩子，子 agent 的 Stop 改写成 SubagentStop |
-| [`utils/xdg.ts`](annotated/src/utils/xdg.ts) | 66 | 71 | 6 | XDG 基础目录规范：state/cache/data/home/bin 五处目录解析，支持 env 与 homedir 覆盖 |
-| [`utils/sessionUrl.ts`](annotated/src/utils/sessionUrl.ts) | 64 | 70 | 6 | 会话恢复标识符解析：JSONL 文件路径 / 裸 UUID / URL 三种形式，Windows 路径须先于 URL 处理 |
-| [`utils/model/antModels.ts`](annotated/src/utils/model/antModels.ts) | 64 | 69 | 5 | ant 内部模型类型与读取：非 ant 用户一律回落空/null，按别名或模型名解析 |
-| [`utils/hooks/registerSkillHooks.ts`](annotated/src/utils/hooks/registerSkillHooks.ts) | 64 | 69 | 5 | 把 skill 的 frontmatter 钩子注册为会话钩子，once:true 的首成功后自动移除 |
-| [`utils/computerUse/common.ts`](annotated/src/utils/computerUse/common.ts) | 61 | 68 | 7 | 计算机使用的公共常量/能力：服务器名、终端 bundle ID 回退表、静态能力声明 |
-| [`utils/permissions/bashClassifier.ts`](annotated/src/utils/permissions/bashClassifier.ts) | 61 | 69 | 8 | 命令分类器权限的对外构建桩：全部函数返回空值/禁用，仅 ant 内部有真实实现 |
-| [`utils/settings/pluginOnlyPolicy.ts`](annotated/src/utils/settings/pluginOnlyPolicy.ts) | 60 | 65 | 5 | 定制面「仅插件来源」锁定策略：受管设置判定锁定面、管理员可信来源豁免 |
+| 文件                                                                                                 | 原文 | 批注版 | 锚点 | 讲什么                                                                      |
+| -------------------------------------------------------------------------------------------------- | -- | --- | -- | ------------------------------------------------------------------------ |
+| [`utils/browser.ts`](annotated/src/utils/browser.ts)                                               | 68 | 72  | 4  | 用系统默认程序打开文件/文件夹、用默认浏览器打开 URL，平台分发到 explorer/open/xdg-open                |
+| [`utils/process.ts`](annotated/src/utils/process.ts)                                               | 68 | 73  | 5  | 进程输出/错误的辅助：EPIPE 防护、统一写 stdout/stderr、快速失败退出、探测 stdin 是否真有数据             |
+| [`utils/hooks/registerFrontmatterHooks.ts`](annotated/src/utils/hooks/registerFrontmatterHooks.ts) | 67 | 72  | 5  | 把 agent/skill 的 frontmatter 钩子注册为会话作用域钩子，子 agent 的 Stop 改写成 SubagentStop |
+| [`utils/xdg.ts`](annotated/src/utils/xdg.ts)                                                       | 66 | 71  | 6  | XDG 基础目录规范：state/cache/data/home/bin 五处目录解析，支持 env 与 homedir 覆盖          |
+| [`utils/sessionUrl.ts`](annotated/src/utils/sessionUrl.ts)                                         | 64 | 70  | 6  | 会话恢复标识符解析：JSONL 文件路径 / 裸 UUID / URL 三种形式，Windows 路径须先于 URL 处理            |
+| [`utils/model/antModels.ts`](annotated/src/utils/model/antModels.ts)                               | 64 | 69  | 5  | ant 内部模型类型与读取：非 ant 用户一律回落空/null，按别名或模型名解析                               |
+| [`utils/hooks/registerSkillHooks.ts`](annotated/src/utils/hooks/registerSkillHooks.ts)             | 64 | 69  | 5  | 把 skill 的 frontmatter 钩子注册为会话钩子，once:true 的首成功后自动移除                      |
+| [`utils/computerUse/common.ts`](annotated/src/utils/computerUse/common.ts)                         | 61 | 68  | 7  | 计算机使用的公共常量/能力：服务器名、终端 bundle ID 回退表、静态能力声明                               |
+| [`utils/permissions/bashClassifier.ts`](annotated/src/utils/permissions/bashClassifier.ts)         | 61 | 69  | 8  | 命令分类器权限的对外构建桩：全部函数返回空值/禁用，仅 ant 内部有真实实现                                  |
+| [`utils/settings/pluginOnlyPolicy.ts`](annotated/src/utils/settings/pluginOnlyPolicy.ts)           | 60 | 65  | 5  | 定制面「仅插件来源」锁定策略：受管设置判定锁定面、管理员可信来源豁免                                       |
 
 踩坑：本批十份文件头部与函数头多为 `/** */` 文档块或 `//` 注释，`annotate.py` 的自动外移让文件级与函数级锚点全部落在块外——如 `xdg.ts` 第 1 行 `(1,after)` 落在模块文档块之后、`bashClassifier.ts` 第 1 行 `(1,after)` 落在 `//` 桩说明之后；`registerFrontmatterHooks.ts`/`registerSkillHooks.ts`/`pluginOnlyPolicy.ts` 的 `(函数首行,before)` 都落在 `*/` 之后、函数签名之前，零块内中文、零 `⟳`、零 `⚠`；所有锚点均取 import/类型/函数签名/语句收尾行，无跨行赋值首行、无块注释内部。
 
@@ -2676,18 +2670,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份行数已降到 60 行以下，但密度反而更高：命令行开关的两种写法、斜杠命令的宽松切分、版本比较的六函数、两条消息折叠规则、异步上下文的边界、串行队列、三档隐私、技能使用的去抖与衰减、全局按键的生命周期。多数文件只有二三十行有效逻辑，剩下的篇幅都在注释里解释「为什么不能那样写」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/cliArgs.ts`](annotated/src/utils/cliArgs.ts) | 60 | 65 | 5 | 命令行开关早读；等号与空格两写法，纠正双横线错位 |
-| [`utils/slashCommandParsing.ts`](annotated/src/utils/slashCommandParsing.ts) | 60 | 66 | 6 | 斜杠命令解析；MCP 标记并回命令名，参数宽松归一化 |
-| [`utils/semver.ts`](annotated/src/utils/semver.ts) | 59 | 65 | 6 | 版本比较六函数；原生优先，回落开宽松模式 |
-| [`utils/collapseHookSummaries.ts`](annotated/src/utils/collapseHookSummaries.ts) | 59 | 64 | 5 | 折叠同标签钩子汇总；时长取最大，并行区间重叠不能求和 |
-| [`utils/workloadContext.ts`](annotated/src/utils/workloadContext.ts) | 57 | 61 | 4 | 轮次标签；必须建新边界而非透传，否则泄漏自我延续 |
-| [`utils/sequential.ts`](annotated/src/utils/sequential.ts) | 56 | 61 | 5 | 串行执行包装；标记先置位，单个失败不中断队列 |
-| [`utils/privacyLevel.ts`](annotated/src/utils/privacyLevel.ts) | 55 | 61 | 6 | 三档隐私等级；取最严格信号，否定式判据一次覆盖两档 |
-| [`utils/collapseTeammateShutdowns.ts`](annotated/src/utils/collapseTeammateShutdowns.ts) | 55 | 60 | 5 | 折叠队友关闭通知；四条件守卫，合并只留计数 |
-| [`utils/suggestions/skillUsageTracking.ts`](annotated/src/utils/suggestions/skillUsageTracking.ts) | 55 | 60 | 5 | 技能使用记录；一分钟去抖，七天半衰期加十分之一下限 |
-| [`utils/computerUse/escHotkey.ts`](annotated/src/utils/computerUse/escHotkey.ts) | 54 | 59 | 5 | 全局 Escape 中止；注册失败降级，注销用 finally 释放泵 |
+| 文件                                                                                                 | 原文 | 批注版 | 锚点 | 讲什么                                 |
+| -------------------------------------------------------------------------------------------------- | -- | --- | -- | ----------------------------------- |
+| [`utils/cliArgs.ts`](annotated/src/utils/cliArgs.ts)                                               | 60 | 65  | 5  | 命令行开关早读；等号与空格两写法，纠正双横线错位            |
+| [`utils/slashCommandParsing.ts`](annotated/src/utils/slashCommandParsing.ts)                       | 60 | 66  | 6  | 斜杠命令解析；MCP 标记并回命令名，参数宽松归一化          |
+| [`utils/semver.ts`](annotated/src/utils/semver.ts)                                                 | 59 | 65  | 6  | 版本比较六函数；原生优先，回落开宽松模式                |
+| [`utils/collapseHookSummaries.ts`](annotated/src/utils/collapseHookSummaries.ts)                   | 59 | 64  | 5  | 折叠同标签钩子汇总；时长取最大，并行区间重叠不能求和          |
+| [`utils/workloadContext.ts`](annotated/src/utils/workloadContext.ts)                               | 57 | 61  | 4  | 轮次标签；必须建新边界而非透传，否则泄漏自我延续            |
+| [`utils/sequential.ts`](annotated/src/utils/sequential.ts)                                         | 56 | 61  | 5  | 串行执行包装；标记先置位，单个失败不中断队列              |
+| [`utils/privacyLevel.ts`](annotated/src/utils/privacyLevel.ts)                                     | 55 | 61  | 6  | 三档隐私等级；取最严格信号，否定式判据一次覆盖两档           |
+| [`utils/collapseTeammateShutdowns.ts`](annotated/src/utils/collapseTeammateShutdowns.ts)           | 55 | 60  | 5  | 折叠队友关闭通知；四条件守卫，合并只留计数               |
+| [`utils/suggestions/skillUsageTracking.ts`](annotated/src/utils/suggestions/skillUsageTracking.ts) | 55 | 60  | 5  | 技能使用记录；一分钟去抖，七天半衰期加十分之一下限           |
+| [`utils/computerUse/escHotkey.ts`](annotated/src/utils/computerUse/escHotkey.ts)                   | 54 | 59  | 5  | 全局 Escape 中止；注册失败降级，注销用 finally 释放泵 |
 
 三条横切观察：
 
@@ -2705,18 +2699,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份全部落在「五十行出头」，但主题横跨权限桥、终端偏好、高亮加载、ID 编码、二进制探测、命令规格、空闲超时、电脑控制装配、集合运算、标签剥离——几乎每份都是「一个概念 + 若干边界条件」，正文逻辑少，注释在解释为什么必须这么写。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/swarm/leaderPermissionBridge.ts`](annotated/src/utils/swarm/leaderPermissionBridge.ts) | 54 | 64 | 7 | 权限桥；模块级单例，React 外取 setter，卸载须置回 null |
-| [`utils/deepLink/terminalPreference.ts`](annotated/src/utils/deepLink/terminalPreference.ts) | 54 | 66 | 7 | 终端偏好；`TERM_PROGRAM` 与 `.app` 名不同需查表，非 macOS 跳过 |
-| [`utils/cliHighlight.ts`](annotated/src/utils/cliHighlight.ts) | 54 | 66 | 8 | 高亮懒加载；单例 Promise，借缓存命中顺带取语言表，失败吞成 null |
-| [`utils/taggedId.ts`](annotated/src/utils/taggedId.ts) | 54 | 62 | 5 | 标记 ID；base58 定长 22 位左填充，必须与后端脚本同格式 |
-| [`utils/binaryCheck.ts`](annotated/src/utils/binaryCheck.ts) | 53 | 60 | 7 | 二进制探测；会话缓存，false 也缓存，命中判 `!== undefined` |
-| [`utils/bash/registry.ts`](annotated/src/utils/bash/registry.ts) | 53 | 62 | 5 | 命令规格；内置表优先再图规格，三道拦截挡住路径注入 |
-| [`utils/idleTimeout.ts`](annotated/src/utils/idleTimeout.ts) | 53 | 61 | 6 | 空闲超时；创建时读一次环境变量，到点后二次校验才退出 |
-| [`utils/computerUse/setup.ts`](annotated/src/utils/computerUse/setup.ts) | 53 | 65 | 5 | 电脑控制 MCP；前缀触发后端能力提示，配置存在只为路由 |
-| [`utils/set.ts`](annotated/src/utils/set.ts) | 53 | 59 | 5 | 集合四运算；手写循环不展开，热路径省中间数组 |
-| [`utils/displayTags.ts`](annotated/src/utils/displayTags.ts) | 51 | 61 | 6 | 剥 XML 标签；泛化正则三条约束，空结果两种兜底策略 |
+| 文件                                                                                             | 原文 | 批注版 | 锚点 | 讲什么                                            |
+| ---------------------------------------------------------------------------------------------- | -- | --- | -- | ---------------------------------------------- |
+| [`utils/swarm/leaderPermissionBridge.ts`](annotated/src/utils/swarm/leaderPermissionBridge.ts) | 54 | 64  | 7  | 权限桥；模块级单例，React 外取 setter，卸载须置回 null           |
+| [`utils/deepLink/terminalPreference.ts`](annotated/src/utils/deepLink/terminalPreference.ts)   | 54 | 66  | 7  | 终端偏好；`TERM_PROGRAM` 与 `.app` 名不同需查表，非 macOS 跳过 |
+| [`utils/cliHighlight.ts`](annotated/src/utils/cliHighlight.ts)                                 | 54 | 66  | 8  | 高亮懒加载；单例 Promise，借缓存命中顺带取语言表，失败吞成 null         |
+| [`utils/taggedId.ts`](annotated/src/utils/taggedId.ts)                                         | 54 | 62  | 5  | 标记 ID；base58 定长 22 位左填充，必须与后端脚本同格式             |
+| [`utils/binaryCheck.ts`](annotated/src/utils/binaryCheck.ts)                                   | 53 | 60  | 7  | 二进制探测；会话缓存，false 也缓存，命中判 `!== undefined`       |
+| [`utils/bash/registry.ts`](annotated/src/utils/bash/registry.ts)                               | 53 | 62  | 5  | 命令规格；内置表优先再图规格，三道拦截挡住路径注入                      |
+| [`utils/idleTimeout.ts`](annotated/src/utils/idleTimeout.ts)                                   | 53 | 61  | 6  | 空闲超时；创建时读一次环境变量，到点后二次校验才退出                     |
+| [`utils/computerUse/setup.ts`](annotated/src/utils/computerUse/setup.ts)                       | 53 | 65  | 5  | 电脑控制 MCP；前缀触发后端能力提示，配置存在只为路由                   |
+| [`utils/set.ts`](annotated/src/utils/set.ts)                                                   | 53 | 59  | 5  | 集合四运算；手写循环不展开，热路径省中间数组                         |
+| [`utils/displayTags.ts`](annotated/src/utils/displayTags.ts)                                   | 51 | 61  | 6  | 剥 XML 标签；泛化正则三条约束，空结果两种兜底策略                    |
 
 三条横切观察：
 
@@ -2734,18 +2728,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份全部落在「四五十行」，主题横跨内容数组插入、模型能力覆盖、埋点来源分类、FPS 度量、合并中止信号、上下文升级提示、哈希工具、profiler 基件、拒绝追踪、settings 编辑校验——每份都是单一职责的小工具，注释多用来解释约束与回退路径。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/contentArray.ts`](annotated/src/utils/contentArray.ts) | 51 | 55 | 4 | content 数组插入；相对最后一个 tool_result 落位，末尾补 text 续接 |
-| [`utils/model/modelSupportOverrides.ts`](annotated/src/utils/model/modelSupportOverrides.ts) | 50 | 54 | 4 | 模型能力覆盖；按环境变量三元组查 TIERS，memoize 缓存 |
-| [`utils/promptCategory.ts`](annotated/src/utils/promptCategory.ts) | 49 | 54 | 5 | 埋点来源；agent 类型与 REPL 风格映射到 QuerySource |
-| [`utils/fpsTracker.ts`](annotated/src/utils/fpsTracker.ts) | 47 | 52 | 5 | FPS 度量；记帧时长算平均与低 1% 帧率，p99 反推 |
-| [`utils/combinedAbortSignal.ts`](annotated/src/utils/combinedAbortSignal.ts) | 47 | 51 | 4 | 合并中止信号；setTimeout 替 AbortSignal.timeout 防 Bun 计时器泄漏 |
-| [`utils/model/contextWindowUpgradeCheck.ts`](annotated/src/utils/model/contextWindowUpgradeCheck.ts) | 47 | 52 | 5 | 上下文升级；opus/sonnet 1M 提示与 warning/tip 文案 |
-| [`utils/hash.ts`](annotated/src/utils/hash.ts) | 46 | 52 | 6 | 哈希工具；djb2 确定、hashContent 变更检测、hashPair 免拼接 |
-| [`utils/profilerBase.ts`](annotated/src/utils/profilerBase.ts) | 46 | 51 | 5 | profiler 基件；懒加载 perf_hooks、共享时间线行格式 |
-| [`utils/permissions/denialTracking.ts`](annotated/src/utils/permissions/denialTracking.ts) | 45 | 52 | 7 | 拒绝追踪；连续/累计计数与回退提问阈值 |
-| [`utils/settings/validateEditTool.ts`](annotated/src/utils/settings/validateEditTool.ts) | 45 | 49 | 4 | settings 编辑校验；仅 Claude settings 文件，前后都须合法 |
+| 文件                                                                                                   | 原文 | 批注版 | 锚点 | 讲什么                                                 |
+| ---------------------------------------------------------------------------------------------------- | -- | --- | -- | --------------------------------------------------- |
+| [`utils/contentArray.ts`](annotated/src/utils/contentArray.ts)                                       | 51 | 55  | 4  | content 数组插入；相对最后一个 tool_result 落位，末尾补 text 续接      |
+| [`utils/model/modelSupportOverrides.ts`](annotated/src/utils/model/modelSupportOverrides.ts)         | 50 | 54  | 4  | 模型能力覆盖；按环境变量三元组查 TIERS，memoize 缓存                   |
+| [`utils/promptCategory.ts`](annotated/src/utils/promptCategory.ts)                                   | 49 | 54  | 5  | 埋点来源；agent 类型与 REPL 风格映射到 QuerySource               |
+| [`utils/fpsTracker.ts`](annotated/src/utils/fpsTracker.ts)                                           | 47 | 52  | 5  | FPS 度量；记帧时长算平均与低 1% 帧率，p99 反推                       |
+| [`utils/combinedAbortSignal.ts`](annotated/src/utils/combinedAbortSignal.ts)                         | 47 | 51  | 4  | 合并中止信号；setTimeout 替 AbortSignal.timeout 防 Bun 计时器泄漏 |
+| [`utils/model/contextWindowUpgradeCheck.ts`](annotated/src/utils/model/contextWindowUpgradeCheck.ts) | 47 | 52  | 5  | 上下文升级；opus/sonnet 1M 提示与 warning/tip 文案             |
+| [`utils/hash.ts`](annotated/src/utils/hash.ts)                                                       | 46 | 52  | 6  | 哈希工具；djb2 确定、hashContent 变更检测、hashPair 免拼接          |
+| [`utils/profilerBase.ts`](annotated/src/utils/profilerBase.ts)                                       | 46 | 51  | 5  | profiler 基件；懒加载 perf_hooks、共享时间线行格式                 |
+| [`utils/permissions/denialTracking.ts`](annotated/src/utils/permissions/denialTracking.ts)           | 45 | 52  | 7  | 拒绝追踪；连续/累计计数与回退提问阈值                                 |
+| [`utils/settings/validateEditTool.ts`](annotated/src/utils/settings/validateEditTool.ts)             | 45 | 49  | 4  | settings 编辑校验；仅 Claude settings 文件，前后都须合法           |
 
 三条横切观察：
 
@@ -2761,18 +2755,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份继续落在「四十行上下」，主题横跨队友功能开关、proper-lockfile 惰性封装、纯事件信号原语、API provider 推断、权限规则 schema、OSC 8 超链接、单轮补全遥测、自动模式状态、技能加载埋点、bash 超时取值——每份都是单一职责的小工具，注释多用来解释约束、回退路径与门控策略。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/agentSwarmsEnabled.ts`](annotated/src/utils/agentSwarmsEnabled.ts) | 44 | 48 | 4 | 队友功能统一闸门；Ant 恒开、外部需 opt-in 且过 killswitch |
-| [`utils/lockfile.ts`](annotated/src/utils/lockfile.ts) | 43 | 49 | 6 | proper-lockfile 惰性封装；首次调用才 require，绕开启动期猴补丁 |
-| [`utils/signal.ts`](annotated/src/utils/signal.ts) | 43 | 49 | 6 | 纯事件信号原语；把 15 处 listener Set 样板收成 createSignal |
-| [`utils/model/providers.ts`](annotated/src/utils/model/providers.ts) | 40 | 46 | 6 | API provider 推断；bedrock→vertex→foundry 优先级 + 一手 URL 校验 |
-| [`utils/permissions/PermissionRule.ts`](annotated/src/utils/permissions/PermissionRule.ts) | 40 | 44 | 4 | 权限规则 zod schema；allow/deny/ask 三态 + 规则值形状 |
-| [`utils/hyperlink.ts`](annotated/src/utils/hyperlink.ts) | 39 | 44 | 5 | OSC 8 终端超链接；不支持时回退纯文本 URL |
-| [`utils/unaryLogging.ts`](annotated/src/utils/unaryLogging.ts) | 39 | 44 | 5 | 单轮补全事件上报；四类补全类型 + 三事件类别 |
-| [`utils/permissions/autoModeState.ts`](annotated/src/utils/permissions/autoModeState.ts) | 39 | 45 | 6 | 自动模式模块级状态；激活/CLI 标志/熔断三组读写器 |
-| [`utils/telemetry/skillLoadedEvent.ts`](annotated/src/utils/telemetry/skillLoadedEvent.ts) | 39 | 43 | 4 | 会话启动技能加载埋点；技能名走 PII 特供列 |
-| [`utils/timeouts.ts`](annotated/src/utils/timeouts.ts) | 39 | 44 | 5 | bash 超时取值；默认 2 分钟 / 最大 10 分钟，可环境变量覆盖 |
+| 文件                                                                                         | 原文 | 批注版 | 锚点 | 讲什么                                                    |
+| ------------------------------------------------------------------------------------------ | -- | --- | -- | ------------------------------------------------------ |
+| [`utils/agentSwarmsEnabled.ts`](annotated/src/utils/agentSwarmsEnabled.ts)                 | 44 | 48  | 4  | 队友功能统一闸门；Ant 恒开、外部需 opt-in 且过 killswitch               |
+| [`utils/lockfile.ts`](annotated/src/utils/lockfile.ts)                                     | 43 | 49  | 6  | proper-lockfile 惰性封装；首次调用才 require，绕开启动期猴补丁            |
+| [`utils/signal.ts`](annotated/src/utils/signal.ts)                                         | 43 | 49  | 6  | 纯事件信号原语；把 15 处 listener Set 样板收成 createSignal          |
+| [`utils/model/providers.ts`](annotated/src/utils/model/providers.ts)                       | 40 | 46  | 6  | API provider 推断；bedrock→vertex→foundry 优先级 + 一手 URL 校验 |
+| [`utils/permissions/PermissionRule.ts`](annotated/src/utils/permissions/PermissionRule.ts) | 40 | 44  | 4  | 权限规则 zod schema；allow/deny/ask 三态 + 规则值形状              |
+| [`utils/hyperlink.ts`](annotated/src/utils/hyperlink.ts)                                   | 39 | 44  | 5  | OSC 8 终端超链接；不支持时回退纯文本 URL                              |
+| [`utils/unaryLogging.ts`](annotated/src/utils/unaryLogging.ts)                             | 39 | 44  | 5  | 单轮补全事件上报；四类补全类型 + 三事件类别                                |
+| [`utils/permissions/autoModeState.ts`](annotated/src/utils/permissions/autoModeState.ts)   | 39 | 45  | 6  | 自动模式模块级状态；激活/CLI 标志/熔断三组读写器                            |
+| [`utils/telemetry/skillLoadedEvent.ts`](annotated/src/utils/telemetry/skillLoadedEvent.ts) | 39 | 43  | 4  | 会话启动技能加载埋点；技能名走 PII 特供列                                |
+| [`utils/timeouts.ts`](annotated/src/utils/timeouts.ts)                                     | 39 | 44  | 5  | bash 超时取值；默认 2 分钟 / 最大 10 分钟，可环境变量覆盖                   |
 
 三条横切观察：
 
@@ -2788,18 +2782,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份仍是「三四十行」的单职责小工具，主题横跨「权限分类器共享层、环境变量校验、同步执行封装、任务输出截断、缓存路径消毒、设置写入回声抑制、SDK 进度事件、语义数字解析、修饰键检测、权限结果描述」——每份都用注释解释约束、回退路径与平台门控。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/permissions/classifierShared.ts`](annotated/src/utils/permissions/classifierShared.ts) | 39 | 42 | 3 | 分类器权限系统共享基础设施；工具调用块提取 + zod 安全解析 |
-| [`utils/envValidation.ts`](annotated/src/utils/envValidation.ts) | 38 | 41 | 3 | 有界整数环境变量校验；valid/capped/invalid 三态 |
-| [`utils/execSyncWrapper.ts`](annotated/src/utils/execSyncWrapper.ts) | 38 | 41 | 3 | 包裹 execSync 加慢操作日志；已 deprecated 的同步执行封装 |
-| [`utils/task/outputFormatting.ts`](annotated/src/utils/task/outputFormatting.ts) | 38 | 42 | 4 | 任务输出格式化与截断；超长附完整文件路径 |
-| [`utils/cachePaths.ts`](annotated/src/utils/cachePaths.ts) | 38 | 42 | 4 | 缓存目录路径解析与项目目录消毒；djb2 跨版本稳定 |
-| [`utils/settings/internalWrites.ts`](annotated/src/utils/settings/internalWrites.ts) | 37 | 42 | 5 | 进程内设置写入时间戳；打破 settings→changeDetector 循环依赖 |
-| [`utils/task/sdkProgress.ts`](annotated/src/utils/task/sdkProgress.ts) | 36 | 39 | 3 | 统一 emitTaskProgress SDK 事件；后台智能体与工作流共用 |
-| [`utils/semanticNumber.ts`](annotated/src/utils/semanticNumber.ts) | 36 | 39 | 3 | 语义数字 zod 预处理；容错模型给数字加引号 |
-| [`utils/modifiers.ts`](annotated/src/utils/modifiers.ts) | 36 | 39 | 3 | macOS 原生修饰键检测封装；仅 darwin 生效 |
-| [`utils/permissions/PermissionResult.ts`](annotated/src/utils/permissions/PermissionResult.ts) | 35 | 38 | 3 | 权限结果类型重导出与行为描述辅助 |
+| 文件                                                                                             | 原文 | 批注版 | 锚点 | 讲什么                                        |
+| ---------------------------------------------------------------------------------------------- | -- | --- | -- | ------------------------------------------ |
+| [`utils/permissions/classifierShared.ts`](annotated/src/utils/permissions/classifierShared.ts) | 39 | 42  | 3  | 分类器权限系统共享基础设施；工具调用块提取 + zod 安全解析           |
+| [`utils/envValidation.ts`](annotated/src/utils/envValidation.ts)                               | 38 | 41  | 3  | 有界整数环境变量校验；valid/capped/invalid 三态         |
+| [`utils/execSyncWrapper.ts`](annotated/src/utils/execSyncWrapper.ts)                           | 38 | 41  | 3  | 包裹 execSync 加慢操作日志；已 deprecated 的同步执行封装    |
+| [`utils/task/outputFormatting.ts`](annotated/src/utils/task/outputFormatting.ts)               | 38 | 42  | 4  | 任务输出格式化与截断；超长附完整文件路径                       |
+| [`utils/cachePaths.ts`](annotated/src/utils/cachePaths.ts)                                     | 38 | 42  | 4  | 缓存目录路径解析与项目目录消毒；djb2 跨版本稳定                 |
+| [`utils/settings/internalWrites.ts`](annotated/src/utils/settings/internalWrites.ts)           | 37 | 42  | 5  | 进程内设置写入时间戳；打破 settings→changeDetector 循环依赖 |
+| [`utils/task/sdkProgress.ts`](annotated/src/utils/task/sdkProgress.ts)                         | 36 | 39  | 3  | 统一 emitTaskProgress SDK 事件；后台智能体与工作流共用     |
+| [`utils/semanticNumber.ts`](annotated/src/utils/semanticNumber.ts)                             | 36 | 39  | 3  | 语义数字 zod 预处理；容错模型给数字加引号                    |
+| [`utils/modifiers.ts`](annotated/src/utils/modifiers.ts)                                       | 36 | 39  | 3  | macOS 原生修饰键检测封装；仅 darwin 生效                |
+| [`utils/permissions/PermissionResult.ts`](annotated/src/utils/permissions/PermissionResult.ts) | 35 | 38  | 3  | 权限结果类型重导出与行为描述辅助                           |
 
 三条横切观察：
 
@@ -2815,18 +2809,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份继续落在「三十行上下」，主题横跨「托管设置路径、队友会话常量、shell 抽象、异步 cwd 覆盖、错误聚合、控制消息兼容、SLURM 命令规范、临时文件、computer-use 原生模块、语义布尔」——多份仍是为打破循环依赖或做容错解析而单独抽出的小模块。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/settings/managedPath.ts`](annotated/src/utils/settings/managedPath.ts) | 34 | 37 | 3 | 托管设置目录路径解析；按平台返回固定位置 + drop-in 拆分目录 |
-| [`utils/swarm/constants.ts`](annotated/src/utils/swarm/constants.ts) | 33 | 36 | 3 | 队友/swarm 会话常量与命名；socket 名 + 三枚队友环境变量键 |
-| [`utils/shell/shellProvider.ts`](annotated/src/utils/shell/shellProvider.ts) | 33 | 35 | 2 | shell 类型与 ShellProvider 接口；bash/powershell 两类能力抽象 |
-| [`utils/cwd.ts`](annotated/src/utils/cwd.ts) | 32 | 36 | 4 | AsyncLocalStorage 实现按异步上下文覆盖 cwd；并发智能体互不污染 |
-| [`utils/settings/allErrors.ts`](annotated/src/utils/settings/allErrors.ts) | 32 | 34 | 2 | 聚合设置校验错误与 MCP 配置错误；打破 settings→mcp 循环依赖 |
-| [`utils/controlMessageCompat.ts`](annotated/src/utils/controlMessageCompat.ts) | 32 | 34 | 2 | 控制消息 requestId→request_id 兼容归一化；防老 iOS 客户端静默丢弃 |
-| [`utils/bash/specs/srun.ts`](annotated/src/utils/bash/specs/srun.ts) | 31 | 33 | 2 | srun 命令规范；SLURM 集群节点执行，选项与位置参数声明 |
-| [`utils/tempfile.ts`](annotated/src/utils/tempfile.ts) | 31 | 33 | 2 | 临时文件路径生成；UUID 或内容哈希稳定标识（保提示缓存前缀） |
-| [`utils/computerUse/inputLoader.ts`](annotated/src/utils/computerUse/inputLoader.ts) | 30 | 33 | 3 | computer-use-input 原生模块惰性加载与缓存；libuv 下主队列挂起警示 |
-| [`utils/semanticBoolean.ts`](annotated/src/utils/semanticBoolean.ts) | 29 | 32 | 3 | 语义布尔 zod 预处理；容错模型给布尔加引号 |
+| 文件                                                                                   | 原文 | 批注版 | 锚点 | 讲什么                                               |
+| ------------------------------------------------------------------------------------ | -- | --- | -- | ------------------------------------------------- |
+| [`utils/settings/managedPath.ts`](annotated/src/utils/settings/managedPath.ts)       | 34 | 37  | 3  | 托管设置目录路径解析；按平台返回固定位置 + drop-in 拆分目录               |
+| [`utils/swarm/constants.ts`](annotated/src/utils/swarm/constants.ts)                 | 33 | 36  | 3  | 队友/swarm 会话常量与命名；socket 名 + 三枚队友环境变量键             |
+| [`utils/shell/shellProvider.ts`](annotated/src/utils/shell/shellProvider.ts)         | 33 | 35  | 2  | shell 类型与 ShellProvider 接口；bash/powershell 两类能力抽象 |
+| [`utils/cwd.ts`](annotated/src/utils/cwd.ts)                                         | 32 | 36  | 4  | AsyncLocalStorage 实现按异步上下文覆盖 cwd；并发智能体互不污染        |
+| [`utils/settings/allErrors.ts`](annotated/src/utils/settings/allErrors.ts)           | 32 | 34  | 2  | 聚合设置校验错误与 MCP 配置错误；打破 settings→mcp 循环依赖           |
+| [`utils/controlMessageCompat.ts`](annotated/src/utils/controlMessageCompat.ts)       | 32 | 34  | 2  | 控制消息 requestId→request_id 兼容归一化；防老 iOS 客户端静默丢弃    |
+| [`utils/bash/specs/srun.ts`](annotated/src/utils/bash/specs/srun.ts)                 | 31 | 33  | 2  | srun 命令规范；SLURM 集群节点执行，选项与位置参数声明                  |
+| [`utils/tempfile.ts`](annotated/src/utils/tempfile.ts)                               | 31 | 33  | 2  | 临时文件路径生成；UUID 或内容哈希稳定标识（保提示缓存前缀）                  |
+| [`utils/computerUse/inputLoader.ts`](annotated/src/utils/computerUse/inputLoader.ts) | 30 | 33  | 3  | computer-use-input 原生模块惰性加载与缓存；libuv 下主队列挂起警示     |
+| [`utils/semanticBoolean.ts`](annotated/src/utils/semanticBoolean.ts)                 | 29 | 32  | 3  | 语义布尔 zod 预处理；容错模型给布尔加引号                           |
 
 三条横切观察：
 
@@ -2842,18 +2836,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份仍是「三十行上下」的叶子小模块，主题横跨「内嵌搜索工具探测、gh 鉴权遥测、Ink 反色高亮、shell 前缀加引号、用户情绪/续写关键词、worktree 轻量探测、策略锁定插件、UUID/AgentId、工具 schema 缓存、OTEL 诊断桥接」——多份刻意绕开重型依赖链或为隐私/缓存做独立小件。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/embeddedTools.ts`](annotated/src/utils/embeddedTools.ts) | 29 | 32 | 3 | 内嵌搜索工具（bfs/ugrep）检测与 bun 二进制路径；仅 ant-native 构建启用 |
-| [`utils/github/ghAuthStatus.ts`](annotated/src/utils/github/ghAuthStatus.ts) | 29 | 33 | 4 | gh CLI 安装/鉴权三态探测；用 auth token 避免网络请求、令牌不进内存 |
-| [`utils/highlightMatch.tsx`](annotated/src/utils/highlightMatch.tsx) | 28 | 30 | 3 | Ink/React 反色高亮匹配片段；JSX 锚点只落签名与收尾行 |
-| [`utils/bash/shellPrefix.ts`](annotated/src/utils/bash/shellPrefix.ts) | 28 | 31 | 3 | shell 前缀字符串拆「路径加参数」分别加引号；含 bash 走间接 runner |
-| [`utils/userPromptKeywords.ts`](annotated/src/utils/userPromptKeywords.ts) | 27 | 32 | 5 | 负面情绪词 / keep going 续写词正则检测 |
-| [`utils/getWorktreePathsPortable.ts`](annotated/src/utils/getWorktreePathsPortable.ts) | 27 | 30 | 3 | 轻量 child_process 探 git worktree 列表；不引 execa 依赖链 |
-| [`utils/plugins/managedPlugins.ts`](annotated/src/utils/plugins/managedPlugins.ts) | 27 | 30 | 3 | 从策略设置读被锁定的插件名集合；仅保护 plugin@marketplace 布尔 |
-| [`utils/uuid.ts`](annotated/src/utils/uuid.ts) | 27 | 32 | 5 | UUID 校验加带前缀 AgentId 生成；依赖 crypto.randomBytes |
-| [`utils/toolSchemaCache.ts`](annotated/src/utils/toolSchemaCache.ts) | 26 | 31 | 5 | 会话级工具 schema 渲染缓存；避免重算约 11K token 工具块 |
-| [`utils/telemetry/logger.ts`](annotated/src/utils/telemetry/logger.ts) | 26 | 29 | 3 | 实现 OTEL DiagLogger 桥接本地日志；仅 error/warn 有功 |
+| 文件                                                                                     | 原文 | 批注版 | 锚点 | 讲什么                                              |
+| -------------------------------------------------------------------------------------- | -- | --- | -- | ------------------------------------------------ |
+| [`utils/embeddedTools.ts`](annotated/src/utils/embeddedTools.ts)                       | 29 | 32  | 3  | 内嵌搜索工具（bfs/ugrep）检测与 bun 二进制路径；仅 ant-native 构建启用 |
+| [`utils/github/ghAuthStatus.ts`](annotated/src/utils/github/ghAuthStatus.ts)           | 29 | 33  | 4  | gh CLI 安装/鉴权三态探测；用 auth token 避免网络请求、令牌不进内存      |
+| [`utils/highlightMatch.tsx`](annotated/src/utils/highlightMatch.tsx)                   | 28 | 30  | 3  | Ink/React 反色高亮匹配片段；JSX 锚点只落签名与收尾行                |
+| [`utils/bash/shellPrefix.ts`](annotated/src/utils/bash/shellPrefix.ts)                 | 28 | 31  | 3  | shell 前缀字符串拆「路径加参数」分别加引号；含 bash 走间接 runner       |
+| [`utils/userPromptKeywords.ts`](annotated/src/utils/userPromptKeywords.ts)             | 27 | 32  | 5  | 负面情绪词 / keep going 续写词正则检测                       |
+| [`utils/getWorktreePathsPortable.ts`](annotated/src/utils/getWorktreePathsPortable.ts) | 27 | 30  | 3  | 轻量 child_process 探 git worktree 列表；不引 execa 依赖链  |
+| [`utils/plugins/managedPlugins.ts`](annotated/src/utils/plugins/managedPlugins.ts)     | 27 | 30  | 3  | 从策略设置读被锁定的插件名集合；仅保护 plugin@marketplace 布尔        |
+| [`utils/uuid.ts`](annotated/src/utils/uuid.ts)                                         | 27 | 32  | 5  | UUID 校验加带前缀 AgentId 生成；依赖 crypto.randomBytes     |
+| [`utils/toolSchemaCache.ts`](annotated/src/utils/toolSchemaCache.ts)                   | 26 | 31  | 5  | 会话级工具 schema 渲染缓存；避免重算约 11K token 工具块            |
+| [`utils/telemetry/logger.ts`](annotated/src/utils/telemetry/logger.ts)                 | 26 | 29  | 3  | 实现 OTEL DiagLogger 桥接本地日志；仅 error/warn 有功        |
 
 三条横切观察：
 
@@ -2871,18 +2865,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份是 utils 收尾带的「二十行上下」叶子小模块，主题横跨「自动模式拒绝记录、Ink 配色主题映射、官方插件市场常量、模型别名与族通配、优雅关闭清理登记、macOS 原生 swift 模块懒加载、额外用量计费判定、独立智能体命名、Zod 转 JSON Schema 缓存、Bun 运行时探测」——多份把「配置/缓存/探测」收口成独立小件，刻意不引重依赖。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/autoModeDenials.ts`](annotated/src/utils/autoModeDenials.ts) | 26 | 32 | 6 | 自动模式分类器最近拒绝命令清单：类型、写入（特性开关 + 截断到上限）、只读读取 |
-| [`utils/ink.ts`](annotated/src/utils/ink.ts) | 26 | 29 | 3 | 颜色名转 Ink 的 TextProps 颜色格式，未知色回退原始 ANSI 色 |
-| [`utils/plugins/officialMarketplace.ts`](annotated/src/utils/plugins/officialMarketplace.ts) | 25 | 29 | 4 | 官方 Anthropic 插件市场常量：来源配置与显示名，启动时自动安装识别 |
-| [`utils/model/aliases.ts`](annotated/src/utils/model/aliases.ts) | 25 | 30 | 5 | 模型别名与模型族通配别名：短名路由 + 允许名单 wildcard 匹配 |
-| [`utils/cleanupRegistry.ts`](annotated/src/utils/cleanupRegistry.ts) | 25 | 30 | 5 | 优雅关闭清理登记处：全局 Set 登记/撤销 + Promise.all 批量执行 |
-| [`utils/computerUse/swiftLoader.ts`](annotated/src/utils/computerUse/swiftLoader.ts) | 23 | 28 | 5 | macOS 原生 @ant/computer-use-swift 模块懒加载与缓存，非 macOS 抛错 |
-| [`utils/extraUsage.ts`](annotated/src/utils/extraUsage.ts) | 23 | 27 | 4 | 额外用量计费判定：综合订阅/快模式/opus-4-6 与 sonnet-4-6 版本 |
-| [`utils/standaloneAgent.ts`](annotated/src/utils/standaloneAgent.ts) | 23 | 27 | 4 | 独立智能体命名：非群组会话返回名，处于群组让位群组上下文 |
-| [`utils/zodToJsonSchema.ts`](annotated/src/utils/zodToJsonSchema.ts) | 23 | 28 | 5 | Zod v4 转 JSON Schema 并按引用身份缓存，扛高频 API 调用 |
-| [`utils/bundledMode.ts`](annotated/src/utils/bundledMode.ts) | 22 | 27 | 5 | 两个 Bun 运行时探测：是否 Bun 启动、是否 Bun 编译独立可执行 |
+| 文件                                                                                           | 原文 | 批注版 | 锚点 | 讲什么                                                  |
+| -------------------------------------------------------------------------------------------- | -- | --- | -- | ---------------------------------------------------- |
+| [`utils/autoModeDenials.ts`](annotated/src/utils/autoModeDenials.ts)                         | 26 | 32  | 6  | 自动模式分类器最近拒绝命令清单：类型、写入（特性开关 + 截断到上限）、只读读取             |
+| [`utils/ink.ts`](annotated/src/utils/ink.ts)                                                 | 26 | 29  | 3  | 颜色名转 Ink 的 TextProps 颜色格式，未知色回退原始 ANSI 色             |
+| [`utils/plugins/officialMarketplace.ts`](annotated/src/utils/plugins/officialMarketplace.ts) | 25 | 29  | 4  | 官方 Anthropic 插件市场常量：来源配置与显示名，启动时自动安装识别               |
+| [`utils/model/aliases.ts`](annotated/src/utils/model/aliases.ts)                             | 25 | 30  | 5  | 模型别名与模型族通配别名：短名路由 + 允许名单 wildcard 匹配                 |
+| [`utils/cleanupRegistry.ts`](annotated/src/utils/cleanupRegistry.ts)                         | 25 | 30  | 5  | 优雅关闭清理登记处：全局 Set 登记/撤销 + Promise.all 批量执行            |
+| [`utils/computerUse/swiftLoader.ts`](annotated/src/utils/computerUse/swiftLoader.ts)         | 23 | 28  | 5  | macOS 原生 @ant/computer-use-swift 模块懒加载与缓存，非 macOS 抛错 |
+| [`utils/extraUsage.ts`](annotated/src/utils/extraUsage.ts)                                   | 23 | 27  | 4  | 额外用量计费判定：综合订阅/快模式/opus-4-6 与 sonnet-4-6 版本           |
+| [`utils/standaloneAgent.ts`](annotated/src/utils/standaloneAgent.ts)                         | 23 | 27  | 4  | 独立智能体命名：非群组会话返回名，处于群组让位群组上下文                         |
+| [`utils/zodToJsonSchema.ts`](annotated/src/utils/zodToJsonSchema.ts)                         | 23 | 28  | 5  | Zod v4 转 JSON Schema 并按引用身份缓存，扛高频 API 调用             |
+| [`utils/bundledMode.ts`](annotated/src/utils/bundledMode.ts)                                 | 22 | 27  | 5  | 两个 Bun 运行时探测：是否 Bun 启动、是否 Bun 编译独立可执行                |
 
 三条横切观察：
 
@@ -2900,18 +2894,18 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十份是 utils 收尾带的「二十行上下」叶子小模块，主题横跨「shell 工具名登记与 PowerShell 开关判据、会话级环境变量表、全局配置常量（通知渠道/编辑器/队友模式）、命令生命周期观察者、对等节点地址解析、状态提示 token 估算、插件策略拦截、bash 子命令规格与聚合入口、macOS 钥匙串凭证便携化」——多份刻意保持「叶子模块、零重依赖、只做一件事」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/shell/shellToolUtils.ts`](annotated/src/utils/shell/shellToolUtils.ts) | 22 | 25 | 3 | shell 工具名数组（Bash+PowerShell）+ Windows 上 PowerShell 工具的开关判据 |
-| [`utils/sessionEnvVars.ts`](annotated/src/utils/sessionEnvVars.ts) | 22 | 26 | 4 | 会话级环境变量 Map：读/写/删/清四个纯函数 |
-| [`utils/configConstants.ts`](annotated/src/utils/configConstants.ts) | 21 | 25 | 4 | 三族全局配置常量：通知渠道、编辑器模式、队友模式（独立成文件避循环依赖） |
-| [`utils/commandLifecycle.ts`](annotated/src/utils/commandLifecycle.ts) | 21 | 25 | 4 | 命令生命周期极简观察者：单一监听器 + started/completed 通知 |
-| [`utils/peerAddress.ts`](annotated/src/utils/peerAddress.ts) | 21 | 24 | 3 | 对等节点地址解析：uds/bridge/other 三种 scheme 的拆包 |
-| [`utils/statusNoticeHelpers.ts`](annotated/src/utils/statusNoticeHelpers.ts) | 20 | 23 | 3 | agent 描述累计 token 估算（阈值 15000），供状态提示折叠 |
-| [`utils/plugins/pluginPolicy.ts`](annotated/src/utils/plugins/pluginPolicy.ts) | 20 | 23 | 3 | 插件策略拦截：读 policySettings 判断某插件是否被强制禁用 |
-| [`utils/bash/specs/timeout.ts`](annotated/src/utils/bash/specs/timeout.ts) | 20 | 23 | 3 | bash 子命令 timeout 的规格：duration 与 command 两个参数 |
-| [`utils/authPortable.ts`](annotated/src/utils/authPortable.ts) | 19 | 22 | 3 | macOS 钥匙串删除 API key + 配置脱敏（末 20 字符） |
-| [`utils/bash/specs/index.ts`](annotated/src/utils/bash/specs/index.ts) | 18 | 21 | 3 | bash 子命令规格聚合入口：七个规格拼成数组并满足类型约束 |
+| 文件                                                                             | 原文 | 批注版 | 锚点 | 讲什么                                                        |
+| ------------------------------------------------------------------------------ | -- | --- | -- | ---------------------------------------------------------- |
+| [`utils/shell/shellToolUtils.ts`](annotated/src/utils/shell/shellToolUtils.ts) | 22 | 25  | 3  | shell 工具名数组（Bash+PowerShell）+ Windows 上 PowerShell 工具的开关判据 |
+| [`utils/sessionEnvVars.ts`](annotated/src/utils/sessionEnvVars.ts)             | 22 | 26  | 4  | 会话级环境变量 Map：读/写/删/清四个纯函数                                   |
+| [`utils/configConstants.ts`](annotated/src/utils/configConstants.ts)           | 21 | 25  | 4  | 三族全局配置常量：通知渠道、编辑器模式、队友模式（独立成文件避循环依赖）                       |
+| [`utils/commandLifecycle.ts`](annotated/src/utils/commandLifecycle.ts)         | 21 | 25  | 4  | 命令生命周期极简观察者：单一监听器 + started/completed 通知                   |
+| [`utils/peerAddress.ts`](annotated/src/utils/peerAddress.ts)                   | 21 | 24  | 3  | 对等节点地址解析：uds/bridge/other 三种 scheme 的拆包                    |
+| [`utils/statusNoticeHelpers.ts`](annotated/src/utils/statusNoticeHelpers.ts)   | 20 | 23  | 3  | agent 描述累计 token 估算（阈值 15000），供状态提示折叠                      |
+| [`utils/plugins/pluginPolicy.ts`](annotated/src/utils/plugins/pluginPolicy.ts) | 20 | 23  | 3  | 插件策略拦截：读 policySettings 判断某插件是否被强制禁用                       |
+| [`utils/bash/specs/timeout.ts`](annotated/src/utils/bash/specs/timeout.ts)     | 20 | 23  | 3  | bash 子命令 timeout 的规格：duration 与 command 两个参数               |
+| [`utils/authPortable.ts`](annotated/src/utils/authPortable.ts)                 | 19 | 22  | 3  | macOS 钥匙串删除 API key + 配置脱敏（末 20 字符）                        |
+| [`utils/bash/specs/index.ts`](annotated/src/utils/bash/specs/index.ts)         | 18 | 21  | 3  | bash 子命令规格聚合入口：七个规格拼成数组并满足类型约束                             |
 
 三条横切观察：
 
@@ -2929,23 +2923,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 14 行一路取到 8 行（小文件多取到单批 15 上限）；主题横跨「macOS 按键映射、输入框默认 shell 解析、系统提示品牌类型、浏览器构建替换入口、bash 子命令纯数据规格、Promise 垫片、零依赖数组工具、沙箱违规标签清理、记忆类型表、工作树开关写死、零依赖 UA 串、队友默认模型回退、设置 schema 导出」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为避开 polyfill / 兼容旧 Node / 切断循环依赖而从大文件抽离。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/keyboardShortcuts.ts`](annotated/src/utils/keyboardShortcuts.ts) | 14 | 17 | 3 | macOS 终端「Option+字母」特殊字符 → 按键绑定映射（思考/模型/快速模式开关） |
-| [`utils/shell/resolveDefaultShell.ts`](annotated/src/utils/shell/resolveDefaultShell.ts) | 14 | 16 | 2 | 输入框 `!` 命令默认 shell 解析：设置优先、回退 bash、不自动翻 PowerShell |
-| [`utils/systemPromptType.ts`](annotated/src/utils/systemPromptType.ts) | 14 | 17 | 3 | 品牌类型 SystemPrompt（只读字符串数组 + __brand 身份标记）与工厂函数 |
-| [`utils/crypto.ts`](annotated/src/utils/crypto.ts) | 13 | 15 | 2 | 浏览器构建替换入口：避免 crypto-browserify polyfill，且必须用 import-then-export 保活绑定 |
-| [`utils/bash/specs/sleep.ts`](annotated/src/utils/bash/specs/sleep.ts) | 13 | 16 | 3 | bash 内置 sleep 命令的纯数据规格（duration 参数） |
-| [`utils/bash/specs/nohup.ts`](annotated/src/utils/bash/specs/nohup.ts) | 13 | 16 | 3 | bash 内置 nohup 命令的纯数据规格（command 参数） |
-| [`utils/withResolvers.ts`](annotated/src/utils/withResolvers.ts) | 13 | 15 | 2 | Promise.withResolvers 垫片（Node 18 兼容），返回 promise/resolve/reject 三元组 |
-| [`utils/bash/specs/time.ts`](annotated/src/utils/bash/specs/time.ts) | 13 | 16 | 3 | bash 内置 time 命令的纯数据规格（command 参数） |
-| [`utils/array.ts`](annotated/src/utils/array.ts) | 13 | 17 | 4 | 三个零依赖数组工具：intersperse / count / uniq |
-| [`utils/sandbox/sandbox-ui-utils.ts`](annotated/src/utils/sandbox/sandbox-ui-utils.ts) | 12 | 14 | 2 | 清理 `<sandbox_violations>` 标签便于干净展示报错 |
-| [`utils/memory/types.ts`](annotated/src/utils/memory/types.ts) | 12 | 15 | 3 | 记忆类型取值列表（按 TEAMMEM 特性追加 TeamMem）与派生类型 |
-| [`utils/worktreeModeEnabled.ts`](annotated/src/utils/worktreeModeEnabled.ts) | 11 | 13 | 2 | 工作树模式现已无条件开启（修复缓存默认吞掉 --worktree） |
-| [`utils/userAgent.ts`](annotated/src/utils/userAgent.ts) | 10 | 12 | 2 | 零依赖 User-Agent 辅助（claude-code/<版本>），不牵动 auth.ts 依赖树 |
-| [`utils/swarm/teammateModel.ts`](annotated/src/utils/swarm/teammateModel.ts) | 10 | 13 | 3 | 新队友默认模型回退（未设则 Opus 4.6，需按 provider 区分） |
-| [`utils/settings/schemaOutput.ts`](annotated/src/utils/settings/schemaOutput.ts) | 8 | 10 | 2 | 把 SettingsSchema 转成 JSON Schema 字符串输出 |
+| 文件                                                                                       | 原文 | 批注版 | 锚点 | 讲什么                                                                  |
+| ---------------------------------------------------------------------------------------- | -- | --- | -- | -------------------------------------------------------------------- |
+| [`utils/keyboardShortcuts.ts`](annotated/src/utils/keyboardShortcuts.ts)                 | 14 | 17  | 3  | macOS 终端「Option+字母」特殊字符 → 按键绑定映射（思考/模型/快速模式开关）                       |
+| [`utils/shell/resolveDefaultShell.ts`](annotated/src/utils/shell/resolveDefaultShell.ts) | 14 | 16  | 2  | 输入框 `!` 命令默认 shell 解析：设置优先、回退 bash、不自动翻 PowerShell                   |
+| [`utils/systemPromptType.ts`](annotated/src/utils/systemPromptType.ts)                   | 14 | 17  | 3  | 品牌类型 SystemPrompt（只读字符串数组 + \_\_brand 身份标记）与工厂函数                     |
+| [`utils/crypto.ts`](annotated/src/utils/crypto.ts)                                       | 13 | 15  | 2  | 浏览器构建替换入口：避免 crypto-browserify polyfill，且必须用 import-then-export 保活绑定 |
+| [`utils/bash/specs/sleep.ts`](annotated/src/utils/bash/specs/sleep.ts)                   | 13 | 16  | 3  | bash 内置 sleep 命令的纯数据规格（duration 参数）                                  |
+| [`utils/bash/specs/nohup.ts`](annotated/src/utils/bash/specs/nohup.ts)                   | 13 | 16  | 3  | bash 内置 nohup 命令的纯数据规格（command 参数）                                   |
+| [`utils/withResolvers.ts`](annotated/src/utils/withResolvers.ts)                         | 13 | 15  | 2  | Promise.withResolvers 垫片（Node 18 兼容），返回 promise/resolve/reject 三元组   |
+| [`utils/bash/specs/time.ts`](annotated/src/utils/bash/specs/time.ts)                     | 13 | 16  | 3  | bash 内置 time 命令的纯数据规格（command 参数）                                    |
+| [`utils/array.ts`](annotated/src/utils/array.ts)                                         | 13 | 17  | 4  | 三个零依赖数组工具：intersperse / count / uniq                                 |
+| [`utils/sandbox/sandbox-ui-utils.ts`](annotated/src/utils/sandbox/sandbox-ui-utils.ts)   | 12 | 14  | 2  | 清理 `<sandbox_violations>` 标签便于干净展示报错                                 |
+| [`utils/memory/types.ts`](annotated/src/utils/memory/types.ts)                           | 12 | 15  | 3  | 记忆类型取值列表（按 TEAMMEM 特性追加 TeamMem）与派生类型                                |
+| [`utils/worktreeModeEnabled.ts`](annotated/src/utils/worktreeModeEnabled.ts)             | 11 | 13  | 2  | 工作树模式现已无条件开启（修复缓存默认吞掉 --worktree）                                    |
+| [`utils/userAgent.ts`](annotated/src/utils/userAgent.ts)                                 | 10 | 12  | 2  | 零依赖 User-Agent 辅助（claude-code/<版本>），不牵动 auth.ts 依赖树                  |
+| [`utils/swarm/teammateModel.ts`](annotated/src/utils/swarm/teammateModel.ts)             | 10 | 13  | 3  | 新队友默认模型回退（未设则 Opus 4.6，需按 provider 区分）                               |
+| [`utils/settings/schemaOutput.ts`](annotated/src/utils/settings/schemaOutput.ts)         | 8  | 10  | 2  | 把 SettingsSchema 转成 JSON Schema 字符串输出                                |
 
 三条横切观察：
 
@@ -2963,11 +2957,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批三份是 utils 子树最后的叶子：均为 8 行微型模块，清掉即 `src/utils/` 全目录 **564/564 = 100% 清零**（行覆盖 180,487/180,487）。这标志着 hooks → utils 两条子树依次全清，流水线正式转入 `src/components/`。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/lazySchema.ts`](annotated/src/utils/lazySchema.ts) | 8 | 10 | 2 | 惰性 schema 工厂：把 Zod 构造从模块初始化推迟到首次访问，`??=` 一次性记忆化 |
-| [`utils/memory/versions.ts`](annotated/src/utils/memory/versions.ts) | 8 | 10 | 2 | 同步判断目录是否处于 git 仓库内（`findGitRoot` 向上找 `.git`，异步请用 `dirIsInGitRepo`） |
-| [`utils/messagePredicates.ts`](annotated/src/utils/messagePredicates.ts) | 8 | 10 | 2 | 类型守卫 `isHumanTurn`：`tool_result` 与真人同带 `type:'user'`，靠 `isMeta` + `toolUseResult` 双重排除 |
+| 文件                                                                       | 原文 | 批注版 | 锚点 | 讲什么                                                                                    |
+| ------------------------------------------------------------------------ | -- | --- | -- | -------------------------------------------------------------------------------------- |
+| [`utils/lazySchema.ts`](annotated/src/utils/lazySchema.ts)               | 8  | 10  | 2  | 惰性 schema 工厂：把 Zod 构造从模块初始化推迟到首次访问，`??=` 一次性记忆化                                        |
+| [`utils/memory/versions.ts`](annotated/src/utils/memory/versions.ts)     | 8  | 10  | 2  | 同步判断目录是否处于 git 仓库内（`findGitRoot` 向上找 `.git`，异步请用 `dirIsInGitRepo`）                     |
+| [`utils/messagePredicates.ts`](annotated/src/utils/messagePredicates.ts) | 8  | 10  | 2  | 类型守卫 `isHumanTurn`：`tool_result` 与真人同带 `type:'user'`，靠 `isMeta` + `toolUseResult` 双重排除 |
 
 横切观察：
 
@@ -2984,10 +2978,10 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批转入 `src/components/` 后首次取件。该子树与前两条不同：单文件动辄 800–1,800 行，且多为 React Compiler 编译产物（满屏 `_c(n)` 记忆槽与 `t1..tN` 临时变量）。因此本批改为「**按源行量取件**」——只取最大的 2 份共 3,397 行，仍是历史单批体量的 5–6 倍，锚点密度相应降到约每 46 行一处，全部落在函数签名/语句收尾/常量声明行。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
+| 文件                                                                               | 原文   | 批注版  | 锚点 | 讲什么                                                              |
+| -------------------------------------------------------------------------------- | ---- | ---- | -- | ---------------------------------------------------------------- |
 | [`components/Settings/Config.tsx`](annotated/src/components/Settings/Config.tsx) | 1822 | 1858 | 36 | `/config` 主面板：全局配置 + settings 文件 + AppState 三处状态聚合，即时落盘 + 挂载快照回滚 |
-| [`components/LogSelector.tsx`](annotated/src/components/LogSelector.tsx) | 1575 | 1612 | 37 | `/resume` 历史选择器：标签/分支/工作树过滤、Fuse 全文检索、会话预览与重命名 |
+| [`components/LogSelector.tsx`](annotated/src/components/LogSelector.tsx)         | 1575 | 1612 | 37 | `/resume` 历史选择器：标签/分支/工作树过滤、Fuse 全文检索、会话预览与重命名                   |
 
 横切观察：
 
@@ -3006,11 +3000,11 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 第二批 components，延续「按源行量取件」：取最大的 3 份共 3,573 行，密度与上批持平（约每 32 行一处锚点）。三份的共同点是**状态机都很重**——统计面板是「全量挂起 + 区间增量」的双层加载，权限面板是「六种整屏视图」的早退链，询问对话框是「表单焦点 / 手风琴 / 等待阶段」的多层按键分派。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/Stats.tsx`](annotated/src/components/Stats.tsx) | 1227 | 1263 | 35 | `/stats` 用量统计：热力图 + 概览/模型双标签 + 区间循环，另有 ANSI 截图路径 |
-| [`components/permissions/rules/PermissionRuleList.tsx`](annotated/src/components/permissions/rules/PermissionRuleList.tsx) | 1178 | 1215 | 36 | `/permissions` 五标签规则管理：增删规则与工作区目录，内存生效与落盘分离 |
-| [`components/mcp/ElicitationDialog.tsx`](annotated/src/components/mcp/ElicitationDialog.tsx) | 1168 | 1210 | 41 | MCP 反向询问：按 JSON Schema 动态渲染表单，form/url 两种模式 |
+| 文件                                                                                                                         | 原文   | 批注版  | 锚点 | 讲什么                                              |
+| -------------------------------------------------------------------------------------------------------------------------- | ---- | ---- | -- | ------------------------------------------------ |
+| [`components/Stats.tsx`](annotated/src/components/Stats.tsx)                                                               | 1227 | 1263 | 35 | `/stats` 用量统计：热力图 + 概览/模型双标签 + 区间循环，另有 ANSI 截图路径 |
+| [`components/permissions/rules/PermissionRuleList.tsx`](annotated/src/components/permissions/rules/PermissionRuleList.tsx) | 1178 | 1215 | 36 | `/permissions` 五标签规则管理：增删规则与工作区目录，内存生效与落盘分离      |
+| [`components/mcp/ElicitationDialog.tsx`](annotated/src/components/mcp/ElicitationDialog.tsx)                               | 1168 | 1210 | 41 | MCP 反向询问：按 JSON Schema 动态渲染表单，form/url 两种模式      |
 
 横切观察：
 
@@ -3025,13 +3019,13 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 105 批：虚拟列表、滚动总控、远程会话详情（2,995 行，118 锚点）
 
-第三批 components，仍按源行量取件：3 份共 2,995 行，密度约每 25 行一处锚点。三份的共同点是**「视口」与「手势」的时间差**——虚拟列表要在渲染完成之后才知道元素在哪，滚动总控要在几十毫秒的滚轮节奏里推断设备类型，远程会话详情要在日志还没归一化时就算出「几个代理在干活」。
+第三批 components，仍按源行量取件：3 份共 2,995 行，密度约每 25 行一处锚点。三份的共同点&#x662F;**「视口」与「手势」的时间差**——虚拟列表要在渲染完成之后才知道元素在哪，滚动总控要在几十毫秒的滚轮节奏里推断设备类型，远程会话详情要在日志还没归一化时就算出「几个代理在干活」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/VirtualMessageList.tsx`](annotated/src/components/VirtualMessageList.tsx) | 1081 | 1123 | 41 | 全屏虚拟滚动：窗口切片、jump/step/highlight 三段搜索、粘性提示头 |
-| [`components/ScrollKeybindingHandler.tsx`](annotated/src/components/ScrollKeybindingHandler.tsx) | 1011 | 1056 | 44 | 滚轮加速三条曲线、键盘翻页、选区与滚动联动、拖动自动滚动 |
-| [`components/tasks/RemoteSessionDetailDialog.tsx`](annotated/src/components/tasks/RemoteSessionDetailDialog.tsx) | 903 | 937 | 33 | 远程会话三视图分派：ultraplan、ultrareview 阶段流水线、通用详情 |
+| 文件                                                                                                               | 原文   | 批注版  | 锚点 | 讲什么                                        |
+| ---------------------------------------------------------------------------------------------------------------- | ---- | ---- | -- | ------------------------------------------ |
+| [`components/VirtualMessageList.tsx`](annotated/src/components/VirtualMessageList.tsx)                           | 1081 | 1123 | 41 | 全屏虚拟滚动：窗口切片、jump/step/highlight 三段搜索、粘性提示头 |
+| [`components/ScrollKeybindingHandler.tsx`](annotated/src/components/ScrollKeybindingHandler.tsx)                 | 1011 | 1056 | 44 | 滚轮加速三条曲线、键盘翻页、选区与滚动联动、拖动自动滚动               |
+| [`components/tasks/RemoteSessionDetailDialog.tsx`](annotated/src/components/tasks/RemoteSessionDetailDialog.tsx) | 903  | 937  | 33 | 远程会话三视图分派：ultraplan、ultrareview 阶段流水线、通用详情 |
 
 横切观察：
 
@@ -3048,14 +3042,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 106 批：消息选择器、智能体菜单、退出计划权限、团队对话框（3,114 行，99 锚点）
 
-第四批 components，仍按源行量取件：4 份共 3,114 行（比上批多取 1 份——四份恰好卡在 830/800/768/715 的紧凑区间，凑成约 3,100 行维持稳定密度）。四份的共同点是**「对话 / 团队的人机协作面板」**：消息选择器在「恢复会话」时让用户挑要回滚到哪条消息并预览 diff；智能体菜单与团队对话框是 swarm 队友的增删查改与运行管控；退出计划权限把「批准退出计划模式」做成一次带上下文压制的权限请求。
+第四批 components，仍按源行量取件：4 份共 3,114 行（比上批多取 1 份——四份恰好卡在 830/800/768/715 的紧凑区间，凑成约 3,100 行维持稳定密度）。四份的共同点&#x662F;**「对话 / 团队的人机协作面板」**：消息选择器在「恢复会话」时让用户挑要回滚到哪条消息并预览 diff；智能体菜单与团队对话框是 swarm 队友的增删查改与运行管控；退出计划权限把「批准退出计划模式」做成一次带上下文压制的权限请求。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/MessageSelector.tsx`](annotated/src/components/MessageSelector.tsx) | 831 | 859 | 27 | 恢复会话的消息选择器：isTextBlock 判定、RestoreOption 结构、Props、messageOptions 构造、双 useEffect 同步、getRestoreOptions/restoreConversationDirectly/handleSelect/onSelectRestoreOption/handleEscape/useKeybindings 链路，末尾 computeDiffStatsBetweenMessages/selectableUserMessagesFilter/messagesAfterAreOnlySynthetic 三个边界工具 |
-| [`components/agents/AgentsMenu.tsx`](annotated/src/components/agents/AgentsMenu.tsx) | 800 | 822 | 21 | swarm 智能体管理菜单：modeState 分派 list-agents/create-agent/agent-menu/view-agent/delete-confirm/edit-agent 六视图，末尾一排 `_temp0.._temp9` 同构谓词（外加一个通用 `_temp`）做行内可见性判定 |
-| [`components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`](annotated/src/components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx) | 768 | 793 | 24 | 退出计划模式权限请求：buildPermissionUpdates/buildPlanApprovalOptions/autoNameSessionFromPlan/getContextUsedPercent 四个顶层 helper + 主组件，把「批准 / 拒绝 / 改计划」做成带上下文占用百分比的模态 |
-| [`components/teams/TeamsDialog.tsx`](annotated/src/components/teams/TeamsDialog.tsx) | 715 | 743 | 27 | 团队协作对话框：主组件 + TeamDetailView/TeammateListItem/TeammateDetailView 三个编译子组件，killTeammate/viewTeammateOutput/toggleTeammateVisibility/hideTeammate/showTeammate/stub/sendModeChangeToTeammate/cycleTeammateMode/cycleAllTeammateModes 等队友运行管控 |
+| 文件                                                                                                                                                                                               | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`components/MessageSelector.tsx`](annotated/src/components/MessageSelector.tsx)                                                                                                                 | 831 | 859 | 27 | 恢复会话的消息选择器：isTextBlock 判定、RestoreOption 结构、Props、messageOptions 构造、双 useEffect 同步、getRestoreOptions/restoreConversationDirectly/handleSelect/onSelectRestoreOption/handleEscape/useKeybindings 链路，末尾 computeDiffStatsBetweenMessages/selectableUserMessagesFilter/messagesAfterAreOnlySynthetic 三个边界工具 |
+| [`components/agents/AgentsMenu.tsx`](annotated/src/components/agents/AgentsMenu.tsx)                                                                                                             | 800 | 822 | 21 | swarm 智能体管理菜单：modeState 分派 list-agents/create-agent/agent-menu/view-agent/delete-confirm/edit-agent 六视图，末尾一排 `_temp0.._temp9` 同构谓词（外加一个通用 `_temp`）做行内可见性判定                                                                                                                                             |
+| [`components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`](annotated/src/components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx) | 768 | 793 | 24 | 退出计划模式权限请求：buildPermissionUpdates/buildPlanApprovalOptions/autoNameSessionFromPlan/getContextUsedPercent 四个顶层 helper + 主组件，把「批准 / 拒绝 / 改计划」做成带上下文占用百分比的模态                                                                                                                                              |
+| [`components/teams/TeamsDialog.tsx`](annotated/src/components/teams/TeamsDialog.tsx)                                                                                                             | 715 | 743 | 27 | 团队协作对话框：主组件 + TeamDetailView/TeammateListItem/TeammateDetailView 三个编译子组件，killTeammate/viewTeammateOutput/toggleTeammateVisibility/hideTeammate/showTeammate/stub/sendModeChangeToTeammate/cycleTeammateMode/cycleAllTeammateModes 等队友运行管控                                                              |
 
 横切观察：
 
@@ -3070,14 +3064,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 107 批：选择组件、后台任务总管、MCP 远程服务器菜单（2,644 行，93 锚点）
 
-第五批 components，仍按源行量取件：4 份共 2,644 行（690 / 653 / 652 / 649 的紧凑区间）。四份的主题是**「终端里的交互基础设施」**：CustomSelect 是全产品所有菜单/弹窗的选择底座，BackgroundTasksDialog 是七类后台任务的统一总管，MCPRemoteServerMenu 是远程 MCP 服务器的认证与重连中枢——三份都有「多分支互斥视图」或「状态机 reducer」的骨架。
+第五批 components，仍按源行量取件：4 份共 2,644 行（690 / 653 / 652 / 649 的紧凑区间）。四份的主题&#x662F;**「终端里的交互基础设施」**：CustomSelect 是全产品所有菜单/弹窗的选择底座，BackgroundTasksDialog 是七类后台任务的统一总管，MCPRemoteServerMenu 是远程 MCP 服务器的认证与重连中枢——三份都有「多分支互斥视图」或「状态机 reducer」的骨架。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/CustomSelect/select.tsx`](annotated/src/components/CustomSelect/select.tsx) | 690 | 714 | 23 | 选择底座展示层：三种版式（expanded / compact-vertical / compact）各自渲染分支；getTextContent 摊平 ReactNode 算列宽；双列布局靠手动补空格对齐；TwoColumnRow 自己声明原生光标；尾部 8 个 _tempN 同构谓词 |
-| [`components/CustomSelect/use-select-navigation.ts`](annotated/src/components/CustomSelect/use-select-navigation.ts) | 653 | 674 | 21 | 选择底座状态机：useReducer 管理 focusValue 与可视窗口，六种 action；最小滚动策略（焦点到边缘、绝不居中）；选项集变化时带旧视口重建，光标尽量留原地；validatedFocusedValue 防焦点悬空 |
-| [`components/tasks/BackgroundTasksDialog.tsx`](annotated/src/components/tasks/BackgroundTasksDialog.tsx) | 652 | 679 | 26 | 后台任务总管：七类任务统一列表；x 停止 / f 前台化 / Enter 详情的键位分派；WORKFLOW_SCRIPTS 与 MONITOR_TOOL 特性门控 require；allSelectableItems 顺序必须与 JSX 渲染顺序一致的隐式契约；goBackToList 的过期状态陷阱 |
-| [`components/mcp/MCPRemoteServerMenu.tsx`](annotated/src/components/mcp/MCPRemoteServerMenu.tsx) | 649 | 673 | 23 | MCP 远程服务器菜单：四条独立异步流程（标准 OAuth / claudeai 认证 / claudeai 清除认证 / 重连）各带早退加载视图；isEffectivelyAuthenticated 驱动菜单项；手动粘贴回调 URL 的降级路径；revoke 保留 step-up 状态的取舍 |
+| 文件                                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`components/CustomSelect/select.tsx`](annotated/src/components/CustomSelect/select.tsx)                             | 690 | 714 | 23 | 选择底座展示层：三种版式（expanded / compact-vertical / compact）各自渲染分支；getTextContent 摊平 ReactNode 算列宽；双列布局靠手动补空格对齐；TwoColumnRow 自己声明原生光标；尾部 8 个 \_tempN 同构谓词        |
+| [`components/CustomSelect/use-select-navigation.ts`](annotated/src/components/CustomSelect/use-select-navigation.ts) | 653 | 674 | 21 | 选择底座状态机：useReducer 管理 focusValue 与可视窗口，六种 action；最小滚动策略（焦点到边缘、绝不居中）；选项集变化时带旧视口重建，光标尽量留原地；validatedFocusedValue 防焦点悬空                                    |
+| [`components/tasks/BackgroundTasksDialog.tsx`](annotated/src/components/tasks/BackgroundTasksDialog.tsx)             | 652 | 679 | 26 | 后台任务总管：七类任务统一列表；x 停止 / f 前台化 / Enter 详情的键位分派；WORKFLOW_SCRIPTS 与 MONITOR_TOOL 特性门控 require；allSelectableItems 顺序必须与 JSX 渲染顺序一致的隐式契约；goBackToList 的过期状态陷阱 |
+| [`components/mcp/MCPRemoteServerMenu.tsx`](annotated/src/components/mcp/MCPRemoteServerMenu.tsx)                     | 649 | 673 | 23 | MCP 远程服务器菜单：四条独立异步流程（标准 OAuth / claudeai 认证 / claudeai 清除认证 / 重连）各带早退加载视图；isEffectivelyAuthenticated 驱动菜单项；手动粘贴回调 URL 的降级路径；revoke 保留 step-up 状态的取舍     |
 
 横切观察：
 
@@ -3086,20 +3080,20 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 - **异步流程的「完成文案三分法」**：MCPRemoteServerMenu 每条流程的成功 / 半成功（needs-auth）/ 失败都有独立文案，且半成功都提示「可能要手动重启」——连接管理器不保证热生效，宁可提示用户重启也不静默装好。
 - **useEffectEvent 的教科书用法**：onDoneEvent 让「引用稳定」与「永远调最新回调」同时成立，effect 不重跑、闭包不过期——React 官方为事件与 effect 解耦提供的原语，本文件是标准范例。
 
-踩坑：`use-select-navigation.ts` 的数据文件名初稿保留了连字符（slug 规则要求 `-` 也换成 `_`），annotate.py 找不到数据文件报「找不到批注数据」，重命名为 `use_select_navigation` 后通过——slug 规则原文「把 `/` `.` `-` 换成 `_`」中的 `-` 这次才真正踩到。三份编译产物 JSX 内部零插入，锚点全落语句收尾行 / 常量声明行 / `if` 与 `case` 行前；select.tsx 尾部注释块（625 行起）描述的是 TwoColumnRow 但被编译器提升到 _temp9 之前，批注里特别标注「按语义归属读」。预检 93 锚点一次全过（含块注释内部续行扫描与 `after` 落 `*/` 收尾行检测）；annotate 四次零 `⟳`、零 `⚠`，3 处长批注自动折行，增量 96 = 93 锚点 + 3。
+踩坑：`use-select-navigation.ts` 的数据文件名初稿保留了连字符（slug 规则要求 `-` 也换成 `_`），annotate.py 找不到数据文件报「找不到批注数据」，重命名为 `use_select_navigation` 后通过——slug 规则原文「把 `/` `.` `-` 换成 `_`」中的 `-` 这次才真正踩到。三份编译产物 JSX 内部零插入，锚点全落语句收尾行 / 常量声明行 / `if` 与 `case` 行前；select.tsx 尾部注释块（625 行起）描述的是 TwoColumnRow 但被编译器提升到 \_temp9 之前，批注里特别标注「按语义归属读」。预检 93 锚点一次全过（含块注释内部续行扫描与 `after` 落 `*/` 收尾行检测）；annotate 四次零 `⟳`、零 `⚠`，3 处长批注自动折行，增量 96 = 93 锚点 + 3。
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1172 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2294 条加内链 674 条，0 失效；全仓 1172/1902 文件、360,066/513,237 行、70%（行覆盖首次破 70%）。
 
 ### components 第 108 批：权限请求表单、全屏布局壳、OAuth 登录流程、反馈上报（2,505 行，126 锚点）
 
-第六批 components，按源行量取件：4 份共 2,505 行（645 / 637 / 631 / 592）。四份的主题是**「用户对话框的四种门面」**——向用户提问的权限表单（多问题页签加图片粘贴）、REPL 全屏布局壳（粘性滚动加未读 pill）、OAuth 登录状态机（八态加浏览器回跳兜底）、反馈上报对话框（四步流加脱敏与 GitHub issue 拼链）。四份都重交互、都靠状态机驱动画面，读法一致：先抓状态类型，再看动作分派，最后看渲染分支。
+第六批 components，按源行量取件：4 份共 2,505 行（645 / 637 / 631 / 592）。四份的主题&#x662F;**「用户对话框的四种门面」**——向用户提问的权限表单（多问题页签加图片粘贴）、REPL 全屏布局壳（粘性滚动加未读 pill）、OAuth 登录状态机（八态加浏览器回跳兜底）、反馈上报对话框（四步流加脱敏与 GitHub issue 拼链）。四份都重交互、都靠状态机驱动画面，读法一致：先抓状态类型，再看动作分派，最后看渲染分支。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx) | 645 | 677 | 31 | 提问权限表单：语法高亮走 Suspense 加 use 挂起；尺寸预算（预览框分栏公式、chrome 15 行开销）；每问题独立粘贴图片；四种终点（取消 / 向 Claude 回话 / 结束计划访谈 / 提交回答）全部带遥测来源 |
-| [`components/FullscreenLayout.tsx`](annotated/src/components/FullscreenLayout.tsx) | 637 | 669 | 31 | 全屏布局壳：useUnseenDivider 的 count 与 scrollHeight 双快照；未读计数跳过纯工具条目并下限 1；pillVisible 用 useSyncExternalStore 订阅滚动；粘性头固定 1 行防位移；模态弹层包 ModalContext 下发尺寸 |
-| [`components/ConsoleOAuthFlow.tsx`](annotated/src/components/ConsoleOAuthFlow.tsx) | 631 | 662 | 30 | OAuth 登录状态机：八态联合类型加 switch 分派；toRetry 与 nextState 让失败回到正确状态；浏览器回跳 3 秒后出粘贴提示；单字符 c 复制 URL；企业 TLS 代理的 SSL 错误转可行动提示；setup-token 一年期令牌不进钥匙串 |
-| [`components/Feedback.tsx`](annotated/src/components/Feedback.tsx) | 592 | 627 | 34 | 反馈上报：四步流（输入 / 同意 / 提交 / 完成）；redactSensitiveInfo 逐类替换凭证；报告含转录、子代理转录、内存错误与环境信息；标题由 Haiku 生成带兜底；GitHub issue 链接按 7250 字符预算三段式截断；ZDR 组织专属文案 |
+| 文件                                                                                                                                                                                                           | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --- | -- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx) | 645 | 677 | 31 | 提问权限表单：语法高亮走 Suspense 加 use 挂起；尺寸预算（预览框分栏公式、chrome 15 行开销）；每问题独立粘贴图片；四种终点（取消 / 向 Claude 回话 / 结束计划访谈 / 提交回答）全部带遥测来源                              |
+| [`components/FullscreenLayout.tsx`](annotated/src/components/FullscreenLayout.tsx)                                                                                                                           | 637 | 669 | 31 | 全屏布局壳：useUnseenDivider 的 count 与 scrollHeight 双快照；未读计数跳过纯工具条目并下限 1；pillVisible 用 useSyncExternalStore 订阅滚动；粘性头固定 1 行防位移；模态弹层包 ModalContext 下发尺寸 |
+| [`components/ConsoleOAuthFlow.tsx`](annotated/src/components/ConsoleOAuthFlow.tsx)                                                                                                                           | 631 | 662 | 30 | OAuth 登录状态机：八态联合类型加 switch 分派；toRetry 与 nextState 让失败回到正确状态；浏览器回跳 3 秒后出粘贴提示；单字符 c 复制 URL；企业 TLS 代理的 SSL 错误转可行动提示；setup-token 一年期令牌不进钥匙串         |
+| [`components/Feedback.tsx`](annotated/src/components/Feedback.tsx)                                                                                                                                           | 592 | 627 | 34 | 反馈上报：四步流（输入 / 同意 / 提交 / 完成）；redactSensitiveInfo 逐类替换凭证；报告含转录、子代理转录、内存错误与环境信息；标题由 Haiku 生成带兜底；GitHub issue 链接按 7250 字符预算三段式截断；ZDR 组织专属文案         |
 
 横切观察：
 
@@ -3114,14 +3108,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 109 批：hooks 配置浏览器、工具白名单选择器、转圈器家族、启动欢迎屏（2,245 行，121 锚点）
 
-第七批 components，按源行量取件：4 份共 2,245 行（578 / 562 / 562 / 543）。四份的主题是**「终端门面的四种零件」**——hooks 配置的四态钻取浏览器、子代理工具白名单的分桶选择器、四种形态共用的转圈器、按终端宽度三级降级的启动欢迎屏。四份都不处理业务数据，只处理「怎么把已有状态摆到屏幕上、怎么让键盘走得通」。
+第七批 components，按源行量取件：4 份共 2,245 行（578 / 562 / 562 / 543）。四份的主题&#x662F;**「终端门面的四种零件」**——hooks 配置的四态钻取浏览器、子代理工具白名单的分桶选择器、四种形态共用的转圈器、按终端宽度三级降级的启动欢迎屏。四份都不处理业务数据，只处理「怎么把已有状态摆到屏幕上、怎么让键盘走得通」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/hooks/HooksConfigMenu.tsx`](annotated/src/components/hooks/HooksConfigMenu.tsx) | 578 | 607 | 28 | hooks 只读浏览器：四态（事件 / 匹配器 / hook / 详情）逐层钻取，每层 Esc 按「事件是否支持匹配器」动态决定回退落点；全局停用走独立早退视图；策略态与用户态分开判定 |
-| [`components/agents/ToolSelector.tsx`](annotated/src/components/agents/ToolSelector.tsx) | 562 | 593 | 30 | 工具白名单选择器：静态五桶 + MCP 按服务器动态分桶；桶级开关语义是「有缺口就全选」；全选回传 undefined（等价不限制）；可导航条目整表驱动上下键并跳过标题行 |
-| [`components/Spinner.tsx`](annotated/src/components/Spinner.tsx) | 562 | 598 | 35 | 转圈器四形态：简报分流拆成两个组件以守住 hooks 规则；动画时钟下沉到子组件、父层只粗读 ref；思考状态每态至少显示 2 秒；领导空闲时不显示动画以免被停滞检测染红 |
-| [`components/LogoV2/LogoV2.tsx`](annotated/src/components/LogoV2/LogoV2.tsx) | 543 | 572 | 28 | 启动欢迎屏：极简 / 紧凑 / 完整三级降级；条件 require 保证频道通知可被整体摇掉；公告首启取首条其余随机；右侧 Feed 四选一按产品优先级；已读记账与引导计数合并成一次副作用 |
+| 文件                                                                                           | 原文  | 批注版 | 锚点 | 讲什么                                                                                            |
+| -------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------------------------- |
+| [`components/hooks/HooksConfigMenu.tsx`](annotated/src/components/hooks/HooksConfigMenu.tsx) | 578 | 607 | 28 | hooks 只读浏览器：四态（事件 / 匹配器 / hook / 详情）逐层钻取，每层 Esc 按「事件是否支持匹配器」动态决定回退落点；全局停用走独立早退视图；策略态与用户态分开判定   |
+| [`components/agents/ToolSelector.tsx`](annotated/src/components/agents/ToolSelector.tsx)     | 562 | 593 | 30 | 工具白名单选择器：静态五桶 + MCP 按服务器动态分桶；桶级开关语义是「有缺口就全选」；全选回传 undefined（等价不限制）；可导航条目整表驱动上下键并跳过标题行          |
+| [`components/Spinner.tsx`](annotated/src/components/Spinner.tsx)                             | 562 | 598 | 35 | 转圈器四形态：简报分流拆成两个组件以守住 hooks 规则；动画时钟下沉到子组件、父层只粗读 ref；思考状态每态至少显示 2 秒；领导空闲时不显示动画以免被停滞检测染红          |
+| [`components/LogoV2/LogoV2.tsx`](annotated/src/components/LogoV2/LogoV2.tsx)                 | 543 | 572 | 28 | 启动欢迎屏：极简 / 紧凑 / 完整三级降级；条件 require 保证频道通知可被整体摇掉；公告首启取首条其余随机；右侧 Feed 四选一按产品优先级；已读记账与引导计数合并成一次副作用 |
 
 横切观察：
 
@@ -3136,14 +3130,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 110 批：MCP 服务器管理面板、上下文用量可视化、输入型选项、词级 diff 回退（1,968 行，109 锚点）
 
-第八批 components，按源行量取件：4 份共 1,968 行（504 / 489 / 488 / 487），行数几乎齐平。四份的主题是**「把已有数据摆成可读的界面」**——MCP 服务器按作用域分组列表、上下文用量左图右表、选择底座里的可编辑选项、无高亮时的词级 diff 渲染。四份的共同点是「数据早就算好了，这里只负责排版与键盘」。
+第八批 components，按源行量取件：4 份共 1,968 行（504 / 489 / 488 / 487），行数几乎齐平。四份的主题&#x662F;**「把已有数据摆成可读的界面」**——MCP 服务器按作用域分组列表、上下文用量左图右表、选择底座里的可编辑选项、无高亮时的词级 diff 渲染。四份的共同点是「数据早就算好了，这里只负责排版与键盘」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/mcp/MCPListPanel.tsx`](annotated/src/components/mcp/MCPListPanel.tsx) | 504 | 533 | 28 | MCP 服务器面板：按项目 / 本地 / 用户 / 企业四作用域分组，另有 claude.ai、代理专属、内置三区；唯一状态是选中下标，扁平可选表必须与分组渲染严格同序；五种连接状态各有图标与文案 |
-| [`components/ContextVisualization.tsx`](annotated/src/components/ContextVisualization.tsx) | 489 | 514 | 24 | 上下文用量：左边方格图（空闲 / 缓冲 / 按填充度选实心空心）、右边类目列表与占比；延迟加载项不计百分比；按来源分组顺序固定；折叠状态行只在真的折叠过时出现 |
+| 文件                                                                                                                 | 原文  | 批注版 | 锚点 | 讲什么                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------ | --- | --- | -- | ---------------------------------------------------------------------------------------------------- |
+| [`components/mcp/MCPListPanel.tsx`](annotated/src/components/mcp/MCPListPanel.tsx)                                 | 504 | 533 | 28 | MCP 服务器面板：按项目 / 本地 / 用户 / 企业四作用域分组，另有 claude.ai、代理专属、内置三区；唯一状态是选中下标，扁平可选表必须与分组渲染严格同序；五种连接状态各有图标与文案   |
+| [`components/ContextVisualization.tsx`](annotated/src/components/ContextVisualization.tsx)                         | 489 | 514 | 24 | 上下文用量：左边方格图（空闲 / 缓冲 / 按填充度选实心空心）、右边类目列表与占比；延迟加载项不计百分比；按来源分组顺序固定；折叠状态行只在真的折叠过时出现                      |
 | [`components/CustomSelect/select-input-option.tsx`](annotated/src/components/CustomSelect/select-input-option.tsx) | 488 | 515 | 26 | 可编辑选项：三态渲染（标签前置 / 聚焦输入 / 静态值）；六组键位分属 Chat 与 Attachments 两个上下文互不抢键；图片粘贴、切换、删除、失焦即退出图片模式；用户编辑标记防异步复位光标 |
-| [`components/StructuredDiff/Fallback.tsx`](annotated/src/components/StructuredDiff/Fallback.tsx) | 487 | 519 | 31 | 词级 diff 回退：行转对象 → 相邻删加配对 → 逐词对比 → 按宽度手动折行；变化超四成或暗色模式退回整行；行号槽包在不可选区内，背景色跨盒连续；编号函数让整段删除共用原行号区间 |
+| [`components/StructuredDiff/Fallback.tsx`](annotated/src/components/StructuredDiff/Fallback.tsx)                   | 487 | 519 | 31 | 词级 diff 回退：行转对象 → 相邻删加配对 → 逐词对比 → 按宽度手动折行；变化超四成或暗色模式退回整行；行号槽包在不可选区内，背景色跨盒连续；编号函数让整段删除共用原行号区间         |
 
 横切观察：
 
@@ -3158,14 +3152,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 111 批：Bash 权限弹窗、单题提问视图、条款确认弹窗、权限决策调试信息（1,870 行，122 锚点）
 
-第九批 components，按源行量取件：4 份共 1,870 行（482 / 465 / 463 / 460），四份行数挤在 22 行区间内。主题是**「同一份权限数据要能被四种方式读」**：执行前的确认（Bash 命令弹窗，选项集合随特性开关与后端建议变形）、还没有答案的询问（单题提问视图，选项区与底部动作争同一组上下键）、被动接受的告知（条款弹窗，宽限期可以延后表态）、事后追查的解剖（决策调试信息，把原因链与永远不会生效的规则逐条摊开）。四份都不产出业务数据，难点全在「状态如何决定界面形状」。
+第九批 components，按源行量取件：4 份共 1,870 行（482 / 465 / 463 / 460），四份行数挤在 22 行区间内。主题&#x662F;**「同一份权限数据要能被四种方式读」**：执行前的确认（Bash 命令弹窗，选项集合随特性开关与后端建议变形）、还没有答案的询问（单题提问视图，选项区与底部动作争同一组上下键）、被动接受的告知（条款弹窗，宽限期可以延后表态）、事后追查的解剖（决策调试信息，把原因链与永远不会生效的规则逐条摊开）。四份都不产出业务数据，难点全在「状态如何决定界面形状」。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/permissions/BashPermissionRequest/BashPermissionRequest.tsx`](annotated/src/components/permissions/BashPermissionRequest/BashPermissionRequest.tsx) | 482 | 515 | 32 | Bash 权限弹窗：外层分流器把 sed 编辑命令交给专用弹窗；20fps 微光时钟从 535 行主体里整块外提（否则每 50 毫秒重建整棵树）；复合命令按「决策原因是否为子命令结果」识别，绕开会产生死规则的同步前缀启发式；手改前缀落本地设置、分类器描述落会话 |
-| [`components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx) | 465 | 496 | 30 | 单题提问视图：文本选项加一个固定标记的自定义输入项；底部两行靠「从最后一项向下 / 从第一行向上」与选项区交接键盘，未聚焦底部就不消费按键；编号即位置（底部第一行＝选项数+1）；多选提交时把固定标记滤掉换成真实输入 |
-| [`components/grove/Grove.tsx`](annotated/src/components/grove/Grove.tsx) | 463 | 492 | 28 | 条款确认弹窗：宽限期 / 宽限期后两套文案体；显示与否交给纯函数判定；同一个退出键在宽限期等于延后、之后等于放弃；域名被排除时接受选项只剩关闭一项；设置页那行开关接受制表、回车、空格三种确认 |
-| [`components/permissions/PermissionDecisionDebugInfo.tsx`](annotated/src/components/permissions/PermissionDecisionDebugInfo.tsx) | 460 | 493 | 32 | 权限决策解剖：十种决策原因各有译法，子命令结果靠类型排除后自行递归；建议明细拆成规则 / 目录 / 模式三类三种空态；不可达规则按「有建议 > 有工具名 > 全量」三档过滤，每条按问题、原因、修复三行展开 |
+| 文件                                                                                                                                                                   | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`components/permissions/BashPermissionRequest/BashPermissionRequest.tsx`](annotated/src/components/permissions/BashPermissionRequest/BashPermissionRequest.tsx)     | 482 | 515 | 32 | Bash 权限弹窗：外层分流器把 sed 编辑命令交给专用弹窗；20fps 微光时钟从 535 行主体里整块外提（否则每 50 毫秒重建整棵树）；复合命令按「决策原因是否为子命令结果」识别，绕开会产生死规则的同步前缀启发式；手改前缀落本地设置、分类器描述落会话 |
+| [`components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx) | 465 | 496 | 30 | 单题提问视图：文本选项加一个固定标记的自定义输入项；底部两行靠「从最后一项向下 / 从第一行向上」与选项区交接键盘，未聚焦底部就不消费按键；编号即位置（底部第一行＝选项数+1）；多选提交时把固定标记滤掉换成真实输入                        |
+| [`components/grove/Grove.tsx`](annotated/src/components/grove/Grove.tsx)                                                                                             | 463 | 492 | 28 | 条款确认弹窗：宽限期 / 宽限期后两套文案体；显示与否交给纯函数判定；同一个退出键在宽限期等于延后、之后等于放弃；域名被排除时接受选项只剩关闭一项；设置页那行开关接受制表、回车、空格三种确认                                    |
+| [`components/permissions/PermissionDecisionDebugInfo.tsx`](annotated/src/components/permissions/PermissionDecisionDebugInfo.tsx)                                     | 460 | 493 | 32 | 权限决策解剖：十种决策原因各有译法，子命令结果靠类型排除后自行递归；建议明细拆成规则 / 目录 / 模式三类三种空态；不可达规则按「有建议 > 有工具名 > 全量」三档过滤，每条按问题、原因、修复三行展开                             |
 
 横切观察：
 
@@ -3183,14 +3177,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 ### components 第 112 批：模型选择器、电脑操作授权、子代理清单、记忆文件选择器（1,767 行，118 锚点）
 
-第十批 components，按源行量取件：4 份共 1,767 行（448 / 441 / 440 / 438），是连续三批里行数最齐的一次。主题是**「一屏里塞两种东西，靠焦点归属排队」**：模型选择器要同时选模型与推理强度（而强度是否可选又取决于当前模型）、电脑操作授权要在「修系统权限」与「授权应用」两块互斥面板间分派、子代理清单要把「新建项」与「代理项」两类可聚焦条目塞进同一个上下键循环、记忆文件选择器要在列表上方再挂两个开关行。
+第十批 components，按源行量取件：4 份共 1,767 行（448 / 441 / 440 / 438），是连续三批里行数最齐的一次。主题&#x662F;**「一屏里塞两种东西，靠焦点归属排队」**：模型选择器要同时选模型与推理强度（而强度是否可选又取决于当前模型）、电脑操作授权要在「修系统权限」与「授权应用」两块互斥面板间分派、子代理清单要把「新建项」与「代理项」两类可聚焦条目塞进同一个上下键循环、记忆文件选择器要在列表上方再挂两个开关行。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`components/ModelPicker.tsx`](annotated/src/components/ModelPicker.tsx) | 448 | 480 | 31 | 模型选择器：模型与强度双选；三种值（哨兵、用户串、解析后模型名）靠四个纯函数转换；最高档在不支持的模型旁只在显示层钳成高档（状态不动）；强度只写「该持久化的值」，跟随默认时不落盘 |
+| 文件                                                                                                                                                       | 原文  | 批注版 | 锚点 | 讲什么                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------------------------------------------------------- |
+| [`components/ModelPicker.tsx`](annotated/src/components/ModelPicker.tsx)                                                                                 | 448 | 480 | 31 | 模型选择器：模型与强度双选；三种值（哨兵、用户串、解析后模型名）靠四个纯函数转换；最高档在不支持的模型旁只在显示层钳成高档（状态不动）；强度只写「该持久化的值」，跟随默认时不落盘                              |
 | [`components/permissions/ComputerUseApproval/ComputerUseApproval.tsx`](annotated/src/components/permissions/ComputerUseApproval/ComputerUseApproval.tsx) | 441 | 472 | 30 | 电脑操作授权：带系统权限状态就显示跳转面板（打开设置不结束弹窗、只有重试才结束）、否则显示应用白名单；授权清单只收已解析且被勾选的，拒绝清单在允许路径下也不为空；哨兵应用（能当 shell / 读写任意文件 / 改系统设置）逐条加粗警告 |
-| [`components/agents/AgentsList.tsx`](annotated/src/components/agents/AgentsList.tsx) | 440 | 469 | 28 | 子代理清单：两类可聚焦条目（新建项、代理项）自建上下键循环；选中靠「类型＋来源」而非引用相等；扁平可选表按源分组顺序铺开以与渲染同序；副标题计数去重（同名代理只算一次）；空态里仍补内置区段 |
-| [`components/memory/MemoryFileSelector.tsx`](annotated/src/components/memory/MemoryFileSelector.tsx) | 438 | 468 | 29 | 记忆文件选择器：资源钩子同步读清单、无加载态；缺失的用户级/项目级文件补成「新建」占位项；层级用路径→深度映射（依赖父先于子出现在清单里）；三个角色（文件、目录入口、两个开关）靠「焦点在开关区时列表整体禁用」共享键盘 |
+| [`components/agents/AgentsList.tsx`](annotated/src/components/agents/AgentsList.tsx)                                                                     | 440 | 469 | 28 | 子代理清单：两类可聚焦条目（新建项、代理项）自建上下键循环；选中靠「类型＋来源」而非引用相等；扁平可选表按源分组顺序铺开以与渲染同序；副标题计数去重（同名代理只算一次）；空态里仍补内置区段                         |
+| [`components/memory/MemoryFileSelector.tsx`](annotated/src/components/memory/MemoryFileSelector.tsx)                                                     | 438 | 468 | 29 | 记忆文件选择器：资源钩子同步读清单、无加载态；缺失的用户级/项目级文件补成「新建」占位项；层级用路径→深度映射（依赖父先于子出现在清单里）；三个角色（文件、目录入口、两个开关）靠「焦点在开关区时列表整体禁用」共享键盘           |
 
 横切观察：
 
@@ -3203,6 +3197,10 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`ModelPicker.tsx` 的 30–35 行是 `skipSettingsWrite` 的 JSDoc 块注释，锚点落在块首行（该行属 code 状态）而非块内；`MemoryFileSelector.tsx` 的 28 行是单行 eslint 块注释、29 行的条件 `require` 紧跟其后，同样落块外；`ComputerUseApproval.tsx` 的 24–29 行是分派器说明块注释、48 与 200 行是两段分区注释（`// ── ... ──`），全部落 `before` 在注释行或语句行上。预检 118 锚点一次全过（含块注释内部续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⟳`、零 `⚠`；四份各 1 处长批注自动折行，故增量（122 行）比锚点数（118）多 4。
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1192 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2318 条加内链 680 条，0 失效；全仓 1192/1902 文件、370,421/513,237 行、72.2%（README 记 72%）。
+
+**下一批候选（components 降序，建议取 4 份约 1,680 行）**：`LogoV2/WelcomeV2.tsx`(433) · `tasks/BackgroundTaskStatus.tsx`(429) · `CustomSelect/use-multi-select-state.ts`(414) · `tasks/ShellDetailDialog.tsx`(404)（components 已做 120/407，剩 287 份；全仓还剩 710 份）。
+
+
 
 ### components 第 113 批：启动横幅、后台任务状态条、多选状态机、Shell 任务详情（1,680 行，121 锚点）
 
@@ -3227,6 +3225,8 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 踩坑：`WelcomeV2.tsx` 第 433 行是内联 base64 sourcemap、单行几万字符，锚点只能落它之前（本次落在 433 的 `before`，即正文结束后）；`use-multi-select-state.ts` 的 59 与 88 行原本落在 JSDoc 块注释内部，已改锚到块外紧邻的类型成员行（64 与 93）；`ShellDetailDialog.tsx` 的 310–313 是跨行解构，锚点从 313 挪到 314 的 `if (!content)`。预检 121 锚点一次全过（含块注释续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⟳` 零 `⚠`；折行只在前三份出现（33 / 31 / 31 行），第四份 29 锚点未触发折行，故增量 124 = 121 + 3——这是本轮第一次增量不等于锚点数加 4。
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1196 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2318 条加内链 680 条，0 失效；全仓 1196/1902 文件、372,101/513,237 行、72.5%（README 记 72%）。
+
+**下一批候选（components 降序，建议取 4 份约 1,580 行）**：`BridgeDialog.tsx`(401) · `mcp/MCPSettings.tsx`(398) · `ui/TreeSelect.tsx`(397) · `diff/DiffDialog.tsx`(383)（components 已做 124/407，剩 283 份；全仓还剩 706 份）。
 
 ### components 第 114 批：远程控制弹窗、MCP 设置视图机、树形选择器、Diff 查看弹窗（1,579 行，117 锚点）
 
@@ -3254,27 +3254,59 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（components 降序，建议取 4 份约 1,500 行）**：`TaskListV2.tsx`(378) · `agents/new-agent-creation/wizard-steps/ConfirmStep.tsx`(378) · `Settings/Usage.tsx`(377) · `permissions/SkillPermissionRequest/SkillPermissionRequest.tsx`(369)（components 已做 128/407，剩 279 份；全仓还剩 702 份）。
 
+### components 第 115 批：新建代理确认步、任务列表 V2、用量页、技能权限请求、后台任务行、全局搜索弹窗、Tabs 设计系统、添加工作区目录、远程环境弹窗、通用权限提示（3,536 行，167 锚点）
+
+第十三批 components，按行数降序一次取 10 份（378→335），是本轮单批文件数最多、行数最齐的一次。十份横跨「列表 / 弹窗 / 设计系统原语」三类界面，共同的底层套路是**「把异构输入先归一成同一种形状，再让下游只认形状」**：任务列表把任意任务态归一成「完成 / 进行中 / 阻塞」三布尔、后台任务按 type 分派成统一的一行摘要、Tabs 把受控与非受控归一成同一选中态、两套权限弹窗把同意 / 记住 / 拒绝归一成选项列表、全局搜索把 ripgrep 输出归一成 Match。读完这十份，基本能掌握 Claude Code TUI 里「列表渲染、权限询问、搜索」三类高频组件的标准写法。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/agents/new-agent-creation/wizard-steps/ConfirmStep.tsx`](annotated/src/components/agents/new-agent-creation/wizard-steps/ConfirmStep.tsx) | 377 | 398 | 20 | 新建子代理向导最后一步：汇总工具 / 模型 / 记忆 / 系统提示并展示校验（警告可存、错误阻断）；s/Enter 保存、e 保存并编辑、Esc 回退；系统提示截断到 240 列防溢出 |
+| [`components/TaskListV2.tsx`](annotated/src/components/TaskListV2.tsx) | 377 | 403 | 25 | 任务列表 V2：未开 TodoV2 不渲染；按终端高度算可见行（3–10）；最近完成保留 30s 高亮；截断按「最近完成 > 进行中 > 待处理 > 较早完成」排序；swarm 模式下给队友 owner 上主题色 |
+| [`components/Settings/Usage.tsx`](annotated/src/components/Settings/Usage.tsx) | 376 | 392 | 15 | 用量页：拉取会话 / 周 / Sonnet 限额，宽屏横条、窄屏紧凑文字；失败用 axios 响应体构造错误；非 Pro/Max 不显示额外用量段 |
+| [`components/permissions/SkillPermissionRequest/SkillPermissionRequest.tsx`](annotated/src/components/permissions/SkillPermissionRequest/SkillPermissionRequest.tsx) | 368 | 386 | 17 | 技能权限请求弹窗：从 SkillTool 输入 schema 取 skill 名；按名称是否含空格生成精确 / 前缀两种「记住」选项；统一上报 unary 遥测 |
+| [`components/tasks/BackgroundTask.tsx`](annotated/src/components/tasks/BackgroundTask.tsx) | 344 | 359 | 14 | 后台任务行：按 task.type 分派到本地 / 远程 / 队友 / 工作流 / monitor / dream 等多分支，统一渲染「图标 + 文字 + 状态」，完成时标 unread |
+| [`components/GlobalSearchDialog.tsx`](annotated/src/components/GlobalSearchDialog.tsx) | 342 | 359 | 16 | 全局搜索弹窗（ctrl/cmd+shift+f）：防抖 ripgrep，`rg -m` 每文件上限再收口；宽屏预览在右、窄屏在下；命中可 @文件#行 插入对话 |
+| [`components/design-system/Tabs.tsx`](annotated/src/components/design-system/Tabs.tsx) | 339 | 354 | 14 | 设计系统 Tabs 原语：受控 / 非受控统一选中态；表头聚焦 opt-in 后方向键把焦点移入内容；Tab 子组件仅选中才渲染内容 |
+| [`components/permissions/rules/AddWorkspaceDirectory.tsx`](annotated/src/components/permissions/rules/AddWorkspaceDirectory.tsx) | 339 | 355 | 15 | 添加工作区目录弹窗：手动输入（100ms 防抖补全）与预置选择两种形态；记住方式分本会话 / 永久 / 不添加三档 |
+| [`components/RemoteEnvironmentDialog.tsx`](annotated/src/components/RemoteEnvironmentDialog.tsx) | 339 | 354 | 15 | 远程环境弹窗：拉取可用环境写回 localSettings；单环境一键确认、多环境列表；无环境提示去 claude.ai/code 配置 |
+| [`components/permissions/PermissionPrompt.tsx`](annotated/src/components/permissions/PermissionPrompt.tsx) | 335 | 352 | 16 | 通用权限提示共享组件：选项可带反馈输入（Tab 展开）；接受 / 拒绝各自上报 unary；Esc 累加 attribution.escapeCount |
+
+横切观察：
+
+- **「归一」是这批组件的主旋律**：任务列表把任意任务归一成 isCompleted/isInProgress/isBlocked 三布尔再决定样式；后台任务按 type 分派成统一的一行；Tabs 把受控与非受控归一成同一个 handleTabChange（受控回调父级、非受控改内部 state）；权限弹窗把同意 / 记住 / 拒绝归一成 options 列表。读这批时先把「输入有多少种」列出来，再看代码怎么压成「下游只认一种形状」，基本能看懂八成。
+- **受控与非受控的边界要干脆**：Tabs 用 isControlled 一处判断决定选中态来源，绝不半受控；添加目录弹窗也只在「有预置路径」与「无预置」两种形态间切换，不混用。半受控（部分听外部、部分听内部）是最难调试的状态模型，本批两处都避开了。
+- **键盘焦点必须主动抢、主动还**：Tabs 在表头聚焦且 opt-in 后方向键把焦点移入内容区，useTabHeaderFocus 在卸载时退回聚焦态；全局搜索在卸载时清理防抖定时器与中止控制器，避免销毁后还触发搜索；添加目录的键盘导航同样显式接管 tab/回车/上下键。终端里焦点得自己拿、还得自己还。
+- **防抖 + 上限双保险防内存膨胀**：全局搜索既用输入防抖，又给 ripgrep 套 `rg -m` 每文件上限、再在结果数组上收口到 MAX_MATCHES_PER_FILE；添加目录的补全请求也用 100ms 防抖。两处都属于「用户输入不可信、外部进程输出不可信」的双重兜底。
+- **遥测上报要在「用户决策点」收口**：技能权限、通用权限都把 accept/reject 两类事件在 handleSelect/handleCancel 一处上报，且选项自带反馈配置（如 escapeCount）。把上报收敛到一个出口，比散在多处更不容易漏事件。
+- **编译器产物特征贯穿全批**：十份全是 React Compiler 自动记忆化产物（首行引入 `$` 缓存、`_c(N)` 声明缓存槽数、`_temp`/`_temp2` 做格式化辅助）。批注时所有锚点都落在完整语句 / 签名行，绝不落在多行 JSX return 或跨行表达式内部——这是本批唯一贯穿的硬约束。
+
+踩坑：预检阶段抓到两处真实问题并修正后才跑 `annotate.py`：① `RemoteEnvironmentDialog.tsx` 数据文件里第 333 行锚点的 `'after'` 写成 `'after''`（多了一个引号），会导致 Python 语法错误，已修为 `(333, 'after', '''MultipleEnvironmentsContent：...''')`；② `SkillPermissionRequest.tsx` 第 303 行锚点文案含英文双引号 `Use skill "xxx"?`，违反「批注不得含英文双引号」规则（会破坏 markdown 表格与 `'''` 边界），已改用中文「」写成 `Use skill「xxx」?`。两处都属数据文件层面、在 preflight 阶段即拦截，未污染任何 `annotated/` 产物。十份 `annotate.py` 均零 `⟳`、零 `⚠`；因多份含长批注自动折行，增量（3712−3536=176）略高于锚点数（167），差额即折行溢价。`sourceMappingURL` 行（部分文件 >4000 字符）由 check-fidelity 自动放行（标记 `OK*`）。
+
+流程账：10 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1210 份 0 失败；`check-links.py` 源码链接 2318 条加内链 682 条，0 失效；全仓 1210/1902 文件、377,226/513,237 行、73%（README 记 73%）。
+
+**下一批候选（components 降序，建议取 10 份约 3,100 行）**：`permissions/FallbackPermissionRequest.tsx`(333) · `ThemePicker.tsx`(333) · `Spinner/GlimmerMessage.tsx`(328) · `permissions/AskUserQuestionPermissionRequest/PreviewQuestionView.tsx`(328) · `StatusLine.tsx`(324) · `MarkdownTable.tsx`(322) · `design-system/FuzzyPicker.tsx`(312) · `FeedbackSurvey/useFeedbackSurvey.tsx`(296) · `sandbox/SandboxSettings.tsx`(296) · `diff/DiffFileList.tsx`(292)（components 已做 120/389，剩 269 份；全仓还剩 692 份）。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/swarm/teammatePromptAddendum.ts`](annotated/src/utils/swarm/teammatePromptAddendum.ts) | 18 | 20 | 2 | 队友专属系统提示补遗：追加到主智能体提示尾部的通信规范模板 |
-| [`utils/gitSettings.ts`](annotated/src/utils/gitSettings.ts) | 18 | 20 | 2 | 从 git.ts 拆出的 Git 行为设置：按环境变量+初始设置决定注入 Git 指令，避循环依赖与 vscode 禁依赖 |
-| [`utils/nativeInstaller/index.ts`](annotated/src/utils/nativeInstaller/index.ts) | 18 | 20 | 2 | 原生安装器桶文件：只重导出外部真正用到的函数与类型 |
-| [`utils/objectGroupBy.ts`](annotated/src/utils/objectGroupBy.ts) | 18 | 20 | 2 | 手写 TC39 Object.groupBy polyfill，用无原型对象分组 |
-| [`utils/todo/types.ts`](annotated/src/utils/todo/types.ts) | 18 | 20 | 2 | Todo 项的 zod v4 schema 与推导类型，隔离 zod 依赖 |
-| [`utils/classifierApprovalsHook.ts`](annotated/src/utils/classifierApprovalsHook.ts) | 17 | 19 | 2 | 订阅「某工具是否正被分类器检查」的 React 钩子，避免 React 污染纯状态导入方 |
-| [`utils/findExecutable.ts`](annotated/src/utils/findExecutable.ts) | 17 | 19 | 2 | 类似 which 的可执行查找，替换 spawn-rx 以省掉 rxjs |
-| [`utils/secureStorage/index.ts`](annotated/src/utils/secureStorage/index.ts) | 17 | 19 | 2 | 按平台挑凭据存储：macOS 走 Keychain 兜底、其余明文 |
-| [`utils/sinks.ts`](annotated/src/utils/sinks.ts) | 16 | 18 | 2 | 挂载错误日志与分析事件两个 sink 的叶子模块，避 setup 循环依赖 |
-| [`utils/jsonRead.ts`](annotated/src/utils/jsonRead.ts) | 16 | 18 | 2 | 叶子模块 stripBOM，处理 PowerShell 默认写带 BOM 的 UTF-8，避循环依赖 |
-| [`utils/xml.ts`](annotated/src/utils/xml.ts) | 16 | 19 | 3 | 两份 XML/HTML 转义函数：文本内容场景与属性值场景 |
-| [`utils/immediateCommand.ts`](annotated/src/utils/immediateCommand.ts) | 15 | 17 | 2 | 推理配置命令是否立即执行的判定：内部用户永远开、外部走实验开关 |
-| [`utils/yaml.ts`](annotated/src/utils/yaml.ts) | 15 | 17 | 2 | YAML 解析封装：Bun 用内置零成本、否则惰性 require yaml 包 |
-| [`utils/shell/outputLimits.ts`](annotated/src/utils/shell/outputLimits.ts) | 14 | 16 | 2 | Bash 输出长度上下限常量与按环境变量取值函数（含 shell 走间接 runner） |
-| [`utils/bash/specs/alias.ts`](annotated/src/utils/bash/specs/alias.ts) | 14 | 16 | 2 | bash 子命令 alias 的纯数据规格定义（含 bash 走间接 runner） |
+| 文件                                                                                             | 原文 | 批注版 | 锚点 | 讲什么                                                           |
+| ---------------------------------------------------------------------------------------------- | -- | --- | -- | ------------------------------------------------------------- |
+| [`utils/swarm/teammatePromptAddendum.ts`](annotated/src/utils/swarm/teammatePromptAddendum.ts) | 18 | 20  | 2  | 队友专属系统提示补遗：追加到主智能体提示尾部的通信规范模板                                 |
+| [`utils/gitSettings.ts`](annotated/src/utils/gitSettings.ts)                                   | 18 | 20  | 2  | 从 git.ts 拆出的 Git 行为设置：按环境变量+初始设置决定注入 Git 指令，避循环依赖与 vscode 禁依赖 |
+| [`utils/nativeInstaller/index.ts`](annotated/src/utils/nativeInstaller/index.ts)               | 18 | 20  | 2  | 原生安装器桶文件：只重导出外部真正用到的函数与类型                                     |
+| [`utils/objectGroupBy.ts`](annotated/src/utils/objectGroupBy.ts)                               | 18 | 20  | 2  | 手写 TC39 Object.groupBy polyfill，用无原型对象分组                      |
+| [`utils/todo/types.ts`](annotated/src/utils/todo/types.ts)                                     | 18 | 20  | 2  | Todo 项的 zod v4 schema 与推导类型，隔离 zod 依赖                         |
+| [`utils/classifierApprovalsHook.ts`](annotated/src/utils/classifierApprovalsHook.ts)           | 17 | 19  | 2  | 订阅「某工具是否正被分类器检查」的 React 钩子，避免 React 污染纯状态导入方                  |
+| [`utils/findExecutable.ts`](annotated/src/utils/findExecutable.ts)                             | 17 | 19  | 2  | 类似 which 的可执行查找，替换 spawn-rx 以省掉 rxjs                          |
+| [`utils/secureStorage/index.ts`](annotated/src/utils/secureStorage/index.ts)                   | 17 | 19  | 2  | 按平台挑凭据存储：macOS 走 Keychain 兜底、其余明文                             |
+| [`utils/sinks.ts`](annotated/src/utils/sinks.ts)                                               | 16 | 18  | 2  | 挂载错误日志与分析事件两个 sink 的叶子模块，避 setup 循环依赖                         |
+| [`utils/jsonRead.ts`](annotated/src/utils/jsonRead.ts)                                         | 16 | 18  | 2  | 叶子模块 stripBOM，处理 PowerShell 默认写带 BOM 的 UTF-8，避循环依赖            |
+| [`utils/xml.ts`](annotated/src/utils/xml.ts)                                                   | 16 | 19  | 3  | 两份 XML/HTML 转义函数：文本内容场景与属性值场景                                 |
+| [`utils/immediateCommand.ts`](annotated/src/utils/immediateCommand.ts)                         | 15 | 17  | 2  | 推理配置命令是否立即执行的判定：内部用户永远开、外部走实验开关                               |
+| [`utils/yaml.ts`](annotated/src/utils/yaml.ts)                                                 | 15 | 17  | 2  | YAML 解析封装：Bun 用内置零成本、否则惰性 require yaml 包                      |
+| [`utils/shell/outputLimits.ts`](annotated/src/utils/shell/outputLimits.ts)                     | 14 | 16  | 2  | Bash 输出长度上下限常量与按环境变量取值函数（含 shell 走间接 runner）                  |
+| [`utils/bash/specs/alias.ts`](annotated/src/utils/bash/specs/alias.ts)                         | 14 | 16  | 2  | bash 子命令 alias 的纯数据规格定义（含 bash 走间接 runner）                    |
 
 三条横切观察：
 
@@ -3292,23 +3324,23 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 本批是「140 行上下」的十五份独立工具，横跨「文件状态缓存（LRU + 路径归一化）、权限模式可视化、API 查询钩子工厂、输入框 bash 执行、会话入口令牌、水平滚动窗口、深链拉起、生成文件识别、HTTP 辅助、插件拉取遥测、SDK 事件队列、会话活跃度心跳、钩子配置快照、工具错误格式化、终端文本截断」——彼此独立，但共同补齐 utils 中层的「缓存 / 鉴权 / 遥测 / 配置快照 / 终端渲染」五类积木。
 
-| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`utils/fileStateCache.ts`](annotated/src/utils/fileStateCache.ts) | 142 | 153 | 11 | 读文件状态缓存：路径键统一 normalize 的 LRU 封装，含克隆/合并/转对象等辅助 |
-| [`utils/permissions/PermissionMode.ts`](annotated/src/utils/permissions/PermissionMode.ts) | 141 | 155 | 14 | 权限模式枚举与可视配置：default/plan/acceptEdits/bypass/dontAsk/auto 的标题符号颜色与对外映射 |
-| [`utils/hooks/apiQueryHookHelper.ts`](annotated/src/utils/hooks/apiQueryHookHelper.ts) | 141 | 148 | 7 | API 查询钩子工厂：构建消息、非流式调用模型、解析并记录结果，失败也不抛出 |
-| [`utils/processUserInput/processBashCommand.tsx`](annotated/src/utils/processUserInput/processBashCommand.tsx) | 140 | 150 | 9 | 输入框 bash 命令执行：选 Bash/PowerShell 工具、包 <bash-stdout>/<bash-stderr>、进度 UI |
-| [`utils/sessionIngressAuth.ts`](annotated/src/utils/sessionIngressAuth.ts) | 140 | 145 | 5 | 会话入口令牌：环境变量 > 文件描述符 > 已知文件的回退，拼 Cookie/Bearer 认证头 |
-| [`utils/horizontalScroll.ts`](annotated/src/utils/horizontalScroll.ts) | 137 | 145 | 8 | 水平滚动窗口计算：贴边滚动保证选中项可见，ANSI 不切断 |
-| [`utils/deepLink/protocolHandler.ts`](annotated/src/utils/deepLink/protocolHandler.ts) | 136 | 141 | 5 | 深链协议处理器：解析 URI、解析工作目录、在终端拉起 claude |
-| [`utils/generatedFiles.ts`](annotated/src/utils/generatedFiles.ts) | 136 | 143 | 7 | 生成文件识别：按文件名/扩展名/目录/正则排除锁文件与构建产物 |
-| [`utils/http.ts`](annotated/src/utils/http.ts) | 136 | 143 | 7 | HTTP 辅助：拼各类 User-Agent 与 OAuth/API key 认证头，含 401 重试 |
-| [`utils/plugins/fetchTelemetry.ts`](annotated/src/utils/plugins/fetchTelemetry.ts) | 135 | 142 | 7 | 插件拉取遥测：按白名单归类主机，错误分桶，隐私口径只报枚举 |
-| [`utils/sdkEventQueue.ts`](annotated/src/utils/sdkEventQueue.ts) | 134 | 143 | 9 | SDK 事件队列：前台智能体任务开始/进度/结束事件，入队与排空 |
-| [`utils/sessionActivity.ts`](annotated/src/utils/sessionActivity.ts) | 133 | 143 | 10 | 会话活跃度心跳：引用计数驱动的 30 秒保活，注册/注销/起停 |
-| [`utils/hooks/hooksConfigSnapshot.ts`](annotated/src/utils/hooks/hooksConfigSnapshot.ts) | 133 | 141 | 8 | 钩子配置快照：按策略决定哪些来源钩子生效，支持抓取/更新/重置 |
-| [`utils/toolErrors.ts`](annotated/src/utils/toolErrors.ts) | 132 | 137 | 5 | 工具错误格式化：统一多行报错、超长截断、Zod 校验错误转中文 |
-| [`utils/terminal.ts`](annotated/src/utils/terminal.ts) | 131 | 136 | 5 | 终端文本截断渲染：按可见宽度换行，超 3 行折叠并提示展开 |
+| 文件                                                                                                             | 原文  | 批注版 | 锚点 | 讲什么                                                                    |
+| -------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------------------------------------------------- |
+| [`utils/fileStateCache.ts`](annotated/src/utils/fileStateCache.ts)                                             | 142 | 153 | 11 | 读文件状态缓存：路径键统一 normalize 的 LRU 封装，含克隆/合并/转对象等辅助                         |
+| [`utils/permissions/PermissionMode.ts`](annotated/src/utils/permissions/PermissionMode.ts)                     | 141 | 155 | 14 | 权限模式枚举与可视配置：default/plan/acceptEdits/bypass/dontAsk/auto 的标题符号颜色与对外映射  |
+| [`utils/hooks/apiQueryHookHelper.ts`](annotated/src/utils/hooks/apiQueryHookHelper.ts)                         | 141 | 148 | 7  | API 查询钩子工厂：构建消息、非流式调用模型、解析并记录结果，失败也不抛出                                 |
+| [`utils/processUserInput/processBashCommand.tsx`](annotated/src/utils/processUserInput/processBashCommand.tsx) | 140 | 150 | 9  | 输入框 bash 命令执行：选 Bash/PowerShell 工具、包 <bash-stdout>/<bash-stderr>、进度 UI |
+| [`utils/sessionIngressAuth.ts`](annotated/src/utils/sessionIngressAuth.ts)                                     | 140 | 145 | 5  | 会话入口令牌：环境变量 > 文件描述符 > 已知文件的回退，拼 Cookie/Bearer 认证头                      |
+| [`utils/horizontalScroll.ts`](annotated/src/utils/horizontalScroll.ts)                                         | 137 | 145 | 8  | 水平滚动窗口计算：贴边滚动保证选中项可见，ANSI 不切断                                          |
+| [`utils/deepLink/protocolHandler.ts`](annotated/src/utils/deepLink/protocolHandler.ts)                         | 136 | 141 | 5  | 深链协议处理器：解析 URI、解析工作目录、在终端拉起 claude                                     |
+| [`utils/generatedFiles.ts`](annotated/src/utils/generatedFiles.ts)                                             | 136 | 143 | 7  | 生成文件识别：按文件名/扩展名/目录/正则排除锁文件与构建产物                                        |
+| [`utils/http.ts`](annotated/src/utils/http.ts)                                                                 | 136 | 143 | 7  | HTTP 辅助：拼各类 User-Agent 与 OAuth/API key 认证头，含 401 重试                    |
+| [`utils/plugins/fetchTelemetry.ts`](annotated/src/utils/plugins/fetchTelemetry.ts)                             | 135 | 142 | 7  | 插件拉取遥测：按白名单归类主机，错误分桶，隐私口径只报枚举                                          |
+| [`utils/sdkEventQueue.ts`](annotated/src/utils/sdkEventQueue.ts)                                               | 134 | 143 | 9  | SDK 事件队列：前台智能体任务开始/进度/结束事件，入队与排空                                       |
+| [`utils/sessionActivity.ts`](annotated/src/utils/sessionActivity.ts)                                           | 133 | 143 | 10 | 会话活跃度心跳：引用计数驱动的 30 秒保活，注册/注销/起停                                        |
+| [`utils/hooks/hooksConfigSnapshot.ts`](annotated/src/utils/hooks/hooksConfigSnapshot.ts)                       | 133 | 141 | 8  | 钩子配置快照：按策略决定哪些来源钩子生效，支持抓取/更新/重置                                        |
+| [`utils/toolErrors.ts`](annotated/src/utils/toolErrors.ts)                                                     | 132 | 137 | 5  | 工具错误格式化：统一多行报错、超长截断、Zod 校验错误转中文                                        |
+| [`utils/terminal.ts`](annotated/src/utils/terminal.ts)                                                         | 131 | 136 | 5  | 终端文本截断渲染：按可见宽度换行，超 3 行折叠并提示展开                                          |
 
 三条横切观察：
 
@@ -3328,17 +3360,17 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 工具层的第一批，选的是**最常用的那个工具**——`Edit`。它是整套系统里调用量最大的写操作，也是「模型说什么」和「文件实际是什么」之间唯一的翻译层。9 份源文件 2,668 行，批注后 2,735 行、65 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts) | 775 | 790 | 15 | 引号/空白归一化、patch 生成、脱敏还原 |
-| [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts) | 625 | 643 | 18 | 十个 errorCode 的校验链、原子写入 |
-| [`FileEditTool/UI.tsx`](annotated/src/tools/FileEditTool/UI.tsx) | 289 | 295 | 5 | 动词选择、错误降级、拒绝时的 diff |
-| [`FileEditTool/types.ts`](annotated/src/tools/FileEditTool/types.ts) | 85 | 89 | 4 | schema 契约、`z.output` vs `z.input` |
-| [`FileEditTool/prompt.ts`](annotated/src/tools/FileEditTool/prompt.ts) | 28 | 32 | 4 | 「必须先 Read」写进描述 |
-| [`FileEditTool/constants.ts`](annotated/src/tools/FileEditTool/constants.ts) | 11 | 13 | 2 | 叶子模块断依赖环 |
-| [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts) | 434 | 445 | 11 | 整文覆盖、不改写行尾 |
-| [`FileWriteTool/UI.tsx`](annotated/src/tools/FileWriteTool/UI.tsx) | 405 | 410 | 4 | 只显示前 10 行、`EOL` 不用 `os.EOL` |
-| [`FileWriteTool/prompt.ts`](annotated/src/tools/FileWriteTool/prompt.ts) | 18 | 20 | 2 | 「既有文件才要求先读」+ 优先用 Edit |
+| 文件                                                                                     | 原文  | 批注版 | 批注 | 讲什么                               |
+| -------------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------- |
+| [`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts)                   | 775 | 790 | 15 | 引号/空白归一化、patch 生成、脱敏还原            |
+| [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts)     | 625 | 643 | 18 | 十个 errorCode 的校验链、原子写入            |
+| [`FileEditTool/UI.tsx`](annotated/src/tools/FileEditTool/UI.tsx)                       | 289 | 295 | 5  | 动词选择、错误降级、拒绝时的 diff               |
+| [`FileEditTool/types.ts`](annotated/src/tools/FileEditTool/types.ts)                   | 85  | 89  | 4  | schema 契约、`z.output` vs `z.input` |
+| [`FileEditTool/prompt.ts`](annotated/src/tools/FileEditTool/prompt.ts)                 | 28  | 32  | 4  | 「必须先 Read」写进描述                    |
+| [`FileEditTool/constants.ts`](annotated/src/tools/FileEditTool/constants.ts)           | 11  | 13  | 2  | 叶子模块断依赖环                          |
+| [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts) | 434 | 445 | 11 | 整文覆盖、不改写行尾                        |
+| [`FileWriteTool/UI.tsx`](annotated/src/tools/FileWriteTool/UI.tsx)                     | 405 | 410 | 4  | 只显示前 10 行、`EOL` 不用 `os.EOL`       |
+| [`FileWriteTool/prompt.ts`](annotated/src/tools/FileWriteTool/prompt.ts)               | 18  | 20  | 2  | 「既有文件才要求先读」+ 优先用 Edit             |
 
 四个最值得记的点：
 
@@ -3356,13 +3388,13 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 写完写的一端，紧接着读的一端。`Read` 是整个系统里**调用量最大的工具**，也是 `Edit` / `Write` 那条「必须先 Read」规矩的执行者——规矩写在 `prompt.ts` 的模板里，校验落在 `FileEditTool` 里，而「什么算读过」这件事由这里写进 `readFileState`。5 份源文件 1,602 行，批注后 1,655 行、48 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts) | 1,183 | 1,211 | 28 | 五道零 I/O 校验、去重桩、六型输出映射、三级图片压缩 |
-| [`FileReadTool/limits.ts`](annotated/src/tools/FileReadTool/limits.ts) | 92 | 97 | 5 | 两个上限（字节 / token）与优先级 env > GrowthBook > 默认 |
-| [`FileReadTool/prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts) | 49 | 54 | 5 | 模板三段插值、offset 指令两套文案 |
-| [`FileReadTool/imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts) | 94 | 98 | 4 | napi / sharp 双实现、ESM-CJS interop |
-| [`FileReadTool/UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx) | 185 | 192 | 6 | 只渲染摘要、agent 输出文件特殊处理 |
+| 文件                                                                                     | 原文    | 批注版   | 批注 | 讲什么                                        |
+| -------------------------------------------------------------------------------------- | ----- | ----- | -- | ------------------------------------------ |
+| [`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts)     | 1,183 | 1,211 | 28 | 五道零 I/O 校验、去重桩、六型输出映射、三级图片压缩               |
+| [`FileReadTool/limits.ts`](annotated/src/tools/FileReadTool/limits.ts)                 | 92    | 97    | 5  | 两个上限（字节 / token）与优先级 env > GrowthBook > 默认 |
+| [`FileReadTool/prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts)                 | 49    | 54    | 5  | 模板三段插值、offset 指令两套文案                       |
+| [`FileReadTool/imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts) | 94    | 98    | 4  | napi / sharp 双实现、ESM-CJS interop           |
+| [`FileReadTool/UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx)                       | 185   | 192   | 6  | 只渲染摘要、agent 输出文件特殊处理                       |
 
 四个最值得记的点：
 
@@ -3380,14 +3412,14 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 只读三件套收尾：Read 读单文件、Glob 按**名字**找、Grep 按**内容**找。这批 6 份源文件 1,064 行，批注后 1,124 行、60 处锚点。两个工具是刻意的孪生设计——对外都叫「Search」、结果渲染共用同一份实现、路径权限同走通配规则、UNC 短路与 ENOENT 补救逐字对应；分化点也都有意（Glob 的 validateInput 要求目录、Grep 允许 rg 的 PATH 直接指向文件）。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
+| 文件                                                                 | 原文  | 批注版 | 批注 | 讲什么                                |
+| ------------------------------------------------------------------ | --- | --- | -- | ---------------------------------- |
 | [`GrepTool/GrepTool.ts`](annotated/src/tools/GrepTool/GrepTool.ts) | 577 | 612 | 35 | rg 封装全貌：旗标同名参数、三模式输出、分页协议、mtime 排序 |
-| [`GrepTool/UI.tsx`](annotated/src/tools/GrepTool/UI.tsx) | 201 | 206 | 4 | React Compiler 编译产物、三模式共用汇总组件 |
-| [`GrepTool/prompt.ts`](annotated/src/tools/GrepTool/prompt.ts) | 18 | 20 | 2 | 禁用 Bash 跑 rg 的理由、两条高频语法提示 |
-| [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts) | 198 | 212 | 14 | 名字搜索、100 字符阈值放宽、复用 Grep 渲染 |
-| [`GlobTool/UI.tsx`](annotated/src/tools/GlobTool/UI.tsx) | 63 | 67 | 4 | 借走 Grep 的渲染、对外统一叫 Search |
-| [`GlobTool/prompt.ts`](annotated/src/tools/GlobTool/prompt.ts) | 7 | 8 | 1 | 按修改时间排序的检索策略暗示 |
+| [`GrepTool/UI.tsx`](annotated/src/tools/GrepTool/UI.tsx)           | 201 | 206 | 4  | React Compiler 编译产物、三模式共用汇总组件      |
+| [`GrepTool/prompt.ts`](annotated/src/tools/GrepTool/prompt.ts)     | 18  | 20  | 2  | 禁用 Bash 跑 rg 的理由、两条高频语法提示          |
+| [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts) | 198 | 212 | 14 | 名字搜索、100 字符阈值放宽、复用 Grep 渲染         |
+| [`GlobTool/UI.tsx`](annotated/src/tools/GlobTool/UI.tsx)           | 63  | 67  | 4  | 借走 Grep 的渲染、对外统一叫 Search           |
+| [`GlobTool/prompt.ts`](annotated/src/tools/GlobTool/prompt.ts)     | 7   | 8   | 1  | 按修改时间排序的检索策略暗示                     |
 
 五个最值得记的点：
 
@@ -3403,12 +3435,12 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 「技能」这个工具是前面几条线的交汇点：技能清单占上下文 1% 预算（`prompt.ts` 精打细算的两级降级）、调用时或 inline 展开注入主对话、或按 frontmatter `context: 'fork'` 丢给子代理（与 AgentTool 共用 `runAgent`）、权限走 Skill 专属的 allow/deny 规则、遥测按官方/第三方分流脱敏。4 份源文件 1,477 行，批注后 1,525 行、47 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`SkillTool/SkillTool.ts`](annotated/src/tools/SkillTool/SkillTool.ts) | 1,108 | 1,140 | 32 | 三条执行路径、权限判定链、双通道遥测、远端技能加载 |
-| [`SkillTool/prompt.ts`](annotated/src/tools/SkillTool/prompt.ts) | 241 | 250 | 9 | 清单预算（1% 窗口）、两级降级、BLOCKING REQUIREMENT 约定 |
-| [`SkillTool/UI.tsx`](annotated/src/tools/SkillTool/UI.tsx) | 128 | 134 | 6 | fork 进度摘要、拒绝/错误也带进度 |
-| [`SkillTool/constants.ts`](annotated/src/tools/SkillTool/constants.ts) | 1 | 2 | 1 | 工具注册名与规则匹配的关系 |
+| 文件                                                                     | 原文    | 批注版   | 批注 | 讲什么                                      |
+| ---------------------------------------------------------------------- | ----- | ----- | -- | ---------------------------------------- |
+| [`SkillTool/SkillTool.ts`](annotated/src/tools/SkillTool/SkillTool.ts) | 1,108 | 1,140 | 32 | 三条执行路径、权限判定链、双通道遥测、远端技能加载                |
+| [`SkillTool/prompt.ts`](annotated/src/tools/SkillTool/prompt.ts)       | 241   | 250   | 9  | 清单预算（1% 窗口）、两级降级、BLOCKING REQUIREMENT 约定 |
+| [`SkillTool/UI.tsx`](annotated/src/tools/SkillTool/UI.tsx)             | 128   | 134   | 6  | fork 进度摘要、拒绝/错误也带进度                      |
+| [`SkillTool/constants.ts`](annotated/src/tools/SkillTool/constants.ts) | 1     | 2     | 1  | 工具注册名与规则匹配的关系                            |
 
 六个最值得记的点：
 
@@ -3425,22 +3457,22 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 第 21 批收的是五个「小而各有绝活」的工具：问用户要答案的、把原语工具藏进 REPL 的、给未认证 MCP 服务器当替身的、改 Jupyter 的、以及助手模式下模型对用户说话的唯一通道。14 份源文件 1,809 行，批注后 2,075 行、132 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
+| 文件                                                                                                               | 原文  | 批注版 | 批注 | 讲什么                                       |
+| ---------------------------------------------------------------------------------------------------------------- | --- | --- | -- | ----------------------------------------- |
 | [`AskUserQuestionTool/AskUserQuestionTool.tsx`](annotated/src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx) | 266 | 310 | 44 | schema 体系、preview 校验、channels 禁用、call 不问人 |
-| [`AskUserQuestionTool/prompt.ts`](annotated/src/tools/AskUserQuestionTool/prompt.ts) | 44 | 51 | 7 | 主提示词、preview 两版补丁、chip 宽度 |
-| [`REPLTool/constants.ts`](annotated/src/tools/REPLTool/constants.ts) | 46 | 57 | 10 | REPL 模式开关判定、REPL_ONLY_TOOLS 藏原语清单 |
-| [`REPLTool/primitiveTools.ts`](annotated/src/tools/REPLTool/primitiveTools.ts) | 39 | 47 | 8 | 惰性 getter 防 TDZ、绕开 getAllBaseTools 的原因 |
-| [`McpAuthTool/McpAuthTool.ts`](annotated/src/tools/McpAuthTool/McpAuthTool.ts) | 215 | 250 | 35 | 伪工具替身、OAuth 后台续段、Promise.race 静默认证 |
-| [`NotebookEditTool/NotebookEditTool.ts`](annotated/src/tools/NotebookEditTool/NotebookEditTool.ts) | 490 | 544 | 54 | 错误码链、非记忆化 jsonParse、readFileState 去重联动 |
-| [`NotebookEditTool/UI.tsx`](annotated/src/tools/NotebookEditTool/UI.tsx) | 93 | 103 | 10 | 结果渲染、错误降级 |
-| [`NotebookEditTool/prompt.ts`](annotated/src/tools/NotebookEditTool/prompt.ts) | 3 | 5 | 2 | 文案里的 cell_number 历史包袱 |
-| [`NotebookEditTool/constants.ts`](annotated/src/tools/NotebookEditTool/constants.ts) | 2 | 4 | 2 | 工具名单独成文件防 import 环 |
-| [`BriefTool/BriefTool.ts`](annotated/src/tools/BriefTool/BriefTool.ts) | 204 | 229 | 25 | 资格/激活双闸、DCE 正向守卫、resume 兼容 schema |
-| [`BriefTool/upload.ts`](annotated/src/tools/BriefTool/upload.ts) | 174 | 203 | 29 | 附件上传、base URL 三级回退、全路径 best-effort |
-| [`BriefTool/attachments.ts`](annotated/src/tools/BriefTool/attachments.ts) | 110 | 126 | 16 | 动态 import 保 tree-shaking、串行 stat 并行上传 |
-| [`BriefTool/UI.tsx`](annotated/src/tools/BriefTool/UI.tsx) | 101 | 114 | 13 | 三种渲染模式、无工具外壳 |
-| [`BriefTool/prompt.ts`](annotated/src/tools/BriefTool/prompt.ts) | 22 | 32 | 10 | 「答案写进 message」话术、助手模式提示词段 |
+| [`AskUserQuestionTool/prompt.ts`](annotated/src/tools/AskUserQuestionTool/prompt.ts)                             | 44  | 51  | 7  | 主提示词、preview 两版补丁、chip 宽度                 |
+| [`REPLTool/constants.ts`](annotated/src/tools/REPLTool/constants.ts)                                             | 46  | 57  | 10 | REPL 模式开关判定、REPL_ONLY_TOOLS 藏原语清单         |
+| [`REPLTool/primitiveTools.ts`](annotated/src/tools/REPLTool/primitiveTools.ts)                                   | 39  | 47  | 8  | 惰性 getter 防 TDZ、绕开 getAllBaseTools 的原因    |
+| [`McpAuthTool/McpAuthTool.ts`](annotated/src/tools/McpAuthTool/McpAuthTool.ts)                                   | 215 | 250 | 35 | 伪工具替身、OAuth 后台续段、Promise.race 静默认证        |
+| [`NotebookEditTool/NotebookEditTool.ts`](annotated/src/tools/NotebookEditTool/NotebookEditTool.ts)               | 490 | 544 | 54 | 错误码链、非记忆化 jsonParse、readFileState 去重联动    |
+| [`NotebookEditTool/UI.tsx`](annotated/src/tools/NotebookEditTool/UI.tsx)                                         | 93  | 103 | 10 | 结果渲染、错误降级                                 |
+| [`NotebookEditTool/prompt.ts`](annotated/src/tools/NotebookEditTool/prompt.ts)                                   | 3   | 5   | 2  | 文案里的 cell_number 历史包袱                     |
+| [`NotebookEditTool/constants.ts`](annotated/src/tools/NotebookEditTool/constants.ts)                             | 2   | 4   | 2  | 工具名单独成文件防 import 环                        |
+| [`BriefTool/BriefTool.ts`](annotated/src/tools/BriefTool/BriefTool.ts)                                           | 204 | 229 | 25 | 资格/激活双闸、DCE 正向守卫、resume 兼容 schema         |
+| [`BriefTool/upload.ts`](annotated/src/tools/BriefTool/upload.ts)                                                 | 174 | 203 | 29 | 附件上传、base URL 三级回退、全路径 best-effort        |
+| [`BriefTool/attachments.ts`](annotated/src/tools/BriefTool/attachments.ts)                                       | 110 | 126 | 16 | 动态 import 保 tree-shaking、串行 stat 并行上传     |
+| [`BriefTool/UI.tsx`](annotated/src/tools/BriefTool/UI.tsx)                                                       | 101 | 114 | 13 | 三种渲染模式、无工具外壳                              |
+| [`BriefTool/prompt.ts`](annotated/src/tools/BriefTool/prompt.ts)                                                 | 22  | 32  | 10 | 「答案写进 message」话术、助手模式提示词段                 |
 
 七个最值得记的点：
 
@@ -3458,16 +3490,16 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 联网能力的两端：WebFetch 是「抓页面 → 转 markdown → 让 Haiku 按用户 prompt 提炼 → 只回提炼结果」的管道，WebSearch 则是「一次 API 调用、服务端自动搜索、本地只负责解析流」的包装。8 份源文件 1,702 行，批注后 1,903 行、106 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`WebFetchTool/utils.ts`](annotated/src/tools/WebFetchTool/utils.ts) | 530 | 606 | 41 | 双缓存、重定向防护、http 升级、二进制落盘、Haiku 管道 |
-| [`WebFetchTool/WebFetchTool.ts`](annotated/src/tools/WebFetchTool/WebFetchTool.ts) | 318 | 351 | 20 | 权限四关顺序、跨域重定向转述、prompt cache 抖动教训 |
-| [`WebFetchTool/preapproved.ts`](annotated/src/tools/WebFetchTool/preapproved.ts) | 166 | 177 | 10 | 130+ 免审批文档站、host/path 两级查找、段边界匹配 |
-| [`WebFetchTool/UI.tsx`](annotated/src/tools/WebFetchTool/UI.tsx) | 72 | 78 | 4 | 结果行只显示大小与状态码 |
-| [`WebFetchTool/prompt.ts`](annotated/src/tools/WebFetchTool/prompt.ts) | 46 | 56 | 5 | 版权准则双档（预批准域鼓励摘录 / 非预批准引文 ≤125 字符） |
-| [`WebSearchTool/WebSearchTool.ts`](annotated/src/tools/WebSearchTool/WebSearchTool.ts) | 435 | 485 | 25 | 服务端 web_search 工具注入、流式猜词、结果块状态机 |
-| [`WebSearchTool/UI.tsx`](annotated/src/tools/WebSearchTool/UI.tsx) | 101 | 111 | 5 | 进度分流（猜到的词 / 收到的结果数） |
-| [`WebSearchTool/prompt.ts`](annotated/src/tools/WebSearchTool/prompt.ts) | 34 | 39 | 2 | Sources 硬性要求、当前年月注入 |
+| 文件                                                                                     | 原文  | 批注版 | 批注 | 讲什么                               |
+| -------------------------------------------------------------------------------------- | --- | --- | -- | --------------------------------- |
+| [`WebFetchTool/utils.ts`](annotated/src/tools/WebFetchTool/utils.ts)                   | 530 | 606 | 41 | 双缓存、重定向防护、http 升级、二进制落盘、Haiku 管道  |
+| [`WebFetchTool/WebFetchTool.ts`](annotated/src/tools/WebFetchTool/WebFetchTool.ts)     | 318 | 351 | 20 | 权限四关顺序、跨域重定向转述、prompt cache 抖动教训  |
+| [`WebFetchTool/preapproved.ts`](annotated/src/tools/WebFetchTool/preapproved.ts)       | 166 | 177 | 10 | 130+ 免审批文档站、host/path 两级查找、段边界匹配  |
+| [`WebFetchTool/UI.tsx`](annotated/src/tools/WebFetchTool/UI.tsx)                       | 72  | 78  | 4  | 结果行只显示大小与状态码                      |
+| [`WebFetchTool/prompt.ts`](annotated/src/tools/WebFetchTool/prompt.ts)                 | 46  | 56  | 5  | 版权准则双档（预批准域鼓励摘录 / 非预批准引文 ≤125 字符） |
+| [`WebSearchTool/WebSearchTool.ts`](annotated/src/tools/WebSearchTool/WebSearchTool.ts) | 435 | 485 | 25 | 服务端 web_search 工具注入、流式猜词、结果块状态机   |
+| [`WebSearchTool/UI.tsx`](annotated/src/tools/WebSearchTool/UI.tsx)                     | 101 | 111 | 5  | 进度分流（猜到的词 / 收到的结果数）               |
+| [`WebSearchTool/prompt.ts`](annotated/src/tools/WebSearchTool/prompt.ts)               | 34  | 39  | 2  | Sources 硬性要求、当前年月注入               |
 
 八个最值得记的点：
 
@@ -3486,17 +3518,17 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 MCP 工具的本地端一半是「模板」——MCPTool.ts 只有 77 行，name/description/prompt/call 全部标注 Overridden in mcpClient.ts，运行时按每个服务器克隆覆盖；另一半是纯数据——classifyForCollapse.ts 的 604 行里约 570 行是两份手工维护的工具名名单。4 份源文件 1,087 行，批注后 1,117 行、29 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`MCPTool/classifyForCollapse.ts`](annotated/src/tools/MCPTool/classifyForCollapse.ts) | 604 | 610 | 6 | 约 30 家服务器的搜索/读取名单、camelCase 归一化、保守不折叠 |
-| [`MCPTool/UI.tsx`](annotated/src/tools/MCPTool/UI.tsx) | 403 | 421 | 17 | 三策略渲染级联、React Compiler 产物、Slack 特判 |
-| [`MCPTool/MCPTool.ts`](annotated/src/tools/MCPTool/MCPTool.ts) | 77 | 82 | 5 | 模板工具、passthrough schema、10 万字符统一上限 |
-| [`MCPTool/prompt.ts`](annotated/src/tools/MCPTool/prompt.ts) | 3 | 4 | 1 | 空串占位，真实文案在 mcpClient.ts 动态覆盖 |
+| 文件                                                                                     | 原文  | 批注版 | 批注 | 讲什么                                   |
+| -------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------------- |
+| [`MCPTool/classifyForCollapse.ts`](annotated/src/tools/MCPTool/classifyForCollapse.ts) | 604 | 610 | 6  | 约 30 家服务器的搜索/读取名单、camelCase 归一化、保守不折叠 |
+| [`MCPTool/UI.tsx`](annotated/src/tools/MCPTool/UI.tsx)                                 | 403 | 421 | 17 | 三策略渲染级联、React Compiler 产物、Slack 特判    |
+| [`MCPTool/MCPTool.ts`](annotated/src/tools/MCPTool/MCPTool.ts)                         | 77  | 82  | 5  | 模板工具、passthrough schema、10 万字符统一上限    |
+| [`MCPTool/prompt.ts`](annotated/src/tools/MCPTool/prompt.ts)                           | 3   | 4   | 1  | 空串占位，真实文案在 mcpClient.ts 动态覆盖          |
 
 五个最值得记的点：
 
 1. **匹配只看工具名，不看服务器名**——托管服务器的名字不稳定（slack 与 claude_ai_Slack 是同一个），工具名才是跨安装稳定的键；normalize 把 camelCase/kebab 统一成 snake_case，Notion 的 search、MongoDB 的 find 这类极短名字也直接命中。
-2. **保守是硬原则**——名单里没有的工具一律不折叠；READ_TOOLS 全是 get_/list_/read_ 前缀的读取动作，kubectl_apply/delete 这种有副作用的绝不出现在名单里。没有条目也是一种记录：Git 和 PagerDuty 在注释里明说「没有搜索动词」。
+2. **保守是硬原则**——名单里没有的工具一律不折叠；READ_TOOLS 全是 get\_/list\_/read_ 前缀的读取动作，kubectl_apply/delete 这种有副作用的绝不出现在名单里。没有条目也是一种记录：Git 和 PagerDuty 在注释里明说「没有搜索动词」。
 3. **Set 去重暴露了策略的代价**——search_docs（Sentry 与 Supabase）、find_projects（Sentry 与 Todoist）各自出现两次：跨服务器的同名工具无法区分。这是「按名匹配、免维护」换来的盲区，由「不认识就不折叠」兜底。
 4. **UI 渲染是三条策略的级联**——① JSON 里有一个主导字符串载荷（超 200 字符或含换行）就拆出来正经换行显示（专治 Slack 的 {"messages":"line1\nline2..."} 被 pretty-print 转义成字面 \n 的问题）；② 否则是小而平的对象（≤12 键、≤5,000 字符）就平铺成对齐的 k:v；③ 都不行退回 pretty-print 截断。三策略共享一个 parseJsonEntries 入口（空串/超长/非对象/键数越界五连守卫），两个大字符串无法判定谁是主载荷时宁可整体放弃也不猜。
 5. **MCPTool.ts 本身是个空壳**——passthrough schema（MCP 工具自带 schema）、checkPermissions 直接 passthrough（权限走服务器级 allowlist 流程）、call 返回空串——所有真实行为在 mcpClient.ts 克隆模板时覆盖。10 万字符的结果上限是所有 MCP 工具的统一护栏。
@@ -3507,14 +3539,14 @@ MCP 工具的本地端一半是「模板」——MCPTool.ts 只有 77 行，name
 
 LSPTool 把「跳转定义 / 找引用 / hover / 调用层级」这九个编辑器操作暴露给模型。6 份源文件 2,006 行，批注后 2,050 行、42 处锚点。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`LSPTool/LSPTool.ts`](annotated/src/tools/LSPTool/LSPTool.ts) | 860 | 874 | 14 | 主流程：初始化等待、didOpen、两段式调用层级、gitignore 过滤 |
-| [`LSPTool/formatters.ts`](annotated/src/tools/LSPTool/formatters.ts) | 592 | 603 | 11 | URI 归一、按文件分组、SymbolKind 映射、空结果的自我解释 |
-| [`LSPTool/UI.tsx`](annotated/src/tools/LSPTool/UI.tsx) | 228 | 237 | 8 | 折叠摘要协议、header 里显示光标处符号名 |
-| [`LSPTool/schemas.ts`](annotated/src/tools/LSPTool/schemas.ts) | 215 | 218 | 3 | 判别联合（真校验）与普通 strictObject（兼容壳）的双 schema |
-| [`LSPTool/symbolContext.ts`](annotated/src/tools/LSPTool/symbolContext.ts) | 90 | 94 | 4 | 同步 I/O 提取光标处符号、64KB 读窗、半行哨兵 |
-| [`LSPTool/prompt.ts`](annotated/src/tools/LSPTool/prompt.ts) | 21 | 23 | 2 | 给模型的操作手册：九操作 + 1-based 约定 |
+| 文件                                                                         | 原文  | 批注版 | 批注 | 讲什么                                     |
+| -------------------------------------------------------------------------- | --- | --- | -- | --------------------------------------- |
+| [`LSPTool/LSPTool.ts`](annotated/src/tools/LSPTool/LSPTool.ts)             | 860 | 874 | 14 | 主流程：初始化等待、didOpen、两段式调用层级、gitignore 过滤  |
+| [`LSPTool/formatters.ts`](annotated/src/tools/LSPTool/formatters.ts)       | 592 | 603 | 11 | URI 归一、按文件分组、SymbolKind 映射、空结果的自我解释     |
+| [`LSPTool/UI.tsx`](annotated/src/tools/LSPTool/UI.tsx)                     | 228 | 237 | 8  | 折叠摘要协议、header 里显示光标处符号名                 |
+| [`LSPTool/schemas.ts`](annotated/src/tools/LSPTool/schemas.ts)             | 215 | 218 | 3  | 判别联合（真校验）与普通 strictObject（兼容壳）的双 schema |
+| [`LSPTool/symbolContext.ts`](annotated/src/tools/LSPTool/symbolContext.ts) | 90  | 94  | 4  | 同步 I/O 提取光标处符号、64KB 读窗、半行哨兵             |
+| [`LSPTool/prompt.ts`](annotated/src/tools/LSPTool/prompt.ts)               | 21  | 23  | 2  | 给模型的操作手册：九操作 + 1-based 约定               |
 
 五个最值得记的点：
 
@@ -3530,17 +3562,17 @@ LSPTool 把「跳转定义 / 找引用 / hover / 调用层级」这九个编辑�
 
 PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），按「外围先行」拆两批。本批做九个外围文件 1,350 行，批注后 1,472 行、59 处锚点；核心安全大文件（pathValidation、readOnlyValidation、powershellPermissions、powershellSecurity、PowerShellTool.tsx，共 7,610 行）留下一批。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`toolName.ts`](annotated/src/tools/PowerShellTool/toolName.ts) | 2 | 3 | 1 | 两行文件打破循环依赖 |
-| [`commonParameters.ts`](annotated/src/tools/PowerShellTool/commonParameters.ts) | 30 | 33 | 3 | 通用参数清单，破两大校验文件间的 import 环 |
-| [`commandSemantics.ts`](annotated/src/tools/PowerShellTool/commandSemantics.ts) | 142 | 150 | 8 | 退出码语义表：robocopy 位掩码、grep 无匹配 |
-| [`destructiveCommandWarning.ts`](annotated/src/tools/PowerShellTool/destructiveCommandWarning.ts) | 109 | 115 | 6 | 破坏性命令警告（纯信息层，不拦权限） |
-| [`gitSafety.ts`](annotated/src/tools/PowerShellTool/gitSafety.ts) | 176 | 185 | 9 | git 武器化防线：裸仓库攻击、NTFS 短名 |
-| [`UI.tsx`](annotated/src/tools/PowerShellTool/UI.tsx) | 131 | 137 | 5 | 折叠显示、进度复用 Shell 组件 |
-| [`modeValidation.ts`](annotated/src/tools/PowerShellTool/modeValidation.ts) | 404 | 419 | 15 | acceptEdits 白名单、七安全标志、双复合守卫 |
-| [`clmTypes.ts`](annotated/src/tools/PowerShellTool/clmTypes.ts) | 211 | 217 | 6 | 微软 CLM 类型白名单反向使用 |
-| [`prompt.ts`](annotated/src/tools/PowerShellTool/prompt.ts) | 145 | 151 | 6 | 版本分支指引、后台与睡眠反模式 |
+| 文件                                                                                                | 原文  | 批注版 | 批注 | 讲什么                          |
+| ------------------------------------------------------------------------------------------------- | --- | --- | -- | ---------------------------- |
+| [`toolName.ts`](annotated/src/tools/PowerShellTool/toolName.ts)                                   | 2   | 3   | 1  | 两行文件打破循环依赖                   |
+| [`commonParameters.ts`](annotated/src/tools/PowerShellTool/commonParameters.ts)                   | 30  | 33  | 3  | 通用参数清单，破两大校验文件间的 import 环    |
+| [`commandSemantics.ts`](annotated/src/tools/PowerShellTool/commandSemantics.ts)                   | 142 | 150 | 8  | 退出码语义表：robocopy 位掩码、grep 无匹配 |
+| [`destructiveCommandWarning.ts`](annotated/src/tools/PowerShellTool/destructiveCommandWarning.ts) | 109 | 115 | 6  | 破坏性命令警告（纯信息层，不拦权限）           |
+| [`gitSafety.ts`](annotated/src/tools/PowerShellTool/gitSafety.ts)                                 | 176 | 185 | 9  | git 武器化防线：裸仓库攻击、NTFS 短名      |
+| [`UI.tsx`](annotated/src/tools/PowerShellTool/UI.tsx)                                             | 131 | 137 | 5  | 折叠显示、进度复用 Shell 组件           |
+| [`modeValidation.ts`](annotated/src/tools/PowerShellTool/modeValidation.ts)                       | 404 | 419 | 15 | acceptEdits 白名单、七安全标志、双复合守卫  |
+| [`clmTypes.ts`](annotated/src/tools/PowerShellTool/clmTypes.ts)                                   | 211 | 217 | 6  | 微软 CLM 类型白名单反向使用             |
+| [`prompt.ts`](annotated/src/tools/PowerShellTool/prompt.ts)                                       | 145 | 151 | 6  | 版本分支指引、后台与睡眠反模式              |
 
 五个最值得记的点：
 
@@ -3556,13 +3588,13 @@ PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），
 
 本批把剩下的五个核心文件做完：pathValidation（2,049）、readOnlyValidation（1,823）、powershellPermissions（1,648）、powershellSecurity（1,090）、PowerShellTool.tsx（1,001），共 7,610 行 → 批注版 7,808 行、196 处锚点。至此 PowerShellTool 全目录 14/14、8,961 行清零。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`pathValidation.ts`](annotated/src/tools/PowerShellTool/pathValidation.ts) | 2,049 | 2,083 | 34 | 参数户口本 + 六层路径闸门 + cd 复合守卫 |
-| [`readOnlyValidation.ts`](annotated/src/tools/PowerShellTool/readOnlyValidation.ts) | 1,823 | 1,862 | 39 | 只读白名单（每条移除注释都是事故）+ 外命令共享校验 |
-| [`powershellPermissions.ts`](annotated/src/tools/PowerShellTool/powershellPermissions.ts) | 1,648 | 1,693 | 45 | 权限主流程：收集后归约 + git 武器化四连守卫 |
-| [`powershellSecurity.ts`](annotated/src/tools/PowerShellTool/powershellSecurity.ts) | 1,090 | 1,122 | 32 | 23 项 AST 安全检查，另类参数前缀归一 |
-| [`PowerShellTool.tsx`](annotated/src/tools/PowerShellTool/PowerShellTool.tsx) | 1,001 | 1,048 | 46 | 工具定义、执行循环、后台化与落盘 |
+| 文件                                                                                        | 原文    | 批注版   | 批注 | 讲什么                        |
+| ----------------------------------------------------------------------------------------- | ----- | ----- | -- | -------------------------- |
+| [`pathValidation.ts`](annotated/src/tools/PowerShellTool/pathValidation.ts)               | 2,049 | 2,083 | 34 | 参数户口本 + 六层路径闸门 + cd 复合守卫   |
+| [`readOnlyValidation.ts`](annotated/src/tools/PowerShellTool/readOnlyValidation.ts)       | 1,823 | 1,862 | 39 | 只读白名单（每条移除注释都是事故）+ 外命令共享校验 |
+| [`powershellPermissions.ts`](annotated/src/tools/PowerShellTool/powershellPermissions.ts) | 1,648 | 1,693 | 45 | 权限主流程：收集后归约 + git 武器化四连守卫  |
+| [`powershellSecurity.ts`](annotated/src/tools/PowerShellTool/powershellSecurity.ts)       | 1,090 | 1,122 | 32 | 23 项 AST 安全检查，另类参数前缀归一     |
+| [`PowerShellTool.tsx`](annotated/src/tools/PowerShellTool/PowerShellTool.tsx)             | 1,001 | 1,048 | 46 | 工具定义、执行循环、后台化与落盘           |
 
 七个最值得记的点：
 
@@ -3580,19 +3612,19 @@ PowerShellTool 是 tools 里安全密度最高的目录（14 份 8,961 行），
 
 EnterPlanModeTool（4 份）、ExitPlanModeTool（4 份）、TodoWriteTool（3 份），共 11 文件 1,236 行 → 批注版 1,303 行、65 处锚点。计划模式是「进—出—跟踪」三段式：EnterPlanMode 开门、ExitPlanModeV2 收口、TodoWrite 在门里跟踪进度。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`EnterPlanModeTool.ts`](annotated/src/tools/EnterPlanModeTool/EnterPlanModeTool.ts) | 126 | 136 | 10 | 空参数 schema、agent 上下文禁用、权限上下文两连改 |
-| [`prompt.ts`](annotated/src/tools/EnterPlanModeTool/prompt.ts) | 170 | 174 | 4 | 两套人格话术按 USER_TYPE 分流 |
-| [`UI.tsx`](annotated/src/tools/EnterPlanModeTool/UI.tsx) | 33 | 38 | 4 | 进入/结果/拒绝三消息 |
-| [`constants.ts`](annotated/src/tools/EnterPlanModeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| 文件                                                                                    | 原文  | 批注版 | 批注 | 讲什么                             |
+| ------------------------------------------------------------------------------------- | --- | --- | -- | ------------------------------- |
+| [`EnterPlanModeTool.ts`](annotated/src/tools/EnterPlanModeTool/EnterPlanModeTool.ts)  | 126 | 136 | 10 | 空参数 schema、agent 上下文禁用、权限上下文两连改 |
+| [`prompt.ts`](annotated/src/tools/EnterPlanModeTool/prompt.ts)                        | 170 | 174 | 4  | 两套人格话术按 USER_TYPE 分流            |
+| [`UI.tsx`](annotated/src/tools/EnterPlanModeTool/UI.tsx)                              | 33  | 38  | 4  | 进入/结果/拒绝三消息                     |
+| [`constants.ts`](annotated/src/tools/EnterPlanModeTool/constants.ts)                  | 1   | 2   | 1  | 工具名常量                           |
 | [`ExitPlanModeV2Tool.ts`](annotated/src/tools/ExitPlanModeTool/ExitPlanModeV2Tool.ts) | 493 | 515 | 22 | 出口主流程：编辑回写、mailbox 审批、熔断防御、模式复原 |
-| [`UI.tsx`](annotated/src/tools/ExitPlanModeTool/UI.tsx) | 82 | 89 | 6 | 结果消息三态（空/等队长/已批准） |
-| [`prompt.ts`](annotated/src/tools/ExitPlanModeTool/prompt.ts) | 29 | 31 | 2 | 外部 stub 提示词（剔除 Ant-only 段） |
-| [`constants.ts`](annotated/src/tools/ExitPlanModeTool/constants.ts) | 2 | 4 | 2 | V1/V2 两个导出同值 |
-| [`TodoWriteTool.ts`](annotated/src/tools/TodoWriteTool/TodoWriteTool.ts) | 115 | 126 | 11 | 清单状态机 + 验证提醒 nudge |
-| [`prompt.ts`](annotated/src/tools/TodoWriteTool/prompt.ts) | 184 | 186 | 2 | 用法指南大模板 |
-| [`constants.ts`](annotated/src/tools/TodoWriteTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| [`UI.tsx`](annotated/src/tools/ExitPlanModeTool/UI.tsx)                               | 82  | 89  | 6  | 结果消息三态（空/等队长/已批准）               |
+| [`prompt.ts`](annotated/src/tools/ExitPlanModeTool/prompt.ts)                         | 29  | 31  | 2  | 外部 stub 提示词（剔除 Ant-only 段）      |
+| [`constants.ts`](annotated/src/tools/ExitPlanModeTool/constants.ts)                   | 2   | 4   | 2  | V1/V2 两个导出同值                    |
+| [`TodoWriteTool.ts`](annotated/src/tools/TodoWriteTool/TodoWriteTool.ts)              | 115 | 126 | 11 | 清单状态机 + 验证提醒 nudge              |
+| [`prompt.ts`](annotated/src/tools/TodoWriteTool/prompt.ts)                            | 184 | 186 | 2  | 用法指南大模板                         |
+| [`constants.ts`](annotated/src/tools/TodoWriteTool/constants.ts)                      | 1   | 2   | 1  | 工具名常量                           |
 
 七个最值得记的点：
 
@@ -3608,20 +3640,20 @@ EnterPlanModeTool（4 份）、ExitPlanModeTool（4 份）、TodoWriteTool（3 �
 
 SendMessageTool（4 份）、ScheduleCronTool（5 份）、ToolSearchTool（3 份），共 12 文件 2,136 行 → 批注版 2,229 行、95 处锚点。三者的共同点：都是「模型对自己和他人时间的调度」——发消息（横向协作）、定时任务（纵向调度）、搜工具（上下文预算调度）。至此 `src/tools/` 已完成 100/184、67% 行数。
 
-| 文件 | 原文 | 批注版 | 批注 | 讲什么 |
-| --- | --- | --- | --- | --- |
-| [`SendMessageTool.ts`](annotated/src/tools/SendMessageTool/SendMessageTool.ts) | 917 | 942 | 25 | agent 间协议：三种结构化消息 + 四层路由 + 跨机注入防护 |
-| [`prompt.ts`](annotated/src/tools/SendMessageTool/prompt.ts) | 49 | 51 | 2 | 「纯文本输出不可见」契约 + 回消息抄 from |
-| [`UI.tsx`](annotated/src/tools/SendMessageTool/UI.tsx) | 31 | 34 | 3 | 审批类消息才显形，其余静默 |
-| [`constants.ts`](annotated/src/tools/SendMessageTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`CronCreateTool.ts`](annotated/src/tools/ScheduleCronTool/CronCreateTool.ts) | 157 | 168 | 11 | 四道预检 + kill switch 折损 + 错峰指引 |
-| [`CronListTool.ts`](annotated/src/tools/ScheduleCronTool/CronListTool.ts) | 97 | 102 | 5 | 队友只看自己的，队长看全部 |
-| [`CronDeleteTool.ts`](annotated/src/tools/ScheduleCronTool/CronDeleteTool.ts) | 95 | 100 | 5 | 删除权限与可见性两层同语义 |
-| [`prompt.ts`](annotated/src/tools/ScheduleCronTool/prompt.ts) | 135 | 144 | 9 | 双层开关 + 整点错峰 + 抖动诚实告知 |
-| [`UI.tsx`](annotated/src/tools/ScheduleCronTool/UI.tsx) | 60 | 66 | 5 | 三个工具的渲染函数 |
-| [`ToolSearchTool.ts`](annotated/src/tools/ToolSearchTool/ToolSearchTool.ts) | 471 | 492 | 21 | 延迟加载体系：缓存键 + 词根评分 + tool_reference 下发 |
-| [`prompt.ts`](annotated/src/tools/ToolSearchTool/prompt.ts) | 121 | 128 | 7 | isDeferredTool 六级判定链 + 延迟加载机制说明 |
-| [`constants.ts`](annotated/src/tools/ToolSearchTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| 文件                                                                             | 原文  | 批注版 | 批注 | 讲什么                                   |
+| ------------------------------------------------------------------------------ | --- | --- | -- | ------------------------------------- |
+| [`SendMessageTool.ts`](annotated/src/tools/SendMessageTool/SendMessageTool.ts) | 917 | 942 | 25 | agent 间协议：三种结构化消息 + 四层路由 + 跨机注入防护     |
+| [`prompt.ts`](annotated/src/tools/SendMessageTool/prompt.ts)                   | 49  | 51  | 2  | 「纯文本输出不可见」契约 + 回消息抄 from              |
+| [`UI.tsx`](annotated/src/tools/SendMessageTool/UI.tsx)                         | 31  | 34  | 3  | 审批类消息才显形，其余静默                         |
+| [`constants.ts`](annotated/src/tools/SendMessageTool/constants.ts)             | 1   | 2   | 1  | 工具名常量                                 |
+| [`CronCreateTool.ts`](annotated/src/tools/ScheduleCronTool/CronCreateTool.ts)  | 157 | 168 | 11 | 四道预检 + kill switch 折损 + 错峰指引          |
+| [`CronListTool.ts`](annotated/src/tools/ScheduleCronTool/CronListTool.ts)      | 97  | 102 | 5  | 队友只看自己的，队长看全部                         |
+| [`CronDeleteTool.ts`](annotated/src/tools/ScheduleCronTool/CronDeleteTool.ts)  | 95  | 100 | 5  | 删除权限与可见性两层同语义                         |
+| [`prompt.ts`](annotated/src/tools/ScheduleCronTool/prompt.ts)                  | 135 | 144 | 9  | 双层开关 + 整点错峰 + 抖动诚实告知                  |
+| [`UI.tsx`](annotated/src/tools/ScheduleCronTool/UI.tsx)                        | 60  | 66  | 5  | 三个工具的渲染函数                             |
+| [`ToolSearchTool.ts`](annotated/src/tools/ToolSearchTool/ToolSearchTool.ts)    | 471 | 492 | 21 | 延迟加载体系：缓存键 + 词根评分 + tool_reference 下发 |
+| [`prompt.ts`](annotated/src/tools/ToolSearchTool/prompt.ts)                    | 121 | 128 | 7  | isDeferredTool 六级判定链 + 延迟加载机制说明       |
+| [`constants.ts`](annotated/src/tools/ToolSearchTool/constants.ts)              | 1   | 2   | 1  | 工具名常量                                 |
 
 八个最值得记的点：
 
@@ -3638,30 +3670,30 @@ SendMessageTool（4 份）、ScheduleCronTool（5 份）、ToolSearchTool（3 �
 
 EnterWorktreeTool（4 份）、ExitWorktreeTool（4 份）、ListMcpResourcesTool（3 份）、ReadMcpResourceTool（3 份）、TeamCreateTool（4 份）、TeamDeleteTool（4 份），共 22 文件 1,484 行 → 批注版 1,613 行、128 处锚点。三条主线：worktree 是「换一个目录继续活」，MCP 资源是「服务器手里的数据面」，team 是「多代理协作的户口本」。
 
-| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
-| --- | --- | --- | --- | --- |
-| [`EnterWorktreeTool.ts`](annotated/src/tools/EnterWorktreeTool/EnterWorktreeTool.ts) | 127 | 140 | 13 | 会话级 chdir、解析回主仓库根、三连清 cwd 缓存 |
-| [`prompt.ts`](annotated/src/tools/EnterWorktreeTool/prompt.ts) | 30 | 33 | 3 | 只在用户明说 worktree 时用；hooks 兜非 git 仓库 |
-| [`UI.tsx`](annotated/src/tools/EnterWorktreeTool/UI.tsx) | 20 | 22 | 2 | 分支名加粗、路径置灰 |
-| [`constants.ts`](annotated/src/tools/EnterWorktreeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`ExitWorktreeTool.ts`](annotated/src/tools/ExitWorktreeTool/ExitWorktreeTool.ts) | 329 | 351 | 22 | fail-closed 数账、逆运算边界、errorCode 1/2/3 |
-| [`prompt.ts`](annotated/src/tools/ExitWorktreeTool/prompt.ts) | 32 | 35 | 3 | scope 闸 + no-op 语义 + discard 确认协议 |
-| [`UI.tsx`](annotated/src/tools/ExitWorktreeTool/UI.tsx) | 25 | 27 | 2 | Kept/Removed 标签分支 |
-| [`constants.ts`](annotated/src/tools/ExitWorktreeTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`ListMcpResourcesTool.ts`](annotated/src/tools/ListMcpResourcesTool/ListMcpResourcesTool.ts) | 123 | 132 | 9 | LRU 三层缓存策略、单服务器失败不拖垮整体 |
-| [`UI.tsx`](annotated/src/tools/ListMcpResourcesTool/UI.tsx) | 29 | 33 | 4 | eslint 豁免：给人看的 UI 不守 tool_result 规则 |
-| [`prompt.ts`](annotated/src/tools/ListMcpResourcesTool/prompt.ts) | 20 | 24 | 4 | DESCRIPTION + PROMPT + 名字三合一 |
-| [`ReadMcpResourceTool.ts`](annotated/src/tools/ReadMcpResourceTool/ReadMcpResourceTool.ts) | 158 | 170 | 12 | blob 拦截落盘换路径、三步前置检查 |
-| [`UI.tsx`](annotated/src/tools/ReadMcpResourceTool/UI.tsx) | 37 | 43 | 5 | 半截输入返回 null 不渲染 |
-| [`prompt.ts`](annotated/src/tools/ReadMcpResourceTool/prompt.ts) | 16 | 18 | 2 | 双必填参数手册 |
-| [`TeamCreateTool.ts`](annotated/src/tools/TeamCreateTool/TeamCreateTool.ts) | 240 | 260 | 20 | 确定性队长 ID、Team=TaskList、gh-32730 清理登记 |
-| [`prompt.ts`](annotated/src/tools/TeamCreateTool/prompt.ts) | 113 | 116 | 3 | 全仓最长工具提示词：七步协作协议 |
-| [`UI.tsx`](annotated/src/tools/TeamCreateTool/UI.tsx) | 6 | 7 | 1 | 一行 create team 文案 |
-| [`constants.ts`](annotated/src/tools/TeamCreateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TeamDeleteTool.ts`](annotated/src/tools/TeamDeleteTool/TeamDeleteTool.ts) | 139 | 153 | 14 | 活跃成员挡拆、恒清 inbox、幂等成功 |
-| [`UI.tsx`](annotated/src/tools/TeamDeleteTool/UI.tsx) | 20 | 23 | 3 | 恒返回 null——批量 shutdown 消息已覆盖 |
-| [`prompt.ts`](annotated/src/tools/TeamDeleteTool/prompt.ts) | 16 | 18 | 2 | 先关人再删队的前置条件 |
-| [`constants.ts`](annotated/src/tools/TeamDeleteTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
+| 文件                                                                                            | 原文行 | 批注版行 | 锚点 | 看点                                   |
+| --------------------------------------------------------------------------------------------- | --- | ---- | -- | ------------------------------------ |
+| [`EnterWorktreeTool.ts`](annotated/src/tools/EnterWorktreeTool/EnterWorktreeTool.ts)          | 127 | 140  | 13 | 会话级 chdir、解析回主仓库根、三连清 cwd 缓存         |
+| [`prompt.ts`](annotated/src/tools/EnterWorktreeTool/prompt.ts)                                | 30  | 33   | 3  | 只在用户明说 worktree 时用；hooks 兜非 git 仓库   |
+| [`UI.tsx`](annotated/src/tools/EnterWorktreeTool/UI.tsx)                                      | 20  | 22   | 2  | 分支名加粗、路径置灰                           |
+| [`constants.ts`](annotated/src/tools/EnterWorktreeTool/constants.ts)                          | 1   | 2    | 1  | 工具名常量                                |
+| [`ExitWorktreeTool.ts`](annotated/src/tools/ExitWorktreeTool/ExitWorktreeTool.ts)             | 329 | 351  | 22 | fail-closed 数账、逆运算边界、errorCode 1/2/3 |
+| [`prompt.ts`](annotated/src/tools/ExitWorktreeTool/prompt.ts)                                 | 32  | 35   | 3  | scope 闸 + no-op 语义 + discard 确认协议    |
+| [`UI.tsx`](annotated/src/tools/ExitWorktreeTool/UI.tsx)                                       | 25  | 27   | 2  | Kept/Removed 标签分支                    |
+| [`constants.ts`](annotated/src/tools/ExitWorktreeTool/constants.ts)                           | 1   | 2    | 1  | 工具名常量                                |
+| [`ListMcpResourcesTool.ts`](annotated/src/tools/ListMcpResourcesTool/ListMcpResourcesTool.ts) | 123 | 132  | 9  | LRU 三层缓存策略、单服务器失败不拖垮整体               |
+| [`UI.tsx`](annotated/src/tools/ListMcpResourcesTool/UI.tsx)                                   | 29  | 33   | 4  | eslint 豁免：给人看的 UI 不守 tool_result 规则  |
+| [`prompt.ts`](annotated/src/tools/ListMcpResourcesTool/prompt.ts)                             | 20  | 24   | 4  | DESCRIPTION + PROMPT + 名字三合一         |
+| [`ReadMcpResourceTool.ts`](annotated/src/tools/ReadMcpResourceTool/ReadMcpResourceTool.ts)    | 158 | 170  | 12 | blob 拦截落盘换路径、三步前置检查                  |
+| [`UI.tsx`](annotated/src/tools/ReadMcpResourceTool/UI.tsx)                                    | 37  | 43   | 5  | 半截输入返回 null 不渲染                      |
+| [`prompt.ts`](annotated/src/tools/ReadMcpResourceTool/prompt.ts)                              | 16  | 18   | 2  | 双必填参数手册                              |
+| [`TeamCreateTool.ts`](annotated/src/tools/TeamCreateTool/TeamCreateTool.ts)                   | 240 | 260  | 20 | 确定性队长 ID、Team=TaskList、gh-32730 清理登记 |
+| [`prompt.ts`](annotated/src/tools/TeamCreateTool/prompt.ts)                                   | 113 | 116  | 3  | 全仓最长工具提示词：七步协作协议                     |
+| [`UI.tsx`](annotated/src/tools/TeamCreateTool/UI.tsx)                                         | 6   | 7    | 1  | 一行 create team 文案                    |
+| [`constants.ts`](annotated/src/tools/TeamCreateTool/constants.ts)                             | 1   | 2    | 1  | 工具名常量                                |
+| [`TeamDeleteTool.ts`](annotated/src/tools/TeamDeleteTool/TeamDeleteTool.ts)                   | 139 | 153  | 14 | 活跃成员挡拆、恒清 inbox、幂等成功                 |
+| [`UI.tsx`](annotated/src/tools/TeamDeleteTool/UI.tsx)                                         | 20  | 23   | 3  | 恒返回 null——批量 shutdown 消息已覆盖          |
+| [`prompt.ts`](annotated/src/tools/TeamDeleteTool/prompt.ts)                                   | 16  | 18   | 2  | 先关人再删队的前置条件                          |
+| [`constants.ts`](annotated/src/tools/TeamDeleteTool/constants.ts)                             | 1   | 2    | 1  | 工具名常量                                |
 
 八个最值得记的点：
 
@@ -3680,21 +3712,21 @@ EnterWorktreeTool（4 份）、ExitWorktreeTool（4 份）、ListMcpResourcesToo
 
 ConfigTool（5 份）、TaskOutputTool（2 份）、TaskUpdateTool（3 份）、RemoteTriggerTool（3 份），共 13 文件 2,069 行 → 批注版 2,234 行、120 处锚点。这批是 tools 层的「管理面」：配置工具自己也是注册表驱动的，任务三件套把 V1 待办与 V2 任务系统缝在一起，远程触发则是 token 永不落 shell 的 API 代理。
 
-| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
-| --- | --- | --- | --- | --- |
-| [`ConfigTool.ts`](annotated/src/tools/ConfigTool/ConfigTool.ts) | 467 | 490 | 23 | 读 allow / 写 ask、default 撤销覆盖、双存储分叉、遥测类型标记 |
-| [`supportedSettings.ts`](annotated/src/tools/ConfigTool/supportedSettings.ts) | 211 | 224 | 13 | 注册表单一事实源、特性开关条件注册、model 动态候选与兜底 |
-| [`prompt.ts`](annotated/src/tools/ConfigTool/prompt.ts) | 93 | 98 | 5 | prompt 从注册表现算、model 单独成节、kill-switch 期隐藏 |
-| [`UI.tsx`](annotated/src/tools/ConfigTool/UI.tsx) | 38 | 42 | 3 | 读写二分显示、三分支结果渲染 |
-| [`constants.ts`](annotated/src/tools/ConfigTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TaskOutputTool.tsx`](annotated/src/tools/TaskOutputTool/TaskOutputTool.tsx) | 584 | 611 | 26 | 官方弃用、三种任务统一输出、磁盘 symlink 陷阱、轮询等待 |
-| [`constants.ts`](annotated/src/tools/TaskOutputTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TaskUpdateTool.ts`](annotated/src/tools/TaskUpdateTool/TaskUpdateTool.ts) | 406 | 432 | 26 | 字段 diff、hooks 拦完成、mailbox 指派、结构化防跳验证 |
-| [`prompt.ts`](annotated/src/tools/TaskUpdateTool/prompt.ts) | 77 | 83 | 6 | 完成判据、状态机、改前先 TaskGet |
-| [`constants.ts`](annotated/src/tools/TaskUpdateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`RemoteTriggerTool.ts`](annotated/src/tools/RemoteTriggerTool/RemoteTriggerTool.ts) | 161 | 172 | 11 | 五动作 REST 映射、validateStatus 放行、beta 版本戳 |
-| [`UI.tsx`](annotated/src/tools/RemoteTriggerTool/UI.tsx) | 17 | 19 | 2 | 状态码 + 行数，内容不渲染 |
-| [`prompt.ts`](annotated/src/tools/RemoteTriggerTool/prompt.ts) | 15 | 17 | 2 | curl 替身、token 进程内注入 |
+| 文件                                                                                   | 原文行 | 批注版行 | 锚点 | 看点                                        |
+| ------------------------------------------------------------------------------------ | --- | ---- | -- | ----------------------------------------- |
+| [`ConfigTool.ts`](annotated/src/tools/ConfigTool/ConfigTool.ts)                      | 467 | 490  | 23 | 读 allow / 写 ask、default 撤销覆盖、双存储分叉、遥测类型标记 |
+| [`supportedSettings.ts`](annotated/src/tools/ConfigTool/supportedSettings.ts)        | 211 | 224  | 13 | 注册表单一事实源、特性开关条件注册、model 动态候选与兜底           |
+| [`prompt.ts`](annotated/src/tools/ConfigTool/prompt.ts)                              | 93  | 98   | 5  | prompt 从注册表现算、model 单独成节、kill-switch 期隐藏  |
+| [`UI.tsx`](annotated/src/tools/ConfigTool/UI.tsx)                                    | 38  | 42   | 3  | 读写二分显示、三分支结果渲染                            |
+| [`constants.ts`](annotated/src/tools/ConfigTool/constants.ts)                        | 1   | 2    | 1  | 工具名常量                                     |
+| [`TaskOutputTool.tsx`](annotated/src/tools/TaskOutputTool/TaskOutputTool.tsx)        | 584 | 611  | 26 | 官方弃用、三种任务统一输出、磁盘 symlink 陷阱、轮询等待          |
+| [`constants.ts`](annotated/src/tools/TaskOutputTool/constants.ts)                    | 1   | 2    | 1  | 工具名常量                                     |
+| [`TaskUpdateTool.ts`](annotated/src/tools/TaskUpdateTool/TaskUpdateTool.ts)          | 406 | 432  | 26 | 字段 diff、hooks 拦完成、mailbox 指派、结构化防跳验证      |
+| [`prompt.ts`](annotated/src/tools/TaskUpdateTool/prompt.ts)                          | 77  | 83   | 6  | 完成判据、状态机、改前先 TaskGet                      |
+| [`constants.ts`](annotated/src/tools/TaskUpdateTool/constants.ts)                    | 1   | 2    | 1  | 工具名常量                                     |
+| [`RemoteTriggerTool.ts`](annotated/src/tools/RemoteTriggerTool/RemoteTriggerTool.ts) | 161 | 172  | 11 | 五动作 REST 映射、validateStatus 放行、beta 版本戳    |
+| [`UI.tsx`](annotated/src/tools/RemoteTriggerTool/UI.tsx)                             | 17  | 19   | 2  | 状态码 + 行数，内容不渲染                            |
+| [`prompt.ts`](annotated/src/tools/RemoteTriggerTool/prompt.ts)                       | 15  | 17   | 2  | curl 替身、token 进程内注入                       |
 
 七个值得记的点：
 
@@ -3712,36 +3744,37 @@ ConfigTool（5 份）、TaskOutputTool（2 份）、TaskUpdateTool（3 份）、
 
 TaskCreate / TaskGet / TaskList / TaskStop 四个目录 12 份，外加 SyntheticOutputTool、TestingPermissionTool、根目录 utils.ts、SleepTool/prompt.ts，共 16 文件 988 行 → 批注版 1,116 行、126 处锚点。这批把「任务系统」的模型侧闭合：建、查、列、停四件事加一个测试钉子，`src/tools/` 只剩 BashTool（14 份）、AgentTool（17 份）、shared（2 份）三个大目录。
 
-| 文件 | 原文行 | 批注版行 | 锚点 | 看点 |
-| --- | --- | --- | --- | --- |
-| [`TaskCreateTool.ts`](annotated/src/tools/TaskCreateTool/TaskCreateTool.ts) | 138 | 156 | 18 | 先写后验 + 钩子拦截回滚、任意 metadata |
-| [`prompt.ts`](annotated/src/tools/TaskCreateTool/prompt.ts) | 56 | 61 | 5 | 队友模式两段插话、先 TaskList 再建防重复 |
-| [`constants.ts`](annotated/src/tools/TaskCreateTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TaskGetTool.ts`](annotated/src/tools/TaskGetTool/TaskGetTool.ts) | 128 | 142 | 14 | 任务不存在回 null 不报错、六字段全量 |
-| [`prompt.ts`](annotated/src/tools/TaskGetTool/prompt.ts) | 24 | 29 | 5 | 动手前先查 blockedBy |
-| [`constants.ts`](annotated/src/tools/TaskGetTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TaskListTool.ts`](annotated/src/tools/TaskListTool/TaskListTool.ts) | 116 | 129 | 13 | 摘要形态、已完成阻塞项过滤、`_internal` 隐身 |
-| [`prompt.ts`](annotated/src/tools/TaskListTool/prompt.ts) | 49 | 55 | 6 | 按 ID 从小到大认领、三元两分支同文案的残留 |
-| [`constants.ts`](annotated/src/tools/TaskListTool/constants.ts) | 1 | 2 | 1 | 工具名常量 |
-| [`TaskStopTool.ts`](annotated/src/tools/TaskStopTool/TaskStopTool.ts) | 131 | 146 | 15 | KillShell 别名兼容、errorCode 1/3 分工、validateInput 全过才放行 |
-| [`UI.tsx`](annotated/src/tools/TaskStopTool/UI.tsx) | 41 | 50 | 8 | 双重截断、恒假的 USER_TYPE 判断 |
-| [`prompt.ts`](annotated/src/tools/TaskStopTool/prompt.ts) | 8 | 10 | 2 | 名字与 DESCRIPTION 同文件导出的异类布局 |
-| [`SyntheticOutputTool.ts`](annotated/src/tools/SyntheticOutputTool/SyntheticOutputTool.ts) | 163 | 182 | 19 | WeakMap 身份缓存、Ajv 先验 schema 再 compile、双文案安全异常 |
-| [`TestingPermissionTool.tsx`](annotated/src/tools/testing/TestingPermissionTool.tsx) | 74 | 82 | 7 | 恒 ask 的测试钉子、恒假的 isEnabled |
-| [`utils.ts`](annotated/src/tools/utils.ts) | 40 | 46 | 6 | sourceToolUseID 打标签防「运行中」重复渲染 |
-| [`SleepTool/prompt.ts`](annotated/src/tools/SleepTool/prompt.ts) | 17 | 22 | 5 | TICK_TAG 插值、API 调用代价写进 prompt |
+| 文件                                                                                         | 原文行 | 批注版行 | 锚点 | 看点                                                  |
+| ------------------------------------------------------------------------------------------ | --- | ---- | -- | --------------------------------------------------- |
+| [`TaskCreateTool.ts`](annotated/src/tools/TaskCreateTool/TaskCreateTool.ts)                | 138 | 156  | 18 | 先写后验 + 钩子拦截回滚、任意 metadata                           |
+| [`prompt.ts`](annotated/src/tools/TaskCreateTool/prompt.ts)                                | 56  | 61   | 5  | 队友模式两段插话、先 TaskList 再建防重复                           |
+| [`constants.ts`](annotated/src/tools/TaskCreateTool/constants.ts)                          | 1   | 2    | 1  | 工具名常量                                               |
+| [`TaskGetTool.ts`](annotated/src/tools/TaskGetTool/TaskGetTool.ts)                         | 128 | 142  | 14 | 任务不存在回 null 不报错、六字段全量                               |
+| [`prompt.ts`](annotated/src/tools/TaskGetTool/prompt.ts)                                   | 24  | 29   | 5  | 动手前先查 blockedBy                                     |
+| [`constants.ts`](annotated/src/tools/TaskGetTool/constants.ts)                             | 1   | 2    | 1  | 工具名常量                                               |
+| [`TaskListTool.ts`](annotated/src/tools/TaskListTool/TaskListTool.ts)                      | 116 | 129  | 13 | 摘要形态、已完成阻塞项过滤、`_internal` 隐身                        |
+| [`prompt.ts`](annotated/src/tools/TaskListTool/prompt.ts)                                  | 49  | 55   | 6  | 按 ID 从小到大认领、三元两分支同文案的残留                             |
+| [`constants.ts`](annotated/src/tools/TaskListTool/constants.ts)                            | 1   | 2    | 1  | 工具名常量                                               |
+| [`TaskStopTool.ts`](annotated/src/tools/TaskStopTool/TaskStopTool.ts)                      | 131 | 146  | 15 | KillShell 别名兼容、errorCode 1/3 分工、validateInput 全过才放行 |
+| [`UI.tsx`](annotated/src/tools/TaskStopTool/UI.tsx)                                        | 41  | 50   | 8  | 双重截断、恒假的 USER_TYPE 判断                               |
+| [`prompt.ts`](annotated/src/tools/TaskStopTool/prompt.ts)                                  | 8   | 10   | 2  | 名字与 DESCRIPTION 同文件导出的异类布局                          |
+| [`SyntheticOutputTool.ts`](annotated/src/tools/SyntheticOutputTool/SyntheticOutputTool.ts) | 163 | 182  | 19 | WeakMap 身份缓存、Ajv 先验 schema 再 compile、双文案安全异常        |
+| [`TestingPermissionTool.tsx`](annotated/src/tools/testing/TestingPermissionTool.tsx)       | 74  | 82   | 7  | 恒 ask 的测试钉子、恒假的 isEnabled                           |
+| [`utils.ts`](annotated/src/tools/utils.ts)                                                 | 40  | 46   | 6  | sourceToolUseID 打标签防「运行中」重复渲染                       |
+| [`SleepTool/prompt.ts`](annotated/src/tools/SleepTool/prompt.ts)                           | 17  | 22   | 5  | TICK_TAG 插值、API 调用代价写进 prompt                       |
 
 七个值得记的点：
 
 1. **四件套是同一骨架的四次实例化**。lazySchema + buildTool + shouldDefer + isConcurrencySafe 完全一致，差异只在 call 里干什么。isEnabled 全部挂在 isTodoV2Enabled() 上——Todo v2 没开时整套一起隐身，老会话不受影响。读一个就懂全部四个，这也是「框架把重复部分吃掉」的直观样本。
 2. **Create 是「先写后验」的标准范本**。createTask 落盘 → 钩子逐个 yield → 有 blockingError 就 deleteTask 回滚再抛。补偿动作紧贴写入点，不在存储里留半条任务；错误信息合并成一条，模型一次看到全部拦截理由。
 3. **「不存在」与「状态不对」是两种错误**。TaskStopTool 的 validateInput 用 errorCode 分开计分：缺参/不存在是 1，存在但不在 running 是 3。调用方（和遥测）能区分「打错 ID」与「停一个已停的」——混成一个码，日志里两类事永远分不开。
-4. **TaskList 的两处过滤是「别让模型看见噪音」**。metadata._internal 的系统任务不进列表；blockedBy 里已完成的项先剔掉。「被已完成任务堵住」不是堵，显示出来只会诱导模型去催一个早已完事的任务。
+4. **TaskList 的两处过滤是「别让模型看见噪音」**。metadata.\_internal 的系统任务不进列表；blockedBy 里已完成的项先剔掉。「被已完成任务堵住」不是堵，显示出来只会诱导模型去催一个早已完事的任务。
 5. **StructuredOutput 的双层结构**。模板版工具（call 原样回传、checkPermissions 恒 allow）+ 工厂版（Ajv 编译进闭包、校验不过抛 TelemetrySafeError）。工厂用 WeakMap 按 schema 对象身份缓存：工作流脚本 80 次调用只编译 1 次，110ms → 4ms；success 和 error 都进缓存，坏 schema 不会每次重复编译。
 6. **两处恒假条件是泄漏构建的「环境替换事故」标本**。TaskStopTool/UI.tsx 的 `"external" === 'ant'` 与 TestingPermissionTool 的 `"production" === 'test'`——process.env 在打包时被替换成字面量，与比较目标永远不相等，分支被砌死。TaskStop 那处影响仅是「ant 用户不渲染」失效；TestingPermission 那处更微妙：isEnabled 恒 false，工具在开源构建里根本不会注册，测试钉子只在原始构建里有效。
 7. **SleepTool 把经济账写进 prompt**。每次唤醒花一次 API 调用、缓存 5 分钟过期——这是少数「让模型自己看着办」的取舍说明，不写的话模型会睡过头或者睡太碎。
 
 流程账：预检三断言一次通过、零合并错误（硬规矩连续第 8 批生效）；一处 FAIL——SyntheticOutputTool.ts 的工厂函数说明锚在 `*/` 行上，`after` 落在块注释结尾行不在自动外移规则内（只认 `/**` 开头行），中文被塞进 `/* */` 内部，挪到函数签名结束行后过验；prompt 模板内部锚点照例外移到段尾，均为人眼确认通顺。
+
 
 ### 服务层自测题（答不上来就回去重读对应文件）
 
@@ -4022,21 +4055,21 @@ AS:  issuer = http://evil.com, token_endpoint = http://evil.com/token
 
 ## 第 7 步（多智能体）读完了吗？
 
-UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影响理解主线。但 `ink/` 那 1.98 万行的**渲染器本身**后来补上了（见第 8 步），因为它是「多智能体产出的文字怎么变成屏幕」的另一半；`components/` 则到了第 9 步才回头补消息渲染主链（**实测 8.2 万行、389 个文件** —— 这个数之前一直误写成 4.2 万）。
+UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影响理解主线。但 `ink/` 那 1.98 万行的**渲染器本身**后来补上了（见第 8 步），因为它是「多智能体产出的文字怎么变成屏幕」的另一半；`components/` 则到了第 9 步才回头补消息渲染主链（**实测 8.2 万行、389 个文件** —— 这个数之前一直误写成 4.2 万）。  
 多智能体这半边四个文件正好是一条完整的链：
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) | 369 | 632 | 模式开关、resume 对齐、协调者系统提示词（258 行） |
-| [`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts) | 287 | 601 | agent 清单注入策略、fork 说明、简报写法 |
-| [`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx) | 1,397 | 2,793 | schema 裁剪、十道检查、两套执行路径、结果话术 |
-| [`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts) | 210 | 559 | 缓存共享的字节级机制、身份冲突纠正 |
+| 文件                                                                   | 原文    | 批注版   | 讲什么                            |
+| -------------------------------------------------------------------- | ----- | ----- | ------------------------------ |
+| [`coordinatorMode.ts`](annotated/src/coordinator/coordinatorMode.ts) | 369   | 632   | 模式开关、resume 对齐、协调者系统提示词（258 行） |
+| [`AgentTool/prompt.ts`](annotated/src/tools/AgentTool/prompt.ts)     | 287   | 601   | agent 清单注入策略、fork 说明、简报写法      |
+| [`AgentTool.tsx`](annotated/src/tools/AgentTool/AgentTool.tsx)       | 1,397 | 2,793 | schema 裁剪、十道检查、两套执行路径、结果话术     |
+| [`forkSubagent.ts`](annotated/src/tools/AgentTool/forkSubagent.ts)   | 210   | 559   | 缓存共享的字节级机制、身份冲突纠正              |
 
 合计 **2,263 行原文**，133 处批注锚点。
 
 **① CC 有哪两种多智能体形态？为什么互斥？**
 
-`coordinator` 模式：一个主进程当包工头，通过 Agent 工具派活给 worker，worker 之间有消息通道（SendMessage），主进程负责综合结论并对用户说话。
+`coordinator` 模式：一个主进程当包工头，通过 Agent 工具派活给 worker，worker 之间有消息通道（SendMessage），主进程负责综合结论并对用户说话。  
 `fork` 模式：主进程把自己的完整上下文复制给子进程，子进程干完就消失，没有消息通道也没有团队概念。
 
 互斥不是因为技术限制，而是角色重叠 —— coordinator 本身就是「分工者」，再让它 fork 自己会变成一个人同时当包工头和工人。而且两者的成本模型相反：coordinator 假设「派活要重新建立上下文」，fork 假设「派活几乎免费」，混在一起模型会算错账。
@@ -4124,33 +4157,34 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 ---
 
+
 ## 第 8 步（终端渲染器）读完了吗？
 
 `src/ink/` 是自己实现的 Ink（不是 npm 上的官方包），19,842 行。**这个目录现已全部批注完：96 个文件、19,842 行原文**，读完之后「一条用户输入 → 一屏字符」这条路是通的；样式层回答了「一屏字符长什么样」，而 `termio/` 回答了**反过来**的问题：「给进来一段带转义序列的字符串，怎么变成结构化事件」。
 
-| 文件 | 原文 | 批注版 | 讲什么 |
-| --- | --- | --- | --- |
-| [`reconciler.ts`](annotated/src/ink/reconciler.ts) | 512 | 727 | React 19 自定义 renderer 的 host config：14 个类型参数、commit 阶段算布局、release 顺序 |
-| [`dom.ts`](annotated/src/ink/dom.ts) | 484 | 685 | 七个元素名的极简 DOM、yoga 桥（两棵树两套下标）、文本测量、脏标记冒泡 |
-| [`ink.tsx`](annotated/src/ink/ink.tsx) | 1,722 | 2,470 | 帧循环九阶段、双缓冲、diff 与 optimize、光标定位、终端模式、退出清理 |
-| [`screen.ts`](annotated/src/ink/screen.ts) | 1,486 | 2,167 | 打包格子（2 个 int 装一格）、样式池的位标签、宽字符四态、blit/shift/clear、两帧 diff |
-| [`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) | 1,462 | 2,180 | 沿树走一遍：blit / 清空 / 重画三选一，ScrollBox 的三遍渲染与 DECSTBM 快路径 |
-| [`log-update.ts`](annotated/src/ink/log-update.ts) | 773 | 1,193 | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型 |
-| [`output.ts`](annotated/src/ink/output.ts) | 798 | 1,151 | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类与预热缓存、单行写入 |
-| [`styles.ts`](annotated/src/ink/styles.ts) | 772 | 967 | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 的语义 |
-| [`colorize.ts`](annotated/src/ink/colorize.ts) | 232 | 372 | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定 |
-| [`stringWidth.ts`](annotated/src/ink/stringWidth.ts) | 223 | 413 | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 的 1 vs 2 |
-| [`Ansi.tsx`](annotated/src/ink/Ansi.tsx) | 292 | 504 | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的降维 |
-| [`termio/ansi.ts`](annotated/src/ink/termio/ansi.ts) | 76 | 150 | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽 |
-| [`termio/csi.ts`](annotated/src/ink/termio/csi.ts) | 320 | 493 | 三个字节区间就是 CSI 的完整语法；`csi()` 的单参数/多参数两副面孔 |
-| [`termio/dec.ts`](annotated/src/ink/termio/dec.ts) | 61 | 119 | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序 |
-| [`termio/esc.ts`](annotated/src/ink/termio/esc.ts) | 68 | 128 | 两字符序列；`null` 与 `unknown` 两种「空」的语义差别 |
-| [`termio/types.ts`](annotated/src/ink/termio/types.ts) | 237 | 424 | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计 |
-| [`termio/sgr.ts`](annotated/src/ink/termio/sgr.ts) | 309 | 541 | 分号/冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二 |
-| [`termio/tokenize.ts`](annotated/src/ink/termio/tokenize.ts) | 320 | 564 | 词法层：八个状态、判定顺序为什么不能重排、`i++` 缺失处的降级 |
-| [`termio/parser.ts`](annotated/src/ink/termio/parser.ts) | 395 | 671 | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 的两个默认值 |
-| [`termio/osc.ts`](annotated/src/ink/termio/osc.ts) | 494 | 879 | OSC 全家族：DCS 透传、剪贴板三条路、内层为什么选 BEL 而不是 ST |
-| [`termio.ts`](annotated/src/ink/termio.ts) | 43 | 83 | 桶文件只导出读的一侧，生成函数走深路径 |
+| 文件                                                                       | 原文    | 批注版   | 讲什么                                                                  |
+| ------------------------------------------------------------------------ | ----- | ----- | -------------------------------------------------------------------- |
+| [`reconciler.ts`](annotated/src/ink/reconciler.ts)                       | 512   | 727   | React 19 自定义 renderer 的 host config：14 个类型参数、commit 阶段算布局、release 顺序 |
+| [`dom.ts`](annotated/src/ink/dom.ts)                                     | 484   | 685   | 七个元素名的极简 DOM、yoga 桥（两棵树两套下标）、文本测量、脏标记冒泡                              |
+| [`ink.tsx`](annotated/src/ink/ink.tsx)                                   | 1,722 | 2,470 | 帧循环九阶段、双缓冲、diff 与 optimize、光标定位、终端模式、退出清理                            |
+| [`screen.ts`](annotated/src/ink/screen.ts)                               | 1,486 | 2,167 | 打包格子（2 个 int 装一格）、样式池的位标签、宽字符四态、blit/shift/clear、两帧 diff             |
+| [`render-node-to-output.ts`](annotated/src/ink/render-node-to-output.ts) | 1,462 | 2,180 | 沿树走一遍：blit / 清空 / 重画三选一，ScrollBox 的三遍渲染与 DECSTBM 快路径                 |
+| [`log-update.ts`](annotated/src/ink/log-update.ts)                       | 773   | 1,193 | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型                                    |
+| [`output.ts`](annotated/src/ink/output.ts)                               | 798   | 1,151 | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类与预热缓存、单行写入                   |
+| [`styles.ts`](annotated/src/ink/styles.ts)                               | 772   | 967   | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 的语义      |
+| [`colorize.ts`](annotated/src/ink/colorize.ts)                           | 232   | 372   | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定                          |
+| [`stringWidth.ts`](annotated/src/ink/stringWidth.ts)                     | 223   | 413   | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 的 1 vs 2                      |
+| [`Ansi.tsx`](annotated/src/ink/Ansi.tsx)                                 | 292   | 504   | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的降维                    |
+| [`termio/ansi.ts`](annotated/src/ink/termio/ansi.ts)                     | 76    | 150   | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽                            |
+| [`termio/csi.ts`](annotated/src/ink/termio/csi.ts)                       | 320   | 493   | 三个字节区间就是 CSI 的完整语法；`csi()` 的单参数/多参数两副面孔                              |
+| [`termio/dec.ts`](annotated/src/ink/termio/dec.ts)                       | 61    | 119   | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序                                 |
+| [`termio/esc.ts`](annotated/src/ink/termio/esc.ts)                       | 68    | 128   | 两字符序列；`null` 与 `unknown` 两种「空」的语义差别                                  |
+| [`termio/types.ts`](annotated/src/ink/termio/types.ts)                   | 237   | 424   | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计                               |
+| [`termio/sgr.ts`](annotated/src/ink/termio/sgr.ts)                       | 309   | 541   | 分号/冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二                     |
+| [`termio/tokenize.ts`](annotated/src/ink/termio/tokenize.ts)             | 320   | 564   | 词法层：八个状态、判定顺序为什么不能重排、`i++` 缺失处的降级                                    |
+| [`termio/parser.ts`](annotated/src/ink/termio/parser.ts)                 | 395   | 671   | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 的两个默认值                       |
+| [`termio/osc.ts`](annotated/src/ink/termio/osc.ts)                       | 494   | 879   | OSC 全家族：DCS 透传、剪贴板三条路、内层为什么选 BEL 而不是 ST                              |
+| [`termio.ts`](annotated/src/ink/termio.ts)                               | 43    | 83    | 桶文件只导出读的一侧，生成函数走深路径                                                  |
 
 合计 **11,079 行原文**，553 处批注锚点（其中 `termio/` 十个文件 2,323 行、156 锚点）。
 
@@ -4164,7 +4198,7 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 这一个回调解释了三件看起来无关的事：为什么 `<Text>` 里不能放 `<Box>`（展不平就没法量宽度）、为什么裸字符串必须包在 `<Text>` 里（没有父级就不知道该继承什么样式、也不知道放哪一行）、为什么宽字符/emoji 要单独处理。
 
-**㊴ 为什么 `<Box>` 套在 `<Text>` 里是**运行时抛错**，而不是「不推荐」？**
+**㊴ 为什么 `<Box>` 套在 `<Text>` 里是**运行时抛&#x9519;**，而不是「不推荐」？**
 
 因为文本测量要求把内容展平成一段连续字符串。中间插一个 flex 盒子，这段文字就不再是「一行有宽度的字符序列」——它变成了「若干块，各自的宽度要由布局决定」，而布局又要先知道文字宽度。这是一个环，没有解。
 
@@ -4206,11 +4240,11 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 三种残形态，后果不同：
 
-| 谁被覆盖 | 残留 | 症状 |
-| --- | --- | --- |
+| 谁被覆盖      | 残留                    | 症状                             |
+| --------- | --------------------- | ------------------------------ |
 | 宽字符被窄字符顶掉 | 后面那个 `SpacerTail` 成孤儿 | 这一列**保持上一帧的内容**（渲染时跳过占位格，没人写它） |
-| 占位格被顶掉 | 前面那个宽字符变成「占一格的宽字符」 | **光标模型失步** —— 终端仍按两列画，之后所有坐标都偏 |
-| 宽字符盖宽字符 | 对方更靠后的占位格成孤儿 | 那一列残留旧内容 |
+| 占位格被顶掉    | 前面那个宽字符变成「占一格的宽字符」    | **光标模型失步** —— 终端仍按两列画，之后所有坐标都偏 |
+| 宽字符盖宽字符   | 对方更靠后的占位格成孤儿          | 那一列残留旧内容                       |
 
 第二条最严重：它不是显示错，是**我们和终端对「第 x 列在哪」的理解分了叉**。所以 `setCellAt` 里那三段清理都必须发生在写入时，而不是「渲染前统一扫一遍」—— 扫描是全屏的，写入是单格的。
 
@@ -4236,12 +4270,12 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 四个判据，都写在 `log-update.ts` 里，每个调用点都解释了「为什么这次躲不掉」：
 
-| 场景 | 为什么不能增量 |
-| --- | --- |
-| 终端 resize | 增量更新要预测「重排后每行长什么样」，等于重算一遍换行 |
-| 内容从「超出视口」缩到「视口内」 | 顶部那些行已经在 scrollback 里，而清屏指令**不能把 scrollback 拉回视野** |
-| 改动落在 scrollback 区域 | 光标到不了那里 —— 跳过这一格会在历史里留一个错字，用户往回翻就看见 |
-| 要清的行数 > 视口高度 | 同理，`eraseLines` 只能在视口内工作 |
+| 场景                 | 为什么不能增量                                            |
+| ------------------ | -------------------------------------------------- |
+| 终端 resize          | 增量更新要预测「重排后每行长什么样」，等于重算一遍换行                        |
+| 内容从「超出视口」缩到「视口内」   | 顶部那些行已经在 scrollback 里，而清屏指令**不能把 scrollback 拉回视野** |
+| 改动落在 scrollback 区域 | 光标到不了那里 —— 跳过这一格会在历史里留一个错字，用户往回翻就看见                |
+| 要清的行数 > 视口高度       | 同理，`eraseLines` 只能在视口内工作                           |
 
 函数名直接叫 `fullResetSequence_CAUSES_FLICKER`。**当某个操作有不可避免的副作用时，把副作用写进名字**，比写注释更难被忽略。
 
@@ -4272,10 +4306,10 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 于是两种写法的语义分开了：
 
-| 写法 | 含义 | 漏掉什么 |
-| --- | --- | --- |
-| `'margin' in style` | 这个键这一帧变了（新值 / 被删 / 被重置） | 什么都不漏 |
-| `style.margin !== undefined` | margin 有**新值** | 属性被移除的情况 |
+| 写法                           | 含义                      | 漏掉什么     |
+| ---------------------------- | ----------------------- | -------- |
+| `'margin' in style`          | 这个键这一帧变了（新值 / 被删 / 被重置） | 什么都不漏    |
+| `style.margin !== undefined` | margin 有**新值**          | 属性被移除的情况 |
 
 按后者判断的话，「把 `margin` 从 4 改回不设置」这个操作永远无法表达——屏幕会一直保留 4 格边距，而且没有任何地方报错。
 
@@ -4311,13 +4345,13 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 `import { c as _c } from "react/compiler-runtime"` 就是这个标记。人写的版本已经被自动重写过了，三条映射就够：
 
-| 看到的 | 读成 |
-| --- | --- |
-| `const $ = _c(12)` | 这个组件有 12 个缓存槽 |
-| `if ($[3] !== children)` | 依赖变了才重算（= `useMemo` 的 deps） |
-| `$[3] = children` | 记下这次的值 |
-| `bb0: { … break bb0 }` | 可能提前返回（labeled block） |
-| `Symbol.for('react.early_return_sentinel')` | 区分「缓存了一个提前返回」和「槽还没填」 |
+| 看到的                                         | 读成                          |
+| ------------------------------------------- | --------------------------- |
+| `const $ = _c(12)`                          | 这个组件有 12 个缓存槽               |
+| `if ($[3] !== children)`                    | 依赖变了才重算（= `useMemo` 的 deps） |
+| `$[3] = children`                           | 记下这次的值                      |
+| `bb0: { … break bb0 }`                      | 可能提前返回（labeled block）       |
+| `Symbol.for('react.early_return_sentinel')` | 区分「缓存了一个提前返回」和「槽还没填」        |
 
 最值得注意的一处：`span.props.dim = true` 是**原地修改**（副作用），而它所在的 `map` 回调只在缓存 miss 时执行。之所以没出问题，是因为 `map` 的结果也被一起缓存了——**碰巧安全**。编译器的缓存正确性依赖函数是纯的，而这里不是。
 
@@ -4408,6 +4442,7 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 宽字符占两格，**后一格（SpacerTail）的 char 是空串**。`charClass('')` 把它判成「空白」，于是双击汉字会选中一片空白而不是那个字。
 
 同一件事还决定了左右扩展的规则**不对称**：
+
 - 往左：遇到 SpacerTail 不能直接比类别，必须**跨过它去看前一格的 head**，用 head 的类别判断
 - 往右：遇到 SpacerTail 直接**吞进来** —— 它属于刚收下的那个宽字符
 
@@ -4417,10 +4452,10 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 两本不同的账，缺一本就错：
 
-| 账本 | 解决什么 | 不记的后果 |
-| --- | --- | --- |
-| `scrolledOff*` 累积器 | 屏幕只有一屏，滚出去的行会被覆盖 | 复制结果只剩后半截 |
-| `virtualAnchorRow` / `virtualFocusRow` | clamp 会丢真位置 | 反向滚动后高亮错行，且累积器永远是旧账 |
+| 账本                                     | 解决什么             | 不记的后果               |
+| -------------------------------------- | ---------------- | ------------------- |
+| `scrolledOff*` 累积器                     | 屏幕只有一屏，滚出去的行会被覆盖 | 复制结果只剩后半截           |
+| `virtualAnchorRow` / `virtualFocusRow` | clamp 会丢真位置      | 反向滚动后高亮错行，且累积器永远是旧账 |
 
 `virtualRow` 举个数就清楚：起点在第 5 行，PgUp 上移 10 行 → `clamp` 到 0；再 PgDn 回来 10 行，从已 clamp 的 0 算会得 10，真值是 5。**高亮错 5 行，而复制出来的文本比看到的多** —— 症状和原因隔得很远。
 
@@ -4467,24 +4502,24 @@ UI 那半边（`components/` 的产品界面）当时跳过了 —— 它不影�
 
 主干那六份（`config` / `client` / `auth` / `xaa` / `xaaIdpLogin` / `useManageMCPConnections`）讲的是「一个连接的一生」。这十六个小件讲的是**连接之外的一切**：名字怎么定、闸怎么设、审批怎么从手机回来、表单怎么问人。
 
-| 文件 | 行数 | 一句话 |
-| --- | --- | --- |
-| [`utils.ts`](annotated/src/services/mcp/utils.ts) | 575 | 名字过滤、配置哈希、过期客户端回收、项目级 server 的信任判定 |
-| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts) | 316 | 通道的六道闸 + `<channel>` 标签怎么拼 |
-| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts) | 313 | server 向人提问（表单 / 打开链接）的整条链路 |
-| [`types.ts`](annotated/src/services/mcp/types.ts) | 258 | 八种 transport 的配置 schema、连接状态机 |
-| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts) | 240 | 把审批提示发到手机，等一句 "yes tbxkq" |
-| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts) | 164 | 从 claude.ai 拉组织下发的 server 列表 |
-| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts) | 138 | 连之前先跑一条本地命令，拿动态 header |
-| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts) | 136 | 把 JSON-RPC 套进 control 信封，跨进程 |
-| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts) | 112 | 和 VSCode 扩展之间的两条 notification |
-| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts) | 106 | `mcp__server__tool` 的拼与拆 |
-| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts) | 78 | 回调端口怎么挑（含 Windows 的坑） |
-| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts) | 76 | 哪些插件被批准可以当通道 |
-| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts) | 72 | 官方 MCP 名单（只用于埋点） |
-| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts) | 63 | 同进程里的一对假传输 |
-| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts) | 38 | `${VAR:-默认值}` |
-| [`normalization.ts`](annotated/src/services/mcp/normalization.ts) | 23 | 名字归一化 |
+| 文件                                                                            | 行数  | 一句话                                |
+| ----------------------------------------------------------------------------- | --- | ---------------------------------- |
+| [`utils.ts`](annotated/src/services/mcp/utils.ts)                             | 575 | 名字过滤、配置哈希、过期客户端回收、项目级 server 的信任判定 |
+| [`channelNotification.ts`](annotated/src/services/mcp/channelNotification.ts) | 316 | 通道的六道闸 + `<channel>` 标签怎么拼         |
+| [`elicitationHandler.ts`](annotated/src/services/mcp/elicitationHandler.ts)   | 313 | server 向人提问（表单 / 打开链接）的整条链路        |
+| [`types.ts`](annotated/src/services/mcp/types.ts)                             | 258 | 八种 transport 的配置 schema、连接状态机      |
+| [`channelPermissions.ts`](annotated/src/services/mcp/channelPermissions.ts)   | 240 | 把审批提示发到手机，等一句 "yes tbxkq"          |
+| [`claudeai.ts`](annotated/src/services/mcp/claudeai.ts)                       | 164 | 从 claude.ai 拉组织下发的 server 列表       |
+| [`headersHelper.ts`](annotated/src/services/mcp/headersHelper.ts)             | 138 | 连之前先跑一条本地命令，拿动态 header             |
+| [`SdkControlTransport.ts`](annotated/src/services/mcp/SdkControlTransport.ts) | 136 | 把 JSON-RPC 套进 control 信封，跨进程       |
+| [`vscodeSdkMcp.ts`](annotated/src/services/mcp/vscodeSdkMcp.ts)               | 112 | 和 VSCode 扩展之间的两条 notification      |
+| [`mcpStringUtils.ts`](annotated/src/services/mcp/mcpStringUtils.ts)           | 106 | `mcp__server__tool` 的拼与拆           |
+| [`oauthPort.ts`](annotated/src/services/mcp/oauthPort.ts)                     | 78  | 回调端口怎么挑（含 Windows 的坑）              |
+| [`channelAllowlist.ts`](annotated/src/services/mcp/channelAllowlist.ts)       | 76  | 哪些插件被批准可以当通道                       |
+| [`officialRegistry.ts`](annotated/src/services/mcp/officialRegistry.ts)       | 72  | 官方 MCP 名单（只用于埋点）                   |
+| [`InProcessTransport.ts`](annotated/src/services/mcp/InProcessTransport.ts)   | 63  | 同进程里的一对假传输                         |
+| [`envExpansion.ts`](annotated/src/services/mcp/envExpansion.ts)               | 38  | `${VAR:-默认值}`                      |
+| [`normalization.ts`](annotated/src/services/mcp/normalization.ts)             | 23  | 名字归一化                              |
 
 **65 一个 23 行的名字归一化文件，凭什么单独存在？它又故意不做什么？**
 
@@ -4542,21 +4577,22 @@ resolve 成 cancel 是协议层面的选择：MCP 那边等的是 `ElicitResult`
 
 它们不是「补细节」这么简单 —— 这一批挖出了**三处零读者的代码**和**一处注释漂移**，比任何一处实现细节都值得记。
 
-| 分组 | 文件 | 它回答的问题 |
-| --- | --- | --- |
-| 出口 | `terminal.ts` | 这个终端能做什么 + 最后一站 `write` |
-| 探测 | `terminal-querier.ts` | 没有超时，怎么知道终端不支持 |
-| 一帧 | `renderer.ts` / `frame.ts` | DOM 怎么变成屏幕缓冲；一帧的数据契约 |
-| 入口 | `root.ts` / `instances.ts` | 三个起点，一张按 stdout 分身的表 |
-| 文本 | `wrap-text.ts` / `wrapAnsi.ts` / `measure-text.ts` / `widest-line.ts` / `squash-text-nodes.ts` | 折行、截断、测量、摊平 |
-| 缓存 | `line-width-cache.ts` / `node-cache.ts` | 两个 Map，一个为流式，一个为 blit |
-| 交互 | `focus.ts` | 焦点栈、Tab 环、删除节点后焦点恢复到哪 |
-| 终端杂项 | `bidi.ts` / `tabstops.ts` / `clearTerminal.ts` / `supports-hyperlinks.ts` / `terminal-focus-state.ts` / `useTerminalNotification.ts` | 各自一个真实世界的坑 |
-| 布局 | `layout/node.ts` / `yoga.ts` / `geometry.ts` / `engine.ts` | 52 个方法的适配层，一半是样板 |
+| 分组   | 文件                                                                                                                                   | 它回答的问题                  |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| 出口   | `terminal.ts`                                                                                                                        | 这个终端能做什么 + 最后一站 `write` |
+| 探测   | `terminal-querier.ts`                                                                                                                | 没有超时，怎么知道终端不支持          |
+| 一帧   | `renderer.ts` / `frame.ts`                                                                                                           | DOM 怎么变成屏幕缓冲；一帧的数据契约    |
+| 入口   | `root.ts` / `instances.ts`                                                                                                           | 三个起点，一张按 stdout 分身的表    |
+| 文本   | `wrap-text.ts` / `wrapAnsi.ts` / `measure-text.ts` / `widest-line.ts` / `squash-text-nodes.ts`                                       | 折行、截断、测量、摊平             |
+| 缓存   | `line-width-cache.ts` / `node-cache.ts`                                                                                              | 两个 Map，一个为流式，一个为 blit   |
+| 交互   | `focus.ts`                                                                                                                           | 焦点栈、Tab 环、删除节点后焦点恢复到哪   |
+| 终端杂项 | `bidi.ts` / `tabstops.ts` / `clearTerminal.ts` / `supports-hyperlinks.ts` / `terminal-focus-state.ts` / `useTerminalNotification.ts` | 各自一个真实世界的坑              |
+| 布局   | `layout/node.ts` / `yoga.ts` / `geometry.ts` / `engine.ts`                                                                           | 52 个方法的适配层，一半是样板        |
 
 **71 `optimizer` 里 `cursorMove` 可以相加、`cursorTo` 只能留最后一条，为什么 `styleStr` 一条都不能丢？**
 
 区别在操作的性质：
+
 - `cursorMove` 是**相对**（`CSI n A`）→ 两次相对移动等于一次合位移，可以相加
 - `cursorTo` 是**绝对**（`CSI n G`）→ 后者直接覆盖前者，前面那条白写
 - `styleStr` 是**转移**（transition，由 `diffAnsiCodes(from, to)` 算出），不是设置
@@ -4604,12 +4640,12 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 四个。判定方法只有一个：**每个导出符号 grep 一次，只数「定义处以外」的命中**。
 
-| 符号 | 位置 | 为什么读代码的人会被误导 |
-| --- | --- | --- |
-| `shouldClearScreen()` | `frame.ts:105` | 名字像是清屏决策的入口，实际判据已内联到 `log-update.ts` 四处（更精细，要看 `cursor.y`） |
-| `clearTerminal`（常量） | `clearTerminal.ts:74` | 真正被用的是同文件的 `getClearTerminalSequence()` 函数 |
-| `renderToScreen()` | `render-to-screen.ts:59` | 注释说「Used for search」，但搜索路径只调 `scanPositions` 扫主屏 |
-| `edges` / `addEdges` / `ZERO_EDGES` / `resolveEdges` / `clampRect` / `withinBounds` | `layout/geometry.ts` | 几何工具箱，只有 `unionRect` 和 `clamp` 活着 |
+| 符号                                                                                  | 位置                       | 为什么读代码的人会被误导                                               |
+| ----------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------- |
+| `shouldClearScreen()`                                                               | `frame.ts:105`           | 名字像是清屏决策的入口，实际判据已内联到 `log-update.ts` 四处（更精细，要看 `cursor.y`） |
+| `clearTerminal`（常量）                                                                 | `clearTerminal.ts:74`    | 真正被用的是同文件的 `getClearTerminalSequence()` 函数                 |
+| `renderToScreen()`                                                                  | `render-to-screen.ts:59` | 注释说「Used for search」，但搜索路径只调 `scanPositions` 扫主屏           |
+| `edges` / `addEdges` / `ZERO_EDGES` / `resolveEdges` / `clampRect` / `withinBounds` | `layout/geometry.ts`     | 几何工具箱，只有 `unionRect` 和 `clamp` 活着                          |
 
 `terminal-querier.ts` 是第五种情况，值得单独说：它的**框架是活的**（哨兵机制确实在服务 `xtversion`），但七个查询构造器里六个零读者。`decrqm` / `da1` / `da2` / `kittyKeyboard` / `cursorPosition` / `oscColor` 全都没人调 —— 包括本该最合适的 `kittyKeyboard`（它比 `supportsExtendedKeys` 的环境变量白名单精确得多）。
 
@@ -4633,16 +4669,16 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 它们回答的是「渲染器之上那一层」—— 前面二十几批讲的是「怎么把一个字符画到格子里」，这批讲的是「一次按键怎么落到某个组件上」「光标该停在哪一列」「滚动为什么不能走 React」。
 
-| 分组 | 文件 | 它回答的问题 |
-| --- | --- | --- |
-| 事件基座 | `events/event.ts` / `terminal-event.ts` | 两套继承线的根；传播控制的三个标志 |
-| 派发 | `events/dispatcher.ts` / `emitter.ts` | 一趟收两个方向；React 优先级从哪读 |
-| 事件类 | `input-event.ts` / `keyboard-event.ts` / `click-event.ts` / `focus-event.ts` / `terminal-focus-event.ts` | 按键怎么翻译；点击为什么不算 DOM 事件 |
-| 事件表 | `events/event-handlers.ts` | prop 名与事件类型的双向映射（含两处缺口） |
-| 输入 | `components/App.tsx`（658 行） | stdin 的唯一拥有者：模式宣示、批处理、鼠标状态机 |
-| 组件 | `Box.tsx` / `Text.tsx` / `ScrollBox.tsx` / `AlternateScreen.tsx` / `Button.tsx` | 布局容器、文本叶子、命令式滚动、全屏、交互原语 |
-| hooks | `use-input` / `use-selection` / `use-declared-cursor` / `use-terminal-viewport` / `use-animation-frame` / `use-interval` | 订阅的时机、槽位的稳定性、可见性判定 |
-| 杂项 | `Link` / `NoSelect` / `RawAnsi` / `Newline` / `Spacer` / 五个 context | 各自一个终端特有的坑 |
+| 分组    | 文件                                                                                                                       | 它回答的问题                      |
+| ----- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| 事件基座  | `events/event.ts` / `terminal-event.ts`                                                                                  | 两套继承线的根；传播控制的三个标志           |
+| 派发    | `events/dispatcher.ts` / `emitter.ts`                                                                                    | 一趟收两个方向；React 优先级从哪读        |
+| 事件类   | `input-event.ts` / `keyboard-event.ts` / `click-event.ts` / `focus-event.ts` / `terminal-focus-event.ts`                 | 按键怎么翻译；点击为什么不算 DOM 事件       |
+| 事件表   | `events/event-handlers.ts`                                                                                               | prop 名与事件类型的双向映射（含两处缺口）     |
+| 输入    | `components/App.tsx`（658 行）                                                                                              | stdin 的唯一拥有者：模式宣示、批处理、鼠标状态机 |
+| 组件    | `Box.tsx` / `Text.tsx` / `ScrollBox.tsx` / `AlternateScreen.tsx` / `Button.tsx`                                          | 布局容器、文本叶子、命令式滚动、全屏、交互原语     |
+| hooks | `use-input` / `use-selection` / `use-declared-cursor` / `use-terminal-viewport` / `use-animation-frame` / `use-interval` | 订阅的时机、槽位的稳定性、可见性判定          |
+| 杂项    | `Link` / `NoSelect` / `RawAnsi` / `Newline` / `Spacer` / 五个 context                                                      | 各自一个终端特有的坑                  |
 
 **77 一次按键为什么会同时触发 `useInput` 和 `onKeyDown`？两套事件继承线的根分别在哪？**
 
@@ -4673,11 +4709,11 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 三处「用时间猜状态」：
 
-| 判据 | 值 | 猜的是什么 | 猜错的代价 |
-| --- | --- | --- | --- |
-| `NORMAL_TIMEOUT` | 50ms | 转义序列还有没有续块 | 序列被劈开（已用 readableLength 补） |
-| `PASTE_TIMEOUT` | 500ms | 粘贴是不是还在继续 | 长粘贴被切成几段 |
-| `STDIN_RESUME_GAP_MS` | 5000ms | tmux/ssh 是不是断过 | 重连后鼠标失效 |
+| 判据                    | 值      | 猜的是什么          | 猜错的代价                      |
+| --------------------- | ------ | -------------- | -------------------------- |
+| `NORMAL_TIMEOUT`      | 50ms   | 转义序列还有没有续块     | 序列被劈开（已用 readableLength 补） |
+| `PASTE_TIMEOUT`       | 500ms  | 粘贴是不是还在继续      | 长粘贴被切成几段                   |
+| `STDIN_RESUME_GAP_MS` | 5000ms | tmux/ssh 是不是断过 | 重连后鼠标失效                    |
 
 第三个最无奈：tmux detach 再 attach、ssh 重连、合盖唤醒，终端都会重置 DEC 私有模式，但**没有任何信号到达进程**。唯一可观测的就是「安静了多久」。
 
@@ -4703,11 +4739,11 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 三处，全是同一类：
 
-| 位置 | 状态 |
-| --- | --- |
-| `terminal-event.ts` 的 `_prepareForTarget` | **零覆写**，但 Dispatcher 每个监听者都调一次 |
-| `dispatcher.ts` 的 `dispatchContinuous` | 零调用；连带 `ContinuousEventPriority` 分支够不着 |
-| `dispatcher.ts` 的 `getEventPriority` | 表里 7 行只有 keydown / focus / blur 能走到（click 走 hit-test 手写冒泡，paste 的事件类缺失，scroll / resize / mousemove 根本没有代码构造这类事件） |
+| 位置                                        | 状态                                                                                                               |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `terminal-event.ts` 的 `_prepareForTarget` | **零覆写**，但 Dispatcher 每个监听者都调一次                                                                                   |
+| `dispatcher.ts` 的 `dispatchContinuous`    | 零调用；连带 `ContinuousEventPriority` 分支够不着                                                                           |
+| `dispatcher.ts` 的 `getEventPriority`      | 表里 7 行只有 keydown / focus / blur 能走到（click 走 hit-test 手写冒泡，paste 的事件类缺失，scroll / resize / mousemove 根本没有代码构造这类事件） |
 
 共同点：**基础设施先建好，需求从旁边绕过去了**。`_prepareForTarget` 本想解决「点击坐标要按 handler 重算」，最后在 `hit-test.ts` 的循环里顺手做了；`dispatchContinuous` 本想给滚轮用，最后滚轮被 `parse-keypress` 当成按键处理了。
 
@@ -4753,12 +4789,12 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 
 这一批挑了最架构性的四份：**消息从数组变成一行的完整路径**。
 
-| 文件 | 行数 | 它回答的问题 |
-| --- | --- | --- |
-| `Messages.tsx` | 834 | 七道工序：规范化 → 切边界 → 重排 → 过滤 → 分组 → 折叠 → 切片 |
-| `MessageRow.tsx` | 383 | 这一行**以后还会不会变**（决定能不能推上 scrollback） |
-| `Message.tsx` | 627 | 按消息类型 / 块类型两次分发到十四个渲染组件 |
-| `messageActions.tsx` | 450 | 键盘光标：哪些行值得停、每个键做什么、底部状态条 |
+| 文件                   | 行数  | 它回答的问题                                  |
+| -------------------- | --- | --------------------------------------- |
+| `Messages.tsx`       | 834 | 七道工序：规范化 → 切边界 → 重排 → 过滤 → 分组 → 折叠 → 切片 |
+| `MessageRow.tsx`     | 383 | 这一行**以后还会不会变**（决定能不能推上 scrollback）      |
+| `Message.tsx`        | 627 | 按消息类型 / 块类型两次分发到十四个渲染组件                 |
+| `messageActions.tsx` | 450 | 键盘光标：哪些行值得停、每个键做什么、底部状态条                |
 
 **共 2,294 行原文（批注版 3,619 行）、119 处锚点。**
 
@@ -4788,11 +4824,11 @@ Date.now() - streamingThinking.streamingEndedAt < 30000
 
 三种切法都试过，注释里记了三次事故编号：
 
-| 方案 | 怎么坏的 |
-| --- | --- |
-| `slice(-200)` | 每追加一条就从头部掉一条 → 屏幕内容整体上移 → 每轮一次全量重置（CC-941） |
-| 量化到 50 条一档 | 压缩和折叠重组也会改变 `collapsed.length` 而**不新增消息**，仍在挪（CC-1154） |
-| UUID 锚点 | 只在真的超过 CAP+STEP 时才前进（CC-1174） |
+| 方案            | 怎么坏的                                                   |
+| ------------- | ------------------------------------------------------ |
+| `slice(-200)` | 每追加一条就从头部掉一条 → 屏幕内容整体上移 → 每轮一次全量重置（CC-941）             |
+| 量化到 50 条一档    | 压缩和折叠重组也会改变 `collapsed.length` 而**不新增消息**，仍在挪（CC-1154） |
+| UUID 锚点       | 只在真的超过 CAP+STEP 时才前进（CC-1174）                          |
 
 而 uuid 本身也不稳定：`collapseHookSummaries` 用组里**第一条**的 uuid 当合并后的 uuid，而 `reorderMessagesInUI` 会随 tool result 到达重排 hook 的相邻关系，于是「哪条第一」会变、合并 uuid 跟着变。
 
@@ -4835,10 +4871,10 @@ Date.now() - streamingThinking.streamingEndedAt < 30000
 
 有两组：
 
-| 判据 | 一处 | 另一处 |
-| --- | --- | --- |
-| collapsed 组永不静态 | `Messages.tsx` 的 `shouldRenderStatically` 返回 false | `MessageRow.tsx` 的比较器里显式 return false |
-| 「是不是最新 bash」 | `Message.tsx` 的 `areMessagePropsEqual` | `MessageRow.tsx` 的 `areMessageRowPropsEqual` |
+| 判据              | 一处                                                 | 另一处                                          |
+| --------------- | -------------------------------------------------- | -------------------------------------------- |
+| collapsed 组永不静态 | `Messages.tsx` 的 `shouldRenderStatically` 返回 false | `MessageRow.tsx` 的比较器里显式 return false        |
+| 「是不是最新 bash」    | `Message.tsx` 的 `areMessagePropsEqual`             | `MessageRow.tsx` 的 `areMessageRowPropsEqual` |
 
 它们必须**同时**成立才有意义：判成静态（推上 scrollback）但 memo 又允许跳过重渲染 → 时态永远停在 "Reading…"，没有任何东西会再重渲染它。
 
@@ -4875,19 +4911,19 @@ isActiveCollapsedGroup = isCollapsed &&
 
 `PromptInput/` 是 `components/` 里第一个**完整的子目录**（21 个文件，5,161 行），也是「按键 → 光标 → 文本 → 提交」这条链的另一半 —— 上一步读的 `Messages/Message/MessageRow` 管的是「文字怎么变成屏幕」，这一批管的是「按键怎么变成文字」。
 
-| 文件 | 行数 | 它回答的问题 |
-| --- | --- | --- |
-| `PromptInput.tsx` | 2,338 | 输入框本体：六种角色挤在一个组件里 |
-| `useSwarmBanner.ts` | 155 | 六种身份抢输入框上方那条横幅 |
-| `PromptInputFooterLeftSide.tsx` | 516 | footer 左半边：十几种小药丸抢一行 |
-| `Notifications.tsx` | 331 | footer 右半边：九个指示器竖着摞 |
-| `PromptInputHelpMenu.tsx` | 357 | 三列快捷键表（一张被编译器展开成 99 个槽的声明） |
-| `PromptInputFooterSuggestions.tsx` | 292 | 补全列表：一半代码是宽度算术 |
-| `ShimmeredInput.tsx` | 142 | 彩虹流光：终端没有渐变，只能逐字符换色 |
-| `PromptInputQueuedCommands.tsx` | 116 | 排队消息：伪造一条通知来复用渲染器 |
-| `VoiceIndicator.tsx` | 136 | 语音三态 + 「为什么这里故意不做动画」 |
-| `inputPaste.ts` / `useMaybeTruncateInput.ts` | 90 / 58 | 十万字符粘贴：截断只发生在显示侧 |
-| `IssueFlagBanner.tsx` | 11 | 一个被构建工具删空的组件（读 bundle 的入门样本） |
+| 文件                                           | 行数      | 它回答的问题                       |
+| -------------------------------------------- | ------- | ---------------------------- |
+| `PromptInput.tsx`                            | 2,338   | 输入框本体：六种角色挤在一个组件里            |
+| `useSwarmBanner.ts`                          | 155     | 六种身份抢输入框上方那条横幅               |
+| `PromptInputFooterLeftSide.tsx`              | 516     | footer 左半边：十几种小药丸抢一行         |
+| `Notifications.tsx`                          | 331     | footer 右半边：九个指示器竖着摞          |
+| `PromptInputHelpMenu.tsx`                    | 357     | 三列快捷键表（一张被编译器展开成 99 个槽的声明）   |
+| `PromptInputFooterSuggestions.tsx`           | 292     | 补全列表：一半代码是宽度算术               |
+| `ShimmeredInput.tsx`                         | 142     | 彩虹流光：终端没有渐变，只能逐字符换色          |
+| `PromptInputQueuedCommands.tsx`              | 116     | 排队消息：伪造一条通知来复用渲染器            |
+| `VoiceIndicator.tsx`                         | 136     | 语音三态 + 「为什么这里故意不做动画」         |
+| `inputPaste.ts` / `useMaybeTruncateInput.ts` | 90 / 58 | 十万字符粘贴：截断只发生在显示侧             |
+| `IssueFlagBanner.tsx`                        | 11      | 一个被构建工具删空的组件（读 bundle 的入门样本） |
 
 **共 5,161 行原文（批注版 8,530 行）、235 处锚点。**
 
@@ -4895,14 +4931,14 @@ isActiveCollapsedGroup = isCollapsed &&
 
 六种，而且是**没法拆**的六种：
 
-| 职责 | 为什么必须在这里 |
-| --- | --- |
-| 文本框 | 光标、选区、多行、vim、粘贴 |
-| 命令面板 | `/` 与 `@` 补全、参数提示 |
+| 职责   | 为什么必须在这里                  |
+| ---- | ------------------------- |
+| 文本框  | 光标、选区、多行、vim、粘贴           |
+| 命令面板 | `/` 与 `@` 补全、参数提示         |
 | 通知中心 | 十几种一次性提示（思考档位、模型切换、草稿提示…） |
-| 导航器 | footer 药丸的四个方向、任务列表、队友切换 |
+| 导航器  | footer 药丸的四个方向、任务列表、队友切换  |
 | 弹窗宿主 | 模型选择、快速打开、历史、任务、团队、Bridge |
-| 提交总闸 | 十几个守卫决定「这次回车算不算提交」 |
+| 提交总闸 | 十几个守卫决定「这次回车算不算提交」        |
 
 根本原因在终端：**没有全局焦点系统**。输入框是唯一持续读 stdin 的组件，所有键都要先经过它；所有弹窗也得在它这里「让路」。所以「拆成小模块」在这里不成立 —— 拆出去的部分仍然要回到这里注册按键。
 
@@ -4939,13 +4975,13 @@ if (state.footerSelection && footerItems.includes(state.footerSelection)) return
 
 **94 「选中了 footer 药丸」有三个版本的状态，各自解决什么？**
 
-| 状态 | 存在哪 | 职责 |
-| --- | --- | --- |
-| `rawFooterSelection` | AppState | 唯一的真值 |
-| `footerItemSelected` | 渲染期派生 | **当帧就正确**（药丸消失 → 立刻变 null） |
-| 清理 effect | `useEffect` | **防止诈尸**（把 raw 也清掉） |
+| 状态                   | 存在哪         | 职责                         |
+| -------------------- | ----------- | -------------------------- |
+| `rawFooterSelection` | AppState    | 唯一的真值                      |
+| `footerItemSelected` | 渲染期派生       | **当帧就正确**（药丸消失 → 立刻变 null） |
+| 清理 effect            | `useEffect` | **防止诈尸**（把 raw 也清掉）        |
 
-只用派生值：raw 会一直是脏的，药丸重新出现时焦点会凭空跳回去（注释里叫 "resurrect"）。
+只用派生值：raw 会一直是脏的，药丸重新出现时焦点会凭空跳回去（注释里叫 "resurrect"）。  
 只用 raw：药丸消失的那一帧，UI 还显示着一个不存在的高亮。
 
 **「立刻正确」和「迟早清理」是两个需求，需要两个状态。**
@@ -4986,6 +5022,7 @@ if (!SandboxManager.isSandboxingEnabled()) return
 于是三个已有机制零改动就复用了：渲染时按占位符展开、提交时还原全文、删除占位符时清理附件。
 
 两个细节值得记：
+
 - 它的格式刻意和普通长文本粘贴的占位符同构（`[...Pasted text #3 +12 lines]`），所以解析端不用改
 - `slice(start, -end)` 的首尾各 500 字是对称切的，和原文严丝合缝 —— **无损挖洞**
 
@@ -5010,21 +5047,21 @@ return (<Box …>Something off with Claude?</Box>)
 
 顺带产出一张「构建残留指纹表」，遇到就直接当死分支处理：
 
-| 形态 | 含义 |
-| --- | --- |
-| `"external" === 'ant' && …` | 内部构建专属，对外恒假 |
-| `"external" !== 'ant'`（折叠后只剩 return null） | 内部专属组件，对外被删空 |
-| `false ? A : B` | feature 折叠后的三元残骸，恒取 B |
-| `feature('X') ? useHook() : 常量` | 编译期开关包 hook（安全，但需要 biome-ignore） |
+| 形态                                        | 含义                               |
+| ----------------------------------------- | -------------------------------- |
+| `"external" === 'ant' && …`               | 内部构建专属，对外恒假                      |
+| `"external" !== 'ant'`（折叠后只剩 return null） | 内部专属组件，对外被删空                     |
+| `false ? A : B`                           | feature 折叠后的三元残骸，恒取 B            |
+| `feature('X') ? useHook() : 常量`           | 编译期开关包 hook（安全，但需要 biome-ignore） |
 
 **99 同一个 `??` 操作符，默认值的选择能说明什么？**
 
 这批里出现两次，方向相反：
 
-| 位置 | 写法 | 含义 |
-| --- | --- | --- |
+| 位置                                            | 写法        | 含义          |
+| --------------------------------------------- | --------- | ----------- |
 | `PromptInputFooterLeftSide.isPrStatusEnabled` | `?? true` | 新增功能，默认让人看见 |
-| `usePromptInputPlaceholder` | `?? 0` | 计数类，从零开始 |
+| `usePromptInputPlaceholder`                   | `?? 0`    | 计数类，从零开始    |
 
 `??` 只是语法，真正决定用户体验的是那个默认值。读配置类代码时，**「默认值是多少」往往比「读了什么」更重要** —— 它决定了绝大多数用户（从不改配置的人）实际看到什么。
 
@@ -5040,11 +5077,11 @@ return (<Box …>Something off with Claude?</Box>)
 
 这一批里出现了三种空实现：
 
-| 形态 | 用在哪 | 为什么 |
-| --- | --- | --- |
-| `() => null` 组件 | `VoiceIndicator`（功能关闭时） | 调用点可以无脑 `<X />`，判断收敛到 1 处 |
-| `NO_OP_SUBSCRIBE` / `NULL` 常量 | `useSyncExternalStore` 的兜底 | hook 签名要求必传，且内联箭头会导致重复订阅 |
-| `EMPTY_SET` / `EMPTY_LOOKUPS` 常量 | 传给 `Message` 的空集合 | 每次 `new Set()` 都会让 memo 失效 |
+| 形态                               | 用在哪                        | 为什么                        |
+| -------------------------------- | -------------------------- | -------------------------- |
+| `() => null` 组件                  | `VoiceIndicator`（功能关闭时）    | 调用点可以无脑 `<X />`，判断收敛到 1 处  |
+| `NO_OP_SUBSCRIBE` / `NULL` 常量    | `useSyncExternalStore` 的兜底 | hook 签名要求必传，且内联箭头会导致重复订阅   |
+| `EMPTY_SET` / `EMPTY_LOOKUPS` 常量 | 传给 `Message` 的空集合          | 每次 `new Set()` 都会让 memo 失效 |
 
 共同点：**把「没有」也变成一个稳定的值**。它同时解决两个问题 —— 调用点不用判空，引用保持不变。
 
@@ -5055,6 +5092,7 @@ return (<Box …>Something off with Claude?</Box>)
 反过来，`SuggestionItemRow` 里每行都调 `useTerminalSize()`（N 个订阅），因为终端尺寸变化的频率极低，而一旦变化必然全屏重绘 —— 多几个订阅淹没在重绘里。
 
 **订阅越细越好，前提是那个值变化得频繁；变化很少的值，粗粒度也无所谓。**
+
 
 ## `messages/` 读完了吗？十道自测题
 
@@ -5270,6 +5308,7 @@ React.useEffect(() => { deleteClassifierApproval(toolUseID); }, []);
 `nullRenderingAttachments.ts` 那 70 行只做一件事：把 34 个「渲染出来什么都没有」的 attachment 类型列出来，让 `Messages.tsx` 在**计数之前**滤掉它们（工单 CC-724）。否则 200 条渲染预算会被 `hook_success` / `todo_reminder` / `date_change` 这类看不见的条目吃掉，用户感觉「滚两下就到头了」。
 
 这条原则值得推广：**凡是「上限 / 配额 / 预算」类的计数，先确认被数的东西用户能不能看见。** 数了看不见的东西，配额就等于缩水，而且没有任何报错。
+
 
 ## 继续往下读之前
 
