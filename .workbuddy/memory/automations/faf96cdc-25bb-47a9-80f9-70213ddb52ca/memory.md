@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 105 批（2026-11-03）：components 第三批（3 文件 2,995 行，118 锚点）
+
+- 状态：完成并推送，commit `b3de0b9`（`c15e1a5..b3de0b9`）。
+- 本批 3 文件：`VirtualMessageList.tsx`(1081→1123，41 锚点) / `ScrollKeybindingHandler.tsx`(1011→1056，44 锚点) / `tasks/RemoteSessionDetailDialog.tsx`(903→937，33 锚点)。合计 2,995 源行 / 118 锚点。
+- 进度：全仓 1164/1902 文件 / 354,308 行 / 69%（实算；components 74/389，剩 315）。
+- 校验：check-fidelity 1164 份 0 失败；check-links 2287 源码链接 + 672 内链 0 失效；annotate 三次零 `⟳`、零 `⚠`（三份各 1 行批注被折行，增量比锚点数多 1）。
+- 下一批目标（components 降序，建议仍取 3 份约 2,800 行）：MessageSelector.tsx(831) · agents/AgentsMenu.tsx(800) · permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx(768) · teams/TeamsDialog.tsx(715) · CustomSelect/select.tsx(690) · CustomSelect/use-select-navigation.ts(653) · tasks/BackgroundTasksDialog.tsx(652) · mcp/MCPRemoteServerMenu.tsx(649)。
+
+### 本批经验（下次先看）
+- **锚点可安全落在「注释段开头行」（`before`）**：比落在段落后第一行代码更稳，既不劈开注释块，也不会被 `after_block` 的块注释误判拖进块内。本批 118 锚点大量使用此法，零外移。
+- **预检新增两类硬判据，建议保留**：①「锚点行是块注释严格内部」→ FAIL；②「`after` 落在块注释收尾行（`*/`）」→ FAIL（`before` 落收尾行则由 annotate 自动前移，允许）。写预检时用逐行状态机判 `code/open/openclose/interior/close`，注意字符串里的 `*/`（如 `halfPage*/fullPage*`）不会误判，因为没有配对的 `/*`。
+- **巨型 `.tsx` 里 JSX 占比过半时，锚点池会明显变少**：RemoteSessionDetailDialog 903 行只取 33 个锚点（JSX 内部零插入），密度低于同批另两份（约 1/23 vs 1/25）。这类文件不要硬凑密度，宁可少而准。
+- **三份共同主题是「时间差」**：虚拟列表 = 渲染完才知道元素位置（两阶段 seek）；滚动总控 = 只能靠时序推断设备类型；远程详情 = 日志未归一化就要出统计。写小节综述时按主题串联比按文件罗列更有信息量。
+
 ## 第 104 批（2026-11-03）：components 第二批（3 文件 3,573 行，112 锚点）
 
 - 状态：完成并推送，commit `bd5da7f`（`e37b93d..bd5da7f`）。
