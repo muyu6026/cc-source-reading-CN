@@ -1,5 +1,14 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 106 批（2026-11-03）：components 第四批（4 文件 3,110 行，99 锚点）
+
+- 状态：完成并推送，commit `942e73c`（`d8a4f28..942e73c`）。本批为**续跑接尾**：上一轮（105 后启动）因中断留下 4 份 annotated 产物 + 4 份数据文件 + 已更新的文档但未提交；续跑先核实（预检 99 锚点全过、fidelity/links 全过、抽查落点），确认产物合法后直接走提交，未重跑 annotate。
+- 本批 4 文件：`MessageSelector.tsx`(830→858，27 锚点) / `agents/AgentsMenu.tsx`(799→821，21 锚点) / `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(767→792，24 锚点) / `teams/TeamsDialog.tsx`(714→742，27 锚点)。合计 3,110 源行 / 99 锚点。
+- 进度：全仓 1168/1902（357,422/513,237 行，69%）· components 78/389（剩 311）。
+- 校验：check-fidelity 1168 份 0 失败；check-links 2290 源码链接 + 673 内链 0 失效；annotate 四次零 ⟳ 零 ⚠。四份各 1 处长批注自动折行，增量（103）比锚点数（99）多 4——核对 CJK 行数时注意「增量 = 锚点数 + 折行数」，不必强求相等。
+- 亮点：①MessageSelector 的三道过滤（diff 统计 / 可选用户消息 / 其后仅合成消息）任一漏掉恢复出来的会话就不可继续；②AgentsMenu 末尾 `_temp0.._temp9` 同构谓词做行内可见性判定，回避巨型 switch；③ExitPlanMode 的 getContextUsedPercent 把「批准会吃掉多少上下文」转成用户可读信号；④TeamsDialog 拆 kill/show/hide/cycle 为独立函数再按状态拼渲染。
+- 下批目标（components 降序，建议 4 份约 2,600 行）：`CustomSelect/select.tsx`(690) · `CustomSelect/use-select-navigation.ts`(653) · `tasks/BackgroundTasksDialog.tsx`(652) · `mcp/MCPRemoteServerMenu.tsx`(649) · `permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637)。
+
 ## 第 105 批（2026-11-03）：components 第三批（3 文件 2,995 行，118 锚点）
 
 - 状态：完成并推送，commit `b3de0b9`（`c15e1a5..b3de0b9`）。
