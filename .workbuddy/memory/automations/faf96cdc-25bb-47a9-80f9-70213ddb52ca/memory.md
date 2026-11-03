@@ -1,5 +1,15 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 107 批（2026-11-03）：components 第五批（4 文件 2,644 行，93 锚点）· 行覆盖破 70%
+
+- 状态：完成并推送，commit `f69d3b2`（`4a54cfb..f69d3b2`）。
+- 本批 4 文件：`CustomSelect/select.tsx`(690→714，23 锚点) / `CustomSelect/use-select-navigation.ts`(653→674，21) / `tasks/BackgroundTasksDialog.tsx`(652→679，26) / `mcp/MCPRemoteServerMenu.tsx`(649→673，23)。合计 2,644 源行 / 93 锚点。
+- 进度：全仓 1172/1902（360,066/513,237 行，**70%**——行覆盖首破七成）· components 82/389（剩 307）。
+- 校验：check-fidelity 1172 份 0 失败；check-links 2294 源码链接 + 674 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；3 处长批注自动折行，增量 96 = 93 + 3。
+- 亮点：①CustomSelect 拆「展示（编译产物）+ 状态机（手写 reducer）」两层，最小滚动 + validatedFocusedValue 防焦点悬空；②BackgroundTasksDialog 的 allSelectableItems 顺序必须与 JSX 渲染顺序一致——编译产物里最脆弱的隐式契约；③MCPRemoteServerMenu 四条异步流程各带早退视图，完成文案三分法（成功 / needs-auth / 失败），半成功都提示可能要手动重启；④useEffectEvent 教科书用法（引用稳定 + 永远调最新回调）。
+- 踩坑：**slug 规则的 `-` 这次真踩到了**——数据文件名初稿保留连字符 `use-select-navigation_ts`，annotate.py 报「找不到批注数据」，重命名为 `use_select_navigation_ts` 后通过。规则原文「把 `/` `.` `-` 换成 `_`」要逐字执行，写文件名前先机械替换一遍。另：select.tsx 尾部注释块（625 行起）描述 TwoColumnRow 但被编译器提升到 _temp9 之前，已在批注里标注「按语义归属读」。
+- 下批目标（components 降序，建议 4 份约 2,400 行）：`permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637) · `ConsoleOAuthFlow.tsx`(631) · `Feedback.tsx`(592) · `hooks/HooksConfigMenu.tsx`(578) · `Spinner.tsx`(562) / `agents/ToolSelector.tsx`(562)。
+
 ## 第 106 批（2026-11-03）：components 第四批（4 文件 3,114 行，99 锚点）
 
 - 状态：完成并推送，commit `942e73c`（`d8a4f28..942e73c`）。本批为**续跑接尾**：上一轮（105 后启动）因中断留下 4 份 annotated 产物 + 4 份数据文件 + 已更新的文档但未提交；续跑先核实（预检 99 锚点全过、fidelity/links 全过、抽查落点），确认产物合法后直接走提交，未重跑 annotate。
