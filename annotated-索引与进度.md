@@ -3023,7 +3023,28 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：3 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1161 份 0 失败（较上批 +3）；`check-links.py` 源码链接 2284 条加内链 671 条，0 失效；全仓 1161/1902 文件、351,310/513,237 行、68%。
 
-**下一批候选（components 降序）**：`VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) · `CustomSelect/select.tsx`(690) …（components 已做 71/389，剩 318 份；全仓还剩 741 份）。建议下批仍取 3 份约 3,000 行。
+### components 第 105 批：虚拟列表、滚动总控、远程会话详情（2,995 行，118 锚点）
+
+第三批 components，仍按源行量取件：3 份共 2,995 行，密度约每 25 行一处锚点。三份的共同点是**「视口」与「手势」的时间差**——虚拟列表要在渲染完成之后才知道元素在哪，滚动总控要在几十毫秒的滚轮节奏里推断设备类型，远程会话详情要在日志还没归一化时就算出「几个代理在干活」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/VirtualMessageList.tsx`](annotated/src/components/VirtualMessageList.tsx) | 1081 | 1123 | 41 | 全屏虚拟滚动：窗口切片、jump/step/highlight 三段搜索、粘性提示头 |
+| [`components/ScrollKeybindingHandler.tsx`](annotated/src/components/ScrollKeybindingHandler.tsx) | 1011 | 1056 | 44 | 滚轮加速三条曲线、键盘翻页、选区与滚动联动、拖动自动滚动 |
+| [`components/tasks/RemoteSessionDetailDialog.tsx`](annotated/src/components/tasks/RemoteSessionDetailDialog.tsx) | 903 | 937 | 33 | 远程会话三视图分派：ultraplan、ultrareview 阶段流水线、通用详情 |
+
+横切观察：
+
+- **两阶段跳转**是本批最重的一块设计：`jump()` 只把目标滚进挂载范围并记一个请求，真正的扫描放在 `seekGen` 触发的被动副作用里——那时 DOM 已经画完、元素必然存在。若在 `jump()` 里同步扫，元素还没挂载，只能拿估算位置反复修正。代价是要有幽灵守卫（绕回起点即放弃、连发上限 20）。
+- **设备猜测靠时序而非能力探测**：滚轮没有标准字段能区分鼠标与触控板，只能靠「反向假事件后 200ms 内翻回」判定编码器回弹、靠「连续小于 5ms 事件」判定触控板轻扫、靠空闲 1500ms 判定换设备。三条守卫缺一，手感会在两类设备间互相污染。
+- **`viewportTop` 是个反复出现的 off-by-N 来源**：滚动内容在屏幕上不从 0 行开始（布局给了内边距，上面还可能有头部），消息相对行必须加上它才是屏幕绝对行；选区平移、粘性头定位、高亮写入三处都要加。
+- **代理计数有一个隐式加一**：ultraplan 的「工作代理数」等于派生的子代理数加一（主代理也干活），重构时丢掉这个加一，只派生一个子代理的会话会显示成「1 agent」。
+
+踩坑：三份都是千行级 `.tsx`，其中 `RemoteSessionDetailDialog.tsx` 是 React Compiler 产物且 JSX 占比过半——`after` 只落语句收尾行与常量声明行，JSX 内部零插入，`before` 用于 `function` / `type` / 注释段开头。预检 118 锚点一次全过（含块注释内部续行扫描与 `after` 落 `*/` 收尾行检测）；`annotate.py` 三次零 `⟳`、零 `⚠`。三份均有 1 行长批注被自动折行，故增量比锚点数多 1。
+
+流程账：3 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1164 份 0 失败（较上批 +3）；`check-links.py` 源码链接 2287 条加内链 672 条，0 失效；全仓 1164/1902 文件、354,308/513,237 行、69%。
+
+**下一批候选（components 降序）**：`MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) · `CustomSelect/select.tsx`(690) · `CustomSelect/use-select-navigation.ts`(653) · `tasks/BackgroundTasksDialog.tsx`(652) · `mcp/MCPRemoteServerMenu.tsx`(649) …（components 已做 74/389，剩 315 份；全仓还剩 738 份）。建议下批仍取 3 份约 2,800 行。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
