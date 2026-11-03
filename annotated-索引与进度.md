@@ -3228,7 +3228,31 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1196 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2318 条加内链 680 条，0 失效；全仓 1196/1902 文件、372,101/513,237 行、72.5%（README 记 72%）。
 
-**下一批候选（components 降序，建议取 4 份约 1,580 行）**：`BridgeDialog.tsx`(401) · `mcp/MCPSettings.tsx`(398) · `ui/TreeSelect.tsx`(397) · `diff/DiffDialog.tsx`(383)（components 已做 124/407，剩 283 份；全仓还剩 706 份）。
+### components 第 114 批：远程控制弹窗、MCP 设置视图机、树形选择器、Diff 查看弹窗（1,579 行，117 锚点）
+
+第十二批 components，4 份共 1,579 行（401 / 398 / 397 / 383），是本轮最轻的一批。四份的主题各不相同，但底层做的是同一件事：**把异质的输入先归一成同一种形状，再让下游只认形状**。远程控制弹窗把二十多个全局字段归一成「标签 + 颜色 + 三段文案」；MCP 设置把六种 viewState 归一成「一个 switch 六个 case」；树形选择器把树归一成拍平行；Diff 弹窗把轮次 diff 归一成 git diff 同形对象。归一之后，下游就不再需要知道来源了。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/BridgeDialog.tsx`](annotated/src/components/BridgeDialog.tsx) | 401 | 432 | 30 | 远程控制弹窗：props 只有完成回调、二十多个字段全从 AppState 读；二维码走 utf8 字符画并过滤空行；只有用户显式开过远程控制才写全局配置；状态机只有「正常/异常」两条出口 |
+| [`components/mcp/MCPSettings.tsx`](annotated/src/components/mcp/MCPSettings.tsx) | 398 | 428 | 29 | MCP 设置视图机：把客户端补全成展示模型（判 transport、探凭据）；「已认证」是三条宽松路径任一成立；加载中不能误报「没有配置」；六个视图各自 return，无公共出口 |
+| [`components/ui/TreeSelect.tsx`](annotated/src/components/ui/TreeSelect.tsx) | 397 | 427 | 29 | 树形选择器：按展开态 DFS 拍平成普通选项交给 Select；只接管左右键、上下键归 Select；受影响于受控优先（传了 isNodeExpanded 内部 Set 即作废）；左键在叶子上会同时折叠父级并移交焦点 |
+| [`components/diff/DiffDialog.tsx`](annotated/src/components/diff/DiffDialog.tsx) | 383 | 413 | 29 | Diff 查看弹窗：两条数据源归一成同形对象；数据源变则重置文件下标；左键承载两层后退；空态四种按优先级排列；编译器把多重 if 赋值重写成带标签块 bb0 |
+
+横切观察：
+
+- **「归一」比「分支」划算**：Diff 弹窗有 2 种数据源 × 2 种视图模式 = 4 种界面，但代码里只有 1 个三目把数据源转同形、1 个三目选主体。如果反过来按组合写分支，四个分支里会有三份重复的渲染逻辑。这条经验在本轮反复出现，可以当作读这批组件时的通用判据。
+- **受控与非受控划界要干脆**：树形选择器只要传了 `isNodeExpanded`，内部 Set 就完全作废，不做「部分受控」。半受控（有的节点听外部、有的听内部）是最难调试的状态模型，因为「为什么点了没反应」永远要两处同时查。
+- **宽松判据换可用性**：MCP 服务器「是否已认证」用三条路径任一成立即算通过（有令牌 / 有会话口令且已连接 / 已连接且有工具）。宁可误判为已认证，也不要让用户看到一个其实能用的服务器却标着未授权——诊断类界面的误报比漏报更伤。
+- **加载中与真的没有，必须分成两种状态**：MCP 设置里第一个早退就是「列表空但客户端非空 → 探测未完成，直接返回不提示」。这类误报在异步列表里极常见，判断依据是「输入非空而输出为空」这个组合。
+- **同一个键承载两层后退**：Diff 弹窗的左方向键在详情里返回列表、在列表里切上一个数据源；Esc 取消也分两层。用户心里只有「往回退」一个概念，键位就该这么设计——而不是为每层分配不同的键。
+- **终端里焦点必须主动抢**：树形选择器最外层 Box 要 `tabIndex` 加 `autoFocus` 才收得到左右键（因为左右键处理在本组件而非 Select 里）。这和上一批 Shell 详情、本批 BridgeDialog 注册 overlay 是同一条约束的三个面。
+
+踩坑：`BridgeDialog.tsx` 的第 10 行是单行 eslint 注释（`-- raw 'd' key ...`），锚点落其 `before` 而非下一行，避免把禁用范围转移给批注本身；`DiffDialog.tsx` 第 277 行 `bb0: {` 是编译器生成的标签块（用于把多重 if 赋值转成 break），锚点落标签之前、第 278 行落首个 `if`，两处都在 code 状态；`MCPSettings.tsx` 第 285 行是 `case "server-tools":`，锚点落 case 行属安全位置。预检 117 锚点一次全过；`annotate.py` 四次零 `⟳` 零 `⚠`；四份各 1 处长批注折行，故增量 121 = 117 + 4（回到常态规律）。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1200 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2322 条加内链 681 条，0 失效；全仓 1200/1902 文件、373,680/513,237 行、72.8%（README 记 72%）。
+
+**下一批候选（components 降序，建议取 4 份约 1,500 行）**：`TaskListV2.tsx`(378) · `agents/new-agent-creation/wizard-steps/ConfirmStep.tsx`(378) · `Settings/Usage.tsx`(377) · `permissions/SkillPermissionRequest/SkillPermissionRequest.tsx`(369)（components 已做 128/407，剩 279 份；全仓还剩 702 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
