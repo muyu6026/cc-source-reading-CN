@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 108 批（2026-11-03）：components 第六批（4 文件 2,505 行，126 锚点）
+
+- 状态：完成并推送，commit `68fcb37`（`d71f138..68fcb37`）。
+- 本批 4 文件：`permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645→677，31 锚点) / `FullscreenLayout.tsx`(637→669，31) / `ConsoleOAuthFlow.tsx`(631→662，30) / `Feedback.tsx`(592→627，34)。合计 2,505 源行 / 126 锚点。
+- 进度：全仓 1176/1902（362,571/513,237 行，**71%**）· components 86/389（剩 303）。
+- 校验：check-fidelity 1176 份 0 失败；check-links 2298 源码链接 + 675 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；4 份各 1 处长批注自动折行，增量 130 = 126 + 4。
+- 亮点：①AskUserQuestion 的「拒绝不等于失败」——取消/向 Claude 回话/结束计划访谈三种非提交终点全走 toolUseConfirm.onReject，后两种把反馈文本+图片块当拒绝理由回传，权限通道被复用成澄清通道；②FullscreenLayout 三个决定同指「滚动不位移」：粘性头固定 1 行、pill 用 useSyncExternalStore 只订阅布尔翻转、分隔线 y 存 ref；③ConsoleOAuthFlow 八态联合类型 + toRetry/nextState 双字段把失败引回正确状态，企业 TLS 代理截胡 token 交换时转成可行动 SSL 提示；④Feedback 三道清洗出口：报告内容脱敏 → 拼链接二次脱敏 → 7250 字符预算三段截断且不切 %XX。
+- 踩坑：开工时 `annotated-索引与进度.md` 又是**外部编辑器回写退化版**（加 `<summary>`、`是`→`&#x662F;`、删表头与「横切观察」行）。按老流程：归一化比对（去反斜杠+去空白+`-{2,}` 归一，用 Counter 求差集）确认「仅工作树新增 12 行、仅 HEAD 有 20 行」→ 备份到 `scripts/_annot/_idx_worktree_backup.md` → `git checkout --` 还原 HEAD，再开工。
+- 另一坑：**初版扫描剩余件的脚本没做路径分隔符归一**——`git ls-files` 给正斜杠、`os.walk` 给反斜杠，`p in done` 永不成立，把已完成的 Config.tsx(1822)/LogSelector.tsx(1575) 误报成「剩余最大件」。修法：两侧都 `replace(os.sep,'/')`。凡按目录树统计覆盖率，先确认识别口径一致。
+- 下批目标（components 降序，建议 4 份约 2,200 行）：`hooks/HooksConfigMenu.tsx`(578) · `agents/ToolSelector.tsx`(562) · `Spinner.tsx`(562) · `LogoV2/LogoV2.tsx`(543) · `mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487)。
+
+
 ## 第 107 批（2026-11-03）：components 第五批（4 文件 2,644 行，93 锚点）· 行覆盖破 70%
 
 - 状态：完成并推送，commit `f69d3b2`（`4a54cfb..f69d3b2`）。
