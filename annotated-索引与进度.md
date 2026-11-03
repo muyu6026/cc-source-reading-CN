@@ -3355,6 +3355,41 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（components 降序，建议取 10–15 份约 3,600 行）**：`Onboarding.tsx`(244) · `design-system/ListItem.tsx`(244) · `QuickOpenDialog.tsx`(244) · `tasks/RemoteSessionProgress.tsx`(243) · `Settings/Status.tsx`(241) · `LogoV2/Clawd.tsx`(240) · `skills/SkillsMenu.tsx`(237) · `Markdown.tsx`(236) · `permissions/NotebookEditPermissionRequest/NotebookEditToolDiff.tsx`(235) · `permissions/PowerShellPermissionRequest/PowerShellPermissionRequest.tsx`(235)（components 已做 145/389，剩 244 份；全仓还剩 667 份）。
 
+### components 第 118 批：首次启动引导、快速打开对话框、列表项基元、远程会话进度行、状态命令渲染、吉祥物字符画、技能菜单、Markdown 渲染、Notebook diff、PowerShell 权限（10 文件 2,399 行，175 锚点）
+
+本批十份围绕两类主题：**面向首次体验的门面链路**（Onboarding 步骤机、QuickOpenDialog 模糊搜索、Clawd 字符画、SkillsMenu、Status 属性表）与**渲染管线的性能工程**（Markdown 的模块级 token 缓存与流式增量词法、ListItem 基元、RemoteSessionProgress 平滑计数、NotebookEditToolDiff 与 PowerShellPermissionRequest 两张权限 diff）。
+
+| 文件 | 原文→批注版 | 锚点 |
+| --- | --- | --- |
+| `Onboarding.tsx` | 244→267 | 22 |
+| `QuickOpenDialog.tsx` | 244→263 | 18 |
+| `design-system/ListItem.tsx` | 244→258 | 13 |
+| `tasks/RemoteSessionProgress.tsx` | 243→262 | 18 |
+| `Settings/Status.tsx` | 241→260 | 18 |
+| `LogoV2/Clawd.tsx` | 240→256 | 15 |
+| `skills/SkillsMenu.tsx` | 237→253 | 15 |
+| `Markdown.tsx` | 236→259 | 22 |
+| `permissions/NotebookEditPermissionRequest/NotebookEditToolDiff.tsx` | 235→252 | 16 |
+| `permissions/PowerShellPermissionRequest/PowerShellPermissionRequest.tsx` | 235→254 | 18 |
+
+横切观察：
+
+- **Markdown 是本批性能密度最高的一份**。三层缓存各有各的理由：模块级 token 缓存解决「useMemo 活不过虚拟滚动重挂」（键用内容哈希防 RSS 回归）、MRU 提升防「回滚就驱逐正在看的条目」、纯文本快路径连哈希都省。`StreamingMarkdown` 用 `'use no memo'` 整体退出编译器——渲染期读写 ref 是算法本体，编译器无法证明其幂等。
+- **Clawd 是「分段缓存」的教科书**：姿态表按行拆段、每段独立进记忆槽，姿态切换时只有眼睛/手臂段参与比较；Apple Terminal 分支用前景背景互换的 bg-fill 手法，同一吉祥物两种画法。
+- **可跳过步骤（SkippableStep）**：skip 时 effect 立即触发 onSkip 推进流程，且本步渲染为 null——跳过不只是不渲染，还要替用户按一次「下一步」。
+- **useSmoothCount 的渲染期 ref 突变**：目标回落或 snap 时直接对齐——注释明说冻结的时钟若不 snap 会让 ref 卡在初值。这类「渲染期写 ref」与前批 useFeedbackSurvey 的按轮次记账同属「编译器下刻意保留的命令式例外」。
+- **PowerShell 弹窗沿用了 Bash 版的全部结构**（可编辑前缀 + hasUserEditedPrefix 防异步覆盖 + 规则落 localSettings），但多行命令直接不给「不再询问」——语料统计 14 条多行规则零重复命中，一次性字面量不值得固化。
+
+踩坑：
+
+- `Markdown.tsx` 第 31 行正则字面量含反引号（`MD_SYNTAX_RE` 的字符类），预检状态机把它误判成模板字符串开头、结束状态非 code。已把 `annotate.py` 的 `_regex_end` 正则字面量判定移植进预检状态机（前置字符集 + 字符类跟踪），与主脚本判定对齐。
+- `NotebookEditToolDiff` 数据文件有一处锚点漏写位置参数（二元组），预检解包报错当场拦下。
+- `ListItem` 数据文件名初版用了连字符（slug 规则要求 `-`→`_`），annotate 找不到数据、改名后补跑。
+
+流程账：10 个数据文件逐一对齐源文件；预检 175 锚点全过、0 块内违例；`annotate.py` 十一次（含 ListItem 补跑）零 `⚠`、一次 `⟳`（Markdown 58→57，锚点挪到注释段边界，无害）；`check-fidelity.py` 全仓 1245 份 0 失败（较上批 +10）；`check-links.py` 源码链接 2361 条加内链 685 条，0 失效；全仓 1245/1902 文件、386,820/513,237 行、75.4%。
+
+**下一批候选（components 降序，建议取 10 份约 2,230 行）**：`Spinner/TeammateSpinnerLine.tsx`(233) · `WorktreeExitDialog.tsx`(231) · `permissions/SedEditPermissionRequest/SedEditPermissionRequest.tsx`(230) · `permissions/AskUserQuestionPermissionRequest/PreviewBox.tsx`(229) · `tasks/AsyncAgentDetailDialog.tsx`(229) · `agents/AgentDetail.tsx`(220) · `permissions/PermissionRequest.tsx`(217) · `CustomSelect/SelectMulti.tsx`(213) · `FeedbackSurvey/useMemorySurvey.tsx`(213) · `mcp/McpParsingWarnings.tsx`(213)（components 已做 173/407，剩 234 份；全仓还剩 657 份）。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。

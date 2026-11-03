@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '/status 命令的渲染层：把版本、会话、账户、模型、MCP、沙箱等运行时信息排成两段属性表，诊断信息走 Suspense 异步加载。'),
+    (19, 'before', '主段构建是纯函数且不依赖任何 props——会话 id、标题、cwd 在一次渲染生命周期内不会变。'),
+    (22, 'before', '会话名缺省时给出指引文案「/rename to add a name」——空位也要解释怎么填。'),
+    (37, 'before', '副段需要 props 数据（模型、MCP 客户端、主题、命令上下文），所以参数化而不是像主段那样读全局。'),
+    (54, 'before', '诊断构建是异步的（安装诊断 + 健康诊断 + 记忆诊断三次 await），返回 Promise 由调用方挂到 Suspense 上。'),
+    (57, 'before', '属性值渲染组件：值可能是数组、字符串或现成的 React 节点，三分支分别处理。'),
+    (62, 'before', '数组分支：逗号分隔并用 flexWrap 换行排布，flexShrink 99 让它优先被压缩。'),
+    (67, 'before', '编译器把「按长度判断是否重建渲染回调」单独拆了一层缓存：数组内容变但长度不变时复用旧回调。'),
+    (89, 'before', '字符串分支直接包 Text。其余类型（ReactNode）原样返回。'),
+    (102, 'before', '主组件。注意 buildPrimarySection 的结果被哨兵缓存（112 行）——它读的全是全局态，缓存是安全的。'),
+    (119, 'before', '副段按四个依赖重建：任何一个变化都会重算属性列表。'),
+    (143, 'before', '在弹窗内打开时 flexGrow 1 占满剩余空间，独立命令打开时不拉伸——同一组件在两种宿主里表现不同。'),
+    (154, 'before', '诊断挂在 Suspense 下且 fallback 为 null：Promise 未决时整个面板先显示，诊断就绪后追加在底部。'),
+    (188, 'before', '段渲染：空段跳过（length > 0 求值为 false 时不产生节点），键用段下标。'),
+    (196, 'before', '属性行：标签加粗带冒号，值交给 PropertyValue；flexShrink 0 保证标签不被压缩截断。'),
+    (204, 'before', '诊断子组件：use(promise) 挂起等待结果。结果为空数组时整个块返回 null，一行都不占。'),
+    (209, 'before', 'React 19 的 use 直接消费 Promise：未决时抛出由最近的 Suspense 接管，这就是上面 fallback 的作用。'),
+    (238, 'before', '每条诊断前加警告图标；诊断项可能是字符串也可能是自带样式的节点，用 typeof 分流。'),
+]

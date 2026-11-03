@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '远程会话（远程代理 / ultrareview）的进度行组件：一行文本，按会话类型和状态分流显示。'),
+    (10, 'before', '动画帧间隔 80ms：计数平滑与彩虹渐变共用这一个节拍。'),
+    (22, 'before', '审阅计数格式化函数。上方注释说明它存在的原因：一行药丸与详情弹窗各自实现过计数文案，历史上对「是否显示 refuted、synthesizing 阶段叫什么」产生过分歧，所以抽成共享函数防漂移。'),
+    (24, 'before', 'stage 字段缺失说明是旧版编排器镜像（未写入 stage），此时只报 found 和 verified 两个数。'),
+    (25, 'before', 'synthesizing（去重综合）阶段：found 计数已冻结不再展示，只报 verified、refuted（有才显示）与 deduping。'),
+    (31, 'before', 'verifying 阶段：found 继续增长，verified 逐步跟上，refuted 大于零才显示——refuted 为零时隐藏是该函数的既定规范。'),
+    (43, 'before', '彩虹文字：逐字符上色，phase 偏移让渐变沿帧流动而不是静态定格，与 ultraplan 关键字同一套处理。'),
+    (52, 'before', '先把字符串展开成字符数组再逐个包 Text——扩展运算符按码元切分，对这七个 ASCII 字母没有问题。'),
+    (60, 'before', '每帧 phase 变化时所有字符重算颜色，key 用下标使 React 原地更新而不是重建节点。'),
+    (76, 'before', '平滑计数 hook：目标跳变（2→5）时逐帧 +1 过渡显示而不是瞬间跳到目标值。'),
+    (79, 'before', '渲染期直接改 ref（不走 setState）：向下修正或 snap 时直接对齐目标。这在 React Compiler 下是刻意为之——上方注释说明 snap（减少动态偏好或时钟冻结）时必须立即对齐，否则冻结的时钟会让 ref 永远停在初值。'),
+    (87, 'before', '审阅行的容器组件：reducedMotion 或会话结束时 snap 直通目标值；只有 running 且未减motion 时才开动画时钟。'),
+    (96, 'before', 'useAnimationFrame 传 null 表示停表：非运行或用户偏好减少动态时完全不驱动的动画，也不消耗渲染。'),
+    (104, 'before', '彩虹相位：每 3 个 tick 前进一格，对 7 取模循环。阶段推进比帧慢，视觉上渐变是缓缓流动的。'),
+    (105, 'before', '完成/失败态整行 JSX 被哨兵缓存——这些输出永不变化，缓存后连比较都省了。'),
+    (177, 'before', '入口分流：远程审阅会话走彩虹行，普通会话按状态显示 done、error、纯状态文案或「完成/总数」计数。'),
+    (208, 'before', '没有待办清单时退化为显示原始状态串加省略号——宁可信息少也不伪造进度。'),
+    (221, 'before', '计数只统计 status 为 completed 的待办项，count 是工具函数包了一层 filter。'),
+]
