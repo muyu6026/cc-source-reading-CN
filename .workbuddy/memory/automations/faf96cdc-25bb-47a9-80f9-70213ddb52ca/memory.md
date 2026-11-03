@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 116 批（2026-11-03）：components 第十四批（10 文件 3,164 行，211 锚点）
+
+- 状态：完成并推送，commit `76986c9`（`63ac1e2..76986c9`）。
+- 本批 10 文件（333→292 行）：`ThemePicker.tsx`(333→359，25 锚点) / `permissions/FallbackPermissionRequest.tsx`(333→355，21) / `PreviewQuestionView.tsx`(328→350，21) / `Spinner/GlimmerMessage.tsx`(328→349，20) / `StatusLine.tsx`(324→347，22) / `MarkdownTable.tsx`(322→346，23) / `design-system/FuzzyPicker.tsx`(312→333，20) / `FeedbackSurvey/useFeedbackSurvey.tsx`(296→320，23) / `sandbox/SandboxSettings.tsx`(296→315，18) / `diff/DiffFileList.tsx`(292→311，18)。
+- 进度：全仓 1220/1902（380,390/513,237 行，74.1%，README 记 74%）· components 148/407（剩 259，总剩 682）。
+- 校验：check-fidelity 1220 份 0 失败；check-links 2346 源码链接 + 684 内链 0 失效；十份 annotate 零 ⟳ 零 ⚠；插入注释 221 行 = 211 锚点 + 10 折行溢价。
+- 主题：**终端里没有 CSS，所有布局与反馈都要手算** —— 表格手算列宽/折行（borderOverhead = 1 + numCols*3）、picker 手算固定开销（CHROME_ROWS=10）、预览视图手算占位（PREVIEW_OVERHEAD=11）、文件清单手算路径可用列（columns-16-3-4）、状态栏全屏下预留一行。
+- 三条可跨批复用的经验：①**溢出在终端里是重绘 bug 不是滚动问题**（Ink 相邻两帧裁剪不同 → 滚动区无限闪烁；超高的 picker 每次重渲染光标上移量算错 → 上一行闪白）；②**显示宽度 ≠ 字符数**（grapheme 切簇 + stringWidth 量列，任何按 length 算的地方在中文/emoji 上必错）；③**随机/打日志不能放在会被反复求值的 useMemo 里**（useFeedbackSurvey 的 0.5% 会退化成「几乎必然」），要按离散量记账（lastEligibleSubmitCountRef / logNextResultRef）。
+- 踩坑（均在 preflight 拦截）：①九份数据文件 10 处误用英文双引号（`Symbol.for("...")`、`flexDirection="row"`、`defaultTab="Mode"`、`{ " " }`、`"five_hour" in data`、`color="background"`），改「」包裹；②`SandboxSettings` 把空心圆写成转义序列，反斜杠是禁用字符，改「空心圆（U+25CB）」；③`MarkdownTable` 第 137 行锚点用了带换行的编号列表 → 触发控制字符断言，改写 ①②③ 单行。
+- 顺手修：索引第 115 批小节的 components 计数口径写成 `120/389`（实际 138/407），已改正。
+- 下批目标（components 降序，续取 10 份约 2,750 行）：`TrustDialog/TrustDialog.tsx`(290) · `CustomSelect/use-select-input.ts`(287) · `diff/DiffDetailView.tsx`(281) · `CoordinatorAgentStatus.tsx`(273) · `agents/agentFileUtils.ts`(272) · `permissions/PermissionExplanation.tsx`(272) · `Spinner/TeammateSpinnerTree.tsx`(272) · `ResumeTask.tsx`(268) · `LogoV2/ChannelsNotice.tsx`(266) · `tasks/InProcessTeammateDetailDialog.tsx`(266)。
+
 ## 第 115 批（2026-11-03）：components 第十三批（10 文件 3,536 行，167 锚点）
 
 - 状态：完成并推送，commit `63ac1e2`。
