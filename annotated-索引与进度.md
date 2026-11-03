@@ -3156,7 +3156,30 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1184 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2306 条加内链 677 条，0 失效；全仓 1184/1902 文件、366,784/513,237 行、71%。
 
-**下一批候选（components 降序，建议取 4 份约 1,830 行）**：`permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482) · `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465) · 其余按行数继续取（components 已做 94/389，剩 295 份；全仓还剩 718 份）。
+### components 第 111 批：Bash 权限弹窗、单题提问视图、条款确认弹窗、权限决策调试信息（1,870 行，122 锚点）
+
+第九批 components，按源行量取件：4 份共 1,870 行（482 / 465 / 463 / 460），四份行数挤在 22 行区间内。主题是**「同一份权限数据要能被四种方式读」**：执行前的确认（Bash 命令弹窗，选项集合随特性开关与后端建议变形）、还没有答案的询问（单题提问视图，选项区与底部动作争同一组上下键）、被动接受的告知（条款弹窗，宽限期可以延后表态）、事后追查的解剖（决策调试信息，把原因链与永远不会生效的规则逐条摊开）。四份都不产出业务数据，难点全在「状态如何决定界面形状」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/permissions/BashPermissionRequest/BashPermissionRequest.tsx`](annotated/src/components/permissions/BashPermissionRequest/BashPermissionRequest.tsx) | 482 | 515 | 32 | Bash 权限弹窗：外层分流器把 sed 编辑命令交给专用弹窗；20fps 微光时钟从 535 行主体里整块外提（否则每 50 毫秒重建整棵树）；复合命令按「决策原因是否为子命令结果」识别，绕开会产生死规则的同步前缀启发式；手改前缀落本地设置、分类器描述落会话 |
+| [`components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/QuestionView.tsx) | 465 | 496 | 30 | 单题提问视图：文本选项加一个固定标记的自定义输入项；底部两行靠「从最后一项向下 / 从第一行向上」与选项区交接键盘，未聚焦底部就不消费按键；编号即位置（底部第一行＝选项数+1）；多选提交时把固定标记滤掉换成真实输入 |
+| [`components/grove/Grove.tsx`](annotated/src/components/grove/Grove.tsx) | 463 | 492 | 28 | 条款确认弹窗：宽限期 / 宽限期后两套文案体；显示与否交给纯函数判定；同一个退出键在宽限期等于延后、之后等于放弃；域名被排除时接受选项只剩关闭一项；设置页那行开关接受制表、回车、空格三种确认 |
+| [`components/permissions/PermissionDecisionDebugInfo.tsx`](annotated/src/components/permissions/PermissionDecisionDebugInfo.tsx) | 460 | 493 | 32 | 权限决策解剖：十种决策原因各有译法，子命令结果靠类型排除后自行递归；建议明细拆成规则 / 目录 / 模式三类三种空态；不可达规则按「有建议 > 有工具名 > 全量」三档过滤，每条按问题、原因、修复三行展开 |
+
+横切观察：
+
+- **高频动画的正确修法是「挪边界」，不是「优化时钟」**：Bash 弹窗里那个 20fps 微光字幕，原本住在 535 行的主体内部，而主体有一个编译器 bailout（放弃自动记忆化），于是每次时钟跳动都把整棵 JSX 树重建一遍，分类器检查的 1 到 3 秒里要重建几十次。修法是把时钟搬进一个只渲染一行文字的独立组件——让高频更新的物理面积缩到最小。这与第 109 批 Spinner 的做法同源（那边是把帧循环下沉到子行），但方向相反：一个是下沉，一个是外提，判断依据都是「谁的渲染代价小就让谁高频」。
+- **同一交互两套语义，靠阶段判定而不是两套组件**：条款弹窗里同一个退出键，宽限期按下去是「延后」（下次启动还问），宽限期外是「放弃」（不再问）；接受选项也随「域名是否被排除」从两项缩成一项。提问视图同理——底部第二行只在计划模式下存在，而底部键盘处理里那个向下分支据此决定「能不能下移到第二行」。两处都没有复制组件，只在分支里读一个阶段量。
+- **编译产物的提前返回＝哨兵加带标签块**：决策调试信息里两个组件都用 `react.early_return_sentinel` 表达提前返回，读法是把「哨兵赋值」当成 `return`、把块外那次哨兵检查当成「函数末尾」。Bash 弹窗的选项选中处理则用带标签的 `switch`，标签存在的理由是——不加标签时某个 `case` 里的 `break` 只跳出 `switch`，最后那次「通知上层」会被静默跳过。
+- **调试信息的可信度靠「先全量后过滤」**：不可达规则先算全量，再按三档优先级过滤（本次带建议规则 → 只看与该规则同名同内容的；只给了工具名 → 只看该工具下的；都没有 → 全量）。计算函数因此不需要任何分支参数，过滤逻辑全在调用处，读起来像三段独立规则而不是一棵条件树。
+- **规则的落盘目标就是它的信任级别**：用户亲手编辑的前缀落本地设置（长期生效），分类器从自然语言描述推导出的规则只落会话（用完即弃）。同一份「以后别再问」的诉求，因为来源可信度不同而写进不同作用域——这是 Bash 那份里最容易被当成随手一写、实际最该保留的设计。
+
+踩坑：`Grove.tsx` 第 16 行是 ASCII 箱子模板字符串的起始行（模板跨 16–26 行），锚点落在起始行（该行仍属 code 状态），`annotate.py` 仍报了一次 `⟳`，但外移目标是 16→16，位置未变，注释正确落在 `const NEW_TERMS_ASCII =` 之前；`BashPermissionRequest.tsx` 的 36–41 与 195–208 是两段长行注释群、135 行是单行注释，全部用 `before` 落语句行；`QuestionView.tsx` 的 Props（20–42）无块注释，块注释只在 `PermissionDecisionDebugInfo.tsx` 的 190–191 与 204 两处，落在块外的语句行上。预检 122 锚点一次全过（含块注释内部续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⚠`、一次 `⟳`（位置未变，见上）；四份各 1 处长批注自动折行，故增量（126 行）比锚点数（122）多 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1188 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2310 条加内链 678 条，0 失效；全仓 1188/1902 文件、368,654/513,237 行、71.8%（README 记 71%）。
+
+**下一批候选（components 降序，建议取 4 份约 1,770 行）**：`ModelPicker.tsx`(448) · `permissions/ComputerUseApproval/ComputerUseApproval.tsx`(441) · `agents/AgentsList.tsx`(440) · `memory/MemoryFileSelector.tsx`(438)（components 已做 116/407，剩 291 份；全仓还剩 714 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
