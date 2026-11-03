@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组（编译产物标志）。'''),
+    (2, 'before', '''引入结构化 diff 的 hunk 类型、路径解析、终端尺寸与文件读取工具。'''),
+    (11, 'before', '''Props：filePath 与 hunks（差异块）；isLargeFile / isBinary / isTruncated / isUntracked 是几种「无法或不便展示真实 diff」的特殊状态。'''),
+    (20, 'before', '''组件说明：展示单个文件的 diff 内容，用 StructuredDiff 做词级差异与语法高亮；不滚动，全部渲染（解析上限约 400 行）。'''),
+    (25, 'before', '''DiffDetailView 组件。先读取文件首行与全文（用于 untracked 文件的行数统计），再按不同状态分支渲染。'''),
+    (39, 'before', '''用 `bb0` 命名 break 目标组织早期返回：无 filePath 时只构造一个空的首行与内容结构并跳出。'''),
+    (54, 'before', '''读取文件：把绝对路径拼出来后用 readFileSafe 读全文，取首行用于 untracked 文件的行数提示。'''),
+    (86, 'before', '''未跟踪文件分支：展示文件名与「（untracked）」，提示尚未暂存；并建议 `git add` 以看到行数。'''),
+    (143, 'before', '''二进制文件分支：无法展示 diff，只显示文件名与一条说明。'''),
+    (176, 'before', '''大文件分支：diff 超过约 1MB 上限时不展开，提示超限。'''),
+    (207, 'before', '''正常分支：展示文件名，若被截断则追加「（truncated）」标记。'''),
+    (234, 'before', '''把 hunk 列表映射成 StructuredDiff；无内容时显示「No diff content」。宽度按终端列数减去边距计算。'''),
+    (255, 'before', '''截断提示：超过 400 行时显示「… diff truncated」。'''),
+    (261, 'before', '''组合最终竖向布局：文件名 + 分隔线 + diff 主体 + 截断提示，整体宽度占满。'''),
+]

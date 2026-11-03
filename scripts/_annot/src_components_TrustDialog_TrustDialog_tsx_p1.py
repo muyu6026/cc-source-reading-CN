@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时：提供 `$` 记忆化缓存数组。编译器把 useMemo/useRef 等内联成「按依赖缓存的 `$[n]` 读取」，是编译产物的标志。'''),
+    (18, 'before', '''从同目录 utils 批量引入「设置来源探测」函数：它们各自判断某类权限或配置是否出现在 project/local 设置里，供下方决定是否展示信任警告。'''),
+    (19, 'before', '''组件 props：onDone 是接受或取消后的回调；commands 是可选的已加载命令列表，用于探测其中是否暗含 bash 执行。'''),
+    (23, 'before', '''信任弹窗组件。首次接触某目录时询问用户「是否信任此文件夹」，避免 Claude 在陌生或来历不明的目录里自由读、改、执行文件。'''),
+    (30, 'before', '''React Compiler 模式：缓存是哨兵值 `react.memo_cache_sentinel` 时计算并写入 `$[0]`，否则复用缓存。这种 `if ($[n] === 哨兵) … else 复用` 结构贯穿全组件，等价于被内联的 useMemo。'''),
+    (55, 'before', '''逐一探测各类「危险能力」是否存在：hooks、bash 放行规则、apiKey 助手、aws/gcp 命令、otel 头助手、危险环境变量。每项对应上方一个 `hasXxx` 布尔。'''),
+    (127, 'before', '''是否拥有任何 bash 执行途径：设置里放行、斜杠命令带 bash、技能带 bash——三者任一即视为「会执行命令」。'''),
+    (128, 'before', '''是否已经接受过信任（会话级或项目级），决定能否跳过本弹窗。'''),
+    (132, 'before', '''副作用：首次渲染上报展示事件，记录是否家目录及各危险能力开关，用于产品遥测。'''),
+    (157, 'before', '''用户选择回调：选退出则直接关停进程；选信任则按是否家目录写入「会话信任」或「项目配置」，随后回调 onDone 关闭弹窗。'''),
+    (188, 'before', '''绑定 Ctrl+C 退出键；pending 态（已按一次）时底部提示再按一次才真正退出。'''),
+    (199, 'before', '''已信任则立即跳过：setTimeout 触发 onDone 后返回 null，不再渲染任何内容。'''),
+    (207, 'before', '''弹窗正文：展示当前工作目录，并说明这是一次性安全检查，Claude 将能读、改、执行该目录下的文件。'''),
+    (227, 'before', '''两个选项：信任并继续 / 退出。选退出的值 `exit` 在回调里直接关停进程。'''),
+    (257, 'before', '''整体包进 warning 色 PermissionDialog，标题「Accessing workspace」，把目录、说明、链接与选项组合成竖向排列。'''),
+    (266, 'before', '''一批零碎助手：退出键直接关停；两个来源判定函数区分 slash 命令来自旧 commands_DEPRECATED 还是 skills/plugin 并含 bash 工具；以及回写项目配置把 hasTrustDialogAccepted 置真的函数。'''),
+]

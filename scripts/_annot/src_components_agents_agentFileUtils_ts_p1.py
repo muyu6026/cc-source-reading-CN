@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''agent 文件的读写工具集：把 agent 定义格式化为 markdown、按来源计算文件路径、以及保存、更新、删除 agent 文件。'''),
+    (17, 'after', '''formatAgentAsMarkdown：把 agent 数据拼成「名称/描述/正文」的 markdown 文件内容，frontmatter 用 YAML。'''),
+    (30, 'before', '''YAML 双引号转义：反斜杠、双引号、换行都要转义，否则写进 frontmatter 会破坏格式。'''),
+    (39, 'before', '''tools 字段省略规则：未定义或仅含通配 `*` 时不写 tools 行（即「允许全部工具」）。'''),
+    (48, 'before', '''拼接各类可选字段：model、effort、color、memory 仅在提供时才追加对应行。'''),
+    (60, 'before', '''getAgentDirectoryPath：按设置来源返回 agent 目录——user 在配置 home 下，project/local 在 `.claude/agents`，policy 在受管路径下；flagSettings 不支持直接取目录（抛错）。'''),
+    (79, 'before', '''getRelativeAgentDirectoryPath：返回相对路径版目录；project 用 `.claude/agents`，其余退回绝对路径函数。'''),
+    (92, 'before', '''getNewAgentFilePath：根据来源与 agentType 拼出新建文件的完整路径（`<目录>/<类型>.md`）。'''),
+    (104, 'before', '''getActualAgentFilePath：返回已有 agent 的真实文件路径；内置 agent 返回字符串 Built-in，插件 agent 抛错。用 filename 或 agentType 兜底文件名。'''),
+    (121, 'before', '''getNewRelativeAgentFilePath：返回新建文件的相对路径；内置返回 Built-in。'''),
+    (135, 'before', '''getActualRelativeAgentFilePath：返回已有 agent 的相对路径；内置、插件、flag 各有专属字符串，其余按来源拼相对目录。'''),
+    (154, 'before', '''ensureAgentDirectoryExists：递归创建 agent 目录并返回该目录路径。'''),
+    (166, 'before', '''saveAgentToFile：保存新建 agent——校验非内置，确保目录存在，格式化后用 `wx` 标志写（已存在则报错），EEXIST 时给出友好错误。'''),
+    (208, 'before', '''updateAgentFile：更新已有 agent 文件——按真实路径覆盖写（不强制排他），内容同样由 formatAgentAsMarkdown 生成。'''),
+    (241, 'before', '''deleteAgentFromFile：删除 agent 文件——内置不可删；EEXENT（文件不存在）静默忽略，其余错误上抛。'''),
+    (260, 'before', '''writeFileAndFlush：底层写文件——open 后 writeFile 加 datasync 确保落盘，finally 中关闭句柄。'''),
+]

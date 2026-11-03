@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组。'''),
+    (2, 'before', '''模块说明：本文件被 LogoV2.tsx 在 KAIROS 特性标志下按需 require，整文件在标志都为假时被 tree-shake；不要在未守卫的代码里静态引入。'''),
+    (9, 'before', '''引入 useState 与频道、通道白名单、订阅类型、插件与设置相关的工具。'''),
+    (18, 'before', '''ChannelsNotice：展示当前会话正在监听的频道（channel）来源与状态。无频道时返回 null。'''),
+    (29, 'before', '''无频道则直接返回 null。'''),
+    (32, 'before', '''hasNonDev：是否存在非开发态频道；flag 文案根据是否有开发频道与命令行标志变化。'''),
+    (34, 'before', '''disabled 分支：频道功能被关闭时，提示 `flag ignored` 并说明不可用。'''),
+    (61, 'before', '''noAuth 分支：需要 claude.ai 鉴权但未登录时，提示运行 /login 并重启。'''),
+    (88, 'before', '''policyBlocked 分支：被组织策略禁用时，提示入站消息会被静默丢弃，并建议管理员在受管设置开启。'''),
+    (128, 'before', '''正常分支：列出正在监听的频道来源，并附实验性风险提示；提供重启时去掉 flag 即可关闭。'''),
+    (164, 'before', '''两个渲染未匹配项的助手：把未匹配的频道条目格式化为「条目 · 原因」的警告文本。'''),
+    (173, 'before', '''_temp：读取允许频道并汇总成展示状态——是否禁用、是否未鉴权、是否被策略拦截、列表字符串、未匹配项。'''),
+    (199, 'before', '''formatEntry：把频道条目格式化为 `plugin:名称@市场` 或 `server:名称`。'''),
+    (206, 'before', '''findUnmatched：找出未被满足的频道来源——server 类检查是否配置了同名 MCP server 且非开发态需危险标志；plugin 类检查是否安装且在白名单上。'''),
+]

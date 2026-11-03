@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组。'''),
+    (3, 'before', '''引入 DeepImmutable 类型、耗时 hook、键盘事件、主题与队友任务状态、工具与格式化相关组件。'''),
+    (18, 'before', '''Props：被查看的队友任务（只读）、完成时回调、可选的中止、返回、前台化回调。'''),
+    (25, 'before', '''InProcessTeammateDetailDialog：展示某个运行中队友任务的详情对话框——名称、状态、耗时、token、进度活动、提示词与错误。'''),
+    (34, 'before', '''读取主题；首次渲染取一次工具列表（用于渲染工具活动名）。'''),
+    (43, 'before', '''用 1 秒心跳计算耗时：传入开始时间、是否运行、心跳间隔与暂停总时长。'''),
+    (64, 'before', '''键盘处理：空格或 Esc 关闭；左键返回；运行态下 x 中止、f 前台化。'''),
+    (99, 'before', '''describeTeammateActivity：把队友当前活动描述成一句话（用于标题括号里的状态）。'''),
+    (106, 'before', '''token 与工具使用计数：优先取 result，否则取 progress 中的累计值。'''),
+    (116, 'before', '''把提示词截断到 300 列用于展示。'''),
+    (151, 'before', '''副标题：状态词（Completed/Failed/Stopped）+ 耗时 + token + 工具数，颜色随状态变化。'''),
+    (197, 'before', '''进度区块：运行状态且有近期活动时，渲染 Progress 标题与每条工具活动的精简行。'''),
+    (233, 'before', '''错误区块：失败态且有 error 时，渲染红色 Error 标题与错误正文。'''),
+    (242, 'before', '''组装 Dialog：把标题、副标题、输入引导与三个区块（进度、提示词、错误）包进 PermissionDialog 风格的 Dialog。'''),
+]

@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组。'''),
+    (5, 'before', '''引入字符串宽度、动画帧、队友任务状态、格式化与主题、设计系统组件。'''),
+    (17, 'before', '''常量：分隔符宽度、thinking 裸词宽度、超过 30 秒才显示 token 数。'''),
+    (21, 'before', '''思考闪烁常量的来源说明：原本独立的 ThinkingShimmerText 组件有自己 50ms 时钟，这里内联以复用既有时钟、去掉冗余订阅。'''),
+    (36, 'before', '''SpinnerAnimationRowProps：组件的完整入参——动画输入、消息与颜色、各类计时 ref、显示开关、队友派生数据、思考状态与 effort 后缀。'''),
+    (71, 'after', '''SpinnerAnimationRow：SpinnerWithVerb 中每 50ms 重绘的那一段。它独占 useAnimationFrame(50) 与所有由动画时钟派生的量（帧、闪烁、token 计数动画、耗时、停滞强度、思考闪烁），把外层父组件从热路径中解放出来。'''),
+    (103, 'before', '''用 50ms 时钟（reducedMotion 时为 null）驱动整段动画。'''),
+    (106, 'before', '''耗时（墙钟）：从各计时 ref 推导；暂停未结束时用暂停起点，否则用现在时刻减去开始与暂停总时长。'''),
+    (114, 'before', '''队友场景的转折起点：当 swarm 运行时 leader 的耗时会被 API 调用重置或冻结，所以用 turnStartRef 锚定迄今最早起点；无队友时每帧重置。'''),
+    (127, 'before', '''停滞检测：leader 空闲时（leaderIsIdle）当作「有活动工具」处理以重置停滞计时，避免误报。'''),
+    (142, 'before', '''token 计数器动画：每 50ms 平滑逼近真实长度，按差距分档递增，使数字滚动而非跳变。'''),
+    (165, 'before', '''token 总数：前台化且非空闲的队友取其进度；否则取 leader 与队友之和。'''),
+    (175, 'before', '''渐进式宽度门控：按可用列数依次决定是否显示 thinking、耗时、token；thinking 空间不足时退化为裸词 thinking。'''),
+    (195, 'before', '''思考闪烁颜色：复用共享 `time` 而非再开一个 50ms 订阅，按正弦波计算不透明度。'''),
+    (202, 'before', '''组装状态片段（后缀、耗时、token、thinking）并按前台化或是否空决定整体括号包裹。'''),
+    (232, 'before', '''SpinnerModeGlyph：按动画模式（工具输入、使用、响应、思考、请求）绘制一个小箭头图标。'''),
+]

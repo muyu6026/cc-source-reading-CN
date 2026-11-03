@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组。'''),
+    (3, 'before', '''引入 ink 组件、WebFetch 工具、权限加载器与 Select、权限相关组件。'''),
+    (12, 'before', '''inputToPermissionRuleContent：把工具输入转成权限规则内容——解析出 URL 的主机名，生成 `domain:主机名`；解析失败则用 `input:原始字符串`。'''),
+    (29, 'before', '''WebFetchPermissionRequest：WebFetch 工具的权限请求对话框。展示要抓取的 URL、是否提供「不再询问此域名」选项，并处理接受与拒绝。'''),
+    (45, 'before', '''从 url 解析出 hostname，复用缓存避免重复构造 URL 对象。'''),
+    (64, 'before', '''usePermissionRequestLogging：上报这次权限请求（tool_use_single、无语言）。'''),
+    (72, 'before', '''shouldShowAlwaysAllowOptions：是否展示「不再询问」选项（由全局权限设置决定）。'''),
+    (84, 'before', '''构造选项列表：基础 Yes；若允许常驻则追加「Yes, and do not ask again for 域名」；最后 No（esc 拒绝）。'''),
+    (120, 'before', '''onChange：根据选择分支——yes 直接允许；yes-dont-ask-again-domain 在 localSettings 写入一条 allow 规则后再允许；no 上报拒绝并回调。'''),
+    (164, 'before', '''渲染工具调用消息（URL + prompt），按主题与 verbose 控制详细度。'''),
+    (188, 'before', '''展示工具描述（dim 色）。'''),
+    (205, 'before', '''展示权限规则解释（为何允许或拒绝）。'''),
+    (219, 'before', '''Esc 取消映射为选 no。'''),
+    (237, 'before', '''组装 PermissionDialog：工具消息 + 规则解释 + 询问文案 + Select，标题为 Fetch。'''),
+]

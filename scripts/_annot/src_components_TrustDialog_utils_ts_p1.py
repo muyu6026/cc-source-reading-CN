@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''信任弹窗的「设置来源探测」工具集：判断各类权限或配置是否出现在 project/local 设置里，并把这些来源汇总成文件路径数组。'''),
+    (8, 'before', '''hasHooks：判断一份设置是否启用了 hooks——排除 null 与 disableAllHooks，再检查 statusLine、fileSuggestion 或任意非空 hook 配置。'''),
+    (29, 'before', '''getHooksSources：返回含 hooks 的设置来源路径（`.claude/settings.json` 与 `settings.local.json`）。'''),
+    (45, 'before', '''hasBashPermission：判断权限规则里是否有允许 Bash 工具的规则（精确名或以 `Bash(` 开头）。'''),
+    (54, 'after', '''getBashPermissionSources：返回含 bash 放行规则的设置来源路径。'''),
+    (74, 'after', '''formatListWithAnd：把数组格式化成带 and 的英文列举串；limit 为 0 时忽略上限，超出则显示「… and N more」。'''),
+    (106, 'after', '''hasOtelHeadersHelper：判断设置是否配置了 otelHeadersHelper。'''),
+    (113, 'after', '''getOtelHeadersHelperSources：返回含 otelHeadersHelper 的设置来源路径。'''),
+    (133, 'after', '''hasApiKeyHelper：判断设置是否配置了 apiKeyHelper。'''),
+    (140, 'after', '''getApiKeyHelperSources：返回含 apiKeyHelper 的设置来源路径。'''),
+    (160, 'after', '''hasAwsCommands：判断设置是否配置了 awsAuthRefresh 或 awsCredentialExport。'''),
+    (167, 'after', '''getAwsCommandsSources：返回含 aws 命令的设置来源路径。'''),
+    (187, 'after', '''hasGcpCommands：判断设置是否配置了 gcpAuthRefresh。'''),
+    (194, 'after', '''getGcpCommandsSources：返回含 gcp 命令的设置来源路径。'''),
+    (214, 'after', '''hasDangerousEnvVars：判断设置里是否存在不在 SAFE_ENV_VARS 中的环境变量（即危险变量）。'''),
+    (227, 'after', '''getDangerousEnvVarsSources：返回含危险环境变量的设置来源路径。'''),
+]

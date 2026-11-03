@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''ResumeTask：恢复会话的终端界面组件。从 Sessions API 拉取可恢复的 Claude Code 会话列表，按当前仓库过滤并排序，用户选中后回调 onSelect。'''),
+    (4, 'before', '''eslint 禁用注释：这里故意用原生 j/k/方向键做列表导航，绕开统一的 useKeybindings 规则。'''),
+    (17, 'before', '''Props：onSelect（选中会话回调）、onCancel（取消回调）、isEmbedded（是否内嵌而非全屏）。'''),
+    (22, 'before', '''错误类型与常量化字符串：网络、鉴权、API、其他四类错误；列间用两个空格分隔。'''),
+    (25, 'before', '''组件主体：声明大量状态——会话列表、当前仓库、加载中、错误类型、重试中、是否完成遥测错误流、聚焦索引。'''),
+    (43, 'before', '''loadSessions：拉取会话的核心异步函数。先探测当前仓库，再按仓库过滤、按更新时间倒序排列，异常时按信息归类错误类型。'''),
+    (49, 'before', '''若探测到当前仓库则只保留该仓库的会话，否则展示全部；过滤与排序都基于 updated_at。'''),
+    (81, 'before', '''handleRetry：进入重试态并重新拉取会话。'''),
+    (87, 'before', '''绑定 Esc 为取消（confirm:no），上下文为 Confirmation。'''),
+    (90, 'before', '''原生键盘处理：Ctrl+C 取消；错误态下 Ctrl+R 重试；错误态下回车则放弃回到常规 teleport 流程。'''),
+    (109, 'before', '''handleErrorComplete：完成遥测错误流后重新拉取会话。'''),
+    (115, 'before', '''渲染分支：未完成错误流时先弹 TeleportError；加载中显示 Spinner；有错误显示对应引导；无会话显示空态。'''),
+    (156, 'before', '''把会话映射成带相对时间的元数据，并计算时间列的最大宽度用于对齐。'''),
+    (161, 'before', '''构造 Select 选项：时间右补空格对齐，后接会话标题。'''),
+    (175, 'before', '''布局开销与可见数量：根据是否内嵌、终端行数、固定开销计算最多可见选项数与总高度。'''),
+    (200, 'before', '''渲染选择列表：表头 Updated / Session Title 加 Select，onChange 时按 id 找到会话并 onSelect。'''),
+]

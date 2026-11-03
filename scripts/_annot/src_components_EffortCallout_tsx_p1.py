@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时，提供 `$` 记忆化缓存数组。'''),
+    (3, 'before', '''引入 ink 组件、订阅类型、配置与 effort 相关工具、模型解析与 Select 组件。'''),
+    (14, 'before', '''EffortCalloutSelection：选择结果类型——effort 等级、undefined（用默认）或 dismiss（关闭）。'''),
+    (15, 'before', '''Props：当前模型与完成回调（携带选择结果）。'''),
+    (19, 'before', '''自动关闭时限：30 秒后若无操作自动 dismiss。'''),
+    (20, 'before', '''EffortCallout：首次为 Opus 4.6 用户弹出的 effort（推理强度）说明与选择对话框。'''),
+    (27, 'before', '''首次渲染取一次 Opus 默认 effort 配置（对话框标题与描述）。'''),
+    (45, 'before', '''用 onDoneRef 转发最新的 onDone，避免闭包过期。'''),
+    (55, 'before', '''handleCancel：自动关闭或 Esc 时回调 dismiss。'''),
+    (68, 'before', '''30 秒自动关闭：setTimeout 触发 handleCancel，卸载时清理。'''),
+    (80, 'before', '''根据模型推导默认 effort 等级；无默认值时回落到 high。'''),
+    (90, 'before', '''handleSelect：若选中的就是默认等级则记为 undefined（不写设置），否则写入对应等级并回调 onDone。'''),
+    (105, 'before', '''三个选项：medium（推荐）、high、low。'''),
+    (122, 'before', '''对话框描述与底部图例（low · medium · high 的符号对照）。'''),
+    (150, 'before', '''组装 PermissionDialog：描述 + 图例 + Select，按 handleSelect / handleCancel 提交或取消。'''),
+    (211, 'after', '''shouldShowEffortCallout：决定是否展示该对话框——仅 Opus 4.6、未 dismiss、非全新用户；Pro 用户展示新文案，Max/Team 由配置开关控制，其余人群直接标记为已 dismiss 不再展示。'''),
+]
