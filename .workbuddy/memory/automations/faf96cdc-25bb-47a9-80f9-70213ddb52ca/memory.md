@@ -1,5 +1,13 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 117 批（2026-11-03）：components 第十五批（15 文件 4,019 行，219 锚点）
+
+- 状态：完成并推送，commit `a08a01d`。
+- 本批 15 份（信任/权限/多智能体状态可视化主题）：`TrustDialog/TrustDialog.tsx` / `CustomSelect/use-select-input.ts` / `diff/DiffDetailView.tsx` / `CoordinatorAgentStatus.tsx` / `agents/agentFileUtils.ts` / `permissions/PermissionExplanation.tsx` / `Spinner/TeammateSpinnerTree.tsx` / `ResumeTask.tsx` / `LogoV2/ChannelsNotice.tsx` / `tasks/InProcessTeammateDetailDialog.tsx` / `WebFetchPermissionRequest.tsx` / `tasks/DreamDetailDialog.tsx` / `EffortCallout.tsx` / `Spinner/SpinnerAnimationRow.tsx` / `TrustDialog/utils.ts`。
+- 校验：check-fidelity 0 失败；check-links 0 失效；annotate 零 ⟳ 零 ⚠。
+- 进度：全仓 1235/1902；components 163/407（剩 244，总剩 667）。
+- 下批目标（components 降序 10 份约 2,399 行）：`Onboarding`(244) · `QuickOpenDialog`(244) · `design-system/ListItem`(244) · `tasks/RemoteSessionProgress`(243) · `Settings/Status`(241) · `LogoV2/Clawd`(240) · `skills/SkillsMenu`(237) · `Markdown`(236) · `NotebookEditToolDiff`(235) · `PowerShellPermissionRequest`(235)。
+
 ## 第 116 批（2026-11-03）：components 第十四批（10 文件 3,164 行，211 锚点）
 
 - 状态：完成并推送，commit `76986c9`（`63ac1e2..76986c9`）。
