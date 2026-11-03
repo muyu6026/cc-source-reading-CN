@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 102 批（2026-11-03）：utils 收尾清零（3 份 8 行小文件，6 锚点）· utils 子树 564/564 全清
+
+- 状态：完成并推送，commit `1f88d20`（`a07bf0a..1f88d20`）。
+- 本批 3 文件（utils 最后三片叶子，各 8 行）：lazySchema / memory/versions / messagePredicates。合计 3 文件 24 源行 / 6 锚点。
+- 里程碑：`src/utils/` 经数十批推进至此 **564/564 文件 = 100% 清零**（行覆盖 180,487/180,487）；hooks → utils 两条子树依次全清，流水线正式转入 `src/components/`。
+- 进度：全仓 1156/1902 文件 / 344,337 行 / 67%（实算；components 66/389，剩 323 份）。
+- 校验：check-fidelity 1156 份 0 失败；check-links 2279 源码链接 + 669 内链 0 失效；annotate.py 三次零 `⟳`、零 `⚠`。
+- 下一批目标（转 `src/components/`，按 check-coverage 实际 top）：Settings/Config.tsx(1822) · LogSelector.tsx(1575) · Stats.tsx(1228) · permissions/rules/PermissionRuleList.tsx(1179) · mcp/ElicitationDialog.tsx(1169) · VirtualMessageList.tsx(1082) · ScrollKeybindingHandler.tsx(1012) · tasks/RemoteSessionDetailDialog.tsx(904) · MessageSelector.tsx(831) · agents/AgentsMenu.tsx(800)。注意 components 多为 `.tsx` 巨文件，锚点只能落函数/类型收尾行与签名结束行、不可插在 JSX 内部；含 shell/bash 子串者仍需间接 runner。
+
+### 本批经验（下次先看）
+- **utils 收尾 3 份极小文件即清零，单批不必凑满 10**：当目标子树只剩 3 份 8 行叶子时，直接清空收尾即可（不强行混入下一子树）；清零后本批仍是非空提交，符合「不要空提交」规则。
+- **遗留未提交记忆要顺手补提交**：上轮（101）因速率限制中断，记忆文件改动遗留未提交；本批先单独补提交该记忆（`a07bf0a`），再写本批记忆，避免仓库长期挂未提交改动。
+- **文件级锚点继续统一 `(1,'before')`**：lazySchema 首行是 `/**` 文档块，`before` 插在块前；其余锚点落函数收尾 / `return` 判别式行，零块内中文、零 `⟳`。三个路径均无危险子串，直接命令行 `annotate.py`。
+
 ## 第 101 批（2026-11-03）：utils 剩余小文件十五件套（14→8 行档）
 
 - 状态：完成并推送，commit `9f1d305`（`5de50c1..9f1d305`）。
