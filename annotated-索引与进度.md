@@ -3046,6 +3046,30 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（components 降序）**：`MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) · `CustomSelect/select.tsx`(690) · `CustomSelect/use-select-navigation.ts`(653) · `tasks/BackgroundTasksDialog.tsx`(652) · `mcp/MCPRemoteServerMenu.tsx`(649) …（components 已做 74/389，剩 315 份；全仓还剩 738 份）。建议下批仍取 3 份约 2,800 行。
 
+### components 第 106 批：消息选择器、智能体菜单、退出计划权限、团队对话框（3,114 行，99 锚点）
+
+第四批 components，仍按源行量取件：4 份共 3,114 行（比上批多取 1 份——四份恰好卡在 830/800/768/715 的紧凑区间，凑成约 3,100 行维持稳定密度）。四份的共同点是**「对话 / 团队的人机协作面板」**：消息选择器在「恢复会话」时让用户挑要回滚到哪条消息并预览 diff；智能体菜单与团队对话框是 swarm 队友的增删查改与运行管控；退出计划权限把「批准退出计划模式」做成一次带上下文压制的权限请求。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/MessageSelector.tsx`](annotated/src/components/MessageSelector.tsx) | 831 | 859 | 27 | 恢复会话的消息选择器：isTextBlock 判定、RestoreOption 结构、Props、messageOptions 构造、双 useEffect 同步、getRestoreOptions/restoreConversationDirectly/handleSelect/onSelectRestoreOption/handleEscape/useKeybindings 链路，末尾 computeDiffStatsBetweenMessages/selectableUserMessagesFilter/messagesAfterAreOnlySynthetic 三个边界工具 |
+| [`components/agents/AgentsMenu.tsx`](annotated/src/components/agents/AgentsMenu.tsx) | 800 | 822 | 21 | swarm 智能体管理菜单：modeState 分派 list-agents/create-agent/agent-menu/view-agent/delete-confirm/edit-agent 六视图，末尾一排 `_temp0.._temp9` 同构谓词（外加一个通用 `_temp`）做行内可见性判定 |
+| [`components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`](annotated/src/components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx) | 768 | 793 | 24 | 退出计划模式权限请求：buildPermissionUpdates/buildPlanApprovalOptions/autoNameSessionFromPlan/getContextUsedPercent 四个顶层 helper + 主组件，把「批准 / 拒绝 / 改计划」做成带上下文占用百分比的模态 |
+| [`components/teams/TeamsDialog.tsx`](annotated/src/components/teams/TeamsDialog.tsx) | 715 | 743 | 27 | 团队协作对话框：主组件 + TeamDetailView/TeammateListItem/TeammateDetailView 三个编译子组件，killTeammate/viewTeammateOutput/toggleTeammateVisibility/hideTeammate/showTeammate/stub/sendModeChangeToTeammate/cycleTeammateMode/cycleAllTeammateModes 等队友运行管控 |
+
+横切观察：
+
+- **「恢复会话」是四份里信息密度最高的一块**：MessageSelector 不能只列消息，还要算「选中消息与当前消息之间的 diff 统计」（computeDiffStatsBetweenMessages）、还要过滤「可被选中的用户消息」（selectableUserMessagesFilter）与「其后是否只有合成消息」（messagesAfterAreOnlySynthetic）——后者决定回滚到那条会不会落到一个「全是系统消息、用户无可干预点」的死状态。三道过滤任一漏掉，恢复出来的会话就不可继续。
+- **「队友管控」靠一排同构谓词分派**：AgentsMenu 末尾的 `_temp0.._temp9`（加一个通用 `_temp`）都是「某按钮在当前行 / 当前 mode 下该不该显示」的纯谓词；TeamsDialog 则把 kill/show/hide/cycle 拆成独立函数再在渲染里按状态拼。两者都回避了「用一个巨型 switch 把 UI 与逻辑缠在一起」，把可见性判定收敛成纯函数。
+- **「批准即生效、确认即执行」的两段式反复出现**：AgentsMenu 的 delete-confirm 分支先弹确认再真正删；ExitPlanMode 的 buildPlanApprovalOptions 把「批准 / 拒绝 / 改计划」三种按钮集中生成，主组件只负责渲染与收集结果。删除与批准都是不可逆操作，必须多一次显式确认。
+- **上下文占用百分比是权限面板的隐形主角**：ExitPlanMode 的 getContextUsedPercent 把「计划要占用的上下文窗口比例」算出来展示给用户，批准前先让人知道「这一批准会吃掉多少上下文」——这是纯技术参数转成用户可读信号的典型手法。
+
+踩坑：四份均为 React Compiler 产物（`_c()` 记忆槽 + `$[n]` 依赖比较），JSX 内部零插入，`after` 只落语句收尾行与常量 / 函数签名行，`before` 用于 `function` / `type` / `/** */` 文档块开头。多份含 `/** */` 块（MessageSelector 719/794 行、ExitPlanMode 673 行、TeamsDialog 618/629/635/641/662/676 行）均用 `before` 落签名行规避块注释内部。AgentsMenu 初稿漏了 delete-confirm 分支（679 行），补锚后数据文件 21 锚点。预检 99 锚点一次全过（含块注释内部续行扫描与 `after` 落 `*/` 收尾行检测）；`annotate.py` 四次零 `⟳`、零 `⚠`，四份各有 1 处长批注被自动折行，故增量（103 行）比锚点数（99）多 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1168 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2290 条加内链 673 条，0 失效；全仓 1168/1902 文件、357,422/513,237 行、69%。
+
+**下一批候选（components 降序）**：`CustomSelect/select.tsx`(690) · `CustomSelect/use-select-navigation.ts`(653) · `tasks/BackgroundTasksDialog.tsx`(652) · `mcp/MCPRemoteServerMenu.tsx`(649) · `permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637) · `ConsoleOAuthFlow.tsx`(631) · `Feedback.tsx`(592) …（components 已做 78/389，剩 311 份；全仓还剩 734 份）。建议下批取 4 份约 2,600 行，或 3 份约 2,000 行保持密度。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。

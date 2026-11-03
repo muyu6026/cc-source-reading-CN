@@ -1,0 +1,32 @@
+# 数据文件：src/components/teams/TeamsDialog.tsx
+# slug = src_components_teams_TeamsDialog_tsx
+# 规则：一个源文件 = 一个数据文件；中文用三引号；禁止英文双引号 " 与反斜杠 \（用「」/『』代替）。
+ANNOTATIONS = [
+    (1, 'before', '''本文件是团队（teams）对话框组件，用于查看当前团队里的各个队友（teammate）：列出成员、进入详情、切换权限模式、杀掉 / 关掉 / 修剪空闲队友、隐藏或显示 pane。文件由 React Compiler 编译，TeamDetailView 等子组件内满是 $[k] 记忆槽，等价 useMemo，看逻辑即可。'''),
+    (32, 'before', '''Props 只接收可选初始团队列表与 onDone（关闭回调）；DialogLevel 描述对话框所处的层级——要么是队友列表，要么是某个队友的详情。'''),
+    (48, 'before', '''TeamsDialog 主组件入口。先把自己注册为 overlay 以免被全局 Esc 处理拦截，再初始化对话框层级、选中下标与刷新键，并定时（每秒）刷新以拾取队友的模式变化。'''),
+    (65, 'after', '''dialogLevel 记录当前层级，selectedIndex 记录列表里选中的下标，refreshKey 每次自增都强制重算队友状态。'''),
+    (79, 'after', '''useInterval 每秒把 refreshKey 加一，使队友状态按 dialogLevel.teamName 与 refreshKey 重新拉取，从而实时反映队友模式变动。'''),
+    (106, 'after', '''handleCycleMode 响应 confirm:cycleMode 动作：详情视图只轮转当前这一个队友的模式，列表视图则把全部队友的模式一并轮转。'''),
+    (113, 'after', '''useKeybindings 在 Confirmation 上下文注册 cycleMode 按键，触发上面的 handleCycleMode。'''),
+    (220, 'after', '''这段 useInput 回调集中处理键盘：左键返回列表、上下键移动选中、Enter 进入详情或切到队友的 tmux pane、k 杀队友、s 优雅关、h 切换单个显隐、H 切换全部显隐、p 修剪所有空闲队友。'''),
+    (236, 'after', '''TeamsDialog 收尾：按 dialogLevel 渲染队友列表视图或详情视图（JSX 在 229 行至 235 行），都不匹配则返回 null。'''),
+    (243, 'before', '''TeamDetailView 是列表视图子组件，展示某个团队的全部队友并渲染导航提示（上 / 下选择、Enter 查看、k 杀、s 关、p 修剪、shift+tab 同步轮模式、Esc 关闭）。'''),
+    (293, 'after', '''TeamDetailView 收尾：把列表与导航提示包进 Dialog 返回。'''),
+    (298, 'before', '''TeammateListItem 渲染单条队友：按模式符号与颜色、选中指针、[hidden] / [idle] 标记与模型名拼出一行文本。'''),
+    (371, 'after', '''TeammateListItem 收尾：返回组装好的单行文本。'''),
+    (377, 'before', '''TeammateDetailView 是详情视图子组件，展示选中队友的任务、提示（p 展开）、模式符号、工作路径与颜色，并注册 p 键展开提示。'''),
+    (540, 'after', '''TeammateDetailView 收尾：把任务区、提示区与标题包进 Dialog 返回，附导航提示。'''),
+    (547, 'before', '''killTeammate 杀掉指定队友的 pane：先按创建它的后端正确调用 killPane（处理 -s 与 -L 旗标），再从团队配置与任务里移除该成员，并写一条 teammate_terminated 通知进 AppState 收件箱。'''),
+    (604, 'after', '''killTeammate 收尾：无论杀 pane 是否成功，移除成员与任务、通知队长的清理都照常执行。'''),
+    (605, 'before', '''viewTeammateOutput 把终端焦点切到该队友的 pane：iTerm 走 session focus -s，其余走 tmux select-pane（在 swarm 里要带 -L 指定 swarm socket）。'''),
+    (616, 'after', '''viewTeammateOutput 收尾：返回 Promise。'''),
+    (621, 'before', '''toggleTeammateVisibility 切换单个队友 pane 的显隐：当前隐藏则显示、当前显示则隐藏（上方文档块在 618 行，锚签名行以免插入块内）。'''),
+    (627, 'after', '''toggleTeammateVisibility 收尾。'''),
+    (645, 'before', '''sendModeChangeToTeammate 把模式变更同时写进 config.json（UI 立即反映）与队友邮箱（让队友更新本地权限上下文）（上方文档块在 641 行，锚签名行）。'''),
+    (660, 'after', '''sendModeChangeToTeammate 收尾。'''),
+    (665, 'before', '''cycleTeammateMode 轮转单个队友权限模式：取当前模式算下一个，再下发变更（上方文档块在 662 行，锚签名行）。'''),
+    (674, 'after', '''cycleTeammateMode 收尾。'''),
+    (682, 'before', '''cycleAllTeammateModes 批量轮转所有队友模式：若各模式不一致先统一重置为默认，若一致则全体进下一个模式，用一次批量写避免竞态，再逐个发邮箱消息（上方文档块在 676 行，锚签名行）。'''),
+    (714, 'after', '''cycleAllTeammateModes 收尾：记录已下发模式变更日志。'''),
+]

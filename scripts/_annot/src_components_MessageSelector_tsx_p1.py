@@ -1,0 +1,32 @@
+# 数据文件：src/components/MessageSelector.tsx
+# slug = src_components_MessageSelector_tsx
+# 规则：一个源文件 = 一个数据文件；中文用三引号；禁止英文双引号 " 与反斜杠 \（用「」/『』代替）。
+ANNOTATIONS = [
+    (1, 'before', '''本文件实现 Rewind（回退）功能的消息选择器界面。它让用户从历史对话里挑一条消息，把对话和（或）代码回退到那条消息之前。文件由 React Compiler 编译，所有组件都用记忆槽（_c(n)）与 $[n] 缓存来等价 useMemo/useCallback，故函数体里满是 t1..tN 临时变量与 $[k] 比较，无需在意这些生成物，只关注逻辑即可。'''),
+    (19, 'before', '''isTextBlock 是一个 TypeScript 类型守卫：入参是 ContentBlockParam，返回时把类型收窄成 TextBlockParam，便于后续只处理纯文本块。'''),
+    (31, 'after', '''RestoreOption 是回退时可选项的集合：both（对话加代码）、conversation、code、summarize（从此处摘要）、summarize_up_to（摘要到此处）、nevermind（取消）。'''),
+    (44, 'after', '''Props 描述选择器接收的数据：messages 候选消息列表，三类回退回调 onRestoreMessage / onRestoreCode / onSummarize，关闭回调 onClose，以及可选 preselectedMessage——传入时跳过列表直达确认态（调用方已做过跳过检查，此时 Esc 直接全关）。'''),
+    (46, 'before', '''MessageSelector 主组件入口。它组装选择器的全部状态（已选索引、回退目标、diff 统计、反馈输入）与按键绑定，并在 return 里渲染列表或确认区（JSX 主体在 315 行至 400 行）。'''),
+    (66, 'after', '''messageOptions 用 useMemo 记忆化：先过滤出用户可回退消息，再追加一条由当前空提示构成的虚拟消息（代表最新），作为列表里的「当前」项。'''),
+    (83, 'after', '''首个 useEffect：当预选消息存在且文件历史开启时异步拉取该消息的文件历史 diff 统计；用 cancelled 局部标志在卸载或依赖变化时取消回写，避免竞态污染状态。'''),
+    (90, 'after', '''两个 summarize 反馈状态（from / up_to）各自独立保存。Select 组件内部已按选项分别缓存输入文本，这里再独立持有，避免共享同一个变量导致不同选项的输入互相错位。'''),
+    (134, 'after', '''getRestoreOptions 按能否回退代码（canRestoreCode）组装选项列表：能回退时给出 both / conversation / code，否则只给 conversation；再把 summarize 选项挂上内联输入框与对应反馈回调。'''),
+    (154, 'after', '''restoreConversationDirectly 在文件历史未开启时调用：直接执行 onPreRestore 并回退对话，跳过二次确认；失败则记日志并写入 error 状态。'''),
+    (176, 'after', '''handleSelect 处理「选中某条消息」：先校验消息仍在列表（否则关闭选择器），再拉取 diff 统计并切到确认态（设置 messageToRestore 与 diffStatsForRestore）。'''),
+    (246, 'after', '''onSelectRestoreOption 是确认区的总分派：按所选操作分别回退对话 / 代码 / 做摘要，两段回退各自 try-catch，最后汇总成单一错误信息（两者都失败、仅对话失败、仅代码失败、成功关闭）。'''),
+    (256, 'after', '''handleEscape 绑定 Esc：处于确认态且非预选时退回消息列表（清空 messageToRestore）；否则记取消事件并关闭整个选择器。'''),
+    (284, 'after', '''通过 useKeybindings 在 MessageSelector 上下文注册导航按键（上 / 下 / 首页 / 末页 / 选择），且只在非回退中、非错误、非确认态、确有可选项时才激活。'''),
+    (312, 'after', '''该 useEffect 为每条候选项异步加载文件历史元数据：对每条非当前消息计算其与下一条之间的 diff 统计，结果写入 fileHistoryMetadata（按选项下标索引）。'''),
+    (401, 'after', '''MessageSelector 主组件收尾：return 出的内容覆盖三类分支——错误提示、确认区（含 RestoreOptionDescription 与 Select）、以及可选项为空的提示；JSX 主体在 315 行至 400 行。'''),
+    (415, 'after', '''getRestoreOptionConversationText 把每个 RestoreOption 映射成一句动作说明（如 both / conversation 表示『对话将被分叉』、code / nevermind 表示『对话不变』），供确认区展示。'''),
+    (460, 'after', '''RestoreOptionDescription 渲染确认区的选项说明文本。所有 t1..t4 与 $[0..10] 都是 React Compiler 生成的记忆槽：_c(11) 声明十一个槽位，$[k] 等价于带依赖比较的 useMemo，命中缓存就直接复用上次结果。'''),
+    (543, 'after', '''RestoreCodeConfirmation 在确认区展示即将回退的代码概况：单文件显示文件名，多文件显示『A 与 B』或『A 与其他 N 个文件』，并附增删行数；若无文件改动则提示无需回退。'''),
+    (578, 'after', '''DiffStatsText 渲染一行加插入行数减删除行数，分别用 diffAddedWord 与 diffRemovedWord 配色，供文件历史元数据显示。'''),
+    (717, 'after', '''UserMessageOption 把单条消息渲染成列表项：识别 content 末尾块并截断显示；对含 bash-input、skill、command 等格式的消息给出专用前缀，当前消息标（current）。'''),
+    (722, 'before', '''computeDiffStatsBetweenMessages 计算两消息之间所有文件编辑（FileEdit / FileWrite）的 diff 统计。其上方文档块（719 行起）说明用途，这里锚签名行以避免插入文档块内部。'''),
+    (766, 'after', '''computeDiffStatsBetweenMessages 收尾：返回 filesChanged（去重文件路径）、insertions、deletions；新建文件按内容行数计插入，其余按结构化补丁逐 hunk 累加。'''),
+    (767, 'before', '''selectableUserMessagesFilter 过滤出可回退的用户消息：排除工具结果、合成消息、元消息、紧凑摘要、仅展示在转录里的消息，以及命令输出 / 队友消息等带特定标签的文本。'''),
+    (792, 'after', '''selectableUserMessagesFilter 收尾：返回布尔，决定某条用户消息是否出现在回退列表里。'''),
+    (799, 'before', '''messagesAfterAreOnlySynthetic 判断给定索引之后是否只剩合成 / 取消 / 进度 / 系统等无意义消息。其上方文档块（794 行起）说明用途，这里锚签名行以避免插入文档块内部。'''),
+    (830, 'after', '''messagesAfterAreOnlySynthetic 收尾：返回 true 表示后续无有意义内容，调用方可据此省去二次确认。'''),
+]
