@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 113 批（2026-11-03）：components 第十一批（4 文件 1,680 行，121 锚点）
+
+- 状态：完成并推送，commit `74aedb1`（`070af39..74aedb1`）。
+- 本批 4 文件：`LogoV2/WelcomeV2.tsx`(433→466，32 锚点) / `tasks/BackgroundTaskStatus.tsx`(429→460，30) / `CustomSelect/use-multi-select-state.ts`(414→443，29) / `tasks/ShellDetailDialog.tsx`(404→435，30)。
+- 进度：全仓 1196/1902（372,101/513,237 行，72.5%，README 记 72%）· components 124/407（剩 283，总剩 706）。
+- 校验：check-fidelity 1196 份 0 失败；check-links 2322 源码链接 + 681 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；**增量 124 = 121 + 3**——本轮第一次不等于「锚点数 + 4」（第四份 29 锚点未触发折行）。
+- 亮点：①`submitButtonText` 是多选状态机的总开关——给了它回车只移焦点、空格才切换，不给则回车直接提交，按键语义由**界面形态**而非键位决定；②任务条里队友下标整体 `+1`（0 号位归 mainPill 伪条目，无 taskId，点击即 exitTeammateView），这一行是最易错的偏移；③Shell 详情把 Suspense 边界下沉到输出子组件，Promise 未解时只挂起输出区、标题仍在；④末尾 10 行用反向找换行符而非 split，避免大字符串整份复制。
+- 踩坑：`WelcomeV2.tsx` 第 433 行是内联 base64 sourcemap（单行几万字符，行数虚高），锚点落其 `before`；`use-multi-select-state.ts` 的 59 / 88 原本落在 JSDoc 块内，改锚到块外成员行 64 / 93；`ShellDetailDialog.tsx` 310–313 跨行解构，锚点从 313 挪到 314。**规律：锚点排布时先确认目标行不在 `/** ... */` 内，类型定义里的注释行尤其容易命中。**
+- 下批目标（components 降序，建议 4 份约 1,580 行）：`BridgeDialog.tsx`(401) · `mcp/MCPSettings.tsx`(398) · `ui/TreeSelect.tsx`(397) · `diff/DiffDialog.tsx`(383)。
+
+
 ## 第 112 批（2026-11-03）：components 第十批（4 文件 1,767 行，118 锚点）
 
 - 状态：完成并推送，commit `070af39`（`1ee153c..070af39`）。
