@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'after', '''ShowInIDEPrompt 是编辑文件前的权限确认弹窗：显示文件名、符号链接警告，并给出接受/拒绝以及补充反馈的选项。'''),
+    (24, 'after', '''Props 是泛型 A：onChange 把选中的权限选项和原始输入、可选反馈一起回传；ideName、symlinkTarget 等用于展示。'''),
+    (41, 'after', '''组件先用编译器缓存 $ 解构出全部 props，随后每个派生 UI 片段都按依赖做记忆化重建。'''),
+    (49, 'after', '''t1 是已在 ideName 中打开改动的提示文本，仅在 ideName 变化时重建。'''),
+    (57, 'after', '''如果文件是符号链接且目标在 cwd 之外，会额外提示将通过符号链接修改目录外的文件，提醒用户注意越界写入。'''),
+    (64, 'after', '''当检测到是受支持的 VSCode 终端时，提示保存文件以继续，引导用户先落地改动。'''),
+    (72, 'after', '''用 basename 取出文件名用于提问，避免把完整路径直接塞进一句问话里。'''),
+    (80, 'after', '''t5 是核心问句：Do you want to make this edit to <文件名>?，文件名加粗强调。'''),
+    (107, 'after', '''onChange 回调里按选项类型分发：reject / accept-once 会带上用户填写的反馈文本（trim 后为空则传 undefined），其余情况只回传选项本身。'''),
+    (118, 'after', '''没选任何选项时（Esc 取消）统一回传一个 type: reject 的空反馈，等价于拒绝。'''),
+    (126, 'after', '''setFocusedOption 透传给 Select，用于记录当前高亮项。'''),
+    (138, 'after', '''Select 是内联选择组件：inlineDescriptions 让每个选项描述直接显示，onChange / onCancel / onFocus / onInputModeToggle 分别接上对应回调。'''),
+    (147, 'after', '''t10 把问句和选择器竖排组合进一个 Box。'''),
+    (156, 'after', '''t12 是底部提示条：Esc 取消；当焦点在 yes/no 且未进入输入模式时，追加 Tab to amend 提示。'''),
+    (167, 'after', '''最外层用 Pane 把图标、符号链接警告、保存提示、问句、选择器、底部条整体包成一个权限色块的对话框。'''),
+    (168, 'after', '''组件最终返回拼装好的 Pane。'''),
+]

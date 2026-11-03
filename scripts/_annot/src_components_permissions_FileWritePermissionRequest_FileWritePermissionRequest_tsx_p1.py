@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (1, 'after', '''FileWritePermissionRequest 是文件写入前的权限确认弹窗：判断是新建还是覆盖，展示差异预览，并把选择交给通用 FilePermissionDialog。'''),
+    (14, 'after', '''FileWriteToolInput 是从 FileWriteTool.inputSchema 推断出的输入类型。'''),
+    (37, 'after', '''ideDiffSupport 描述如何生成和应用 IDE 差异：getConfig 读取旧内容（文件不存在就当空串），生成单文件整文替换的差异配置；applyChanges 取第一条编辑的新内容作为最终写入内容。'''),
+    (49, 'after', '''组件先解析工具输入得到 parsed，再解构出 file_path 和 content。'''),
+    (83, 'after', '''通过尝试 readFileSync 判断文件是否存在：ENOENT 异常被吞掉当成不存在（旧内容空串），其他异常照常抛出。'''),
+    (88, 'after', '''actionText 按文件是否存在取 overwrite 或 create，标题随之取 Overwrite file / Create file。'''),
+    (102, 'after', '''用 relative 算相对 cwd 的路径作为副标题，basename 取文件名用于问句加粗。'''),
+    (110, 'after', '''把文件名用 basename 取出并加粗，作为问句里的主角。'''),
+    (127, 'after', '''问句 Do you want to <动作> <文件名>? 拼好。'''),
+    (138, 'after', '''content 差异预览交给 FileWriteToolDiff，按是否覆盖传入旧内容。'''),
+    (155, 'after', '''把所有字段（标题、问句、差异、路径、完成类型 write_file_single、解析函数、IDE 差异支持）交给通用 FilePermissionDialog 渲染。'''),
+    (156, 'after', '''组件返回拼装好的权限对话框。'''),
+    (160, 'after', '''_temp 直接调用 FileWriteTool.inputSchema.parse 解析输入（严格模式，失败会抛错）。'''),
+]

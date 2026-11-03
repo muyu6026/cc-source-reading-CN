@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'after', '''CondensedLogo 是会话顶部的精简 Logo 条：在有限宽度里展示爪形图标、Claude Code 版本、模型与计费、当前 agent 与 cwd，并视情况插入访客通行证/超额额度广告。'''),
+    (34, 'after', '''组件取出终端宽度、agent、effort 值、当前模型，以及 Logo 显示数据（版本/cwd/计费类型/agent 名）和两路 upsell 开关。'''),
+    (53, 'after', '''第一个 useEffect：当访客通行证 upsell 展示后，离开时累加已见次数埋点。'''),
+    (71, 'after', '''第二个 useEffect：当超额额度 upsell 展示且访客通行证没展示时，累加超额额度的已见次数。'''),
+    (81, 'after', '''textWidth 按终端列数预留边距算出可用宽度，再据此截断版本号、模型计费、cwd 等字段，窄屏也不溢出。'''),
+    (88, 'after', '''t4 按是否开启全屏环境选择动画爪（AnimatedClawd）还是静态爪（Clawd）。'''),
+    (95, 'after', '''t5 是加粗的 Claude Code 字样，t6 拼上暗色版本号 vX。'''),
+    (103, 'after', '''t7 用 formatModelAndBilling 把模型显示名加 effort 后缀与计费类型格式化，窄屏时拆成两行。'''),
+    (122, 'after', '''t8/t9 拼出「@agent · cwd」或单纯 cwd 的暗色行。'''),
+    (130, 'after', '''t10 在开启访客通行证 upsell 时渲染对应组件。'''),
+    (140, 'after', '''t11 在没开访客通行证但开了超额额度 upsell 时，渲染两行版的 OverageCreditUpsell。'''),
+    (153, 'after', '''t12 用 OffscreenFreeze 包一层，把图标与版本/模型计费/cwd/两路 upsell 竖向拼进一个横向 Box。'''),
+    (154, 'after', '''组件返回拼装好的 Logo 条。'''),
+    (157, 'after', '''_temp2 从状态里取 effortValue；_temp 取 agent，供 useAppState 选择器使用。'''),
+    (160, 'after', '''_temp 返回状态里的 agent 字段。'''),
+]

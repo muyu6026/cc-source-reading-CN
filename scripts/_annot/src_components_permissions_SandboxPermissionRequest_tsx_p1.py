@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'after', '''SandboxPermissionRequest 是沙箱外的网络连接请求确认弹窗：询问用户是否放行某个 host，以及是否记住这次选择。'''),
+    (14, 'after', '''Props 只要 hostPattern（网络主机模式）和 onUserResponse（用户回传 allow / persistToSettings）。'''),
+    (23, 'after', '''组件解构出 hostPattern 里的 host，并准备 onSelect 回调。'''),
+    (57, 'after', '''onSelect 按用户选择分发：yes 放行不持久化、yes-dont-ask-again 放行且写入设置、no 直接拒绝。'''),
+    (66, 'after', '''managedDomainsOnly 表示是否处于只允许托管域名的管控模式，决定要不要给不再询问选项。'''),
+    (76, 'after', '''默认 yes 标签就是 Yes。'''),
+    (87, 'after', '''如果不在托管域名模式，额外提供一个「Yes, and don't ask again for <host>」选项，让用户把该 host 加入白名单。'''),
+    (97, 'after', '''no 标签提示告诉 Claude 换种做法（Esc），强调可改指令。'''),
+    (106, 'after', '''把 yes / 可选的白名单项 / no 拼成一个 options 数组。'''),
+    (121, 'after', '''展示区先打印 Host: 和具体 host 名。'''),
+    (128, 'after', '''再问一句 Do you want to allow this connection?。'''),
+    (141, 'after', '''onCancel 透传一个拒绝且不持久化的回调给 Select。'''),
+    (152, 'after', '''Select 组件承载选项、选中与取消回调。'''),
+    (161, 'after', '''最外层用 PermissionDialog 包成 Network request outside of sandbox 标题的对话框。'''),
+    (162, 'after', '''组件返回拼装好的对话框。'''),
+]

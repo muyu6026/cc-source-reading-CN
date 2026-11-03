@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'after', '''ThemedBox 是主题感知的 Box 包装组件：把 borderColor / backgroundColor 等可以传主题键（如 claude / permission）的属性，解析成真正的颜色值再交给底层 Box。'''),
+    (20, 'after', '''ThemedColorProps 列出哪些颜色属性接受主题键或原始 Color 两种写法。'''),
+    (23, 'after', '''BaseStylesWithoutColors 从底层 Styles 里剔除颜色相关属性，避免和主题解析后的颜色冲突。'''),
+    (37, 'after', '''Props 在基础样式之上叠加主题色属性，并补充 ref / tabIndex / 各种事件回调。'''),
+    (39, 'after', '''resolveColor 的注释说明：它把可能是主题键的颜色值解析成原始 Color。'''),
+    (50, 'after', '''resolveColor 先判断空值；若以 rgb( / # / ansi256( / ansi: 开头就当作原始颜色直接返回，否则当作主题键去 theme 里查表。'''),
+    (52, 'after', '''ThemedBox 的注释说明：这是一个把主题色键解析成原始颜色、再包一层基础 Box 的主题感知组件。'''),
+    (99, 'after', '''组件把 props 解构出各颜色字段与 children / ref / 其余属性 rest，并做依赖记忆化。'''),
+    (100, 'after', '''useTheme 取当前主题名，用于后续查表。'''),
+    (135, 'after', '''用 getTheme 拿到主题对象，把六个颜色字段（含背景）逐一经 resolveColor 解析；背景色单独存为 resolvedBackgroundColor。'''),
+    (136, 'after', '''resolvedBackgroundColor 保存解析后的背景色。'''),
+    (152, 'after', '''t2 把解析后的颜色全部交给底层 Box，并透传 ref / rest / children。'''),
+    (153, 'after', '''组件返回渲染好的主题感知 Box。'''),
+    (155, 'after', '''ThemedBox 作为默认导出供其他组件引用。'''),
+]

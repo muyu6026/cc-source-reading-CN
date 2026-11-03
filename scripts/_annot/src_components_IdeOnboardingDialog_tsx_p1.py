@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'after', '''IdeOnboardingDialog 是首次在某 IDE 里启动 Claude Code 时弹出的欢迎框，介绍它能做什么并标记已展示过。'''),
+    (13, 'after', '''Props 只关心两件事：onDone 关闭弹窗，以及可选的安装状态（用于显示已装插件版本）。'''),
+    (19, 'after', '''组件解构 props 后第一件事就是调用 markDialogAsShown，确保这次展示被记下来。'''),
+    (41, 'after', '''用 useKeybindings 把 Enter / confirm 的 yes 和 no 都绑到 onDone，等于按回车即关闭。'''),
+    (50, 'after', '''优先用安装状态里的 ideType，否则回退到终端探测到的类型，决定后续显示哪类 IDE 的名称。'''),
+    (51, 'after', '''isJetBrains 区分 JetBrains 系（叫 plugin）和其他（叫 extension），文案据此切换。'''),
+    (60, 'after', '''toIDEDisplayName 把内部类型翻译成给用户看的名字，如 VS Code / IntelliJ。'''),
+    (63, 'after', '''快捷键提示按平台不同：macOS 是 Cmd+Option+K，其他是 Ctrl+Alt+K。'''),
+    (79, 'after', '''如果带安装版本，副标题会写已安装 plugin/extension 加版本号，否则留空。'''),
+    (121, 'after', '''t13 把三条卖点（开文件、看改动、快捷启动）竖向拼好，并显示快捷键提示。'''),
+    (131, 'after', '''Dialog 组件承载标题（欢迎语）、副标题（版本）、主题色 ide 和关闭回调，内部塞进上面的卖点列表。'''),
+    (137, 'after', '''底部那行 Press Enter to continue 用斜体暗色弱提示。'''),
+    (147, 'after', '''最终把 Dialog 和底部提示并排拼成返回的内容。'''),
+    (153, 'after', '''hasIdeOnboardingDialogBeenShown 按当前终端类型查配置，判断欢迎框是否已展示过，防止每次都弹。'''),
+    (166, 'after', '''markDialogAsShown 在首次展示后把当前终端标记为已展示，下次不再弹；已展示则直接返回。'''),
+]

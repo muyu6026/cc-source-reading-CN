@@ -3502,6 +3502,46 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（components 降序，建议取 15 份约 2,454 行）**：`design-system/ThemeProvider.tsx`(170) · `ShowInIDEPrompt.tsx`(170) · `mcp/MCPReconnect.tsx`(167) · `IdeOnboardingDialog.tsx`(167) · `TeleportResumeWrapper.tsx`(167) · `LogoV2/OverageCreditUpsell.tsx`(166) · `permissions/NotebookEditPermissionRequest/NotebookEditPermissionRequest.tsx`(166) · `permissions/shellPermissionHelpers.tsx`(164) · `permissions/SandboxPermissionRequest.tsx`(163) · `LogoV2/CondensedLogo.tsx`(161) · `permissions/FileWritePermissionRequest/FileWritePermissionRequest.tsx`(161) · `CustomSelect/use-select-state.ts`(157) · `InvalidConfigDialog.tsx`(156) · `design-system/ThemedBox.tsx`(156) · `IdeAutoConnectDialog.tsx`(154)（components 已做 200/389，剩 189 份；全仓还剩 612 份）。
 
+### components 第 122 批：设计系统、IDE 登入与连接对话框、MCP 重连、权限请求家族、LogoV2 与 CustomSelect 选择器（15 文件 2,446 行，201 锚点）
+
+本批十五份横跨六类主题：**设计系统主题层**（`ThemeProvider` 用 Context 下发主题与三档 API——`useTheme` / `useThemeSetting` / `usePreviewTheme`，auto 偏好经 OSC 11 系统主题探测；`ThemedBox` 把主题色键经 `resolveColor` 查表成原始 Color 再包底层 Box）、**IDE 登入与连接对话框族**（`IdeOnboardingDialog` 首次启动欢迎框 + 已展示去重、`IdeAutoConnectDialog` 自动连接 IDE 开关与其反向禁用版、`ShowInIDEPrompt` 编辑文件前权限确认含符号链接越界警告）、**MCP 自愈**（`MCPReconnect` 断线自动重连弹窗，重连中 / 失败 / 成功三态）、**跨端会话恢复**（`TeleportResumeWrapper` 把会话选择 / 加载 / 错误与埋点总装进 resume 流程）、**权限请求特化族**（`NotebookEditPermissionRequest` 的 Jupyter 单元格增删改 diff、`SandboxPermissionRequest` 沙箱外 host 放行 + 持久化、`FileWritePermissionRequest` 新建 / 覆盖差异预览、`shellPermissionHelpers` 给 Bash/PowerShell 对话框生成建议标签）、**LogoV2 品牌条**（`OverageCreditUpsell` 超额额度赠金促销 + 首页 feed、`CondensedLogo` 会话顶部精简 Logo 含两路 upsell 埋点）以及**选择器状态机**（`CustomSelect/use-select-state` 把焦点 / 选中 / 可见窗口 / 翻页动作打包成 `SelectState`）与**错误兜底**（`InvalidConfigDialog` 配置 JSON 非法时的可操作对话框，用硬编码 `SAFE_ERROR_THEME_NAME` 防循环依赖）。
+
+| 文件 | 原文→批注版 | 锚点 |
+| --- | --- | --- |
+| `design-system/ThemeProvider.tsx` | 170→188 | 17 |
+| `ShowInIDEPrompt.tsx` | 170→187 | 16 |
+| `mcp/MCPReconnect.tsx` | 167→177 | 9 |
+| `IdeOnboardingDialog.tsx` | 167→183 | 15 |
+| `TeleportResumeWrapper.tsx` | 167→180 | 12 |
+| `permissions/NotebookEditPermissionRequest/NotebookEditPermissionRequest.tsx` | 166→176 | 9 |
+| `LogoV2/OverageCreditUpsell.tsx` | 166→187 | 20 |
+| `permissions/shellPermissionHelpers.tsx` | 164→175 | 10 |
+| `permissions/SandboxPermissionRequest.tsx` | 163→179 | 15 |
+| `permissions/FileWritePermissionRequest/FileWritePermissionRequest.tsx` | 161→175 | 13 |
+| `LogoV2/CondensedLogo.tsx` | 161→177 | 15 |
+| `CustomSelect/use-select-state.ts` | 157→177 | 20 |
+| `design-system/ThemedBox.tsx` | 156→171 | 14 |
+| `InvalidConfigDialog.tsx` | 156→165 | 8 |
+| `IdeAutoConnectDialog.tsx` | 154→163 | 8 |
+
+横切观察：
+
+- **设计系统的「键 → 色」解析两件套**：`ThemeProvider` 把 `auto` 偏好解析成最终 `currentTheme`（auto 时经 OSC 11 系统主题探测 + `$COLORFGBG` 种子，非 auto 直接用用户偏好），`ThemedBox` 把 `borderColor` / `backgroundColor` 等主题键经 `resolveColor` 查表成原始 `Color`；两者都刻意用硬编码 `dark` 兜底（`DEFAULT_THEME` / `SAFE_ERROR_THEME_NAME`），确保配置读不出时也不崩。区别在层次：`ThemeProvider` 管全局主题分发，`ThemedBox` 管单个颜色属性的解析，合起来才是「一份偏好怎么落到每个像素」。
+- **权限请求「特化 UI + 通用对话框」是 components 层的稳定骨架（本批第三次确认）**：`NotebookEditPermissionRequest` / `FileWritePermissionRequest` 都把自己拼好的字段（标题、问句、差异、路径、完成类型、解析函数、IDE diff 支持）交给通用 `FilePermissionDialog`，`SandboxPermissionRequest` 交给更轻的 `PermissionDialog`（网络场景），`ShowInIDEPrompt` 同模式——批次 119/121 已见过，本批再印证「请求 → 组装 → 通用对话框」是统一套路。
+- **状态都收敛成显式状态机**：`use-select-state` 把焦点（index）/ 选中（value）/ 可见窗口（from..to）/ 翻页动作打包成 `SelectState`；`IdeAutoConnectDialog` / `IdeOnboardingDialog` 用 `shouldShow*` 布尔 + `markDialogAsShown` 去重防重复弹窗。前者管「选什么」，后者管「什么时候该弹」，但都把交互收敛成可测试的状态。
+- **弹窗 = 副作用 + 三态渲染**：`MCPReconnect` 内部 `useEffect` 跑 `attemptReconnect`（找 server → 调重连 → 按返回分发），渲染重连中 / 失败 / 成功；`TeleportResumeWrapper` 用 `useTeleportResume` 拿 `resumeSession` / `isResuming` / `error`，渲染加载 / 错误 / 正常。两者都把「副作用结果」映射成「UI 三态」，且都在成功 / 失败时通过 `onComplete` / `onError` 把控制权交回上层。
+- **埋点与「展示去重」成对出现**：`IdeOnboardingDialog` / `IdeAutoConnectDialog` / `CondensedLogo` 都用「已展示标记 + 布尔判定」防刷屏，`OverageCreditUpsell` 额外用 `MAX_IMPRESSIONS = 3` 限流；`CondensedLogo` 两个 `useEffect` 分别给访客通行证与超额额度 upsell 累加已见次数，且只在对应组件展示时才打——条件埋点的典型写法，避免「没看见也计数」。
+
+踩坑：
+
+- 14 份 `.tsx` 尾部带约 2 万字符的 `sourceMappingURL` base64 行（如 `OverageCreditUpsell.tsx` 源文件该行长 21,964 字符）；`annotate.py` 按 >4000 字符规则将其替换为两行说明注释，未计入批注版行数——这正是 .tsx 文件「批注版 − 原文」明显大于锚点数的主因（锚点数 + 源映射行移除 + 中文行净增）。仅 `CustomSelect/use-select-state.ts` 为 `.ts` 无源映射行，其「批注版 − 原文」恰好等于锚点数（20）。
+- 本批 15 份数据文件预检 201 锚点全过、0 块内违例、零 `⚠`、零 `⟳`；无正则字面量误判、无漏写位置参数的二元组、无锚点落在多行表达式首行或 `/* */` 块注释内部的情形。
+- 锚点全部落在 `after` 位置（函数声明、return、关键分支、导出行），未使用 `before` / `after_block`；React Compiler 产物（`_c(n)` 缓存槽、`$` 记忆数组、`t0..tN` 临时名）的 memo 结构未干扰锚点落点，check-fidelity 复跑 0 失败。
+
+流程账：15 个数据文件逐一对齐源文件；预检 201 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`；`check-fidelity.py` 全仓 1305 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 689 条，0 失效；全仓 1305/1902 文件、398,150/513,237 行、77%。
+
+**下一批候选（components 降序，建议取 15 份约 2,204 行）**：`ThinkingToggle.tsx`(153) · `SkillImprovementSurvey.tsx`(152) · `shell/ShellProgressMessage.tsx`(150) · `permissions/rules/WorkspaceTab.tsx`(150) · `ManagedSettingsSecurityDialog/ManagedSettingsSecurityDialog.tsx`(149) · `design-system/Divider.tsx`(149) · `ValidationErrorsList.tsx`(148) · `permissions/useShellPermissionFeedback.ts`(148) · `permissions/BashPermissionRequest/bashToolUseOptions.tsx`(147) · `hooks/SelectMatcherMode.tsx`(144) · `permissions/AskUserQuestionPermissionRequest/SubmitQuestionsView.tsx`(144) · `ManagedSettingsSecurityDialog/utils.ts`(144) · `agents/new-agent-creation/wizard-steps/GenerateStep.tsx`(143) · `AutoModeOptInDialog.tsx`(142) · `mcp/MCPToolListView.tsx`(141)（components 已做 215/389，剩 174 份；全仓还剩 597 份）。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
