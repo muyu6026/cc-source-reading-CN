@@ -3134,7 +3134,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1180 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2302 条加内链 676 条，0 失效；全仓 1180/1902 文件、364,816/513,237 行、71%。
 
-**下一批候选（components 降序，建议取 4 份约 1,960 行）**：`mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487) · `permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482) · `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465) …（components 已做 90/389，剩 299 份；全仓还剩 722 份）。
+### components 第 110 批：MCP 服务器管理面板、上下文用量可视化、输入型选项、词级 diff 回退（1,968 行，109 锚点）
+
+第八批 components，按源行量取件：4 份共 1,968 行（504 / 489 / 488 / 487），行数几乎齐平。四份的主题是**「把已有数据摆成可读的界面」**——MCP 服务器按作用域分组列表、上下文用量左图右表、选择底座里的可编辑选项、无高亮时的词级 diff 渲染。四份的共同点是「数据早就算好了，这里只负责排版与键盘」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/mcp/MCPListPanel.tsx`](annotated/src/components/mcp/MCPListPanel.tsx) | 504 | 533 | 28 | MCP 服务器面板：按项目 / 本地 / 用户 / 企业四作用域分组，另有 claude.ai、代理专属、内置三区；唯一状态是选中下标，扁平可选表必须与分组渲染严格同序；五种连接状态各有图标与文案 |
+| [`components/ContextVisualization.tsx`](annotated/src/components/ContextVisualization.tsx) | 489 | 514 | 24 | 上下文用量：左边方格图（空闲 / 缓冲 / 按填充度选实心空心）、右边类目列表与占比；延迟加载项不计百分比；按来源分组顺序固定；折叠状态行只在真的折叠过时出现 |
+| [`components/CustomSelect/select-input-option.tsx`](annotated/src/components/CustomSelect/select-input-option.tsx) | 488 | 515 | 26 | 可编辑选项：三态渲染（标签前置 / 聚焦输入 / 静态值）；六组键位分属 Chat 与 Attachments 两个上下文互不抢键；图片粘贴、切换、删除、失焦即退出图片模式；用户编辑标记防异步复位光标 |
+| [`components/StructuredDiff/Fallback.tsx`](annotated/src/components/StructuredDiff/Fallback.tsx) | 487 | 519 | 31 | 词级 diff 回退：行转对象 → 相邻删加配对 → 逐词对比 → 按宽度手动折行；变化超四成或暗色模式退回整行；行号槽包在不可选区内，背景色跨盒连续；编号函数让整段删除共用原行号区间 |
+
+横切观察：
+
+- **扁平表与渲染必须同序，是键盘列表的通用契约**：MCPListPanel 只有「选中下标」一个状态，向上键改的是扁平表下标，画面却按五个分组渲染。一旦两处顺序不一致，回车选中的就不是高亮那行——这与第 107 批 BackgroundTasksDialog 的「条目顺序契约」是同一个坑，只是这里的分组层更多。反查也按引用相等而非名字，同名不同源的服务器才区分得开。
+- **「返回 null 表示退回」把判断权留在渲染器内**：词级 diff 渲染器自己判变化比例与暗色模式，不合适就返回 null，编排层收到 null 就落到整行渲染。阈值、宽度、配色都封在这一个函数里，上层不必知道「什么时候不该词级」。
+- **键位按上下文分层，而不是按组件分层**：输入型选项的六组键位分挂 Chat 与 Attachments 两个上下文，图片模式只在 Attachments 下生效，失焦立即退出。这样同一个按键在不同模式下语义不同，且不会与上层列表的上下键抢事件。
+- **可视化的分母只取一个来源**：上下文用量的所有百分比都用后端给的上限做分母，延迟加载项直接标「不可用」而不是按 0 计算。一处口径，避免图上与列表里出现两个不同的百分比。
+
+踩坑：`StructuredDiff/Fallback.tsx` 的 9–45 行是整段示例块注释（内含代码围栏与箭头说明），`select-input-option.tsx` 的 Props 里 JSDoc 块注释成串（31–35、36–41、42–48、49–52 等），`ContextVisualization.tsx` 有 14–20 与 76 行的块注释——全部用 `before` 落语句行或块首行规避内部；四份的模板字符串（句柄、提示文案）内部零锚点。预检 109 锚点一次全过；`annotate.py` 四次零 `⟳`、零 `⚠`，四份各 1 处长批注自动折行，故增量（113 行）比锚点数（109）多 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1184 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2306 条加内链 677 条，0 失效；全仓 1184/1902 文件、366,784/513,237 行、71%。
+
+**下一批候选（components 降序，建议取 4 份约 1,830 行）**：`permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482) · `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465) · 其余按行数继续取（components 已做 94/389，剩 295 份；全仓还剩 718 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 

@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 109 批（2026-11-03）：components 第七批（4 文件 2,245 行，121 锚点）
+
+- 状态：完成并推送，commit `155e4ff`（`4b41a03..155e4ff`）。
+- 本批 4 文件：`hooks/HooksConfigMenu.tsx`(578→607，28 锚点) / `agents/ToolSelector.tsx`(562→593，30) / `Spinner.tsx`(562→598，35) / `LogoV2/LogoV2.tsx`(543→572，28)。合计 2,245 源行 / 121 锚点。
+- 进度：全仓 1180/1902（364,816/513,237 行，71%）· components 90/389（剩 299）。
+- 校验：check-fidelity 1180 份 0 失败；check-links 2306 源码链接 + 677 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；4 份各 1 处长批注折行，增量 125 = 121 + 4。
+- 亮点：①HooksConfigMenu 的回退不是固定阶梯，每层按「该事件是否支持匹配器」动态决定落点；②ToolSelector 全选回传 undefined（等价不限制），桶级开关语义是「有缺口就全选」；③Spinner 动画时钟下沉到 SpinnerAnimationRow，父层只粗读 ref 做 30 秒/30 分钟阈值；④LogoV2 三级降级链「有东西要给你看」优先，条件 require 让频道通知整文件可摇掉。
+- 踩坑：本轮用户要求「做完自动执行下一轮」，故改为一轮内连推多批（109 起连续执行）。每批仍完整走 13 步，只是不再等待确认。
+- 下批目标（components 降序，建议 4 份约 1,960 行）：`mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487) · `permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482) · `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465)。
+
+
 ## 第 108 批（2026-11-03）：components 第六批（4 文件 2,505 行，126 锚点）
 
 - 状态：完成并推送，commit `68fcb37`（`d71f138..68fcb37`）。
