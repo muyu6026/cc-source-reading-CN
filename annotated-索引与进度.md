@@ -2959,6 +2959,27 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 剩余，按行数降序）**：`memory/versions.ts`(8) · `messagePredicates.ts`(8) · `lazySchema.ts`(8) …（utils 还剩 3 份；全仓还剩 749 份）。注意：utils 仅剩这 3 份 8 行小文件，下一批即可清零。
 
+### utils 第 102 批：收尾清零（3 份 8 行小文件，6 锚点）
+
+本批三份是 utils 子树最后的叶子：均为 8 行微型模块，清掉即 `src/utils/` 全目录 **564/564 = 100% 清零**（行覆盖 180,487/180,487）。这标志着 hooks → utils 两条子树依次全清，流水线正式转入 `src/components/`。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`utils/lazySchema.ts`](annotated/src/utils/lazySchema.ts) | 8 | 10 | 2 | 惰性 schema 工厂：把 Zod 构造从模块初始化推迟到首次访问，`??=` 一次性记忆化 |
+| [`utils/memory/versions.ts`](annotated/src/utils/memory/versions.ts) | 8 | 10 | 2 | 同步判断目录是否处于 git 仓库内（`findGitRoot` 向上找 `.git`，异步请用 `dirIsInGitRepo`） |
+| [`utils/messagePredicates.ts`](annotated/src/utils/messagePredicates.ts) | 8 | 10 | 2 | 类型守卫 `isHumanTurn`：`tool_result` 与真人同带 `type:'user'`，靠 `isMeta` + `toolUseResult` 双重排除 |
+
+横切观察：
+
+- 「utils 收口于一致性小工具」：三份都满足「叶子模块、只做一件事」——惰性工厂、同步 git 探测、消息类型守卫，是 utils 子树从巨兽到叶子完整覆盖的最后一笔。
+- 「判别式的历史教训」：`messagePredicates.ts` 的注释点明四个 PR 都曾因只看 `type==='user'` 把 `tool_result` 误判为真人，故用 `isMeta` 与 `toolUseResult` 双重排除——这类「看似简单却有历史坑」的守卫正是批注要留下来的重点。
+
+踩坑：三份文件级锚点统一 `(1,'before')` 顶到最前（lazySchema 首行是 `/**` 文档块、`before` 插在块前而非块内），其余锚点落在函数收尾 / `return` 判别式行，零块内中文、零 `⟳`、零 `⚠`。三个相对路径均不含 `bash`/`shell`/`powershell` 子串，命令行直接跑 `annotate.py` 三次通过，无需间接 runner。预检门禁（六断言 + 块注释内部续行扫描，块首/收尾与 `(1,after)` 豁免）6 锚点一次全过。
+
+流程账：本批 3 个数据文件逐一对齐源文件，预检 6 锚点全过；`annotate.py` 三次失败 0、`⟳` 0、零 `⚠`；`check-fidelity.py` 全仓 1156 份 0 失败；`check-links.py` 源码链接 2279 条加内链 669 条，0 失效。`src/utils/` 经数十批推进，至此 564/564 全目录清零。
+
+**下一批候选（utils 已清零，转 `src/components/`）**：按 `check-coverage src/components` 实际 top 清单，最大缺失为 `Settings/Config.tsx`(1822) · `LogSelector.tsx`(1575) · `Stats.tsx`(1228) · `permissions/rules/PermissionRuleList.tsx`(1179) · `mcp/ElicitationDialog.tsx`(1169) · `VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) …（components 已做 66/389，剩 323 份；全仓还剩 746 份）。注意：components 多为 `.tsx` 巨文件，锚点只能落函数/类型收尾行与签名结束行，不可插在 JSX 内部；含 shell/bash 子串者仍需间接 runner。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
