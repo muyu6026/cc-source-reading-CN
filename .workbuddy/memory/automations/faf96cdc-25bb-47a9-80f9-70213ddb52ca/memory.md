@@ -1,5 +1,24 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 111 批（2026-11-03）：components 第九批（4 文件 1,870 行，122 锚点）
+
+- 状态：完成并推送，commit `1ee153c`（`a9d3f9b..1ee153c`）。
+- 本批 4 文件：`permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482→515，32 锚点) / `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465→496，30) / `grove/Grove.tsx`(463→492，28) / `permissions/PermissionDecisionDebugInfo.tsx`(460→493，32)。
+- 进度：全仓 1188/1902（368,654/513,237 行，71.8%，README 记 71%）· components 116/407（剩 291，总剩 714）。
+- 校验：check-fidelity 1188 份 0 失败；check-links 2314 源码链接 + 679 内链 0 失效；annotate 四次零 ⚠、一次 ⟳（Grove 16→16，位置未变）；4 份各 1 处长批注折行，增量 126 = 122 + 4。
+- 亮点：①Bash 弹窗的 20fps 微光时钟原本住在 535 行主体内，而主体有编译器 bailout，于是每 50ms 重建整棵树——修法是「挪边界」（外提到只渲染一行文字的组件），与第 109 批 Spinner「下沉时钟」方向相反、判据相同；②复合命令按 `decisionReason.type === 'subcommandResults'` 识别，绕开对整串做前两词提取的同步启发式（会造出 `Bash(cd src:*)` 这类永不匹配的死规则，用户配置里能积 150+ 条）；③规则落盘目标＝信任级别：用户手改前缀落 `localSettings`，分类器描述推导的规则落 `session`；④QuestionView 选项区与底部两行共享上下键，靠「未聚焦底部就不消费按键」+「从最后一项向下/从第一行向上」两个回调交接；编号即位置（底部第一行＝选项数+1）；⑤Grove 同一个 Esc 在宽限期＝延后、之后＝放弃，`domain_excluded` 时接受选项从两项缩成一项；⑥DebugInfo 的提前返回在编译产物里是「哨兵 + 带标签块」，不可达规则按「有建议 > 有工具名 > 全量」三档过滤（先全量后过滤，计算函数无分支参数）。
+- 踩坑：`Grove.tsx` 第 16 行是 ASCII 箱子模板字符串（跨 16–26 行）的起始行，预检判为 code 状态、`annotate.py` 仍报一次 `⟳` 但外移目标 16→16，产物正确（注释落在 `const NEW_TERMS_ASCII =` 之前）——这类「报 ⟳ 但位置没动」的告警应视为无害，不必改数据。
+- 下批目标（components 降序，建议 4 份约 1,770 行）：`ModelPicker.tsx`(448) · `permissions/ComputerUseApproval/ComputerUseApproval.tsx`(441) · `agents/AgentsList.tsx`(440) · `memory/MemoryFileSelector.tsx`(438)。
+
+## 第 110 批（2026-11-03）：components 第八批（4 文件 1,968 行，109 锚点）
+
+- 状态：完成并推送（commit 见 `git log`，本条目为补记，提交时漏写 memory）。
+- 本批 4 文件：`mcp/MCPListPanel.tsx`(504→533，28) / `ContextVisualization.tsx`(489→514，24) / `CustomSelect/select-input-option.tsx`(488→515，26) / `StructuredDiff/Fallback.tsx`(487→519，31)。
+- 进度：全仓 1184/1902（366,784/513,237 行，71%）· components 112/407（剩 295）。
+- 校验：check-fidelity 1184 份 0 失败；check-links 2306 源码 + 677 内链 0 失效；annotate 零 ⟳ 零 ⚠；增量 113 = 109 + 4。
+- 亮点：①MCPListPanel 只有「选中下标」一个状态，扁平可选表必须与五分组渲染严格同序（同第 107 批 BackgroundTasksDialog 的条目顺序契约）；②词级 diff 渲染器返回 null 表示「退回整行」，阈值/宽度/配色全封在渲染器内；③输入型选项的六组键位分挂 Chat 与 Attachments 两个上下文，失焦即退出图片模式；④上下文用量所有百分比统一用后端上限做分母，延迟加载项标「不可用」而非按 0 算。
+
+
 ## 第 109 批（2026-11-03）：components 第七批（4 文件 2,245 行，121 锚点）
 
 - 状态：完成并推送，commit `155e4ff`（`4b41a03..155e4ff`）。
