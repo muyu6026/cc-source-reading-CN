@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 104 批（2026-11-03）：components 第二批（3 文件 3,573 行，112 锚点）
+
+- 状态：完成并推送，commit `bd5da7f`（`e37b93d..bd5da7f`）。
+- 本批 3 文件：`Stats.tsx`(1227→1263，35 锚点) / `permissions/rules/PermissionRuleList.tsx`(1178→1215，36 锚点) / `mcp/ElicitationDialog.tsx`(1168→1210，41 锚点)。合计 3,573 源行 / 112 锚点。
+- 进度：全仓 1161/1902 文件 / 351,310 行 / 68%（实算；components 71/389，剩 318）。
+- 校验：check-fidelity 1161 份 0 失败；check-links 2284 源码链接 + 671 内链 0 失效；annotate 三次零 `⟳`、零 `⚠`。
+- 下一批目标（components 降序，建议仍取 3 份约 3,000 行）：VirtualMessageList.tsx(1082) · ScrollKeybindingHandler.tsx(1012) · tasks/RemoteSessionDetailDialog.tsx(904) · MessageSelector.tsx(831) · agents/AgentsMenu.tsx(800) · permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx(768) · teams/TeamsDialog.tsx(715) · CustomSelect/select.tsx(690)。
+
+### 本批经验（下次先看）
+- **3 份 ≈ 3,500 行是本阶段稳定节奏**：112 锚点、密度约每 32 行一处，上下文与质量都还能守住；到 4 份（4,000+ 行）就开始需要反复回读，不划算。
+- **抓骨架 → 定点精读**：先 grep 顶层 `function/const/type`，再只精读「状态区 / 变更回调区 / effect 区 / 早退分支链 / render 尾 / 辅助函数」，不整文件读（千行 JSX 单次 Read 会超限或吃掉大量上下文）。
+- **本批三类高频结构值得写成模板**：①双层加载（Promise 只建一次 + 记忆槽哨兵，否则 `use()` 死循环）；②内存生效与落盘分离（`applyPermissionUpdate` 纯函数算新上下文 → 写 AppState → 按需 `persistPermissionUpdate`）；③互斥焦点（`currentFieldIndex` 与 `focusedButton` 二者皆空才是初始态）。
+- **文本自检要包含反斜杠**：初稿在描述 ASCII 动画时写了转义符，被门禁拦下；预检的 `"`/`\` 扫描是必要的，不是形式主义。
+
 ## 第 103 批（2026-11-03）：转入 components 首取（2 文件 3,397 行，73 锚点）
 
 - 状态：完成并推送，commit `b103ddb`（`a9f566d..b103ddb`）。
