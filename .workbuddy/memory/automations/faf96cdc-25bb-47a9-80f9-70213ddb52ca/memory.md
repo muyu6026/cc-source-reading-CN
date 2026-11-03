@@ -1,5 +1,15 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 118 批（2026-11-03）：components 第十六批（10 文件 2,399 行，175 锚点）
+
+- 状态：完成并推送，commit `859e8cb`。
+- 本批 10 份：`Onboarding.tsx`(244→267，22 锚点) / `QuickOpenDialog.tsx`(244→263，18) / `design-system/ListItem.tsx`(244→258，13) / `tasks/RemoteSessionProgress.tsx`(243→262，18) / `Settings/Status.tsx`(241→260，18) / `LogoV2/Clawd.tsx`(240→256，15) / `skills/SkillsMenu.tsx`(237→253，15) / `Markdown.tsx`(236→259，22) / `NotebookEditToolDiff.tsx`(235→252，16) / `PowerShellPermissionRequest.tsx`(235→254，18)。
+- 进度：全仓 1245/1902（386,820/513,237 行，75.4%）· components 173/407（剩 234，总剩 657）。
+- 校验：check-fidelity 1245 份 0 失败；check-links 2361 源码链接 + 686 内链 0 失效；annotate 十一次零 ⚠、一次 ⟳（Markdown 58→57 无害）。
+- 新沉淀：①预检状态机必须移植 annotate.py 的 `_regex_end`（Markdown.tsx 第 31 行正则字符类含反引号，曾被误判成模板串开头、结束态非 code）；②ListItem 数据文件名踩 slug 规则（`-`→`_`）；③一条锚点漏位置参数被预检解包报错拦下。
+- 主题亮点：Markdown 三层缓存（模块级 token 缓存键用哈希防 RSS 回归 + MRU 提升 + 纯文本快路径）与 StreamingMarkdown 的 `'use no memo'`；Clawd 分段缓存 + Apple Terminal bg-fill；useSmoothCount 渲染期 ref 突变。
+- 下批目标（components 降序 10 份约 2,230 行）：`Spinner/TeammateSpinnerLine.tsx`(233) · `WorktreeExitDialog.tsx`(231) · `SedEditPermissionRequest.tsx`(230) · `PreviewBox.tsx`(229) · `AsyncAgentDetailDialog.tsx`(229) · `agents/AgentDetail.tsx`(220) · `PermissionRequest.tsx`(217) · `CustomSelect/SelectMulti.tsx`(213) · `useMemorySurvey.tsx`(213) · `McpParsingWarnings.tsx`(213)。
+
 ## 第 117 批（2026-11-03）：components 第十五批（15 文件 4,019 行，219 锚点）
 
 - 状态：完成并推送，commit `a08a01d`。
