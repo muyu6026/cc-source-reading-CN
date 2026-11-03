@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+ (1, 'after', '引入 useCallback 与 useReducer 两个 hooks'),
+ (3, 'after', '单题答案类型，可为单选字符串或多选数组'),
+ (5, 'after', '每题的 UI 状态：选中值与文本输入值'),
+ (10, 'after', 'reducer 全局状态：当前题号、答案表、各题状态、是否文本输入'),
+ (33, 'after', '所有可派发的动作联合类型'),
+ (34, 'after', '纯函数 reducer，按动作类型更新状态'),
+ (36, 'after', '下一题：题号加一并退出文本输入'),
+ (43, 'after', '上一题：题号不小于 0'),
+ (50, 'after', '局部更新某题的选中值或文本输入'),
+ (70, 'after', '记录答案，按需自动跳到下一题'),
+ (90, 'after', '切换是否处于文本输入模式'),
+ (98, 'after', '初始状态，从第一题开始'),
+ (105, 'after', '对外暴露的 hook 状态与操作方法类型'),
+ (125, 'after', '多选问答状态管理 hook'),
+ (126, 'after', '用 useReducer 管理问答状态'),
+ (128, 'after', '封装 dispatch 为 nextQuestion 回调'),
+ (136, 'after', '封装 updateQuestionState 回调，更新单题状态'),
+ (152, 'after', '封装 setAnswer，默认在作答后前进'),
+ (164, 'after', '封装 setTextInputMode 回调'),
+ (168, 'after', '返回全部状态与操作方法'),
+]

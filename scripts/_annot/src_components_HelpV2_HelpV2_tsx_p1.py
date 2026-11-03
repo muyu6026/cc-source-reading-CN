@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+ (1, 'after', '导入 React 编译期运行时 _c，由 React Compiler 注入用于记忆化缓存'),
+ (14, 'after', '定义组件属性：onClose 关闭回调、commands 当前可用命令列表'),
+ (20, 'after', '帮助对话框主组件，参数 t0 为聚合后的 props'),
+ (21, 'after', '$ 是 React Compiler 生成的 memo 缓存数组，长度 44 对应可缓存值数量'),
+ (30, 'after', '最大高度取终端行数的一半，避免帮助框过长'),
+ (31, 'after', '判断当前是否处于模态框内，决定高度限制'),
+ (52, 'after', '绑定 help:dismiss 快捷键（默认 Esc）关闭帮助'),
+ (53, 'after', '引入 Ctrl/Cmd+D 退出逻辑，pending 表示已按一次等待确认'),
+ (60, 'after', '从 commands 中过滤出内建命令并排除隐藏项'),
+ (69, 'after', '其余命令归为自定义命令'),
+ (82, 'after', '通用 tab 展示基础帮助信息'),
+ (92, 'after', '内建命令 tab，列出默认命令并可浏览'),
+ (104, 'after', '自定义命令 tab，无命令时给出空提示'),
+ (138, 'after', '模态框内不限制最大高度'),
+ (141, 'after', 'Tabs 容器，标题显示 Claude Code 版本号'),
+ (149, 'after', '提供在线文档链接'),
+ (166, 'after', '用 Pane 包裹标题、tab 与提示三块内容'),
+ (182, 'after', '返回最终渲染树'),
+]

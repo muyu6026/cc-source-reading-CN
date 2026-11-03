@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+ (1, 'after', 'figures 提供终端绘制的符号，如单选框、对勾'),
+ (15, 'after', '组件属性：agentServer 服务端信息、onCancel 取消、onComplete 完成'),
+ (28, 'after', 'agent 专属 MCP 服务菜单组件，注释说明此类服务仅在 agent 运行时连接'),
+ (33, 'after', '读取当前主题用于着色'),
+ (34, 'after', '是否正在鉴权中'),
+ (37, 'after', '保存 OAuth 请求的 AbortController 引用以便卸载时中止'),
+ (41, 'after', '组件卸载时中止未完成的 OAuth 流程，关闭回调服务器'),
+ (44, 'after', 'Esc 取消：中止鉴权并把界面复位'),
+ (52, 'after', '仅在鉴权进行中时激活 confirm:no 快捷键'),
+ (56, 'after', '执行 OAuth 鉴权流程'),
+ (71, 'after', '鉴权成功后通过 onComplete 通知父组件'),
+ (82, 'after', '服务名首字母大写用于显示标题'),
+ (83, 'after', '鉴权进行中显示等待界面与浏览器提示'),
+ (105, 'after', '构建菜单选项列表'),
+ (108, 'after', '仅对需要鉴权的 HTTP/SSE 服务显示鉴权入口'),
+ (118, 'after', '对话框展示服务类型、URL、命令、使用方与状态'),
+ (162, 'after', 'Select 根据所选执行鉴权或返回'),
+]
