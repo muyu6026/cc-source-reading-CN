@@ -3112,7 +3112,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1176 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2298 条加内链 675 条，0 失效；全仓 1176/1902 文件、362,571/513,237 行、71%。
 
-**下一批候选（components 降序，建议取 4 份约 2,200 行）**：`hooks/HooksConfigMenu.tsx`(578) · `agents/ToolSelector.tsx`(562) · `Spinner.tsx`(562) · `LogoV2/LogoV2.tsx`(543) · `mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487) …（components 已做 86/389，剩 303 份；全仓还剩 726 份）。
+### components 第 109 批：hooks 配置浏览器、工具白名单选择器、转圈器家族、启动欢迎屏（2,245 行，121 锚点）
+
+第七批 components，按源行量取件：4 份共 2,245 行（578 / 562 / 562 / 543）。四份的主题是**「终端门面的四种零件」**——hooks 配置的四态钻取浏览器、子代理工具白名单的分桶选择器、四种形态共用的转圈器、按终端宽度三级降级的启动欢迎屏。四份都不处理业务数据，只处理「怎么把已有状态摆到屏幕上、怎么让键盘走得通」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/hooks/HooksConfigMenu.tsx`](annotated/src/components/hooks/HooksConfigMenu.tsx) | 578 | 607 | 28 | hooks 只读浏览器：四态（事件 / 匹配器 / hook / 详情）逐层钻取，每层 Esc 按「事件是否支持匹配器」动态决定回退落点；全局停用走独立早退视图；策略态与用户态分开判定 |
+| [`components/agents/ToolSelector.tsx`](annotated/src/components/agents/ToolSelector.tsx) | 562 | 593 | 30 | 工具白名单选择器：静态五桶 + MCP 按服务器动态分桶；桶级开关语义是「有缺口就全选」；全选回传 undefined（等价不限制）；可导航条目整表驱动上下键并跳过标题行 |
+| [`components/Spinner.tsx`](annotated/src/components/Spinner.tsx) | 562 | 598 | 35 | 转圈器四形态：简报分流拆成两个组件以守住 hooks 规则；动画时钟下沉到子组件、父层只粗读 ref；思考状态每态至少显示 2 秒；领导空闲时不显示动画以免被停滞检测染红 |
+| [`components/LogoV2/LogoV2.tsx`](annotated/src/components/LogoV2/LogoV2.tsx) | 543 | 572 | 28 | 启动欢迎屏：极简 / 紧凑 / 完整三级降级；条件 require 保证频道通知可被整体摇掉；公告首启取首条其余随机；右侧 Feed 四选一按产品优先级；已读记账与引导计数合并成一次副作用 |
+
+横切观察：
+
+- **层级不是固定阶梯，而是按数据形状动态决定**：HooksConfigMenu 的回退既不是简单的「退一层」，而是每次退回前先查「该事件是否支持匹配器」——支持就回匹配器列表，不支持直接回事件列表。同一份四态类型，在不同事件下走出的路径不同，避免把用户丢进一个空的中间层。
+- **「全选」回传的是 undefined 而不是完整名单**：ToolSelector 在全部选中时回 undefined，语义是「不限制」，未来新增工具自动被允许；桶级开关的判定是「有缺口就全选，否则全不选」而非「逐项取反」。两种选择都指向「让结果不依赖当前快照」。
+- **动画时钟必须下沉，否则整棵树按帧重渲染**：Spinner 把 50 毫秒帧循环放进 SpinnerAnimationRow，父组件只在 props 或应用状态变化时重渲染；帧号、流光、停滞强度、token 计数、思考微光、耗时全部由子组件算。代价是父层只能粗读 ref 做 30 秒、30 分钟这类粗阈值判断——这个取舍源码里写得很清楚，批注保留了「为什么」。
+- **启动屏的降级链是「有东西要给你看」优先**：极简模式只在没有新版本说明、没有引导、也没有强制完整标识时才成立；完整版右侧 Feed 的四选一同样按产品优先级（引导、访客卡、超额卡、版本说明）。画面复杂度由「有多少真信息」驱动，而不是由终端宽度单独决定。
+
+踩坑：HooksConfigMenu 文件头 2–13 行是大段文档注释，Spinner 59–61 / 100–104 / 303–315 / 438–441 与 LogoV2 30–35 也是块注释或注释群，全部用 `before` 落语句行规避块内；LogoV2 与 Spinner 的模板字符串（tmux 提示、时长文案）内部零锚点。预检 121 锚点一次全过（含块注释内部续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⟳`、零 `⚠`，四份各 1 处长批注自动折行，故增量（125 行）比锚点数（121）多 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1180 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2302 条加内链 676 条，0 失效；全仓 1180/1902 文件、364,816/513,237 行、71%。
+
+**下一批候选（components 降序，建议取 4 份约 1,960 行）**：`mcp/MCPListPanel.tsx`(504) · `ContextVisualization.tsx`(489) · `CustomSelect/select-input-option.tsx`(488) · `StructuredDiff/Fallback.tsx`(487) · `permissions/BashPermissionRequest/BashPermissionRequest.tsx`(482) · `permissions/AskUserQuestionPermissionRequest/QuestionView.tsx`(465) …（components 已做 90/389，剩 299 份；全仓还剩 722 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 

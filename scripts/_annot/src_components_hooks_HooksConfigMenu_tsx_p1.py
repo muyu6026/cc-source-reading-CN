@@ -1,0 +1,33 @@
+# 数据文件：src/components/hooks/HooksConfigMenu.tsx
+# slug = src_components_hooks_HooksConfigMenu_tsx
+# 规则：一个源文件 = 一个数据文件；中文用三引号；禁止英文双引号 " 与反斜杠 \（用「」/『』代替）。
+ANNOTATIONS = [
+    (1, 'before', '''本文件是 hooks 配置的只读浏览器：用户可以逐层钻取每个 hook 事件、看该事件下配置的匹配器与各类型 hook（command、prompt、agent、http），再进入单条 hook 的详情页。要改配置只能去编辑 settings.json 或直接让 Claude 改——文件头注释写明这个取舍：旧版编辑 UI 只支持 command 类型，为四种类型都做一套菜单内编辑面维护成本太高。四态状态机（选事件、选匹配器、选 hook、看详情）贯穿全文。'''),
+    (14, 'before', '''导入段：hook 元数据与分组全部来自 hooksConfigManager；settings 用 getSettingsForSource 单独取 policySettings 源，才能区分「用户自己关的」与「管理策略关的」。'''),
+    (31, 'before', '''Props：toolNames 用于生成匹配器提示（哪些工具名可作匹配器），onExit 关闭菜单并把结果作为命令回显。'''),
+    (37, 'before', '''四态联合类型：select-event 选事件、select-matcher 选匹配器、select-hook 选具体 hook、view-hook 看详情。每层往下都带上层上下文（event、matcher、hook），回退时无需再查。'''),
+    (51, 'before', '''主组件：一个 switch 分派四个子视图，四个 mode 各注册一个 Esc 键位实现逐层回退；另有全局停用（disableAllHooks）的独立早退视图。'''),
+    (66, 'before', '''modeState 初值是编译器缓存的 select-event 常量对象；后续所有导航都靠 setModeState 整体替换，不做局部改字段。'''),
+    (67, 'before', '''两个策略态：disabledByPolicy 表示「全局停用且是管理设置文件要求的」，restrictedByPolicy 表示「只允许受管 hook」（此时菜单会提示不可添加）。'''),
+    (70, 'before', '''settings 变更订阅：只在 policySettings 源变化时重算两个策略态——用户改自己的 settings 不必刷新这张只读表。'''),
+    (84, 'before', '''三个派生值用 in 运算符从联合类型里安全取值：不在该态时给默认值（事件默认 PreToolUse、匹配器默认 null），避免每层都判空。'''),
+    (89, 'before', '''工具名合并：内置工具名在前、MCP 工具名在后，作为匹配器元数据与分组计算的输入。'''),
+    (99, 'before', '''核心派生：把 AppState 里所有 hook 配置按「事件到匹配器到 hook 列表」两层分组。这是全文件的唯一数据源，四个子视图都从这里切。'''),
+    (109, 'before', '''当前事件的匹配器排序列表（空匹配器与通配优先级的排序逻辑在 hooksConfigManager 里）。'''),
+    (119, 'before', '''当前匹配器下的 hook 列表，供 select-hook 与 view-hook 使用。'''),
+    (130, 'before', '''handleExit：关闭时回一条固定文案，display 用 system 表示按系统消息展示而非助手回复。'''),
+    (143, 'before', '''第一层 Esc（select-event 态）直接退出整个菜单。'''),
+    (167, 'before', '''第二层 Esc（select-matcher 态）回到事件列表。'''),
+    (180, 'before', '''第三层 Esc（select-hook 态）回退看该事件是否支持匹配器：支持就回匹配器列表，否则直接回事件列表——避免回退到一个不存在的层级。'''),
+    (215, 'before', '''第四层 Esc（view-hook 态）回到该 hook 所属的匹配器列表，matcher 取 hook 自己的 matcher 或空串。'''),
+    (248, 'before', '''事件元数据表（每个事件的描述与匹配器支持情况），供各子视图显示。'''),
+    (257, 'before', '''全局停用判定直接读 settings 的 disableAllHooks，与策略态分开：一个是「实际是否停用」，一个是「是否被管理策略强制」。'''),
+    (259, 'before', '''按事件统计 hook 数量并求总数：外层遍历事件，内层把每个匹配器下的 hook 数组长度累加（reducer 在文件尾的 _temp5）。'''),
+    (281, 'before', '''全局停用视图：早退返回一个独立的 Dialog，说明「所有 hook 当前停用、你配置了 N 个但都没在跑」，并列出停用后的三条后果（不执行命令、不显示状态行、工具操作不做 hook 校验）。'''),
+    (380, 'before', '''正常路径：按 modeState.mode 分派四个子视图，每个 case 里都重新拼一遍回调（编译器缓存），语义是「往下一层或往上一层」。'''),
+    (381, 'before', '''case select-event：选中事件后判断该事件是否支持匹配器——支持就进匹配器层，否则直接进 hook 层且 matcher 为空串（如 UserPromptSubmit 这类无匹配器的事件）。'''),
+    (419, 'before', '''case select-matcher：选中匹配器后进 hook 层；取消回到事件列表。'''),
+    (461, 'before', '''case select-hook：选中 hook 进详情；取消按事件是否支持匹配器决定回哪一层。'''),
+    (513, 'before', '''case view-hook：只渲染详情，eventSupportsMatcher 决定详情里是否展示「匹配器」字段与返回按钮的落点。'''),
+    (558, 'before', '''编译器提升的小函数：Esc 提示文案、hook 计数 reducer、MCP 工具名映射、AppState 选择器，以及两个策略初值函数——后者在挂载时读一次 settings，避免渲染期重复读盘。'''),
+]
