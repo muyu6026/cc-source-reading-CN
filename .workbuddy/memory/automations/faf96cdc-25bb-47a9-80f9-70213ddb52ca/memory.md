@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 114 批（2026-11-03）：components 第十二批（4 文件 1,579 行，117 锚点）
+
+- 状态：完成并推送，commit `8715ed9`（`74aedb1..8715ed9`）。
+- 本批 4 文件：`BridgeDialog.tsx`(401→432，30 锚点) / `mcp/MCPSettings.tsx`(398→428，29) / `ui/TreeSelect.tsx`(397→427，29) / `diff/DiffDialog.tsx`(383→413，29)。
+- 进度：全仓 1200/1902（373,680/513,237 行，72.8%，README 记 72%）· components 128/407（剩 279，总剩 702）。
+- 校验：check-fidelity 1200 份 0 失败；check-links 2326 源码链接 + 682 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；四份各 1 处长批注折行，增量 121 = 117 + 4（回到常态规律）。
+- 亮点（本批主题=**先把异质输入归一成同一种形状**）：①`turnDiffToDiffData` 把「一轮对话的 diff」转成与 git diff 完全同形的对象，之后 2 数据源×2 视图模式=4 种界面只用 1 个三目收敛，无重复渲染逻辑；②MCP 设置里「已认证」是三条宽松路径任一成立（有令牌 / 会话口令且已连接 / 已连接且有工具）——诊断界面宁可误判已认证也不要误报未授权；③异步列表必须区分「加载中」与「真的没有」，判据是「输入非空而输出为空」则早退不提示；④TreeSelect 只接管左右键、上下键归 Select，且「传了 isNodeExpanded 内部 Set 即完全作废」——受控与非受控划界要干脆，半受控最难查。
+- 踩坑：`DiffDialog.tsx` 277 行的 `bb0: {` 是**编译器把多重 if 赋值重写成带标签块**（break 代替嵌套 else），不是业务标签语法；锚点落标签之前、278 行落首个 `if`；`BridgeDialog.tsx` 10 行 eslint 单行注释要落 `before`（若落下一行会把禁用范围转给批注本身）；`MCPSettings.tsx` 285 行 `case "..."` 行锚点安全。
+- 下批目标（components 降序，建议 4 份约 1,500 行）：`TaskListV2.tsx`(378) · `agents/new-agent-creation/wizard-steps/ConfirmStep.tsx`(378) · `Settings/Usage.tsx`(377) · `permissions/SkillPermissionRequest/SkillPermissionRequest.tsx`(369)。
+
+
 ## 第 113 批（2026-11-03）：components 第十一批（4 文件 1,680 行，121 锚点）
 
 - 状态：完成并推送，commit `74aedb1`（`070af39..74aedb1`）。
