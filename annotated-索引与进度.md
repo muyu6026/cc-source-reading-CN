@@ -3284,7 +3284,39 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：10 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1210 份 0 失败；`check-links.py` 源码链接 2318 条加内链 682 条，0 失效；全仓 1210/1902 文件、377,226/513,237 行、73%（README 记 73%）。
 
-**下一批候选（components 降序，建议取 10 份约 3,100 行）**：`permissions/FallbackPermissionRequest.tsx`(333) · `ThemePicker.tsx`(333) · `Spinner/GlimmerMessage.tsx`(328) · `permissions/AskUserQuestionPermissionRequest/PreviewQuestionView.tsx`(328) · `StatusLine.tsx`(324) · `MarkdownTable.tsx`(322) · `design-system/FuzzyPicker.tsx`(312) · `FeedbackSurvey/useFeedbackSurvey.tsx`(296) · `sandbox/SandboxSettings.tsx`(296) · `diff/DiffFileList.tsx`(292)（components 已做 120/389，剩 269 份；全仓还剩 692 份）。
+**下一批候选（components 降序，建议取 10 份约 3,100 行）**：`permissions/FallbackPermissionRequest.tsx`(333) · `ThemePicker.tsx`(333) · `Spinner/GlimmerMessage.tsx`(328) · `permissions/AskUserQuestionPermissionRequest/PreviewQuestionView.tsx`(328) · `StatusLine.tsx`(324) · `MarkdownTable.tsx`(322) · `design-system/FuzzyPicker.tsx`(312) · `FeedbackSurvey/useFeedbackSurvey.tsx`(296) · `sandbox/SandboxSettings.tsx`(296) · `diff/DiffFileList.tsx`(292)（components 已做 138/407，剩 269 份；全仓还剩 692 份）。
+
+### components 第 116 批：主题选择器、兜底权限弹窗、带预览提问视图、微光消息、状态栏、Markdown 表格、模糊选择器、评分问卷触发、沙箱设置、Diff 文件清单（3,164 行，211 锚点）
+
+第十四批 components，仍按行数降序取 10 份（333→292），合计 3,164 行、211 锚点，是本轮**锚点最多的一批**（密度约每 15 行一处）。十份的共同主题是**「终端里没有 CSS，所有布局与反馈都要手算」**：表格手算列宽与折行、状态栏手算占位行、picker 手算固定开销行数、微光消息手算显示宽度与切点、文件清单手算路径可用列数。它们串起来基本就是一套「Ink 终端布局实用手册」。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/ThemePicker.tsx`](annotated/src/components/ThemePicker.tsx) | 333 | 359 | 25 | 主题选择器：onboarding 与 /theme 共用；预览三件套（预览/保存/取消）保证键盘导航不写盘；环境变量压制用户设置的状态行文案优先级 |
+| [`components/permissions/FallbackPermissionRequest.tsx`](annotated/src/components/permissions/FallbackPermissionRequest.tsx) | 333 | 355 | 21 | 兜底权限弹窗：所有无专属弹窗的工具都走这里；「不再询问」写的是整工具名的 allow 规则、落 localSettings；描述截断 3 行保住选项区 |
+| [`components/permissions/AskUserQuestionPermissionRequest/PreviewQuestionView.tsx`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/PreviewQuestionView.tsx) | 328 | 350 | 21 | 带预览的分题视图：左选项右预览；无 Other 输入项；Tab 切题绑定必须写在子组件（监听顺序）；PREVIEW_OVERHEAD=11 逐项列明细 |
+| [`components/Spinner/GlimmerMessage.tsx`](annotated/src/components/Spinner/GlimmerMessage.tsx) | 328 | 349 | 20 | 微光消息：按字素簇切三段（before/shimmer/after）；宽字符与组合 emoji 不能按 code unit 切；卡住态覆盖动画；末尾补一个原色空格定右边界 |
+| [`components/StatusLine.tsx`](annotated/src/components/StatusLine.tsx) | 324 | 347 | 22 | 底部状态栏：对外快照契约（可选段不存在而非空值）；模型必须读 AppState 而非 getMainLoopModel（issue 37596）；300ms 防抖 + 四元触发条件 + memo |
+| [`components/MarkdownTable.tsx`](annotated/src/components/MarkdownTable.tsx) | 322 | 346 | 23 | 终端 Markdown 表格：三档列宽分配、垂直居中、行高超 4 行转纵向 key-value；SAFETY_MARGIN 防裁剪闪烁；整表单块 Ansi 渲染 |
+| [`components/design-system/FuzzyPicker.tsx`](annotated/src/components/design-system/FuzzyPicker.tsx) | 312 | 333 | 20 | 模糊选择器：过滤权归调用方；visibleCount 必须钳到终端高度以下；结构不随预览真假变；direction=up 用 column-reverse 而非反转数组 |
+| [`components/FeedbackSurvey/useFeedbackSurvey.tsx`](annotated/src/components/FeedbackSurvey/useFeedbackSurvey.tsx) | 296 | 320 | 23 | 评分问卷触发：概率必须只滚一次（否则 0.5% 变几乎必然）；七道否决按代价排序、读盘的跨会话节流放最后；好坏评追问概率分开配 |
+| [`components/sandbox/SandboxSettings.tsx`](annotated/src/components/sandbox/SandboxSettings.tsx) | 296 | 315 | 18 | 沙箱设置：三档模式压平两个开关；页签随依赖检查状态增减（有错只留依赖页）；每档写设置都写全两个字段防脏状态 |
+| [`components/diff/DiffFileList.tsx`](annotated/src/components/diff/DiffFileList.tsx) | 292 | 311 | 18 | Diff 文件清单：5 行滚动窗口 + 居中 + 触底回拉；路径从头部截断保留文件名；三种不可 diff 状态（untracked/binary/large）各给一句 |
+
+横切观察：
+
+- **「手算常量」是终端布局的通用代价**：MarkdownTable 的 `borderOverhead = 1 + numCols * 3`、FuzzyPicker 的 `CHROME_ROWS = 10`、PreviewQuestionView 的 `PREVIEW_OVERHEAD = 11`、DiffFileList 的 `columns - 16 - 3 - 4`、StatusLine 的「全屏下预留一行」。这五处都是把「边框 / 边距 / 提示行」逐项列成算术，注释里连每一项是什么都写清。没有这把尺子，改一个 margin 就会在某个终端尺寸下溢出。
+- **溢出在终端里不是滚动问题，是重绘问题**：MarkdownTable 注释写明「溢出会让 Ink 在相邻两帧裁得不一样，滚动区无限闪烁」；FuzzyPicker 注释写明「界面超过终端高度后，每次重渲染光标上移量算错、上一行闪白」。所以两处都宁可选「降级视图」也不让内容超出——这与 Web 里「反正能滚」的直觉完全相反。
+- **显示宽度 ≠ 字符数**：GlimmerMessage 用 `getGraphemeSegmenter` 切簇、用 `stringWidth` 量列；MarkdownTable 取最长单词宽度时也走 `stringWidth`。Emoji、CJK、组合音标都是 2 列或 1 簇，任何按 `length` 算的地方都会在中文/表情消息上错位。
+- **异步内容必须预留占位高度**：StatusLine 在全屏下即使没文本也渲染一个空格；FuzzyPicker 空列表仍渲染 `height={visibleCount}`；DiffFileList 无「更多」时渲染一个空格而不是 null。三处手法一致——**高度恒定比内容完整更重要**，否则一次异步返回就会把整块布局推一下。
+- **遥测与节流要「只发生一次」**：useFeedbackSurvey 的概率骰子按轮次记账（`lastEligibleSubmitCountRef`），StatusLine 的日志开关按 `logNextResultRef` 记账。凡是「随机」或「打日志」被放进会被反复求值的 useMemo/渲染函数里，就一定会退化成「几乎必然发生」——这是本批最值得跨文件复用的一条经验。
+- **兜底组件的复杂度分配很不对称**：FallbackPermissionRequest 最短最保守（只三档、无编辑框、不接管键盘），因为它要适配任意未来工具；而有领域知识的弹窗才敢做多选、编辑框、预览。看一个弹窗的复杂度，大致能判断它服务的是「已知的少数工具」还是「未知的全部工具」。
+
+踩坑：本批预检连拦三类问题，全部在写 `annotated/` 之前修正。① 九份数据文件里有 10 处批注误用英文双引号（如 `Symbol.for("react.memo_cache_sentinel")`、`flexDirection="row"`、`defaultTab="Mode"`、`{ " " }`、`"five_hour" in data`），按规则改写成「」包裹的形态；② `SandboxSettings` 数据文件里把空心圆写成转义序列，反斜杠本身是禁用字符，改成「空心圆（U+25CB）」；③ `MarkdownTable` 第 137 行锚点用了带换行的编号列表，触发「控制字符」断言，改写为 ①②③ 单行串。三类问题都属数据文件层面，preflight 阶段即拦截。十份 `annotate.py` 全部零 `⟳`、零 `⚠`；插入注释 221 行、锚点 211 处，差额 10 即长批注自动折行溢价。
+
+流程账：10 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1220 份 0 失败；`check-links.py` 源码链接 2336 条加内链 683 条，0 失效；全仓 1220/1902 文件、380,390/513,237 行、74.1%（README 记 74%）。
+
+**下一批候选（components 降序，建议取 10 份约 2,750 行）**：`TrustDialog/TrustDialog.tsx`(290) · `CustomSelect/use-select-input.ts`(287) · `diff/DiffDetailView.tsx`(281) · `CoordinatorAgentStatus.tsx`(273) · `agents/agentFileUtils.ts`(272) · `permissions/PermissionExplanation.tsx`(272) · `Spinner/TeammateSpinnerTree.tsx`(272) · `ResumeTask.tsx`(268) · `LogoV2/ChannelsNotice.tsx`(266) · `tasks/InProcessTeammateDetailDialog.tsx`(266)（components 已做 148/407，剩 259 份；全仓还剩 682 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 

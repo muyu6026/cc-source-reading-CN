@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 115 批（2026-11-03）：components 第十三批（10 文件 3,536 行，167 锚点）
+
+- 状态：完成并推送，commit `63ac1e2`。
+- 本批 10 文件（378→335 行）：`ConfirmStep.tsx`(377→398，20 锚点) / `TaskListV2.tsx`(377→403，25) / `Settings/Usage.tsx`(376→392，15) / `SkillPermissionRequest.tsx`(368→386，17) / `tasks/BackgroundTask.tsx`(344→359，14) / `GlobalSearchDialog.tsx`(342→359，16) / `design-system/Tabs.tsx`(339→354，14) / `rules/AddWorkspaceDirectory.tsx`(339→355，15) / `RemoteEnvironmentDialog.tsx`(339→354，15) / `permissions/PermissionPrompt.tsx`(335→352，16)。
+- 进度：全仓 1210/1902（377,226/513,237 行，73%）· components 138/407（剩 269，总剩 692）。
+- 校验：check-fidelity 1210 份 0 失败；check-links 2318 源码链接 + 682 内链 0 失效；十份 annotate 零 ⟳ 零 ⚠；增量 176 = 167 + 9（多份长批注折行溢价）。
+- 策略转变：**单批从 4 份改为 10 份**（约 3,100–3,600 行），减少每批固定开销（读索引、改 README、提交推送各一次），吞吐提升约 2 倍；锚点密度随之降到每 20 行一处，只挑「看不懂就会误读」的位置下锚。
+- 主题：**把异构输入先归一成同一种形状** —— 任务列表归一成「完成/进行中/阻塞」三布尔、后台任务按 type 分派成统一一行、Tabs 受控与非受控归一成同一选中态、两套权限弹窗归一成 options 列表、全局搜索把 ripgrep 输出归一成 Match。
+- 踩坑（均在 precheck 拦截，未污染产物）：① `RemoteEnvironmentDialog` 数据文件把 `'after'` 误写成 `'after''`（多一引号必致语法错）；② `SkillPermissionRequest` 锚点文案含英文双引号 `Use skill "xxx"?`，改中文「」。
+- 下批目标（components 降序，续取 10 份约 3,100 行）：`ThemePicker.tsx`(333) · `permissions/FallbackPermissionRequest.tsx`(333) · `PreviewQuestionView.tsx`(328) · `Spinner/GlimmerMessage.tsx`(328) · `StatusLine.tsx`(324) · `MarkdownTable.tsx`(322) · `design-system/FuzzyPicker.tsx`(312) · `FeedbackSurvey/useFeedbackSurvey.tsx`(296) · `sandbox/SandboxSettings.tsx`(296) · `diff/DiffFileList.tsx`(292)。
+
 ## 第 114 批（2026-11-03）：components 第十二批（4 文件 1,579 行，117 锚点）
 
 - 状态：完成并推送，commit `8715ed9`（`74aedb1..8715ed9`）。

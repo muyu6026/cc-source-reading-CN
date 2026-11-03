@@ -1,0 +1,320 @@
+// 评分问卷的触发逻辑。表面上只是「隔一阵弹个笑脸哭脸」，实际是一套**多层节流 + 多层策略门禁**：会话内时间窗、会话内轮次窗、跨会话时间窗、模型白名单、组织策略（ZDR）、环境变量、动态配置概率。真正值得读的是这些条件的**检查顺序**——它按「便宜且强否决的在前、要读文件的最后」排。
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDynamicConfig } from 'src/hooks/useDynamicConfig.js';
+import { isFeedbackSurveyDisabled } from 'src/services/analytics/config.js';
+import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEvent } from 'src/services/analytics/index.js';
+import { isPolicyAllowed } from '../../services/policyLimits/index.js';
+import type { Message } from '../../types/message.js';
+import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
+import { isEnvTruthy } from '../../utils/envUtils.js';
+import { getLastAssistantMessage } from '../../utils/messages.js';
+import { getMainLoopModel } from '../../utils/model/model.js';
+import { getInitialSettings } from '../../utils/settings/settings.js';
+import { logOTelEvent } from '../../utils/telemetry/events.js';
+import { submitTranscriptShare, type TranscriptShareTrigger } from './submitTranscriptShare.js';
+import type { TranscriptShareResponse } from './TranscriptSharePrompt.js';
+import { useSurveyState } from './useSurveyState.js';
+import type { FeedbackSurveyResponse, FeedbackSurveyType } from './utils.js';
+// 配置项全部来自服务端下发的动态配置（GrowthBook），所以每一条都得给默认值。七个字段里三个是时间窗（首次出现前、两次之间、跨会话之间）、两个是轮次窗（首次前、两次之间）、一个是显示时长、一个是模型白名单与概率。
+type FeedbackSurveyConfig = {
+  minTimeBeforeFeedbackMs: number;
+  minTimeBetweenFeedbackMs: number;
+  minTimeBetweenGlobalFeedbackMs: number;
+  minUserTurnsBeforeFeedback: number;
+  minUserTurnsBetweenFeedback: number;
+  hideThanksAfterMs: number;
+  onForModels: string[];
+  probability: number;
+};
+type TranscriptAskConfig = {
+  probability: number;
+};
+// 默认概率 **0.005**，即 0.5%，而且首次出现要求「会话已持续 10 分钟 + 至少 5 轮对话」。这两个数决定了问卷在没配动态配置时几乎弹不出来——默认值刻意保守，把调参权留给服务端，而不是让它默认打扰用户。
+const DEFAULT_FEEDBACK_SURVEY_CONFIG: FeedbackSurveyConfig = {
+  minTimeBeforeFeedbackMs: 600000,
+  minTimeBetweenFeedbackMs: 3600000,
+  minTimeBetweenGlobalFeedbackMs: 100000000,
+  minUserTurnsBeforeFeedback: 5,
+  minUserTurnsBetweenFeedback: 10,
+  hideThanksAfterMs: 3000,
+  onForModels: ['*'],
+  probability: 0.005
+};
+const DEFAULT_TRANSCRIPT_ASK_CONFIG: TranscriptAskConfig = {
+  probability: 0
+};
+// 返回值只有四个字段：状态机状态、上一次回答、两个回调。所有节流状态、概率骰子、遥测都在内部消化，调用方只关心「现在该显示什么」。这是 hook 与组件分工的典型形态——组件不知道何时该弹，只知道弹出来长什么样。
+export function useFeedbackSurvey(messages: Message[], isLoading: boolean, submitCount: number, surveyType: FeedbackSurveyType = 'session', hasActivePrompt: boolean = false): {
+  state: 'closed' | 'open' | 'thanks' | 'transcript_prompt' | 'submitting' | 'submitted';
+  lastResponse: FeedbackSurveyResponse | null;
+  handleSelect: (selected: FeedbackSurveyResponse) => boolean;
+  handleTranscriptSelect: (selected: TranscriptShareResponse) => void;
+} {
+// 最后一条助手消息 id 每次都直接写进 ref（渲染期赋值），因为它只用于遥测元数据，不参与任何渲染决策。写进 ref 而不是 state，避免「来一条消息就重渲染一次整棵问卷树」。
+  const lastAssistantMessageIdRef = useRef('unknown');
+  lastAssistantMessageIdRef.current = getLastAssistantMessage(messages)?.message?.id || 'unknown';
+// 本地节流状态只有两个字段：上次显示的时间戳、上次显示时的轮次计数。**不存「是否已显示过」**——因为「显示过」可以由 `timeLastShown !== null` 直接推出，多存一个布尔就多一处可能不一致的状态。
+  const [feedbackSurvey, setFeedbackSurvey] = useState<{
+    timeLastShown: number | null;
+    submitCountAtLastAppearance: number | null;
+  }>(() => ({
+    timeLastShown: null,
+    submitCountAtLastAppearance: null
+  }));
+// 三条动态配置分开取：主配置、坏评分享追问概率、好评分享追问概率。好评与坏评的追问概率分开配，是因为两者的目的不同——坏评追问是「找 bug」，好评追问是「找可公开的案例」，产研对这个比例的诉求完全不一样。
+  const config = useDynamicConfig<FeedbackSurveyConfig>('tengu_feedback_survey_config', DEFAULT_FEEDBACK_SURVEY_CONFIG);
+  const badTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('tengu_bad_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
+  const goodTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('tengu_good_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
+// `feedbackSurveyRate` 来自用户设置，会**覆盖**动态配置里的概率（见下面 `settingsRate ?? config.probability`）。这是给内部/企业环境留的口子：不改服务端配置也能把问卷关掉或强制打开。
+  const settingsRate = getInitialSettings().feedbackSurveyRate;
+// 会话起点与「起点时的轮次计数」各记一个 ref。它们只在**首次出现**那一路判断里用（当前轮次减去起点轮次 = 本会话已发生多少轮），之后不再更新——所以不能用 state，也不需要触发渲染。
+  const sessionStartTime = useRef(Date.now());
+  const submitCountAtSessionStart = useRef(submitCount);
+  const submitCountRef = useRef(submitCount);
+  submitCountRef.current = submitCount;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+// 这段注释记录了一个已经踩过的坑，也是本文件最值得抄的一段：概率**必须只滚一次**。原来的写法把 `Math.random()` 放在 useMemo 里，于是只要依赖数组里任何一项变化（轮次 +1、isLoading 翻转）就会重滚一次骰子；渲染次数够多之后，0.5% 的概率实际上变成「几乎必然出现」。
+  // Probability gate: roll once when eligibility conditions are met, not on every
+  // useMemo re-evaluation. Without this, each dependency change (submitCount,
+  // isLoading toggle, etc.) re-rolls Math.random(), making the survey almost
+  // certain to appear after enough renders.
+  const probabilityPassedRef = useRef(false);
+  const lastEligibleSubmitCountRef = useRef<number | null>(null);
+// 更新时间戳时先判「值是否真的变了」再 setState，返回同一个 prev 引用以避免重渲染。紧接着同步写全局配置（跨会话节流状态），但也先比一次再写——`saveGlobalConfig` 是写文件操作，重复写同样的值纯属浪费 IO。
+  const updateLastShownTime = useCallback((timestamp: number, submitCountValue: number) => {
+    setFeedbackSurvey(prev => {
+      if (prev.timeLastShown === timestamp && prev.submitCountAtLastAppearance === submitCountValue) {
+        return prev;
+      }
+      return {
+        timeLastShown: timestamp,
+        submitCountAtLastAppearance: submitCountValue
+      };
+    });
+    // Persist cross-session pacing state (previously done by onChangeAppState observer)
+    if (getGlobalConfig().feedbackSurveyState?.lastShownTime !== timestamp) {
+      saveGlobalConfig(current => ({
+        ...current,
+        feedbackSurveyState: {
+          lastShownTime: timestamp
+        }
+      }));
+    }
+  }, []);
+  const onOpen = useCallback((appearanceId: string) => {
+    updateLastShownTime(Date.now(), submitCountRef.current);
+    logEvent('tengu_feedback_survey_event', {
+      event_type: 'appeared' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      last_assistant_message_id: lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
+    });
+    void logOTelEvent('feedback_survey', {
+      event_type: 'appeared',
+      appearance_id: appearanceId,
+      survey_type: surveyType
+    });
+  }, [updateLastShownTime, surveyType]);
+// 回答事件的遥测把 `appearance_id` 一起带上：它把「出现」与「回答」两条事件串成同一次曝光，否则数据分析只能看到「弹了 N 次、答了 M 次」，对不上是哪一次弹了没答。
+  const onSelect = useCallback((appearanceId_0: string, selected: FeedbackSurveyResponse) => {
+    updateLastShownTime(Date.now(), submitCountRef.current);
+    logEvent('tengu_feedback_survey_event', {
+      event_type: 'responded' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      appearance_id: appearanceId_0 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      last_assistant_message_id: lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
+    });
+    void logOTelEvent('feedback_survey', {
+      event_type: 'responded',
+      appearance_id: appearanceId_0,
+      response: selected,
+      survey_type: surveyType
+    });
+  }, [updateLastShownTime, surveyType]);
+// 是否追问分享对话记录，四道门依次是：**只有好/坏评才问**（中评不问）→ **用户说过别再问**（持久化）→ **组织策略禁止产品反馈**（ZDR 客户连遥测都受限）→ **概率门**。顺序即优先级，最后才是随机。
+  const shouldShowTranscriptPrompt = useCallback((selected_0: FeedbackSurveyResponse) => {
+    // Only bad and good ratings trigger the transcript ask
+    if (selected_0 !== 'bad' && selected_0 !== 'good') {
+      return false;
+    }
+
+    // Don't show if user previously chose "Don't ask again"
+// `transcriptShareDismissed` 是持久化到全局配置的「别再问」，一旦用户选过就永久生效。注意它与问卷本身的节流是两套状态：关掉追问不影响之后还会不会弹评分。
+    if (getGlobalConfig().transcriptShareDismissed) {
+      return false;
+    }
+
+    // Don't show if product feedback is blocked by org policy (ZDR)
+    if (!isPolicyAllowed('allow_product_feedback')) {
+      return false;
+    }
+
+    // Probability gate from GrowthBook config (separate per rating)
+// 好坏评各取各的概率。注意这里每调用一次就滚一次骰子——但这个函数只在「用户真的点了评价」时调一次，不像上面那个 shouldOpen 会被反复求值，所以不需要额外的「只滚一次」保护。
+    const probability = selected_0 === 'bad' ? badTranscriptAskConfig.probability : goodTranscriptAskConfig.probability;
+    return Math.random() <= probability;
+  }, [badTranscriptAskConfig.probability, goodTranscriptAskConfig.probability]);
+  const onTranscriptPromptShown = useCallback((appearanceId_1: string, surveyResponse: FeedbackSurveyResponse) => {
+    const trigger: TranscriptShareTrigger = surveyResponse === 'good' ? 'good_feedback_survey' : 'bad_feedback_survey';
+    logEvent('tengu_feedback_survey_event', {
+      event_type: 'transcript_prompt_appeared' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      appearance_id: appearanceId_1 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      last_assistant_message_id: lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
+    });
+    void logOTelEvent('feedback_survey', {
+      event_type: 'transcript_prompt_appeared',
+      appearance_id: appearanceId_1,
+      survey_type: surveyType
+    });
+  }, [surveyType]);
+  const onTranscriptSelect = useCallback(async (appearanceId_2: string, selected_1: TranscriptShareResponse, surveyResponse_0: FeedbackSurveyResponse | null): Promise<boolean> => {
+    const trigger_0: TranscriptShareTrigger = surveyResponse_0 === 'good' ? 'good_feedback_survey' : 'bad_feedback_survey';
+    logEvent('tengu_feedback_survey_event', {
+      event_type: `transcript_share_${selected_1}` as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      appearance_id: appearanceId_2 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      last_assistant_message_id: lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      trigger: trigger_0 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
+    });
+// 选「别再问」时写盘；选「是」时上传对话记录。上传结果（成功/失败）会再补一条遥测，让产研能看到「用户同意但上传失败」的比例——这个比例高说明网络或后端有问题，而不是用户不愿意分享。
+    if (selected_1 === 'dont_ask_again') {
+      saveGlobalConfig(current_0 => ({
+        ...current_0,
+        transcriptShareDismissed: true
+      }));
+    }
+// 真正上传用 `messagesRef.current` 而不是入参 messages：上传是异步的，用的是**点击那一刻**的最新消息列表。若闭包捕获了渲染时的 messages，上传的可能是一段旧对话。
+    if (selected_1 === 'yes') {
+      const result = await submitTranscriptShare(messagesRef.current, trigger_0, appearanceId_2);
+      logEvent('tengu_feedback_survey_event', {
+        event_type: (result.success ? 'transcript_share_submitted' : 'transcript_share_failed') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        appearance_id: appearanceId_2 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        trigger: trigger_0 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
+      });
+      return result.success;
+    }
+    return false;
+  }, [surveyType]);
+  const {
+    state,
+    lastResponse,
+    open,
+    handleSelect,
+    handleTranscriptSelect
+  } = useSurveyState({
+    hideThanksAfterMs: config.hideThanksAfterMs,
+    onOpen,
+    onSelect,
+    shouldShowTranscriptPrompt,
+    onTranscriptPromptShown,
+    onTranscriptSelect
+  });
+  const currentModel = getMainLoopModel();
+// 模型白名单有三个分支：空数组 = 谁都不弹（显式关闭），含 `*` = 全弹，否则精确匹配当前模型。空数组判成「不弹」而不是「全弹」，是安全默认——配置漏填不该导致全员被弹窗。
+  const isModelAllowed = useMemo(() => {
+    if (config.onForModels.length === 0) {
+      return false;
+    }
+    if (config.onForModels.includes('*')) {
+      return true;
+    }
+    return config.onForModels.includes(currentModel);
+  }, [config.onForModels, currentModel]);
+// shouldOpen 是一长串 `return false` 的漏斗，从最便宜的条件开始：状态机必须 closed → 不能在加载中 → 不能有别的弹窗 → 测试开关 → 模型白名单 → 环境变量 → 服务端开关 → 组织策略。**每一条都是单方面否决**，没有任何一条能「强制通过」（除了显式的测试开关）。
+  const shouldOpen = useMemo(() => {
+    if (state !== 'closed') {
+      return false;
+    }
+    if (isLoading) {
+      return false;
+    }
+
+    // Don't show survey when permission or ask question prompts are visible
+    if (hasActivePrompt) {
+      return false;
+    }
+
+    // Force display for testing
+// `CLAUDE_FORCE_DISPLAY_SURVEY` 是开发用的强制开关，但它有条件限制：必须 `!feedbackSurvey.timeLastShown`，即本会话还没弹过。这样开发时按下去能立刻看到，但不会每轮都弹、把调试流打断。
+    if (process.env.CLAUDE_FORCE_DISPLAY_SURVEY && !feedbackSurvey.timeLastShown) {
+      return true;
+    }
+    if (!isModelAllowed) {
+      return false;
+    }
+    if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY)) {
+      return false;
+    }
+    if (isFeedbackSurveyDisabled()) {
+      return false;
+    }
+
+    // Check if product feedback is allowed by org policy
+    if (!isPolicyAllowed('allow_product_feedback')) {
+      return false;
+    }
+
+    // Check session-local pacing
+// 会话内节流分两条：**时间**（距上次显示是否够久）与**轮次**（距上次显示是否又聊了足够多轮）。两条都要满足——只按时间会导致用户挂着窗口不聊也被弹，只按轮次会导致狂聊一小时被弹很多次。
+    if (feedbackSurvey.timeLastShown) {
+      // Check time elapsed since last appearance in this session
+      const timeSinceLastShown = Date.now() - feedbackSurvey.timeLastShown;
+      if (timeSinceLastShown < config.minTimeBetweenFeedbackMs) {
+        return false;
+      }
+      // Check user turn requirement for subsequent appearances
+      if (feedbackSurvey.submitCountAtLastAppearance !== null && submitCount < feedbackSurvey.submitCountAtLastAppearance + config.minUserTurnsBetweenFeedback) {
+        return false;
+      }
+    } else {
+      // First appearance in this session
+      const timeSinceSessionStart = Date.now() - sessionStartTime.current;
+      if (timeSinceSessionStart < config.minTimeBeforeFeedbackMs) {
+        return false;
+      }
+      if (submitCount < submitCountAtSessionStart.current + config.minUserTurnsBeforeFeedback) {
+        return false;
+      }
+    }
+
+    // Probability check: roll once per eligibility window to avoid re-rolling
+    // on every useMemo re-evaluation (which would make triggering near-certain).
+// 概率骰子按 `submitCount` 记账：只有轮次变了才重滚一次。`lastEligibleSubmitCountRef` 存的是「上次滚骰子时的轮次」，比较用它而不是时间戳，因为轮次是离散的、比较稳定；用时间戳会因为毫秒级差异反复重滚。
+    if (lastEligibleSubmitCountRef.current !== submitCount) {
+      lastEligibleSubmitCountRef.current = submitCount;
+      probabilityPassedRef.current = Math.random() <= (settingsRate ?? config.probability);
+    }
+    if (!probabilityPassedRef.current) {
+      return false;
+    }
+
+    // Check global pacing (across all sessions)
+    // Leave this till last because it reads from the filesystem which is expensive.
+// 跨会话节流放在**最后**，注释直接写了原因：它要读全局配置文件，是这里最贵的一次 IO。前面的条件任何一个不满足就直接返回了，能走到这里的调用已经很少——这就是「按代价排序」的实际写法。
+    const globalFeedbackState = getGlobalConfig().feedbackSurveyState;
+    if (globalFeedbackState?.lastShownTime) {
+      const timeSinceGlobalLastShown = Date.now() - globalFeedbackState.lastShownTime;
+      if (timeSinceGlobalLastShown < config.minTimeBetweenGlobalFeedbackMs) {
+        return false;
+      }
+    }
+    return true;
+  }, [state, isLoading, hasActivePrompt, isModelAllowed, feedbackSurvey.timeLastShown, feedbackSurvey.submitCountAtLastAppearance, submitCount, config.minTimeBetweenFeedbackMs, config.minTimeBetweenGlobalFeedbackMs, config.minUserTurnsBetweenFeedback, config.minTimeBeforeFeedbackMs, config.minUserTurnsBeforeFeedback, config.probability, settingsRate]);
+  useEffect(() => {
+    if (shouldOpen) {
+      open();
+    }
+  }, [shouldOpen, open]);
+  return {
+    state,
+    lastResponse,
+    handleSelect,
+    handleTranscriptSelect
+  };
+}
+// 原文件此处有一行 34660 字符的 sourceMappingURL（base64 source map），
+// 它只用于把编译产物映射回源码，对理解逻辑没有帮助，这里省略不抄。
