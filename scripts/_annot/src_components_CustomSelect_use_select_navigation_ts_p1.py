@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 源文件: src/components/CustomSelect/use-select-navigation.ts (slug: use_select_navigation)
+ANNOTATIONS = [
+    (1, 'before', '本文件是 CustomSelect 的状态机层：用 useReducer 管理焦点与可视窗口（滚动窗口的 from / to 下标），reducer 里集中处理上下移动、翻页、循环、重置与程序化聚焦五种动作。Select 组件的所有键盘行为最终都落到这里的 dispatch。'),
+    (13, 'before', 'State：optionMap 是值到链表节点的映射（OptionMap 内部是双向链表，支撑 O(1) 的前后移动），后四个字段描述当前可视窗口。'),
+    (40, 'before', 'Action：六种动作的可辨识联合。focus-next/previous-option 是逐项移动，focus-next/previous-page 是整页翻动，set-focus 是外部程序化聚焦，reset 是选项集变化后整体重建状态。'),
+    (74, 'before', 'reducer：纯函数，不碰 React 状态之外的东西。三个核心不变量——focusedValue 必须存在于 optionMap；visibleToIndex 不超过总数；可视窗口随焦点最小滚动（只滚到刚好可见，不跳到居中）。'),
+    (182, 'before', 'focus-next-page：向下翻一整页（visibleOptionCount 项）。因为 OptionMap 是链表不是数组，定位目标项要从头遍历，这里用 while 循环走到目标下标。'),
+    (231, 'before', 'focus-previous-page：向上翻一整页，与 next-page 对称，目标下标取 max(0, 当前下标 - 页大小)。'),
+    (274, 'before', 'reset：直接整体替换状态。选项数组变化时由外层构造好新状态后 dispatch 过来。'),
+    (278, 'before', 'set-focus：程序化聚焦。已在视口内就只改焦点；在视口上方则把窗口滚到它位于顶端，在下方则滚到位于底端——即「最小滚动」策略，绝不居中。'),
+    (332, 'before', 'UseSelectNavigationProps：钩子入参。initialFocusValue 是挂载时的初焦点，focusValue 是父组件后续程序化改焦点的通道（受控用法）。'),
+    (361, 'before', 'SelectNavigation：钩子出参。focusedIndex 是 1 起始的全列表下标（供「3/17」这类滚动位置显示用），isInInput 告诉外层当前焦点是否是输入型选项（输入模式下 Enter 归输入框、不触发选中）。'),
+    (424, 'before', 'createDefaultState：构造初始状态，核心是「让初焦点可见」。支持传入 currentViewport（选项变化重建时保留旧视口位置），分支顺序：焦点在旧视口内 → 保留视口；在上方 → 滚到顶端；在下方 → 滚到底端；最后统一做边界钳制。'),
+    (505, 'before', 'useSelectNavigation 主钩子。reducer 初始化用惰性初始化（createDefaultState 作第三参），只在挂载时执行一次。'),
+    (520, 'after', '初始焦点取值优先级：focusValue（受控）优先于 initialFocusValue。'),
+    (524, 'after', 'onFocus 存进 ref：回调引用每渲染都变（父组件多写成内联箭头函数），放 ref 里让下面的 useEffect 只依赖焦点值本身，不随回调引用变化重跑。'),
+    (544, 'after', '选项集变化检测：引用不同且深比较也不同才 reset。reset 时带上旧视口（currentViewport）与新焦点优先级（focusValue > 现焦点 > initialFocusValue），让「列表内容刷新但光标尽量留在原地」。注意这是渲染期 dispatch（条件满足时同步执行），React 允许同组件渲染期 setState，效果是本次渲染即用新状态。'),
+    (586, 'after', 'visibleOptions：全列表切出当前窗口并附上全局下标。渲染层只看这个切片，窗口外的选项根本不进 DOM（终端 Ink 里即不渲染行）。'),
+    (592, 'before', 'validatedFocusedValue：校验焦点值在当前选项里真实存在。注释讲得很清楚：选项在渲染期变了但 reset 尚未被处理时，内部 state.focusedValue 可能指向已不存在的选项，不校验光标会凭空消失。失效时回退到第一项。'),
+    (609, 'after', 'isInInput：焦点选项是否输入型。外层据此决定 Enter 的归属。'),
+    (618, 'after', '通知 onFocus 用的是校验后的值（实际显示的焦点），不是内部 state 值——后者在选项刚变化的一帧里可能是悬空引用。'),
+    (628, 'after', '受控聚焦通道：父组件改 focusValue 就 dispatch set-focus。Select 的 props 注释警告过：别把它与 onFocus 组成双向同步环。'),
+    (631, 'before', 'focusedIndex：1 起始下标，给滚动位置指示（如 3/17）用。找不到返回 0。'),
+]

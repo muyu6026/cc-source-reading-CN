@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+# 源文件: src/components/CustomSelect/select.tsx
+ANNOTATIONS = [
+    (1, 'before', '本文件是 CustomSelect 的展示层外壳：把选项列表按三种版式（expanded / compact-vertical / compact）渲染成终端 UI，交互（键盘导航、选中、输入型选项）全部委托给 useSelectState 与 useSelectInput 两个钩子。文件由 React Compiler 编译：函数体里满是 _c(n) 记忆槽、tN 临时变量、_tempN 同构谓词与 bb0 标签块，都是生成物，读时抓逻辑主干即可。'),
+    (16, 'before', 'getTextContent：把 ReactNode 递归摊平成纯文本，用于计算标签宽度（stringWidth 只认字符串，不认元素）。'),
+    (28, 'before', 'BaseOption：所有选项的公共字段。label 允许是 ReactNode（可以是带高亮的片段），value 是泛型键。'),
+    (35, 'before', 'OptionWithDescription：在 BaseOption 上叠加输入型选项（type 为 input）的扩展——内嵌 TextInput、占位符、空提交语义（allowEmptySubmitToCancel 决定空输入算提交还是取消）、强制显示标签、光标自动归位等。权限弹窗与提问面板里带输入框的选项就是它。'),
+    (70, 'before', 'SelectProps：Select 的全部可控项。几组成对约束值得注意：onUpFromFirstItem / onDownFromLastItem 存在时导航不循环，把「到头」交给外层处理（多级菜单用）；onFocus 的注释明确警告不要与 focusValue 组成双向同步，否则父传子、子又回调父，会进反馈环。'),
+    (192, 'before', 'Select 主组件。_c(72) 开了 72 个记忆槽，是本批最大的编译产物之一。'),
+    (221, 'after', '编译器把 props 默认值展开成三目：undefined 才落默认，显式传 false / 0 不被覆盖。isDisabled、hideIndexes、visibleOptionCount（默认 5）、layout（默认 compact）、disableSelection、inlineDescriptions 六项都走这个模式。'),
+    (278, 'after', '同步输入型选项的 initialValue：当选项的 initialValue 变了、而用户还没改过当前值（currentValue 等于上一次的初始值）时，把输入值跟着挪过去；用 lastInitialValues 这个 ref 区分「用户改过」和「没动过」。没有这套守卫，异步刷新 initialValue 会冲掉用户正在打的字。'),
+    (301, 'after', 'useSelectState：焦点、选中、可视窗口（visibleFromIndex / visibleToIndex）全在它内部，Select 只消费。'),
+    (348, 'after', 'useSelectInput：键盘事件（上下、回车、Tab 切输入模式、ctrl+g 开编辑器、图片粘贴）全在这里消化，Select 的 JSX 里不需要任何 onKeyDown。'),
+    (354, 'after', 'react.early_return_sentinel 与 bb0 标签块：编译器把整个渲染主体包进一个带标签的块，先算 t17；若 t17 仍是哨兵值说明没走早退分支，最后才落到通用渲染（文件尾部的 return t18）。这是编译器表达「函数内有早退 return」的标准手法。'),
+    (369, 'after', 'expanded 版式：一选项一块（标签 + 描述 + 空行），索引宽度按选项总数位数算，保证上下箭头列对齐。'),
+    (407, 'before', 'compact-vertical 版式：索引在标签左侧同行、描述另起一行缩进对齐（paddingLeft 按 maxIndexWidth 补齐）。与 expanded 的差别是描述不占独立整块、更省纵向空间。'),
+    (463, 'after', 'compact 版式（默认）：所有选项挤在单行。这里先做两个全局判定：hasInputOptions（有没有输入型选项）与 hasDescriptions（非内联模式下有没有描述）——有描述才走下面的双列对齐渲染，否则走最紧凑的单行分支。'),
+    (465, 'after', 'hasDescriptions 特意排除输入型选项：输入框自带标签展示，混进双列对齐会破坏列宽计算，所以输入型选项永远不算「有描述」。'),
+    (492, 'before', '双列渲染：先算 maxLabelWidth（各选项标签宽度取最大，勾选标记占 2 列也计入），再逐行补 padding，让右侧描述列起点严格对齐——终端里没有 CSS grid，对齐全靠手动补空格。'),
+    (531, 'after', '走完双列分支就直接 break bb0，不会落到下面的通用单行渲染——hasDescriptions 为真时单行渲染不参与。'),
+    (609, 'before', '收束：早退分支（输入型选项的提交/取消处理）已在上面的 JSX 里返回；这里判断 t17 是否还是哨兵，不是就直接用，是才构造最终的 Box。'),
+    (622, 'after', '最终渲染：T0 / t15 / t16 分别是容器组件、容器 props、子元素——三个分支（expanded / compact-vertical / compact 单行）各自赋值，出口统一。'),
+    (625, 'before', '注意：这段英文注释描述的是下面 TwoColumnRow 组件，但被编译器提升到了 _temp9 之前——编译输出会把源码注释挪位，读时按语义归属、不要按物理位置。'),
+    (660, 'before', 'TwoColumnRow：双列布局的行容器。与其它版式不同，它不经过 SelectOption → ListItem 渲染链，所以自己声明原生光标（useDeclaredCursor），把光标停在指针指示符上，方便屏幕阅读器与放大镜跟随焦点。'),
+    (678, 'after', 'useDeclaredCursor：Ink 的原生光标声明钩子，active 随 isFocused 开关——焦点行显示真实终端光标，其余行不显示。'),
+    (688, 'after', 'TwoColumnRow 到此结束。文件尾部的 8 个 _tempN 是编译器从各处箭头函数与样式对象提升出来的：_temp / _temp2 / _temp5 / _temp6 / _temp9 都是「粘贴内容是否图片」的同构谓词，_temp7 判断输入型选项，_temp8 判断有无描述，_temp3 / _temp4 是容器与高亮样式——同形谓词不合并是编译器的保守策略，读时当一个小函数看即可。'),
+]

@@ -3068,7 +3068,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1168 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2290 条加内链 673 条，0 失效；全仓 1168/1902 文件、357,422/513,237 行、69%。
 
-**下一批候选（components 降序）**：`CustomSelect/select.tsx`(690) · `CustomSelect/use-select-navigation.ts`(653) · `tasks/BackgroundTasksDialog.tsx`(652) · `mcp/MCPRemoteServerMenu.tsx`(649) · `permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637) · `ConsoleOAuthFlow.tsx`(631) · `Feedback.tsx`(592) …（components 已做 78/389，剩 311 份；全仓还剩 734 份）。建议下批取 4 份约 2,600 行，或 3 份约 2,000 行保持密度。
+### components 第 107 批：选择组件、后台任务总管、MCP 远程服务器菜单（2,644 行，93 锚点）
+
+第五批 components，仍按源行量取件：4 份共 2,644 行（690 / 653 / 652 / 649 的紧凑区间）。四份的主题是**「终端里的交互基础设施」**：CustomSelect 是全产品所有菜单/弹窗的选择底座，BackgroundTasksDialog 是七类后台任务的统一总管，MCPRemoteServerMenu 是远程 MCP 服务器的认证与重连中枢——三份都有「多分支互斥视图」或「状态机 reducer」的骨架。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/CustomSelect/select.tsx`](annotated/src/components/CustomSelect/select.tsx) | 690 | 714 | 23 | 选择底座展示层：三种版式（expanded / compact-vertical / compact）各自渲染分支；getTextContent 摊平 ReactNode 算列宽；双列布局靠手动补空格对齐；TwoColumnRow 自己声明原生光标；尾部 8 个 _tempN 同构谓词 |
+| [`components/CustomSelect/use-select-navigation.ts`](annotated/src/components/CustomSelect/use-select-navigation.ts) | 653 | 674 | 21 | 选择底座状态机：useReducer 管理 focusValue 与可视窗口，六种 action；最小滚动策略（焦点到边缘、绝不居中）；选项集变化时带旧视口重建，光标尽量留原地；validatedFocusedValue 防焦点悬空 |
+| [`components/tasks/BackgroundTasksDialog.tsx`](annotated/src/components/tasks/BackgroundTasksDialog.tsx) | 652 | 679 | 26 | 后台任务总管：七类任务统一列表；x 停止 / f 前台化 / Enter 详情的键位分派；WORKFLOW_SCRIPTS 与 MONITOR_TOOL 特性门控 require；allSelectableItems 顺序必须与 JSX 渲染顺序一致的隐式契约；goBackToList 的过期状态陷阱 |
+| [`components/mcp/MCPRemoteServerMenu.tsx`](annotated/src/components/mcp/MCPRemoteServerMenu.tsx) | 649 | 673 | 23 | MCP 远程服务器菜单：四条独立异步流程（标准 OAuth / claudeai 认证 / claudeai 清除认证 / 重连）各带早退加载视图；isEffectivelyAuthenticated 驱动菜单项；手动粘贴回调 URL 的降级路径；revoke 保留 step-up 状态的取舍 |
+
+横切观察：
+
+- **CustomSelect 拆成「展示 + 状态机」两层是这套 UI 体系最重要的复用决策**：use-select-navigation.ts 是手写源码（reducer 六种 action、最小滚动、validatedFocusedValue 校验），select.tsx 是编译产物（三版式渲染 + 72 个记忆槽）。所有上层（权限弹窗、提问面板、服务器菜单）都消费同一底座，交互行为只改一处。
+- **「顺序契约」是编译产物里最脆弱的隐式约定**：BackgroundTasksDialog 的 allSelectableItems 必须与 JSX 分组渲染顺序一致，否则键盘光标与视觉位置错位——代码里没有任何机制强制这一点，只能靠注释（源码 217 行的英文注释就是干这个的）。
+- **异步流程的「完成文案三分法」**：MCPRemoteServerMenu 每条流程的成功 / 半成功（needs-auth）/ 失败都有独立文案，且半成功都提示「可能要手动重启」——连接管理器不保证热生效，宁可提示用户重启也不静默装好。
+- **useEffectEvent 的教科书用法**：onDoneEvent 让「引用稳定」与「永远调最新回调」同时成立，effect 不重跑、闭包不过期——React 官方为事件与 effect 解耦提供的原语，本文件是标准范例。
+
+踩坑：`use-select-navigation.ts` 的数据文件名初稿保留了连字符（slug 规则要求 `-` 也换成 `_`），annotate.py 找不到数据文件报「找不到批注数据」，重命名为 `use_select_navigation` 后通过——slug 规则原文「把 `/` `.` `-` 换成 `_`」中的 `-` 这次才真正踩到。三份编译产物 JSX 内部零插入，锚点全落语句收尾行 / 常量声明行 / `if` 与 `case` 行前；select.tsx 尾部注释块（625 行起）描述的是 TwoColumnRow 但被编译器提升到 _temp9 之前，批注里特别标注「按语义归属读」。预检 93 锚点一次全过（含块注释内部续行扫描与 `after` 落 `*/` 收尾行检测）；annotate 四次零 `⟳`、零 `⚠`，3 处长批注自动折行，增量 96 = 93 锚点 + 3。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1172 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2294 条加内链 674 条，0 失效；全仓 1172/1902 文件、360,066/513,237 行、70%（行覆盖首次破 70%）。
+
+**下一批候选（components 降序，建议取 4 份约 2,400 行）**：`permissions/AskUserQuestionPermissionRequest/AskUserQuestionPermissionRequest.tsx`(645) · `FullscreenLayout.tsx`(637) · `ConsoleOAuthFlow.tsx`(631) · `Feedback.tsx`(592) · `hooks/HooksConfigMenu.tsx`(578) · `Spinner.tsx`(562) · `agents/ToolSelector.tsx`(562) · `LogoV2/LogoV2.tsx`(543) …（components 已做 82/389，剩 307 份；全仓还剩 730 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 

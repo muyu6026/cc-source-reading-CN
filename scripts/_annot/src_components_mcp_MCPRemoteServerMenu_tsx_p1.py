@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+# 源文件: src/components/mcp/MCPRemoteServerMenu.tsx
+ANNOTATIONS = [
+    (1, 'before', '本文件是 MCP 远程服务器（SSE / HTTP / claudeai-proxy 三类）的管理菜单：展示状态、认证、URL、能力清单，并提供认证 / 清除认证 / 重连 / 启停等动作。核心难点是四条互相独立的异步流程（标准 OAuth、claudeai 认证、claudeai 清除认证、重连），各自带独立的加载视图与取消路径。'),
+    (31, 'before', 'Props：server 是三种服务器信息的联合；onComplete 上报结果文案（回命令行输出），onCancel 返回服务器列表。'),
+    (41, 'before', 'MCPRemoteServerMenu 主组件。状态很多，按流程分四组：标准 OAuth（isAuthenticating / authorizationUrl / 手动回调输入）、claudeai 认证（isClaudeAIAuthenticating / claudeAIAuthUrl）、claudeai 清除认证（isClaudeAIClearingAuth 等）、重连（isReconnecting）。'),
+    (90, 'after', 'isEffectivelyAuthenticated：两种「实际已认证」——有 OAuth token，或已连接且有工具（说明走的是别的认证机制在正常工作）。菜单项的显隐全部由它驱动。'),
+    (92, 'before', 'handleClaudeAIAuthComplete：claudeai 认证完成后重连服务器，按重连结果（connected / needs-auth / failed）给三种不同文案。needs-auth 与 failed 都提示「可能要手动重启」，因为连接管理器不保证热生效。'),
+    (118, 'before', 'handleClaudeAIClearAuthComplete：清缓存 + 把客户端状态改成 needs-auth，并从 AppState 里剔除该服务器的工具 / 命令 / 资源——断连必须同步清能力清单，否则 UI 还会显示可用的工具。'),
+    (150, 'before', '三条 Esc 取消键绑定各管一条流程，用 isActive 互斥激活（同一时刻只有一条认证流程在进行），context 都是 Confirmation。'),
+    (180, 'before', 'useInput 原生输入处理：Enter 确认 claudeai 流程、c 复制授权 URL（带 2 秒复制反馈与防重定时器）。复制回调里先查 unmountedRef——异步 setClipboard 回来时组件可能已卸载，避免卸载后 setState。'),
+    (210, 'after', 'serverCommandsCount 是 MCP prompts 数量；注释说明 skills 不在此显示（归 /skills 管），避免两个入口展示同一批东西。'),
+    (215, 'before', 'handleClaudeAIAuth：拼授权 URL。有组织 id 且是 claudeai-proxy 配置时走直达认证端点（serverId 把 mcprs 前缀换成 mcpsrv），否则回退到通用的 connectors 设置页。productSurface 用环境变量标识入口（cli 等）。'),
+    (235, 'before', 'handleClaudeAIClearAuth：只是打开清除确认视图，真正动作在用户于浏览器操作完按 Enter 后由 handleClaudeAIClearAuthComplete 执行——两段式设计，中间留给用户去网页操作。'),
+    (239, 'before', 'handleToggleEnabled：启停后主动 onCancel 回列表，让用户连续管理多台服务器；失败则报错留在原地。'),
+    (256, 'before', 'handleAuthenticate：标准 OAuth 主流程。重认证前先 revoke 旧 token，但保留 step-up 认证状态（preserveStepUpState），让下一次流程能复用缓存的 scope 与发现文档，少一次往返。'),
+    (265, 'before', 'revoke 里保留 step-up 状态是个细微取舍：清干净更简单，但重新认证会多跳一次 IdP 发现；保留则下次静默换 token。'),
+    (275, 'after', 'onWaitingForCallback 回调把 submit 函数存进 manualCallbackSubmit 状态：回调服务器收不到重定向时（浏览器与终端不通的环境），用户可以手动粘贴回调 URL 提交。'),
+    (303, 'before', 'handleClearAuth：撤销 token → 清服务器缓存 → 更新 AppState（客户端标 failed，剔除工具 / 命令 / 资源）。注释承认 failed 是误名——目前没有区分「未连接」和「失败」。'),
+    (341, 'before', '四条流程的专属加载视图，早退链排列：标准 OAuth → claudeai 认证 → claudeai 清除 → 重连。每条都提供复制 URL 的降级路径（浏览器没自动打开时手动复制）。'),
+    (385, 'before', 'claudeai 认证视图：与标准 OAuth 不同，它没有回调服务器（claudeai 面板侧操作），完成后按 Enter 确认再走重连。'),
+    (414, 'before', 'claudeai 清除认证视图：两阶段提示——浏览器未开时给 URL 可复制，开了后引导去面板点 Disconnect，Enter 在两个阶段含义不同（开浏览器 / 确认完成）。'),
+    (458, 'before', '重连视图：纯加载态，无交互，完成后由调用方（handleClaudeAIAuthComplete 或菜单重连分支）退出。'),
+    (470, 'after', '菜单项动态构造，顺序即语义：禁用态服务器第一项是 Enable（主行动作）；claudeai-proxy 与标准服务器的认证项走不同分支（claudeai-auth vs auth / reauth + clear-auth）；已连接的非 needs-auth 才有 Reconnect。全空时补一个 Back 兜底——Select 组件要求至少一项才能处理 Esc。'),
+    (529, 'before', '菜单 onSelect 里的大 switch 分派到前面定义的各 handler；重连分支是内联实现的（要区分 claudeai-proxy 打点），其余直接调函数。'),
+    (647, 'after', '主视图到此结束。整体结构：四个早退加载视图 + 状态面板 + 动态菜单。所有异步动作都强调「完成后给明确文案」，成功 / 半成功（needs-auth）/ 失败三种结果都有对应提示，不静默。'),
+]
