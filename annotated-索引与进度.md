@@ -3204,7 +3204,31 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1192 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2318 条加内链 680 条，0 失效；全仓 1192/1902 文件、370,421/513,237 行、72.2%（README 记 72%）。
 
-**下一批候选（components 降序，建议取 4 份约 1,680 行）**：`LogoV2/WelcomeV2.tsx`(433) · `tasks/BackgroundTaskStatus.tsx`(429) · `CustomSelect/use-multi-select-state.ts`(414) · `tasks/ShellDetailDialog.tsx`(404)（components 已做 120/407，剩 287 份；全仓还剩 710 份）。
+### components 第 113 批：启动横幅、后台任务状态条、多选状态机、Shell 任务详情（1,680 行，121 锚点）
+
+第十一批 components，仍是行数降序取 4 份共 1,680 行（433 / 429 / 414 / 404），是本轮里最轻的一批（首次低于 1,700 行）。主题是**「同一份状态在几种视图之间让位」**：启动横幅按终端与主题分三个出口画同一张图、任务状态条在「汇总 pill」与「队友 pill 条」之间切换、多选状态机用同一个回车承载「切换」与「提交」两种语义、Shell 详情弹窗用一份组件同时服务 shell 与 monitor 两类任务。四份合起来正好展示了同一个套路：**能并存的信息尽量别并存，让位置只归一个人**。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/LogoV2/WelcomeV2.tsx`](annotated/src/components/LogoV2/WelcomeV2.tsx) | 433 | 466 | 32 | 启动横幅：58 列画布上手工拼贴 ASCII 图；三个出口（Apple Terminal 用半块字符配背景色、浅色用中阴影块、深色用实心块加星号）；每行 JSX 各自占一个记忆槽，常量走哨兵、欢迎语走依赖 |
+| [`components/tasks/BackgroundTaskStatus.tsx`](annotated/src/components/tasks/BackgroundTaskStatus.tsx) | 429 | 460 | 30 | 后台任务状态条：主代理是伪条目（无 taskId，点击即退出队友视图）；队友下标整体右移一格给主代理让位；pill 宽度按显示列算；只有「需要 CTA」时才提示按方向下；两个早退分别是策略与数据 |
+| [`components/CustomSelect/use-multi-select-state.ts`](annotated/src/components/CustomSelect/use-multi-select-state.ts) | 414 | 443 | 29 | 多选状态机：`submitButtonText` 是总开关，决定回车是切换还是提交、Tab 到末位后进按钮还是循环；输入态走白名单放行；空字符串等价于取消选中；Escape 必须 `stopImmediatePropagation` 才不关两层 |
+| [`components/tasks/ShellDetailDialog.tsx`](annotated/src/components/tasks/ShellDetailDialog.tsx) | 404 | 435 | 30 | Shell 任务详情：只读文件尾 8KB；Promise 进 state 才能换引用重读；`useDeferredValue` 保证刷新时仍能按 Esc；Suspense 边界下沉到输出子组件；末尾 10 行靠反向找换行符而非 split |
+
+横切观察：
+
+- **同一个回车，两种语义，由「界面上有没有按钮」决定**：多选状态机里 `submitButtonText` 一给，回车就退化成「移动焦点」、空格才切换选中；不给则回车直接提交。这个开关还顺带决定了 Tab 与上下键到末位后的去向。也就是说按键语义不是由键位定的，而是由界面形态定的——这一点和 Web 表单的本能正好相反。
+- **「让位」比「并存」更常见**：任务状态条在 `expandedView` 为 teammates 时整条退出、交给队友树；Shell 详情在输出 Promise 未解时只挂起输出区而不是整个弹窗；启动横幅在 Apple Terminal 下直接提前返回。三处都在说明同一个原则：一个位置上只该有一个东西说话，多出来的那个必须整块消失而不是缩水。
+- **缓存契约要分清两种，混看就误判**：编译器产物里 `$[k] !== x` 表示「依赖变了才重建」（数据驱动），`$[k] === Symbol.for(...)` 表示「永不变、只算一次」（常量）。把两者混为一谈，就会误判「这里为什么每帧重算」或反过来「这里为什么改了不生效」——启动横幅里同一段图案两份写法，正是两种契约并置的最好例子。
+- **终端里「谁接键盘」要主动抢**：Shell 详情最外层 Box 必须 `tabIndex={0}` 加 `autoFocus` 才收得到按键；多选状态机要靠 `useRegisterOverlay` 抢 Escape、再靠 `stopImmediatePropagation` 防一次按键关两层；任务条的悬停回调还得用哨兵缓存，否则引用一变就可能重挂子树。Web 里焦点由浏览器分配，终端里得自己拿、还得自己守住。
+- **宽度一律按显示列算，不按字符数**：任务条 pill 宽度用 `stringWidth`（中文与 emoji 占两列），Shell 输出的可用宽度是列宽减 6（圆角边框加内边距），横幅每行补空格到 58 列。任何一处用 `length` 代替，滚动窗口与折行就会同时歪掉。
+- **防御性兜底要落在「读不到」而不是「读出错」**：`getTaskOutput` 把任何异常吞成空内容，弹窗显示「无输出」而不是崩掉；`endTime` 缺失就用 `Date.now()` 顶替算已运行时长。排障工具本身不能成为新的故障源。
+
+踩坑：`WelcomeV2.tsx` 第 433 行是内联 base64 sourcemap、单行几万字符，锚点只能落它之前（本次落在 433 的 `before`，即正文结束后）；`use-multi-select-state.ts` 的 59 与 88 行原本落在 JSDoc 块注释内部，已改锚到块外紧邻的类型成员行（64 与 93）；`ShellDetailDialog.tsx` 的 310–313 是跨行解构，锚点从 313 挪到 314 的 `if (!content)`。预检 121 锚点一次全过（含块注释续行扫描与模板字符串状态机扫描）；`annotate.py` 四次零 `⟳` 零 `⚠`；折行只在前三份出现（33 / 31 / 31 行），第四份 29 锚点未触发折行，故增量 124 = 121 + 3——这是本轮第一次增量不等于锚点数加 4。
+
+流程账：4 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1196 份 0 失败（较上批 +4）；`check-links.py` 源码链接 2318 条加内链 680 条，0 失效；全仓 1196/1902 文件、372,101/513,237 行、72.5%（README 记 72%）。
+
+**下一批候选（components 降序，建议取 4 份约 1,580 行）**：`BridgeDialog.tsx`(401) · `mcp/MCPSettings.tsx`(398) · `ui/TreeSelect.tsx`(397) · `diff/DiffDialog.tsx`(383)（components 已做 124/407，剩 283 份；全仓还剩 706 份）。
 
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
