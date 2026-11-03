@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 112 批（2026-11-03）：components 第十批（4 文件 1,767 行，118 锚点）
+
+- 状态：完成并推送，commit `070af39`（`1ee153c..070af39`）。
+- 本批 4 文件：`ModelPicker.tsx`(448→480，31 锚点) / `permissions/ComputerUseApproval/ComputerUseApproval.tsx`(441→472，30) / `agents/AgentsList.tsx`(440→469，28) / `memory/MemoryFileSelector.tsx`(438→468，29)。
+- 进度：全仓 1192/1902（370,421/513,237 行，72.2%，README 记 72%）· components 120/407（剩 287，总剩 710）。
+- 校验：check-fidelity 1192 份 0 失败；check-links 2318 源码链接 + 680 内链 0 失效；annotate 四次零 ⟳ 零 ⚠；4 份各 1 处长批注折行，增量 122 = 118 + 4。
+- 亮点：①ModelPicker 三种值必须分清（界面哨兵 `__NO_PREFERENCE__` / 用户串 / `parseUserSpecifiedModel` 解析后的模型名），全部汇到 `resolveOptionModel` 一个函数；②`displayEffort` 只在显示层把 max 钳成 high，状态不动——反过来做会在切模型时丢掉用户原始意图；③强度只在「用户真调过」时才传下游，落盘也只在「该持久化的值」非空时写（跟随默认不留痕）；④ComputerUse 是「跳转面板 vs 白名单面板」互斥分派，打开系统设置**不结束弹窗**（只有 retry 才结束），允许路径下 denied 清单也非空（装的是没装/没勾的应用）；⑤AgentsList 自建上下键循环的唯一理由是「条目类别不同」（新建项+代理项），选中靠「类型+来源」而非引用相等，副标题计数去重；⑥MemoryFileSelector 用「焦点进开关区就把列表整体 isDisabled」表达焦点归属，`useKeybinding` 的 `isActive` 配合形成双向通道；⑦ComputerUse 的 `checked` 是 `Set` 但全文件无增删入口——结构预留逐项勾选、界面按全选走，属「结构比界面超前」的半成品形态。
+- 踩坑：`ModelPicker.tsx` 30–35 是 JSDoc 块（锚点落块首 30，属 code 状态，未被外移）；`MemoryFileSelector.tsx` 28 行单行 eslint 块注释 + 29 行条件 require；`ComputerUseApproval.tsx` 24–29 说明块 + 48/200 两段 `// ── ... ──` 分区注释——全部落块外。本轮零 ⟳，说明批 111 那次「报 ⟳ 但位置 16→16」确实是模板起始行的特例。
+- 下批目标（components 降序，建议 4 份约 1,680 行）：`LogoV2/WelcomeV2.tsx`(433) · `tasks/BackgroundTaskStatus.tsx`(429) · `CustomSelect/use-multi-select-state.ts`(414) · `tasks/ShellDetailDialog.tsx`(404)。
+
+
 ## 第 111 批（2026-11-03）：components 第九批（4 文件 1,870 行，122 锚点）
 
 - 状态：完成并推送，commit `1ee153c`（`a9d3f9b..1ee153c`）。
