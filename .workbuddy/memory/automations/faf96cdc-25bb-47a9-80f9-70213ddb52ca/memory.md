@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 103 批（2026-11-03）：转入 components 首取（2 文件 3,397 行，73 锚点）
+
+- 状态：完成并推送，commit `b103ddb`（`a9f566d..b103ddb`）。
+- 本批 2 文件：`components/Settings/Config.tsx`(1822→1858，36 锚点) / `components/LogSelector.tsx`(1575→1612，37 锚点)。合计 3,397 源行 / 73 锚点。
+- 进度：全仓 1158/1902 文件 / 347,734 行 / 67%（实算；components 68/389，剩 321）。
+- 校验：check-fidelity 1158 份 0 失败；check-links 2282 源码链接 + 670 内链 0 失效；annotate 两次零 `⟳`、零 `⚠`，行数增量恰等于锚点数。
+- 下一批目标（components 降序，建议取 3 份约 3,500 行）：Stats.tsx(1228) · permissions/rules/PermissionRuleList.tsx(1179) · mcp/ElicitationDialog.tsx(1169) · VirtualMessageList.tsx(1082) · ScrollKeybindingHandler.tsx(1012) · tasks/RemoteSessionDetailDialog.tsx(904) · MessageSelector.tsx(831) · agents/AgentsMenu.tsx(800)。
+
+### 本批经验（下次先看）
+- **components 改「按源行量取件」，不再固定 10 个**：单文件 800–1,800 行，10 份即 1.2 万行、单轮上下文吃不下。本批取最大 2 份共 3,397 行（历史单批体量的 5–6 倍），锚点密度降到约每 46 行一处；下批建议 3 份约 3,500 行。
+- **巨型 `.tsx` 的读法**：先 `grep -nE "^(export )?(function|const|type|interface)|^  (function|const) |^  React\.use(Memo|Callback|Effect)"` 取骨架，再按段 `Read` 关键区间（状态区、回调区、effect 区、render 尾、辅助函数），不要整文件读（Config.tsx 0.3MB 超 Read 上限，必须分段）。
+- **`after` 绝不进 JSX、也不进多行表达式首行**：只落函数签名行、语句收尾行（`});` `;`）、常量声明行、数组收尾行；`before` 用于 `type`/`function`/`/**` 块开头。本批 73 锚点零外移可作模板。
+- **React Compiler 产物照读不误**：`_c(247)` 是记忆槽数，`$[n]` 判断等价 `useMemo`/`useCallback` 依赖比较，`bb0/bb1/bb2` 标签块是条件表达式展开；批注里点明还原写法，读者才不会被 `t1..t72` 劝退。
+
 ## 第 102 批（2026-11-03）：utils 收尾清零（3 份 8 行小文件，6 锚点）· utils 子树 564/564 全清
 
 - 状态：完成并推送，commit `1f88d20`（`a07bf0a..1f88d20`）。
