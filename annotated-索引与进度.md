@@ -3002,6 +3002,29 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（components 降序，仍按源行量取件）**：`Stats.tsx`(1228) · `permissions/rules/PermissionRuleList.tsx`(1179) · `mcp/ElicitationDialog.tsx`(1169) · `VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) …（components 已做 68/389，剩 321 份；全仓还剩 744 份）。建议下批取 3 份（约 3,500 行），保持本批密度。
 
+### components 第 104 批：统计面板、权限规则、MCP 询问（3,573 行，112 锚点）
+
+第二批 components，延续「按源行量取件」：取最大的 3 份共 3,573 行，密度与上批持平（约每 32 行一处锚点）。三份的共同点是**状态机都很重**——统计面板是「全量挂起 + 区间增量」的双层加载，权限面板是「六种整屏视图」的早退链，询问对话框是「表单焦点 / 手风琴 / 等待阶段」的多层按键分派。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/Stats.tsx`](annotated/src/components/Stats.tsx) | 1227 | 1263 | 35 | `/stats` 用量统计：热力图 + 概览/模型双标签 + 区间循环，另有 ANSI 截图路径 |
+| [`components/permissions/rules/PermissionRuleList.tsx`](annotated/src/components/permissions/rules/PermissionRuleList.tsx) | 1178 | 1215 | 36 | `/permissions` 五标签规则管理：增删规则与工作区目录，内存生效与落盘分离 |
+| [`components/mcp/ElicitationDialog.tsx`](annotated/src/components/mcp/ElicitationDialog.tsx) | 1168 | 1210 | 41 | MCP 反向询问：按 JSON Schema 动态渲染表单，form/url 两种模式 |
+
+横切观察：
+
+- 「内存生效」与「持久化」在本批被反复拆开：权限面板先 `applyPermissionUpdate` 算新上下文并写 AppState（立刻生效），只有勾了「记住」才 `persistPermissionUpdate` 落盘；会话级授权进程结束即失效。统计面板同理——全量 Promise 只建一次，区间数据进缓存后不再请求。
+- 「互斥焦点」比「单一焦点」更难写：询问对话框的 `currentFieldIndex` 与 `focusedButton` 必须严格互斥，两者皆空才是「有字段但未聚焦」的初始态；权限面板则用「早退链」把规则详情、新增输入、校验确认、加目录、删目录、主列表六种整屏视图排成互斥分支。
+- 「展示值可本地化，回传值必须原样」：询问对话框的日期字段只改显示格式，提交仍用原始 ISO 串；纯日期还要手工拆年月日构造本地日期，规避 `new Date(字符串)` 按 UTC 解析导致的跨时区偏移。
+- React Compiler 产物的 `Symbol.for("react.memo_cache_sentinel")` 是「只建一次」的哨兵：统计面板的全量 Promise 若每次渲染重建，`use()` 会反复挂起成死循环；这也是批注里必须留下的坑。
+
+踩坑：三份均为千行级 `.tsx`，`after` 只落语句收尾行（`);` / `;`）与常量声明行，`before` 用于 `type`/`function`/`/**` 块开头，JSX 内部零插入。预检 112 锚点一次全过（含块注释内部续行扫描），`annotate.py` 三次零 `⟳`、零 `⚠`。一处文本自检修正：初稿在「ASCII 动画」描述里写了反斜杠转义，被「批注正文禁反斜杠」门禁拦下，改为「横线斜线这类 ASCII 动画」。
+
+流程账：3 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1161 份 0 失败（较上批 +3）；`check-links.py` 源码链接 2284 条加内链 671 条，0 失效；全仓 1161/1902 文件、351,310/513,237 行、68%。
+
+**下一批候选（components 降序）**：`VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) · `CustomSelect/select.tsx`(690) …（components 已做 71/389，剩 318 份；全仓还剩 741 份）。建议下批仍取 3 份约 3,000 行。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
