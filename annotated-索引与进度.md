@@ -2980,6 +2980,28 @@ utils 根目录按行数降序的第三、四名：`hooks.ts`（5,022 行）与 
 
 **下一批候选（utils 已清零，转 `src/components/`）**：按 `check-coverage src/components` 实际 top 清单，最大缺失为 `Settings/Config.tsx`(1822) · `LogSelector.tsx`(1575) · `Stats.tsx`(1228) · `permissions/rules/PermissionRuleList.tsx`(1179) · `mcp/ElicitationDialog.tsx`(1169) · `VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) …（components 已做 66/389，剩 323 份；全仓还剩 746 份）。注意：components 多为 `.tsx` 巨文件，锚点只能落函数/类型收尾行与签名结束行，不可插在 JSX 内部；含 shell/bash 子串者仍需间接 runner。
 
+### components 第 103 批：设置面板与历史选择器（1,822 + 1,575 行，73 锚点）
+
+本批转入 `src/components/` 后首次取件。该子树与前两条不同：单文件动辄 800–1,800 行，且多为 React Compiler 编译产物（满屏 `_c(n)` 记忆槽与 `t1..tN` 临时变量）。因此本批改为「**按源行量取件**」——只取最大的 2 份共 3,397 行，仍是历史单批体量的 5–6 倍，锚点密度相应降到约每 46 行一处，全部落在函数签名/语句收尾/常量声明行。
+
+| 文件 | 原文 | 批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- | --- |
+| [`components/Settings/Config.tsx`](annotated/src/components/Settings/Config.tsx) | 1822 | 1858 | 36 | `/config` 主面板：全局配置 + settings 文件 + AppState 三处状态聚合，即时落盘 + 挂载快照回滚 |
+| [`components/LogSelector.tsx`](annotated/src/components/LogSelector.tsx) | 1575 | 1612 | 37 | `/resume` 历史选择器：标签/分支/工作树过滤、Fuse 全文检索、会话预览与重命名 |
+
+横切观察：
+
+- 「取消 = 反向写」是 `Config.tsx` 的核心不变量：改动一律即时落盘让 UI 立刻生效，Esc 不是「丢弃未保存」而是「用快照把三处状态写回」。因此回滚顺序有硬约束——先 `setTheme`（内部会局部写全局配置），再整体覆盖快照，否则局部写会盖掉整体。
+- 分来源快照不可省：合并后的 settings 视图无法区分「该删键」与「该还原值」，只有按 `localSettings`/`userSettings` 分别留底，配合 `updateSettingsForSource` 的「传 `undefined` 即删键」语义才能精确回滚。
+- 「空」有两种语义：`LogSelector` 里模型值 `undefined`（没设过，回落硬编码）与 `null`（显式跟随队长）必须分开处理；`Config` 里 `isDirty` 则是「是否发生过用户可见改动」的闩锁，没有它「打开即关闭」也会触发一轮无意义写盘。
+- 编译产物要还原着读：`LogSelector` 的 247 个记忆槽与 `bb0/bb1/bb2` 标签块都是 React Compiler 的 `useMemo`/`useCallback`/条件表达式展开，语义等价于原始写法。
+
+踩坑：两份均为巨型 `.tsx`，`after` 绝不落 JSX 内部，只取函数签名行（`function`/`const x = useCallback`）、语句收尾行（`});`/`;`）与常量声明行；`before` 用于 `type`/`function`/文档注释块开头。文件级锚点仍用 `(1,'before')`。预检门禁（六断言 + 块注释内部续行扫描）73 锚点一次全过，`annotate.py` 两次零 `⟳`、零 `⚠`，行数增量恰好等于锚点数（+36 / +37），无意外外移。
+
+流程账：本批 2 个数据文件逐一对齐源文件；`check-fidelity.py` 全仓 1158 份 0 失败（较上批 +2）；`check-links.py` 源码链接 2282 条加内链 670 条，0 失效；全仓 1158/1902 文件、347,734/513,237 行、67%。
+
+**下一批候选（components 降序，仍按源行量取件）**：`Stats.tsx`(1228) · `permissions/rules/PermissionRuleList.tsx`(1179) · `mcp/ElicitationDialog.tsx`(1169) · `VirtualMessageList.tsx`(1082) · `ScrollKeybindingHandler.tsx`(1012) · `tasks/RemoteSessionDetailDialog.tsx`(904) · `MessageSelector.tsx`(831) · `agents/AgentsMenu.tsx`(800) · `permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.tsx`(768) · `teams/TeamsDialog.tsx`(715) …（components 已做 68/389，剩 321 份；全仓还剩 744 份）。建议下批取 3 份（约 3,500 行），保持本批密度。
+
 ### utils 第 100 批：剩余小文件十五件套（18→14 行档，31 锚点）
 
 本批十五份是 utils 收尾的「二十行以下」叶子小模块，按行数降序从 18 行一路取到 14 行；主题横跨「队友系统提示补遗、Git 行为设置、原生安装器桶文件、Object.groupBy polyfill、Todo 类型 schema、分类器检查钩子、可执行查找、凭据存储选型、事件 sink 挂载、BOM 剥离、XML 转义、推理配置立即执行、YAML 解析、Bash 输出上限、bash alias 规格」——多份刻意保持「叶子模块、零重依赖、只做一件事」，或为切断循环依赖而从大文件抽离。
