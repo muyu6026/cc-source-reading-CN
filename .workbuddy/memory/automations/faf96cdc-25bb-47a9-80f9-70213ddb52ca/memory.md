@@ -1,5 +1,24 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 133 批（2026-11-04）：components 收尾清零（34 文件 953 行，130 锚点）
+
+- 状态：完成并推送，commit `084d2c8`。**components 目录自此 389/389 全清（81,892 行）**。
+- 取件策略变更：剩余 34 份全是 ≤45 行小件（合计 953 行），不再按 15 份切，一轮全吃完。
+- 分片：`ui/OrderedListItem`(45→50,5) / `sandbox/SandboxConfigTab`(45→53,7) / `memory/MemoryUpdateNotification`(45→51,6) / `OffscreenFreeze`(44→50,6) / `permissions/FilePermissionDialog/ideDiffConfig`(42→48,6) / `MessageModel`(43→48,5) / `FilePathLink`(43→48,5) / `EffortIndicator`(42→46,4) / `ToolUseLoader`(42→47,5) / `StructuredDiff/colorDiff`(37→42,5) / `MemoryUsageIndicator`(37→42,5) / `shell/ExpandShellOutputContext`(36→41,5) / `Spinner/ShimmerChar`(36→40,4) / `tasks/renderToolActivity`(33→39,6) / `Spinner/useShimmerAnimation`(31→38,7) / `design-system/color`(30→34,4) / `StructuredDiffList`(30→32,2) / `SentryErrorBoundary`(28→31,3) / `agents/types`(27→32,5) / `permissions/utils`(25→29,4) / `agents/AgentNavigationFooter`(26→30,4) / `wizard/WizardNavigationFooter`(24→27,3) / `HelpV2/General`(23→26,3) / `agents/utils`(18→21,3) / `FallbackToolUseRejectedMessage`(16→18,2) / `PressEnterToContinue`(15→17,2) / `MCPServerDialogCopy`(15→17,2) / `InterruptedByUser`(15→17,2) / `wizard/useWizard`(13→15,2) / `Spinner/index`(10→12,2) / `wizard/index`(9→11,2) / `mcp/index`(9→11,2) / `CustomSelect/index`(3→4,1) / `Spinner/teammateSelectHint`(1→2,1)。
+- 校验：预检 130 锚点全过；annotate 三十四次零 ⚠/零 ⟳（ExpandShellOutputContext 走 runner）；check-fidelity 1479 份 0 失败；check-links 2361 + 702，0 失效。
+- 进度：全仓 1479/1902 文件、412,705/513,237 行、80%；剩 423 份（最大的十份占 32,326 行）。
+- **新坑（重要，会复发）**：锚点不可落在多行 JSX 的子元素区。`StructuredDiffList` 三处 `after` 落在 `<Box>`/`</Box>` 之间、`WizardNavigationFooter` 两处落在 `<Byline>` 内，注释放进去变成 JSX 文本节点——既污染渲染，`check-fidelity` 又因「注释行被剥离」查不出来，只能靠人工抽查发现。判据：插入点前一行以 `>` 收尾且后一行以 `<` 开头即子元素区；安全位是 `return` 语句行与 `}: Props): X {` 这类语句边界。已改写为「语句级一条讲清整棵结构」，锚点 133 → 130。
+- 主题亮点：①「终端性能账写在注释里」（OffscreenFreeze 返回同一元素引用让 reconciler bail + 必须 `use no memo`；useShimmerAnimation 卡顿时给时钟传 null 是唯一可靠停止手段；SandboxConfigTab 把依赖探测标成首渲染同步 IO 只跑一次）；②「固定宽度对抗抖动」（ToolUseLoader minWidth 2 / MessageModel stringWidth+8 / ShimmerChar 三字符光带 / General fixedWidth，量宽一律 stringWidth）；③「构建期常量是死码分界线」（MemoryUsageIndicator 与 InterruptedByUser 靠 USER_TYPE 内联，前者因此敢把 hook 放在 early return 之后）。
+- 下批目标（跳出 components 进巨兽区，建议 2 份约 10,599 行，沿用 utils 第一批节奏）：`cli/print.ts`(5,594) · `screens/REPL.tsx`(5,005)；其后 `main.tsx`(4,683) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)。
+- 巨兽批的前置建议：单文件 5,000+ 行不要一次性读入，按 1,200 行分块读、每块写完锚点再读下一块（否则上下文被挤爆）；数据文件仍按 `_p1` 单份累积，锚点按行号升序。
+
+## 第 132 批（2026-11-04）：components 第二十八批（15 文件 752 行，103 锚点）
+
+- 状态：完成并推送，commit `c4c112f`。
+- 15 份全部 ≤55 行：`StatusNotices`(55→61,5) / `LogoV2/Opus1mMergeNotice`(55→60,4) / `KeybindingWarnings`(55→61,5) / 向导 `ModelStep`(52→59,6) / `CtrlOToExpand`(51→57,5) / `LogoV2/AnimatedAsterisk`(50→64,13) / `CustomSelect/option-map`(50→59,9) / `CostThresholdDialog`(50→57,7) / `permissions/WorkerBadge`(49→55,6) / `mcp/utils/reconnectHelpers`(49→53,4) / `DevBar`(49→59,10) / `ExitFlow`(48→55,7) / `ContextSuggestions`(47→56,8) / `sandbox/SandboxDoctorSection`(46→56,9) / `FastIcon`(46→51,5)。
+- 校验：预检 103 锚点全过；annotate 十五次零 ⚠/零 ⟳；check-fidelity 1445 份 0 失败；check-links 2361 + 700，0 失效。
+- 主题：编译器产物统一底色（`_c(N)` 记忆槽；无 `//` 段时锚点只落签名/语句行）；`option-map` 用 Map 扩展出首尾指针与双向链表；`reconnectHelpers`/`KeybindingWarnings` 是「按状态分流文案」的纯函数。
+
 ## 第 130 批（2026-11-04）：components 第二十六批（15 文件 1,124 行，136 锚点）
 
 - 状态：完成并推送，commit `2c7a649`。
