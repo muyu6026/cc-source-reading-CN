@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 130 批（2026-11-04）：components 第二十六批（15 文件 1,124 行，136 锚点）
+
+- 状态：完成并推送，commit `2c7a649`。
+- 本批 15 份全部 ≤80 行（底层件收口）：`Spinner/SpinnerGlyph.tsx`(80→92，11 锚点) / `MessageResponse.tsx`(78→88，9) / `ClaudeCodeHint/PluginHintMenu.tsx`(78→88，9) / `design-system/Pane.tsx`(77→85，7) / `design-system/Byline.tsx`(77→86，8) / `permissions/rules/PermissionRuleDescription.tsx`(76→85，8) / `Spinner/useStalledAnimation.ts`(75→87，12) / `RemoteCallout.tsx`(76→86，9) / `shell/ShellTimeDisplay.tsx`(74→81，7) / 向导 `ConfirmStepWrapper.tsx`(74→85，10) / `ClickableImageRef.tsx`(73→81，7) / `permissions/PermissionDialog.tsx`(72→81，8) / `SearchBox.tsx`(72→81，8) / `ui/OrderedList.tsx`(71→82，10) / `LogoV2/GuestPassesUpsell.tsx`(70→84，13)。
+- 校验：预检 136 锚点全过；annotate 十五次零 ⚠ 零 ⟳（ShellTimeDisplay 走间接 runner）；check-fidelity 1415 份 0 失败；check-links 2361 + 699，0 失效。
+- 进度：全仓 1415/1902（410,093/513,237 行，79.9%）· components 343/407（剩 64 份共 2,631 行，总剩 487）。
+- 主题亮点：①「骨架与内容分离」（PermissionDialog 只管上边框/标题行 space-between/可覆盖内边距；ConfirmStepWrapper 把落盘+setAppState+打开编辑器+打点全揽，ConfirmStep 只展示）；②「渲染副作用与编译产物哨兵」（useStalledAnimation 渲染期改五个 ref 靠长度变长保证幂等、每帧逼近 10% 加 0.01 吸附；Byline 的 early_return_sentinel；MessageResponse 用 Context 防 ⎿ 嵌套）；③「降级链优先于报错」（主题色解析不出 RGB 退两档、OSC 8 不支持退纯文本、规则描述不可说返回 null 交调用方）；④「编号与对齐靠预计算」（OrderedList 数子项取位数 padStart 对齐 + 父标记拼前缀支持 1.1.；SearchBox 用反色单字符模拟光标）。
+- 下批目标（components 降序 15 份约 925 行，最大件 68 行）：`agents/ModelSelector`(68) · `LogoV2/VoiceModeNotice`(68) · `CustomSelect/select-option`(68) · `permissions/PermissionRequestTitle`(66) · `wizard/WizardDialogLayout`(65) · `MessageTimestamp`(63) · `mcp/CapabilitiesSection`(61) · 向导 `ToolsStep`(61) · `Spinner/FlashingChar`(61) · `LogoV2/FeedColumn`(59) · `LogoV2/EmergencyTip`(58) · `IdeStatusIndicator`(58) · `ConfigurableShortcutHint`(57) · `BashModeProgress`(56) · `App`(56)。
+
+
+
 ## 第 129 批（2026-11-04）：components 第二十五批（15 文件 1,245 行，133 锚点）
 
 - 状态：完成并推送，commit `f97c8e7`。
