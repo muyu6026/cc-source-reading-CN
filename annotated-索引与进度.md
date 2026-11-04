@@ -6030,3 +6030,36 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：34 个数据文件逐一对齐源文件；预检 130 锚点全过、0 块内违例；`annotate.py` 三十四次零 `⚠`、零 `⟳`（其中 5 份因锚点落进 JSX 子元素区而改写重跑）；原文 953 行 → 批注版 1,084 行；`check-fidelity.py` 全仓 1479 份 0 失败（较上批 +34）；`check-links.py` 源码链接 2361 条加内链 702 条，0 失效；全仓 1479/1902 文件、412,705/513,237 行、80%；**components 389/389 全目录清零**（81,892 行）。
 
 **下一批候选（跳出 components，进入全仓巨兽区，建议取 2 份约 10,599 行，沿用「utils 第一批两份巨兽」的节奏）**：`cli/print.ts`(5,594) · `screens/REPL.tsx`(5,005)；其后依次 `main.tsx`(4,683) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 423 份，最大的十份就占 32,326 行）。
+
+### src batch 134 (4 files 3457 lines 165 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，进入 `src/` 散件阶段。本批取降序前段的 855–878 行集群，清掉四块：CLI 插件/市场处理、SDK 结构化 stdio、protobuf 事件类型、远程智能体任务框架。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`cli/handlers/plugins.ts`](annotated/src/cli/handlers/plugins.ts) | 878→923 | 45 | CLI 插件/市场子命令处理：install/uninstall/list/update、marketplace add/remove/list、版本解析、权限与策略校验、输出格式化 |
+| [`cli/structuredIO.ts`](annotated/src/cli/structuredIO.ts) | 859→907 | 48 | SDK 结构化 stdio 消息收发（`StructuredIO` 类）：读帧、解析、分发、写回、背压与错误封装 |
+| [`types/generated/events_mono/claude_code/v1/claude_code_internal_event.ts`](annotated/src/types/generated/events_mono/claude_code/v1/claude_code_internal_event.ts) | 865→889 | 24 | protoc 生成的 protobuf 事件类型：oneof 字段、枚举、嵌套 message、序列化元数据 |
+| [`tasks/RemoteAgentTask/RemoteAgentTask.tsx`](annotated/src/tasks/RemoteAgentTask/RemoteAgentTask.tsx) | 855→904 | 48 | 远程智能体任务框架：任务状态机、流式事件订阅、UI 渲染绑定、断线重连/超时处理 |
+
+四块各自的要点：
+
+- **`plugins.ts`（45 锚点）**：子命令与 marketplace 两类入口。install 走三源（`--plugin-dir` / 已装 / 市场）合并与去重；版本解析优先 `manifest.version` 而非 `gitCommitSha`（呼应 `utils/plugins/pluginLoader.ts` 的「版本键错位 = 永远重克隆」坑）；权限/策略走 fail-closed，配置损坏时拦截而非静默跳过。
+- **`structuredIO.ts`（48 锚点）**：把 SDK 与宿主进程间的 stdio 变成「结构化消息流」。读侧按帧拆包、写侧序列化后发出；协议错误被封装成可判别的枚举而非裸异常，便于上层按类型处理。
+- **`events_mono/.../claude_code_internal_event.ts`（24 锚点）**：纯 protoc 生成代码，人类不手写。oneof 用联合类型表达、枚举带未识别兜底分支；批注重点放在「字段含义 + 序列化边界」而非实现细节。
+- **`RemoteAgentTask.tsx`（48 锚点）**：把远程 agent 的一次任务映射成可渲染状态机，订阅流式事件增量更新 UI；网络抖动时靠重连窗口与超时兜底，避免任务卡在终态前。
+
+踩坑：
+
+- 数据文件名必须带完整相对路径 slug：`src_types_generated_events_mono_claude_code_v1_claude_code_internal_event_ts_p1.py`（含 `src/` 前缀）。预检曾因 FILES 条目缺 `src/` 前缀而报源文件「not found」（混用 `/` 与 `\` 分隔符），修正条目后通过。
+- 预检 165 锚点全过、0 块内违例。
+- `annotate.py` 良性 `⟳` 外移 3 处：`plugins.ts` 两处 `//` 注释段内的 `after` 自动挪到段尾（255→262、686→689）；`events_mono` 一处 `after` 落在 `/**` 起始行自动下移到块外（1→5）。落点人眼确认在英文注释块之后、代码之前，未劈开英文。零 `⚠`。
+- 首轮 `check-fidelity` 2 FAIL，均属「锚点落在未结束多行表达式首行」：
+  - `structuredIO.ts` 锚点 `(141,'after')` 落在 `restoredWorkerState: Promise<SessionExternalMetadata | null> =` 行尾 `=`（值在下行）→ 挪到 `(142,'after')`（该行 `Promise.resolve(null)` 收尾）。
+  - `events_mono` 锚点 `(814,'after')` 落在 `type Builtin =` 首行（联合类型铺在后续多行）→ 挪到 `(821,'after')`（Builtin 联合的收尾 `}`）。
+  - 复验：全仓 1483 份 0 失败。
+- `RemoteAgentTask.tsx` 为 `.tsx`（React Compiler 产物），源文件尾部 `sourceMappingURL` 长 base64 行被 `annotate.py` 替换为一句中文说明（故 855 + 48 锚点 = 903，批注版实测 904，差 1 即该替换行），`check-fidelity` 标 `OK*` 而非失败。
+
+流程账：4 个数据文件逐一对齐源文件；预检 165 锚点全过、0 块内违例；`annotate.py` 四次零 `⚠`、3 处良性 `⟳`（上）；首轮 2 FAIL → 修正后复验 `check-fidelity.py` 全仓 **1483 份 0 失败**（`channels_mono` 等 `OK*` 正常）；`check-links.py` 源码链接 2361 条加内链 702 条，0 失效；全仓 **1483/1902 文件、416,163/513,237 行、81%**；`src/` 还剩 **419 份**。
+
+**下一批候选（注意：本批实际取的是 855–878 行集群；但当前 `check-coverage.py src` 的「未做文件」真正榜首是三个巨兽，下一批应直接啃巨兽）**：`cli/print.ts`(5,594) · `screens/REPL.tsx`(5,006) · `main.tsx`(4,684)；其后依次 `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 419 份；巨兽清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
