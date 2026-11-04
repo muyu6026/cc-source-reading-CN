@@ -53,6 +53,7 @@
 - 第 124 批：`4b86725` · 15 文件/2,009 行/215 锚点 · 全仓 **1335/1902 · 402,363 行 · 78%（行）** · components **245/389 文件（63%）/ 71,550 行（87%）**。
 - 第 125–134 批：components 清零冲刺 + 转 `src/` 散件连续推进（各 commit 见各日工作日志）。全仓累计至第 134 批 **1483/1902 · 416,163 行 · 81%（行）**；components **已 389/389 全清（81,892 行）**，`src/ink` **96/96 全清（19,859 行）**，src/ 剩 419 份。
 - 第 135 批：`91649c9` · 1 文件/5,594 行/130 锚点（cli/print.ts 巨文件，5,594→5,724 行）· 全仓 **1484/1902 · 421,757 行 · 82%（行）**；src/ 剩 418 份。
+- 第 136 批：`e9ce276` · 1 文件/5,005 行/155 锚点（screens/REPL.tsx CLI 终端 UI 根组件，5,005→5,223 行）· 全仓 **1485/1902 · 426,763 行 · 83%（行）**；src/ 剩 417 份。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -62,11 +63,11 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-04 第 135 批后）
-- 全仓 **1484/1902 文件（缺失 418）；421,757/513,237 行，按行数覆盖 82%**。
+## 当前状态（2026-11-05 第 136 批后）
+- 全仓 **1485/1902 文件（缺失 417）；426,763/513,237 行，按行数覆盖 83%**。
 - 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)、`src/components`(389/389)、`src/ink`(96/96)。
 - `src/components` **389/389 全清（81,892 行）**；`src/ink` **96/96 全清（19,859 行）**。
-- 当前阶段：进入 `src/` 散件。下一批真正榜首（来自 `check-coverage.py src` 实时）：`screens/REPL.tsx`(5,006)、`main.tsx`(4,684)、`commands/insights.ts`(3,200)；其后 `bridge/bridgeMain.ts`(2,999)、`native-ts/yoga-layout/index.ts`(2,578)、`bridge/replBridge.ts`(2,406)、`commands/plugin/ManagePlugins.tsx`(2,215)、`entrypoints/sdk/coreSchemas.ts`(1,889)、`bootstrap/state.ts`(1,758)。
+- 当前阶段：进入 `src/` 散件。下一批真正榜首（来自 `check-coverage.py src` 实时）：`main.tsx`(4,684)、`commands/insights.ts`(3,200)、`bridge/bridgeMain.ts`(2,999)；其后 `native-ts/yoga-layout/index.ts`(2,578)、`bridge/replBridge.ts`(2,406)、`commands/plugin/ManagePlugins.tsx`(2,215)、`entrypoints/sdk/coreSchemas.ts`(1,889)、`bootstrap/state.ts`(1,758)。（screens/REPL.tsx 已于第 136 批完成。）
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
