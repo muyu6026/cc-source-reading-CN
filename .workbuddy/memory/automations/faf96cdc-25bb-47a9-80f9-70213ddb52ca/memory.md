@@ -830,3 +830,16 @@
 - **批注文本避免引用含引号/反斜杠的 shell 字面量**（第 45 批踩坑：`ls <<'EOF'`、`export "FOO=bar"`、`\\r`、`/\\s/` 让 bashParser 数据文件被预检连拦 4 轮；shell 转义序列 `'"'"'` 还会混进文本）——用「加引号 XX」式中文表述代替，raw string 里 `\\r` 仍是两个反斜杠字符。
 - **写数据文件时干脆不用引号字符**（第 47 批第二次踩到）：`ast.ts` 两轮、`marketplaceManager.ts` 一轮被预检拦下，全是 `"$(cmd)"`、`env "FOO=bar"`、`\-n` 这类字面量引用。改写成「引号包裹的 XX」「转义写法的 -n」即可，一次过。
 - 2,000–2,700 行档一批 3 份是合适的（本批 7,324 行 / 321 锚点，三个数据文件各 100 余锚点）。
+
+## 第 131 批（2026-11-04）：components 清零冲刺最后小文件十五件套
+- 状态：完成并推送，commit `6a9f5fd`（1c4c352..6a9f5fd）。
+- 本批：按行数降序取 components 剩余前 15 小文件（56–68 行档）：LogoV2/VoiceModeNotice(68→70)、CustomSelect/select-option(68→71)、agents/ModelSelector(68→71)、permissions/PermissionRequestTitle(66→69)、wizard/WizardDialogLayout(65→68)、MessageTimestamp(63→65)、Spinner/FlashingChar(61→64)、mcp/CapabilitiesSection(61→64)、agents/new-agent-creation/wizard-steps/ToolsStep(61→64)、LogoV2/FeedColumn(59→61)、IdeStatusIndicator(58→61)、LogoV2/EmergencyTip(58→61)、ConfigurableShortcutHint(57→58)、App(56→57)、BashModeProgress(56→59)。合计 15 文件 925 源行 / 42 锚点 / 批注版 962 行。
+- 进度：全仓 **1430/1902 文件 / 411,015 行 / 80%**；components 340/389（剩 49 份共约 2,068 行），hooks 104/104、utils 564/564、tools 184/184、services 130/130 均全清。
+- 校验：预检 42 锚点全过、0 块内违例；annotate.py 十五次零 `⚠`、零 `⟳`；check-fidelity 1430 份 0 失败（较上批 +15）；check-links 2361 源链 + 699 内链 0 失效。
+- 下一批目标（components 降序，剩 49 份）：KeybindingWarnings(55)/Opus1mMergeNotice(55)/StatusNotices(55)/agents/.../ModelStep(52)/CtrlOToExpand(51)/AnimatedAsterisk(50)/CostThresholdDialog(50)/option-map(50)/WorkerBadge(49)/reconnectHelpers(49)/DevBar(49)/ExitFlow(48)/ContextSuggestions(47)/FastIcon(46)/SandboxDoctorSection(46)；components 再一批即可接近清零，之后转 `src/` 散件（cli/print.ts 5594 等巨文件）。
+
+### 本批经验（下次先看）
+- **本批实际是第 131 批，不是 65**：自动化记忆文件只续写到第 65 批（约 10-28），但 git 已推进到 130；开工先跑 `check-coverage.py src` / `src/components` 实算，别硬套旧 memory 的 next-target（旧 target 仍是 utils 272 行档，早已清零）。
+- **`source/` 真路径是 `source/src/...`**：相对路径 `src/...` 是 `source/` 之下的二级目录；`ls source/cli/print.ts` 会找不到，要 `source/src/cli/print.ts`。
+- **components 这批全是 React 编译器产物（react/compiler-runtime 的 `_c(N)` 缓存 + `//# sourceMappingURL` 巨行）**：无 `//` 注释段、无多行模板，锚点只落函数签名行（`before`）与语句/收尾行（`after`），十五次零 `⟳` 零 `⚠`；巨行 sourcemap 由 annotate.py 自动省略并补 2 行说明（批注版行数 = 源 -15 + 42 + 30）。
+- **预检脚本 ROOT 用 `D:/...` 而非 `/d/`**：混用分隔符会让 `os.path.exists` 误判（历史踩过）。
