@@ -6063,3 +6063,30 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：4 个数据文件逐一对齐源文件；预检 165 锚点全过、0 块内违例；`annotate.py` 四次零 `⚠`、3 处良性 `⟳`（上）；首轮 2 FAIL → 修正后复验 `check-fidelity.py` 全仓 **1483 份 0 失败**（`channels_mono` 等 `OK*` 正常）；`check-links.py` 源码链接 2361 条加内链 702 条，0 失效；全仓 **1483/1902 文件、416,163/513,237 行、81%**；`src/` 还剩 **419 份**。
 
 **下一批候选（注意：本批实际取的是 855–878 行集群；但当前 `check-coverage.py src` 的「未做文件」真正榜首是三个巨兽，下一批应直接啃巨兽）**：`cli/print.ts`(5,594) · `screens/REPL.tsx`(5,006) · `main.tsx`(4,684)；其后依次 `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 419 份；巨兽清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+
+### src batch 135 (cli print ts 5594 lines 130 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，`src/` 散件阶段。本批单啃一头巨兽：CLI 输出层 `cli/print.ts`（5,594 行，全仓现存最大单文件），它是 `-p`/`--print` 打印模式、SDK 结构化输出与 `stream-json` 无头模式的总入口。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`cli/print.ts`](annotated/src/cli/print.ts) | 5,594→5,724 | 130 | CLI 输出与打印中枢：`-p`/`--print` 纯打印、`--output-format` 分流、SDK `stream-json`/`json` 序列化、彩色/非 TTY 适配、权限与工具结果回写、错误与退出码编排 |
+
+要点：
+
+- **`print.ts`（130 锚点）**：文件是无状态函数集合（非类），按「输出格式分支」组织。`printResult`/`printStreamEvent` 把内部 `SDKResultMessage`/`StreamEvent` 转成最终文本或 JSON 片段；`formatResultForPrint` 按 `--output-format`（text/json/stream-json）选序列化器；非 TTY 时强制去色、用 `process.stdout.write` 直接落盘，保证无头环境可读。
+- **`-p`/`--print` 模式**：纯打印路径不走 REPL，把一次性结果格式化后直接退出，适合脚本调用；与 SDK 结构化输出共用同一批底层格式化函数，差异只在「是否包一层 REPL 交互」。
+- **`stream-json` 无头模式**：把每个流式事件逐条 flush 成 JSON 行（`\n` 分隔），供外部进程按行解析。批注强调「每条事件独立成行、不可缓冲合并」，否则对端会拿到半截 JSON。
+- **错误与退出码**：`printError`/`printUnhandledError` 区分用户可见错误与未捕获异常，退出码按 `ERROR_CODES` 映射，便于 CI/脚本判活。
+
+踩坑：
+
+- 数据文件名带完整相对路径 slug：`src_cli_print_ts_p1.py`（含 `src/` 前缀）。
+- 预检 130 锚点全过、0 块内违例。
+- `annotate.py` 良性 `⟳` 外移 3 处：`//` 注释段内的 `after` 自动挪到段尾（1142→1144、1502→1504、2931→2932）。落点人眼确认在英文注释块之后、代码之前，未劈开英文。零 `⚠`。
+- 首轮 `check-fidelity` 1 FAIL：「锚点落在未结束多行表达式首行」——`(2702,'after')` 落在 `let cronScheduler: import('../utils/cronScheduler.js').CronScheduler | null =` 行尾 `=`（值在下行）→ 挪到 `(2703,'after')`（该行 `null` 收尾）。复验：全仓 **1484 份 0 失败**。
+
+流程账：1 个数据文件对齐源文件；预检 130 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、3 处良性 `⟳`（上）；首轮 1 FAIL → 修正后复验 `check-fidelity.py` 全仓 **1484 份 0 失败**（`channels_mono` 等 `OK*` 正常）；`check-links.py` 源码链接 2366 条加内链 704 条，0 失效；全仓 **1484/1902 文件、421,757/513,237 行、82%**；`src/` 还剩 **418 份**。
+
+**下一批候选（两只 >3000 行巨兽仍在榜首，按行数降序）**：`screens/REPL.tsx`(5,006) · `main.tsx`(4,684) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 418 份；巨兽单批 1–2 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
