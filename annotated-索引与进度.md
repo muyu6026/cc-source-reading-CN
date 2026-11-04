@@ -5875,3 +5875,20 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：15 个数据文件逐一对齐源文件；预检 116 锚点全过、0 块内违例；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1370 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 695 条，0 失效；全仓 1370/1902 文件、406,337/513,237 行、79.2%；components 298/407（剩 109 份）。
 
 **下一批候选（components 降序，建议取 15 份约 1,387 行）**：`SandboxViolationExpandedView.tsx`(99) · `PrBadge.tsx`(97) · `agents/new-agent-creation/CreateAgentWizard.tsx`(97) · `DiagnosticsDisplay.tsx`(95) · `design-system/StatusIcon.tsx`(95) · `design-system/LoadingState.tsx`(94) · `NotebookEditToolUseRejectedMessage.tsx`(92) · `LogoV2/feedConfigs.tsx`(92) · `AutoUpdaterWrapper.tsx`(91) · `permissions/PowerShellPermissionRequest/powershellToolUseOptions.tsx`(91) · `hooks/PromptDialog.tsx`(90) · `InvalidSettingsDialog.tsx`(89) · `permissions/FileWritePermissionRequest/FileWriteToolDiff.tsx`(89) · `FeedbackSurvey/TranscriptSharePrompt.tsx`(88) · `LspRecommendation/LspRecommendationMenu.tsx`(88)（components 已做 298/407，剩 109 份；全仓还剩 532 份）。
+
+### components batch 128 (15 files 1387 lines 133 anchors)
+
+本批十五份均为 88–99 行的小组件与工具，横跨「沙箱违规展开视图、PR 徽章、新建代理向导组装器、诊断信息展示、状态图标、加载态、Notebook 编辑拒绝提示、LogoV2 的四个 Feed 工厂、自动更新器分派、PowerShell 权限选项工厂、钩子询问弹窗、设置校验失败弹窗、文件写入 diff 预览、转录分享询问、LSP 插件推荐」十五类主题。十一份是 React Compiler 产物（含一处 `bb0:` 标签块），四份为手写工具函数或工厂（feedConfigs、powershellToolUseOptions、LspRecommendationMenu、SandboxViolation 的 formatTime）。
+
+四条横切观察：
+
+- 「为一次调用不该引入一个库」：SandboxViolationExpandedView 手写 `h:mm:ssa` 格式化，注释直说动机是避开 39MB 的 date-fns；`getHours()%12||12` 是把 0 点和 12 点都兜成 12 的经典写法。对照的是设计系统件 StatusIcon 与 LoadingState——它们走 figures 图标加语义色映射表，doc 注释给足三个 `@example`，属于另一套「能复用就复用」的标准。
+- 「选项工厂按工具能力裁剪」：powershellToolUseOptions 的四个值里 yes 与 no 各分 input 与非 input 两态，always-allow 再分「可编辑前缀输入」与「静态 suggestions 标签」两条路，回退判据是 `hasNonPowerShellSuggestions`（含 `addDirectories` 或非 PowerShell 工具规则时，前缀表达不了这些权限）。两条注释直接写明 PowerShell 没有沙箱选项（Windows 不支持）、没有分类器选项（Bash 专属），删减原因留在代码里而非 commit message。
+- 「三态 null 与哨兵占位」：AutoUpdaterWrapper 用 `null` 表示「还没检测完」，与 `false` 的「检测完但不是」严格区分，检测期间渲染 null 以免闪现错误更新器；CreateAgentWizard 则用三处占位——steps 数组里条件插入 MemoryStep、`initialData` 传空对象哨兵、`onComplete` 传空函数（真正的完成回调在 ConfirmStepWrapper 内部），组装器自身不含业务。
+- 「内联痕迹又两例」：feedConfigs 的 `external === 'ant'` 让 What's new 的解析分支、空态文案、标题三处分叉按构建期常量塌陷成死代码；FileWriteToolDiff 的 `bb0:` 标签块是编译器对 `useMemo` 提前 return 的重写，`break bb0` 只跳出这一个缓存块，不是业务 goto。
+
+坑一处：数据文件名必须带 `src_components_` 前缀。`slug` 是由**完整**相对路径（`src/components/...`）替换 `/`、`.`、`-` 得出的，本批最初按去掉前缀的短名写入，预检报 MISSING 后统一改名才通过——短名只在索引正文里用，落盘名不可省。
+
+流程账：15 个数据文件逐一对齐源文件；预检 133 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、一次无害 `⟳`（powershellToolUseOptions 41→42，锚点从 `//` 注释段中部挪到段边界；该文件路径含 powershell 子串，按惯例走间接 runner）；原文 1,387 行 → 批注版 1,535 行；`check-fidelity.py` 全仓 1385 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 696 条，0 失效；全仓 1385/1902 文件、407,724/513,237 行、79.4%；components 313/407（剩 94 份）。
+
+**下一批候选（components 降序，建议取 15 份约 1,245 行，余下全是 87 行以下小件）**：`tasks/ShellProgress.tsx`(87) · `BypassPermissionsModeDialog.tsx`(87) · `design-system/ProgressBar.tsx`(86) · `LanguagePicker.tsx`(86) · `Spinner/utils.ts`(85) · `agents/new-agent-creation/wizard-steps/ColorStep.tsx`(84) · `FeedbackSurvey/useDebouncedDigitInput.ts`(83) · `TeammateViewHeader.tsx`(82) · `HelpV2/Commands.tsx`(82) · `AwsAuthStatusBox.tsx`(82) · `design-system/KeyboardShortcutHint.tsx`(81) · `teams/TeamStatus.tsx`(80) · `design-system/Ratchet.tsx`(80) · `agents/new-agent-creation/wizard-steps/MethodStep.tsx`(80) · `agents/new-agent-creation/wizard-steps/LocationStep.tsx`(80)（components 已做 313/407，剩 94 份共 5,000 行；全仓还剩 517 份）。
