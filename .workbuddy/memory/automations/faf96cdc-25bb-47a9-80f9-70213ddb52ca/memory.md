@@ -1,5 +1,27 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 128 批（2026-11-04）：components 第二十四批（15 文件 1,387 行，133 锚点）
+
+- 状态：完成并推送，commit `5aee2c4`。
+- 本批 15 份：`SandboxViolationExpandedView.tsx`(99→112，12 锚点) / `PrBadge.tsx`(97→107，9) / `agents/new-agent-creation/CreateAgentWizard.tsx`(97→106，8) / `DiagnosticsDisplay.tsx`(95→105，9) / `design-system/StatusIcon.tsx`(95→104，8) / `design-system/LoadingState.tsx`(94→103，8) / `NotebookEditToolUseRejectedMessage.tsx`(92→101，8) / `LogoV2/feedConfigs.tsx`(92→106，13) / `AutoUpdaterWrapper.tsx`(91→100，8) / `permissions/PowerShellPermissionRequest/powershellToolUseOptions.tsx`(91→102，10) / `hooks/PromptDialog.tsx`(90→99，8) / `InvalidSettingsDialog.tsx`(89→98，8) / `permissions/FileWritePermissionRequest/FileWriteToolDiff.tsx`(89→97，7) / `FeedbackSurvey/TranscriptSharePrompt.tsx`(88→98，9) / `LspRecommendation/LspRecommendationMenu.tsx`(88→97，8)。
+- 校验：预检 133 锚点全过、0 违例；annotate 十五次零 ⚠、一次无害 ⟳（powershellToolUseOptions 41→42，锚点从 `//` 注释段中部挪到段边界；该路径含 powershell 子串走间接 runner）；check-fidelity 1385 份 0 失败；check-links 2361 源码链接 + 697 内链 0 失效。
+- 进度：全仓 1385/1902（407,724/513,237 行，79.4%）· components 313/407（剩 94 份共 5,000 行，总剩 517）。
+- **坑（重要，会复发）**：数据文件名必须带 `src_components_` 前缀 —— `slug` 由**完整**相对路径（`src/components/...`）替换 `/`、`.`、`-` 得到，不是去掉前缀后的短名。本批最初写成短名，预检报 MISSING，统一 `mv` 改名后才通过。
+- 主题亮点：①「为一次调用不该引入一个库」（SandboxViolation 手写 h:mm:ssa 避开 39MB date-fns，`%12||12` 兜 0/12 点）；②「选项工厂按工具能力裁剪」（powershellToolUseOptions 四值 yes/no 各分 input 两态、always-allow 再分可编辑前缀与静态标签，回退判据 `hasNonPowerShellSuggestions`；两行注释写明 PowerShell 无沙箱/无分类器）；③「三态 null 与哨兵占位」（AutoUpdaterWrapper 用 null 表示检测未完成区分 false 的否定结论；CreateAgentWizard 三处占位：steps 条件插入 MemoryStep、initialData 空对象哨兵、onComplete 空函数，真回调在 ConfirmStepWrapper）；④内联痕迹两例（feedConfigs 的 `external === 'ant'` 三处分叉塌成死代码；FileWriteToolDiff 的 `bb0:` 是 useMemo 提前 return 的重写）。
+- 下批目标（components 降序 15 份约 1,245 行，余下全是 87 行以下小件）：`tasks/ShellProgress`(87) · `BypassPermissionsModeDialog`(87) · `design-system/ProgressBar`(86) · `LanguagePicker`(86) · `Spinner/utils`(85) · 向导 `ColorStep`(84) · `FeedbackSurvey/useDebouncedDigitInput`(83) · `TeammateViewHeader`(82) · `HelpV2/Commands`(82) · `AwsAuthStatusBox`(82) · `design-system/KeyboardShortcutHint`(81) · `teams/TeamStatus`(80) · `design-system/Ratchet`(80) · 向导 `MethodStep`(80) · 向导 `LocationStep`(80)。
+
+
+
+## 第 127 批（2026-11-04，补记）：components 第二十三批（15 文件 1,601 行，116 锚点）
+
+- 状态：完成并推送，commit `0e14e48`（该批记忆条目当时漏写，随第 128 批补记）。
+- 本批 15 份：`FeedbackSurvey/submitTranscriptShare.ts`(9) / `hooks/SelectHookMode.tsx`(7) / `LogoV2/Feed.tsx`(10) / `permissions/rules/RemoveWorkspaceDirectory.tsx`(6) / `agents/validateAgent.ts`(8) / `SessionBackgroundHint.tsx`(9) / `FeedbackSurvey/FeedbackSurveyView.tsx`(8) / `tasks/taskStatusUtils.tsx`(7) / `DevChannelsDialog.tsx`(7) / `permissions/WorkerPendingPermission.tsx`(8) / `PackageManagerAutoUpdater.tsx`(9) / `TeleportRepoMismatchDialog.tsx`(6) / 向导 `TypeStep.tsx`(7) / `ChannelDowngradeDialog.tsx`(6) / `FeedbackSurvey/useSurveyState.tsx`(9)。
+- 校验：预检 116 锚点全过；annotate 十五次零 ⟳ 零 ⚠；check-fidelity 1370 份 0 失败；check-links 2361 + 695，0 失效。
+- 主题亮点：「打点先于界面」（useSurveyState 先双写 state 与 ref 再打点再分流，appearanceId 用 ref 存）；「计算与渲染分离」（Feed 导出 calculateFeedWidth 让调用方先算宽）；feature flag 内联痕迹两例（isEnvTruthy 加字面量 false、false 或 false）。
+- 次批验证：本批的「下一批候选」清单在第 128 批被完整取用，行数与清单标注一致。
+
+
+
 ## 第 126 批（2026-11-04）：components 第二十二批（10 文件 1,153 行，99 锚点）
 
 - 状态：完成并推送，commit `56965d9`。

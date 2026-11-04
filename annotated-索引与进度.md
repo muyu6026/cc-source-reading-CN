@@ -5892,3 +5892,18 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：15 个数据文件逐一对齐源文件；预检 133 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、一次无害 `⟳`（powershellToolUseOptions 41→42，锚点从 `//` 注释段中部挪到段边界；该文件路径含 powershell 子串，按惯例走间接 runner）；原文 1,387 行 → 批注版 1,535 行；`check-fidelity.py` 全仓 1385 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 696 条，0 失效；全仓 1385/1902 文件、407,724/513,237 行、79.4%；components 313/407（剩 94 份）。
 
 **下一批候选（components 降序，建议取 15 份约 1,245 行，余下全是 87 行以下小件）**：`tasks/ShellProgress.tsx`(87) · `BypassPermissionsModeDialog.tsx`(87) · `design-system/ProgressBar.tsx`(86) · `LanguagePicker.tsx`(86) · `Spinner/utils.ts`(85) · `agents/new-agent-creation/wizard-steps/ColorStep.tsx`(84) · `FeedbackSurvey/useDebouncedDigitInput.ts`(83) · `TeammateViewHeader.tsx`(82) · `HelpV2/Commands.tsx`(82) · `AwsAuthStatusBox.tsx`(82) · `design-system/KeyboardShortcutHint.tsx`(81) · `teams/TeamStatus.tsx`(80) · `design-system/Ratchet.tsx`(80) · `agents/new-agent-creation/wizard-steps/MethodStep.tsx`(80) · `agents/new-agent-creation/wizard-steps/LocationStep.tsx`(80)（components 已做 313/407，剩 94 份共 5,000 行；全仓还剩 517 份）。
+
+### components batch 129 (15 files 1245 lines 133 anchors)
+
+本批十五份是 components 里最后一批 80–87 行的小件，横跨「任务状态文本与 shell 进度、危险模式确认弹窗、进度条、语言选择器、spinner 字符与配色工具、向导颜色步、数字键防抖 hook、队友视图页头、帮助页命令清单、AWS 认证状态框、快捷键提示、团队页脚状态、高度棘轮、向导方式步、向导位置步」十五类主题。多数是设计系统基元（ProgressBar / KeyboardShortcutHint / Ratchet）与向导步骤（Color / Method / Location），它们被前面几十批的业务组件反复引用，本批把「被引用的那一端」补齐。
+
+四条横切观察：
+
+- 「终端里做布局稳定，靠棘轮与背景色」：Ratchet 用只增不减的 `minHeight` 外壳加 `measureElement` 量内层真实高度，`minHeight` 只在 engaged 时生效、且上限夹到终端行数（`Math.min(height, rows)`）——流式输出变长时外壳不动，是防抖而不是撑高。ProgressBar 空段用 `backgroundColor` 加空格而非画浅色字符，因为背景色块不受字形宽度影响，九级部分块字符（`▏▎▍▌▋▊▉█`）则把亚字符精度做出来。
+- 「latest-ref 不只是防重跑，是防重计时」：useDebouncedDigitInput 把三个回调塞进 `callbacksRef`，调用方传内联箭头也不会让 effect 重跑、不会重置防抖计时器；同时 `initialInputValue` 记住首帧值，只有真正新增字符才算「用户刚输入」，避免「首帧就带着数字」被误判。`setTimeout` 用可变参数把 ref 与值一并传入，回调拿的都是触发时刻快照，不依赖闭包。
+- 「推荐项靠位置与文案，不靠开关」：MethodStep 的 Generate 选项文案里标 recommended 且排第一；LocationStep 的 `projectSettings` 排在 `userSettings` 前；BypassPermissionsModeDialog 反过来把 No 排第一——危险操作的默认光标必须落在安全项上。三种排序是同一原则的正反面：默认值就是产品态度。
+- 「终端字形不可假设」：Commands 的 `truncate(…, maxWidth, true)` 第三参走显示宽度（中英混排按字符数截会错位）；Spinner/utils 的六帧字符表按 TERM 与平台分叉（Ghostty 把 ✽ 换成 `*`，非 darwin 把第三帧 ✳ 换成 `*`），都是对「字体里这个字到底多宽、能不能渲染」的保守处理。
+
+流程账：15 个数据文件逐一对齐源文件；预检 133 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`（ShellProgress 路径含 Shell 子串，按惯例走间接 runner）；原文 1,245 行 → 批注版 1,389 行；`check-fidelity.py` 全仓 1400 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 697 条，0 失效；全仓 1400/1902 文件、408,969/513,237 行、79.7%；components 328/407（剩 79 份共 3,755 行）。
+
+**下一批候选（components 降序，建议取 15 份约 1,124 行，最大件已降到 80 行）**：`Spinner/SpinnerGlyph.tsx`(80) · `MessageResponse.tsx`(78) · `ClaudeCodeHint/PluginHintMenu.tsx`(78) · `design-system/Pane.tsx`(77) · `design-system/Byline.tsx`(77) · `permissions/rules/PermissionRuleDescription.tsx`(76) · `Spinner/useStalledAnimation.ts`(76) · `RemoteCallout.tsx`(76) · `shell/ShellTimeDisplay.tsx`(74) · `agents/new-agent-creation/wizard-steps/ConfirmStepWrapper.tsx`(74) · `ClickableImageRef.tsx`(73) · `permissions/PermissionDialog.tsx`(72) · `SearchBox.tsx`(72) · `ui/OrderedList.tsx`(71) · `LogoV2/GuestPassesUpsell.tsx`(70)（components 已做 328/407，剩 79 份共 3,755 行；全仓还剩 502 份）。
