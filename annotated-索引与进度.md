@@ -5861,3 +5861,17 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：10 个数据文件逐一对齐源文件；预检 99 锚点全过、0 块内违例；`annotate.py` 十次零 `⟳`、零 `⚠`（OutputLine 路径含 shell 子串，按惯例走间接 runner）；`check-fidelity.py` 全仓 1355 份 0 失败（较上批 +10）；`check-links.py` 源码链接 2361 条加内链 694 条，0 失效；全仓 1355/1902 文件、404,736/513,237 行、78.9%；components 283/407（剩 124 份）。
 
 **下一批候选（components 降序，建议取 15 份约 1,601 行）**：`FeedbackSurvey/submitTranscriptShare.ts`(112) · `hooks/SelectHookMode.tsx`(112) · `LogoV2/Feed.tsx`(112) · `permissions/rules/RemoveWorkspaceDirectory.tsx`(110) · `agents/validateAgent.ts`(109) · `SessionBackgroundHint.tsx`(108) · `FeedbackSurvey/FeedbackSurveyView.tsx`(108) · `tasks/taskStatusUtils.tsx`(107) · `DevChannelsDialog.tsx`(105) · `permissions/WorkerPendingPermission.tsx`(105) · `PackageManagerAutoUpdater.tsx`(104) · `TeleportRepoMismatchDialog.tsx`(104) · `agents/new-agent-creation/wizard-steps/TypeStep.tsx`(103) · `ChannelDowngradeDialog.tsx`(102) · `FeedbackSurvey/useSurveyState.tsx`(100)（components 已做 283/407，剩 124 份；全仓还剩 547 份）。
+
+### components batch 127 (15 files 1601 lines 116 anchors)
+
+本批十五份均为 100–113 行的小组件与工具，横跨「反馈问卷闭环（按键视图 + 六态状态机 + 转录分享上传）、钩子只读菜单、通用事件流 Feed（宽度预计算）、工作区收权确认、代理验证（错误/警告两级）、ctrl+b 双击后台、任务状态图标色映射、开发渠道警告、队员等待授权指示、包管理器更新检查、Teleport 仓库校正、向导类型步、渠道降级确认」十五类主题。
+
+三条横切观察：
+
+- 「打点先于界面」：useSurveyState 的 handleSelect 先把响应双写进 state 与 ref、再发问卷打点、最后才做界面分流——appearanceId 用 ref 存（每次展示换新 UUID 串漏斗），异步回调读 ref 不怕闭包过期；分享失败静默回退感谢页，绝不报错打扰用户。
+- 「计算与渲染分离」：Feed 把「最宽要多少列」导出成 calculateFeedWidth 让调用方先算宽再渲染——Box 宽度一次到位；列对齐按全表最大时间戳宽统一算，先对齐再截断。
+- 「feature flag 内联痕迹」：SessionBackgroundHint 与 PackageManagerAutoUpdater 里各有一处恒假判断（isEnvTruthy 加字面量 false、false 或 false）——构建期把 feature 常量内联后留下的死代码，读反编译产物见到字面量布尔判断应先怀疑 feature flag 被裁。
+
+流程账：15 个数据文件逐一对齐源文件；预检 116 锚点全过、0 块内违例；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1370 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 695 条，0 失效；全仓 1370/1902 文件、406,337/513,237 行、79.2%；components 298/407（剩 109 份）。
+
+**下一批候选（components 降序，建议取 15 份约 1,387 行）**：`SandboxViolationExpandedView.tsx`(99) · `PrBadge.tsx`(97) · `agents/new-agent-creation/CreateAgentWizard.tsx`(97) · `DiagnosticsDisplay.tsx`(95) · `design-system/StatusIcon.tsx`(95) · `design-system/LoadingState.tsx`(94) · `NotebookEditToolUseRejectedMessage.tsx`(92) · `LogoV2/feedConfigs.tsx`(92) · `AutoUpdaterWrapper.tsx`(91) · `permissions/PowerShellPermissionRequest/powershellToolUseOptions.tsx`(91) · `hooks/PromptDialog.tsx`(90) · `InvalidSettingsDialog.tsx`(89) · `permissions/FileWritePermissionRequest/FileWriteToolDiff.tsx`(89) · `FeedbackSurvey/TranscriptSharePrompt.tsx`(88) · `LspRecommendation/LspRecommendationMenu.tsx`(88)（components 已做 298/407，剩 109 份；全仓还剩 532 份）。
