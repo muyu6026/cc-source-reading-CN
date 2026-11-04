@@ -5847,3 +5847,17 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：10 个数据文件逐一对齐源文件；预检 125 锚点全过、0 块内违例；`annotate.py` 十次零 `⚠`、一次无害 `⟳`（TextInput 62→60，锚点挪到注释段边界）；`check-fidelity.py` 全仓 1345 份 0 失败（较上批 +10）；`check-links.py` 源码链接 2361 条加内链 692 条，0 失效；全仓 1345/1902 文件、403,583/513,237 行、78.6%；components 273/407（剩 134 份）。
 
 **下一批候选（components 降序，建议取 10–15 份约 1,700 行）**：`HistorySearchDialog.tsx`(118) · `IdleReturnDialog.tsx`(118) · `shell/OutputLine.tsx`(118) · `FallbackToolUseErrorMessage.tsx`(116) · `TeleportStash.tsx`(116) · `MCPServerApprovalDialog.tsx`(115) · `permissions/FilesystemPermissionRequest/FilesystemPermissionRequest.tsx`(115) · `agents/new-agent-creation/wizard-steps/MemoryStep.tsx`(113) · `OutputStylePicker.tsx`(112) · `agents/ColorPicker.tsx`(112)（components 已做 273/407，剩 134 份；全仓还剩 557 份）。
+
+### components batch 126 (10 files 1153 lines 99 anchors)
+
+本批十份均为 112–118 行的小组件，横跨「历史搜索（流式加载 + 双层过滤）、空闲返回提示、Shell 输出行（JSON 美化/URL 链接/ANSI 清理）、工具错误兜底、Teleport stash 确认、MCP 服务器审批、文件系统权限分流、向导记忆步、输出风格选择、代理颜色自绘列表」十类主题。
+
+三条横切观察：
+
+- 「有损变换必须做往返校验」：OutputLine 的 tryFormatJson 在解析重序列化前先归一化比较（去空白、去可选转义），大整数超 MAX_SAFE_INTEGER 这类精度丢失会退回原文——宁可不美化也不改数值。
+- 「错误文本的五层归一管线」：FallbackToolUseErrorMessage 依次做非字符串兜底、抽 tool_use_error 标签、去沙箱/错误标签、InputValidationError 折叠、补 Error: 前缀——每层都把一种噪音收成用户可读的一句话，最后只渲染前 10 行加剩余计数。
+- 「推荐项是位置不是开关」：MemoryStep 的记忆目录选项按向导场景整体换数组，Recommended 永远排第一；配 Select 的 key 让内部光标重置到新数组头部。同类的还有 ColorPicker 放弃通用 Select 自绘键盘列表——每个选项要渲染真实色块，通用行装不下。
+
+流程账：10 个数据文件逐一对齐源文件；预检 99 锚点全过、0 块内违例；`annotate.py` 十次零 `⟳`、零 `⚠`（OutputLine 路径含 shell 子串，按惯例走间接 runner）；`check-fidelity.py` 全仓 1355 份 0 失败（较上批 +10）；`check-links.py` 源码链接 2361 条加内链 694 条，0 失效；全仓 1355/1902 文件、404,736/513,237 行、78.9%；components 283/407（剩 124 份）。
+
+**下一批候选（components 降序，建议取 15 份约 1,601 行）**：`FeedbackSurvey/submitTranscriptShare.ts`(112) · `hooks/SelectHookMode.tsx`(112) · `LogoV2/Feed.tsx`(112) · `permissions/rules/RemoveWorkspaceDirectory.tsx`(110) · `agents/validateAgent.ts`(109) · `SessionBackgroundHint.tsx`(108) · `FeedbackSurvey/FeedbackSurveyView.tsx`(108) · `tasks/taskStatusUtils.tsx`(107) · `DevChannelsDialog.tsx`(105) · `permissions/WorkerPendingPermission.tsx`(105) · `PackageManagerAutoUpdater.tsx`(104) · `TeleportRepoMismatchDialog.tsx`(104) · `agents/new-agent-creation/wizard-steps/TypeStep.tsx`(103) · `ChannelDowngradeDialog.tsx`(102) · `FeedbackSurvey/useSurveyState.tsx`(100)（components 已做 283/407，剩 124 份；全仓还剩 547 份）。
