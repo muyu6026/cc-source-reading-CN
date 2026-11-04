@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 126 批（2026-11-04）：components 第二十二批（10 文件 1,153 行，99 锚点）
+
+- 状态：完成并推送，commit `56965d9`。
+- 本批 10 份：`HistorySearchDialog.tsx`(118→131，12 锚点) / `IdleReturnDialog.tsx`(118→126，7) / `shell/OutputLine.tsx`(118→131，12) / `FallbackToolUseErrorMessage.tsx`(116→128，11) / `TeleportStash.tsx`(116→128，11) / `MCPServerApprovalDialog.tsx`(115→126，10) / `permissions/FilesystemPermissionRequest/FilesystemPermissionRequest.tsx`(115→124，8) / `agents/new-agent-creation/wizard-steps/MemoryStep.tsx`(113→123，9) / `OutputStylePicker.tsx`(112→122，9) / `agents/ColorPicker.tsx`(112→123，10)。
+- 校验：预检 99 锚点全过、0 违例；annotate 十次零 ⟳ 零 ⚠（OutputLine 路径含 shell 子串走间接 runner）；check-fidelity 1355 份 0 失败；check-links 2361 源码链接 + 695 内链 0 失效。
+- 进度：全仓 1355/1902（404,736/513,237 行，78.9%）· components 283/407（剩 124，总剩 547）。
+- 主题亮点：JSON 美化先做往返一致性校验防精度丢失；工具错误文本五层归一管线；MemoryStep 推荐项按场景整体换数组（推荐=位置）；ColorPicker 放弃通用 Select 自绘色块列表。
+- 用户明确要求连续执行不要停（第三次催促），后续每轮完成一批后直接开下一批。
+- 下批目标（components 降序 15 份约 1,601 行）：`submitTranscriptShare`(112) · `SelectHookMode`(112) · `LogoV2/Feed`(112) · `RemoveWorkspaceDirectory`(110) · `agents/validateAgent`(109) · `SessionBackgroundHint`(108) · `FeedbackSurveyView`(108) · `taskStatusUtils`(107) · `DevChannelsDialog`(105) · `WorkerPendingPermission`(105) · `PackageManagerAutoUpdater`(104) · `TeleportRepoMismatchDialog`(104) · `TypeStep`(103) · `ChannelDowngradeDialog`(102) · `useSurveyState`(100)。
+
+
+
 ## 第 125 批（2026-11-04）：components 第二十一批（10 文件 1,220 行，125 锚点）
 
 - 状态：完成并推送，commit `78e646e`。
