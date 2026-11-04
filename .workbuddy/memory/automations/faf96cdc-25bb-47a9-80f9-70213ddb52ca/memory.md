@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 125 批（2026-11-04）：components 第二十一批（10 文件 1,220 行，125 锚点）
+
+- 状态：完成并推送，commit `78e646e`。
+- 本批 10 份：`FileEditToolUpdatedMessage.tsx`(124→138，13 锚点) / `TextInput.tsx`(124→142，17) / `LogoV2/AnimatedClawd.tsx`(124→142，17) / `ApproveApiKey.tsx`(123→134，10) / `agents/new-agent-creation/wizard-steps/DescriptionStep.tsx`(123→134，10) / `permissions/EnterPlanModePermissionRequest/EnterPlanModePermissionRequest.tsx`(122→135，12) / `ClaudeInChromeOnboarding.tsx`(121→133，11) / `permissions/PermissionRuleExplanation.tsx`(121→134，12) / `sandbox/SandboxDependenciesTab.tsx`(120→133，12) / `CompactSummary.tsx`(118→130，11)。
+- 校验：预检 125 锚点全过、0 块内违例；annotate 十次零 ⚠、一次无害 ⟳（TextInput 62→60 注释段边界）；check-fidelity 1345 份 0 失败；check-links 2361 源码链接 + 694 内链 0 失效。
+- 进度：全仓 1345/1902（403,583/513,237 行，78.6%）· components 273/407（剩 134，总剩 557）。
+- 主题亮点：「动画也要看时间窗口」（TextInput 预热 120ms 太短不做脉冲；AnimatedClawd 定时器链 60ms/帧）；「归一化形状收拢展示分支」（PermissionRuleExplanation 六种 reason 归一成三元组，policySettings 不给去哪改提示）；「固定占位防布局抖动」（AnimatedClawd 容器恒高 3，靠裁剪不靠位移）。
+- 顺带修正：README 第 8 行补上缺失的第 124 批链接；预检脚本模板改为 TARGETS 结构（batch122 版），数据文件名由 slug 推导。
+- 下批目标（components 降序 10–15 份约 1,700 行）：`HistorySearchDialog`(118) · `IdleReturnDialog`(118) · `shell/OutputLine`(118) · `FallbackToolUseErrorMessage`(116) · `TeleportStash`(116) · `MCPServerApprovalDialog`(115) · `FilesystemPermissionRequest`(115) · `MemoryStep`(113) · `OutputStylePicker`(112) · `agents/ColorPicker`(112)。
+
+
+
 ## 第 118 批（2026-11-03）：components 第十六批（10 文件 2,399 行，175 锚点）
 
 - 状态：完成并推送，commit `859e8cb`。
