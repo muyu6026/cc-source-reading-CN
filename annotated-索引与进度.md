@@ -6090,3 +6090,30 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 130 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、3 处良性 `⟳`（上）；首轮 1 FAIL → 修正后复验 `check-fidelity.py` 全仓 **1484 份 0 失败**（`channels_mono` 等 `OK*` 正常）；`check-links.py` 源码链接 2366 条加内链 704 条，0 失效；全仓 **1484/1902 文件、421,757/513,237 行、82%**；`src/` 还剩 **418 份**。
 
 **下一批候选（两只 >3000 行巨兽仍在榜首，按行数降序）**：`screens/REPL.tsx`(5,006) · `main.tsx`(4,684) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 418 份；巨兽单批 1–2 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+### src batch 136 (screens REPL tsx 5005 lines 155 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，`src/` 散件阶段。本批单啃一头巨兽：CLI 终端 UI 根组件 `screens/REPL.tsx`（5,005 行，全仓现存第二大单文件），它是整个终端交互的总入口，含数十个嵌套 `useCallback` 与一个大 JSX 返回。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`screens/REPL.tsx`](annotated/src/screens/REPL.tsx) | 5,005→5,224 | 155 | CLI 终端 UI 根组件：条件 require 的死代码消除、各类 hook 与 useCallback（resume/onQuery/onSubmit/handleExit 等）、查询状态机 QueryGuard、消息 ref 镜像的 Zustand 模式、远程/SSH/直连、transcript 模式与搜索、巨型 JSX 返回 |
+
+要点：
+
+- **`REPL.tsx`（155 锚点）**：文件是 React Compiler 编译产物，函数体即一个 4,400 行级的巨型 `REPL()` 组件。开头是 import 与「按 feature 开关条件 require」的死代码消除（ant-only / coordinator / loop 模式）；中部依次挂载各类状态与 41 个 `useCallback`（消息管理、权限、流式、查询生命周期、resume 恢复、transcript 搜索等）；尾部是主 JSX 返回。批注重点放在「为什么这样写」的英文注释难以直接读懂之处：QueryGuard 同步状态机如何取代双状态易错模式、setMessages/setInputValue 怎样用 ref 镜像做 Zustand 式同步、composedOnScroll 作为用户滚动唯一入口的节流设计、以及「自动恢复」在中断时如何回退对话并还原输入。
+- **死代码消除**：同一套 `feature('XXX')` 开关模式贯穿全文，外部构建会被整段剔除；批注点明每一处「条件 require 只为外部构建瘦身」。
+- **resume / onQuery / onSubmit**：三个最复杂的回调，批注串起「恢复会话 → 派发查询 → 落盘消息 → 收尾重置」的完整生命周期与它们之间共享的 ref 契约（abortController / bridgeResult / restoreCallback）。
+- **transcript 模式**：`[` dump-to-scrollback、`v` 外部编辑器打开、less 式 `n/N` 搜索等键盘语义，批注解释其「裸字母在模态上下文」的设计来源。
+- `annotate.py` 对该 `.tsx` 尾部 637,816 字符的 `sourceMappingURL` 巨行做了省略替换（标 `OK*`），未计入锚点。
+
+踩坑：
+
+- 数据文件名带完整相对路径 slug：`src_screens_REPL_tsx_p1.py`（含 `src/` 前缀），与 `annotate.py` 的 `load_annotations` 派生规则一致。
+- 预检 155 锚点全过、0 块内违例、0 个英文双引号与反斜杠、无三连单引号。
+- `annotate.py` 良性 `⟳` 外移 41 处：`//` 注释段内的 `after`/`before` 自动挪到段边界（如 974→975、1771→1772、2155→2158、4956→4957），未劈开英文；零模板字符串外移（无中文漏进模板字面量）。零 `⚠`。
+- `check-fidelity.py` 全仓 **1485 份 0 失败**（`OK*` 正常，sourceMappingURL 省略已计入）；`check-links.py` 源码链接 2366 条加内链 704 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 155 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、41 处良性 `⟳`；`check-fidelity.py` 全仓 **1485 份 0 失败**；`check-links.py` 源码链接 2366 条加内链 704 条，0 失效；全仓 **1485/1902 文件、426,763/513,237 行、83%**；`src/` 还剩 **417 份**。
+
+**下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`main.tsx`(4,684) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 417 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
