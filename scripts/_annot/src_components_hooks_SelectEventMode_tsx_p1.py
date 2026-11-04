@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (2, 'before', '''文件顶部是一段块注释：说明这是 /hooks 菜单的入口，且菜单是只读的——只能浏览已配置钩子的事件，不能修改。'''),
+    (13, 'before', '''引入 `HookEvent` 与 `HookEventMetadata` 类型，分别来自 agent SDK 与钩子配置管理器。'''),
+    (19, 'before', '''Props：各事件的元数据、各事件的钩子计数、总钩子数、是否被策略限制、以及选择/取消回调。'''),
+    (27, 'before', '''SelectEventMode 是 /hooks 配置菜单的入口：列出所有可用钩子事件供浏览，本身只读。'''),
+    (28, 'before', '''`_c(23)` 申请 23 个记忆槽位。'''),
+    (38, 'before', '''用 `plural` 把总钩子数变成「N hooks」的单复数形式，作为副标题的一部分。'''),
+    (45, 'before', '''记忆策略限制提示框：当 `restrictedByPolicy` 为 true 时，说明只有受管设置里的钩子能跑，用户自定义钩子被拦。'''),
+    (54, 'before', '''用哨兵记忆只读提示框：说明菜单只读，改钩子要去编辑 settings.json 或问 Claude，并附文档链接。'''),
+    (61, 'before', '''记忆事件选择回调：把选中值转型成 `HookEvent` 后交给 `onSelectEvent`。'''),
+    (71, 'before', '''记忆选项列表：遍历事件元数据，标出每个事件的已配置钩子数，描述取元数据的 summary。'''),
+    (96, 'before', '''记忆 `Select` 区块：把选项列表与回调组装进一个纵向 `Box`。'''),
+    (106, 'before', '''记忆外层 `Box`：把策略提示、只读提示与事件列表合在一起。'''),
+    (115, 'before', '''记忆最外层 `Dialog`：标题 Hooks，副标题为总钩子数，取消走 `onCancel`。'''),
+]

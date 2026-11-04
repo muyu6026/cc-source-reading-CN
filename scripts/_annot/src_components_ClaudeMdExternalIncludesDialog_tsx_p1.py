@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (3, 'before', '''引入埋点 `logEvent`，本组件每一步选择都会打一条分析事件（接受/拒绝/展示）。'''),
+    (9, 'before', '''Props：完成回调 `onDone`、是否独立弹窗、以及外部导入的 CLAUDE.md 列表 `externalIncludes`。'''),
+    (14, 'before', '''ClaudeMdExternalIncludesDialog 在检测到 CLAUDE.md 从工作目录之外导入文件时弹出，询问用户是否允许这种外部导入。'''),
+    (22, 'before', '''用 `Symbol.for(`react.memo_cache_sentinel`)` 判断首次渲染，建立一次性的空依赖数组 `t1` 给 `useEffect` 用。'''),
+    (28, 'before', '''`React.useEffect(_temp, t1)` 在组件展示时打一条 `tengu_claude_md_includes_dialog_shown` 事件（见末尾 `_temp`）。'''),
+    (30, 'before', '''记忆 `handleSelection`：选 yes 打接受事件并写 `hasClaudeMdExternalIncludesApproved:true`，选 no 打拒绝事件并写 false，两者都标记已展示过警告，最后回调 `onDone`。'''),
+    (48, 'before', '''记忆 `handleEscape`：等价于按 no，复用 `handleSelection(`no`)`。'''),
+    (61, 'before', '''用哨兵记忆安全警告正文：提醒不要对第三方仓库允许外部导入。'''),
+    (68, 'before', '''记忆「列出外部导入路径」区块：仅当 `externalIncludes` 非空时显示。'''),
+    (76, 'before', '''记忆安全提示与文档链接区块。'''),
+    (82, 'before', '''用哨兵记忆两个选项：`yes` 允许外部导入、`no` 禁用外部导入。'''),
+    (95, 'before', '''记忆 `Select`：选项变化后把值转成 yes/no 交给 `handleSelection`。'''),
+    (103, 'before', '''记忆外层 `Dialog`：标题为是否允许外部 CLAUDE.md 导入，颜色为 warning，独立弹窗时隐藏边框与输入提示。'''),
+    (117, 'before', '''`_temp4` 把每个外部导入渲染成一行缩进路径；`_temp3`/`_temp2` 是接受/拒绝时的配置更新；`_temp` 打展示事件。'''),
+]

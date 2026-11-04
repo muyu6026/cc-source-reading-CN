@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (3, 'before', '''`renderPlaceholder` 负责处理占位符的显示时机（有内容时隐藏占位符）。'''),
+    (4, 'before', '''`usePasteHandler` 区分「粘贴」与「普通输入」，粘贴时跳过逐字符输入逻辑。'''),
+    (5, 'before', '''`useDeclaredCursor` 声明一个光标引用，供底层终端按声明位置绘制光标。'''),
+    (9, 'before', '''`HighlightedInput` 是带高亮的输入渲染（当有匹配高亮时走这一支）。'''),
+    (22, 'before', '''BaseTextInput 是所有文本输入的底层渲染组件：处理光标、占位符、粘贴、高亮，但不持有输入状态机（状态在 `inputState` 里）。'''),
+    (23, 'before', '''`_c(14)` 申请 14 个记忆槽位。'''),
+    (32, 'before', '''从 `inputState` 取出渲染所需字段：onInput、已渲染值、光标行列。'''),
+    (38, 'before', '''`t1` 标记「光标是否应当激活」：必须同时聚焦、要求显示光标、且终端本身有焦点。'''),
+    (40, 'before', '''记忆传给 `useDeclaredCursor` 的光标对象 `{line, column, active}`。'''),
+    (53, 'before', '''用粘贴处理器包装 onInput：粘贴且按回车时跳过，否则走正常 onInput。'''),
+    (71, 'before', '''`useEffect` 在 `isPasting` 变化时通知上层 `onIsPastingChange`。'''),
+    (88, 'before', '''`useInput(wrappedOnInput, {isActive:focus})` 真正把键盘输入接进来，仅当本组件获得焦点时生效。'''),
+    (91, 'before', '''`commandWithoutArgs` 判断当前是不是「无参命令」：不含空格、或以空格结尾，决定要不要显示参数提示。'''),
+    (98, 'before', '''`filteredHighlights` 按视口偏移把高亮区间换算成当前可见行的相对坐标，避免高亮错位。'''),
+    (104, 'before', '''若有高亮就走 `HighlightedInput` 分支；否则用 `T0`/`T1` 别名包裹普通 `Text`/`Box` 渲染。'''),
+]

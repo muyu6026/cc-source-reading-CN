@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (2, 'before', '''biome-ignore 注释保留导入顺序标记——这些 import 是「仅批注（ANT-ONLY）」工具插入的，不能被格式化器重排。'''),
+    (14, 'before', '''Props：关闭回调、命令上下文、默认打开的标签页（Status/Config/Usage/Gates 之一）。'''),
+    (22, 'before', '''Settings 是设置弹窗主体，用 `Tabs` 组织 Status / Config / Usage 三个标签（Gates 当前被禁用）。'''),
+    (23, 'before', '''`_c(25)` 申请 25 个记忆槽位。'''),
+    (29, 'before', '''四个 `useState`：当前标签、标签是否隐藏、Config 是否独占 Esc、Gates 是否独占 Esc。后两个用于在嵌入输入框时把 Esc 让给子组件。'''),
+    (33, 'before', '''`useIsInsideModal` 判断弹窗是否嵌在模态框里，这会改变可用高度的计算方式。'''),
+    (37, 'before', '''内容高度：模态框内用 `rows+1`；否则取终端高度 80% 并夹在 15 到 30 行之间。'''),
+    (38, 'before', '''诊断信息来自一个 Promise：`_temp2` 在首次渲染时建立，失败则 catch 成空数组（见文件末尾 `_temp`）。'''),
+    (46, 'before', '''记忆 `handleEscape`：标签未隐藏时才真正关闭，并回一条 `display:`system`` 消息表示「Status 对话框已关闭」。'''),
+    (57, 'before', '''`t2` 计算确认键是否生效：标签未隐藏、且当前不是由 Config/Gates 独占 Esc 时才激活。'''),
+    (71, 'before', '''记忆 Status 标签页内容：把诊断 Promise 透传给 `Status` 组件。'''),
+    (80, 'before', '''记忆 Config 标签页：用 `Suspense` 包住懒加载的 `Config`，并把切 Esc 归属的回调 `setConfigOwnsEsc` 传下去。'''),
+    (96, 'before', '''Gates 标签页目前是禁用的：`false ? [<Gates/>] : []`，编译后恒为空数组，保留接口位置以便日后启用。'''),
+    (118, 'before', '''记忆整体结构：用 `Pane` 包住 `Tabs`，把 selectedTab、隐藏状态、初始焦点等全部传给 Tabs。'''),
+    (131, 'before', '''`_temp2` 首次建立诊断 Promise；`buildDiagnostics` 失败时由 `_temp` 兜底为空数组。'''),
+]

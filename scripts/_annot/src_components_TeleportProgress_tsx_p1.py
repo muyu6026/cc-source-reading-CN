@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口，本文件由编译器生成。'''),
+    (8, 'before', '''从 `../utils/teleport.js` 引入远端会话「传送（teleport）」相关的几个核心函数：分支检出、日志处理、恢复会话等。'''),
+    (13, 'before', '''SPINNER_FRAMES 是四帧旋转字符，配合下面按时间取模来做出终端里的转圈动画。'''),
+    (14, 'before', '''STEPS 定义传送的四个阶段：校验会话、拉取日志、拉取分支、检出分支。顺序即进度条的先后顺序。'''),
+    (30, 'before', '''TeleportProgress 只负责把「传送进度」渲染成终端 UI，真正的异步工作在外面 `teleportWithProgress` 里完成。'''),
+    (31, 'before', '''`_c(16)` 申请 16 个编译器记忆槽位，用于记忆帧动画、步骤索引与各段 JSX。'''),
+    (36, 'before', '''`useAnimationFrame(100)` 每 100 毫秒回调一次，返回的 `time` 驱动 spinner 动画与进度刷新。'''),
+    (37, 'before', '''`frame` 用 elapsed 时间整除 100 再对帧数取模，得到当前该显示哪一帧旋转字符。'''),
+    (46, 'before', '''在 STEPS 里找到当前步骤的下标，用来区分「已完成 / 进行中 / 待处理」三种状态。'''),
+    (64, 'before', '''把每个步骤映射成一行：已完成的打勾、进行中的用 spinner 帧、其余用空心圆，并据此决定颜色与暗显。'''),
+    (121, 'before', '''TeleportProgressWrapper 把「命令式 setState」桥接进 React 树：外层异步函数通过 `setStep` 把进度推进给这个组件。'''),
+    (126, 'before', '''`root.render` 把 Provider 与包装组件挂到已存在的根上，实现「在现有界面里原地渲染进度」。'''),
+    (129, 'before', '''`teleportResumeCodeSession` 才是真正的异步恢复工作，并把 `setStep` 作为进度回调传入。'''),
+    (131, 'before', '''恢复完成后检出分支，再把日志加工成可回放的消息并返回分支名。'''),
+]

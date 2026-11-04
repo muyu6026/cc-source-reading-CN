@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (12, 'before', '''引入权限规则的类型与字符串<->值解析工具：`permissionRuleValueFromString` 把用户输入解析成规则值，`permissionRuleValueToString` 反向还原成展示文案。'''),
+    (14, 'before', '''PermissionRuleInputProps：取消回调、提交回调（带规则值与行为）、以及当前规则行为（allow/deny）。'''),
+    (19, 'before', '''PermissionRuleInput 是一个「输入一条权限规则」的小弹窗，复用于 Settings 里新增 allow/deny 规则。'''),
+    (26, 'before', '''两个 `useState`：输入框当前内容 `inputValue` 与光标偏移 `cursorOffset`，后者用于把光标位置同步回渲染。'''),
+    (30, 'before', '''用 `Symbol.for(`react.memo_cache_sentinel`)` 判断是否为「首次渲染」：首次才建立确认键上下文 `{context:`Settings`}`，之后直接复用 `$[0]`，这是 React Compiler 表达一次性 memo 的固定写法。'''),
+    (44, 'before', '''记忆 `handleSubmit`：提交时先 trim，空值直接 return；否则把字符串解析成规则值并回调 `onSubmit(ruleValue, ruleBehavior)`。'''),
+    (61, 'before', '''记忆标题文本「Add {ruleBehavior} permission rule」，behavior 不同标题词不同。'''),
+    (68, 'before', '''用哨兵记忆一段说明文字：列出外部导入的 CLAUDE.md 路径（若有）。'''),
+    (88, 'before', '''记忆完整的规则格式说明：用 `t4`（换行）、`t5`（WebFetch 示例）、`t6`（「或」连接词）拼出「工具名，可选括号说明」的示例。'''),
+    (99, 'before', '''记忆核心输入区：一个带边框的 `TextInput`，占位符含省略号，列数扣掉 6 给边框与间距留白，光标偏移双向同步。'''),
+    (109, 'before', '''记忆外层带权限色边框的 `Box`，把说明与输入框合在一起。'''),
+    (118, 'before', '''记忆底部提示条：pending 时「再按一次退出」，否则「Enter 提交 · Esc 取消」。'''),
+    (127, 'before', '''返回最终片段 `t11`，即对话框的全部内容。'''),
+]

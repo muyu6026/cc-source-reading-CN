@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (2, 'before', '''`partition` 来自 lodash-es，把服务器数组按「是否被选中」拆成 `[approved, rejected]` 两部分。'''),
+    (6, 'before', '''引入已废弃的设置读写：`getSettings_DEPRECATED` 读当前设置，`updateSettingsForSource` 写 localSettings（.mcp.json 的启用/禁用列表）。'''),
+    (13, 'before', '''Props：待确认的服务器名数组 `serverNames` 与完成回调 `onDone`。'''),
+    (17, 'before', '''MCPServerMultiselectDialog 在发现 `.mcp.json` 里有新的 MCP 服务器时，让用户多选启用或禁用。'''),
+    (18, 'before', '''`_c(21)` 申请 21 个记忆槽位。'''),
+    (24, 'before', '''记忆 `onSubmit`：把选中的服务器拆成批准/拒绝两组，分别并入 localSettings 的启用/禁用列表（用 Set 去重），最后回调 `onDone`。'''),
+    (56, 'before', '''记忆 `handleEscRejectAll`：Esc 时把全部 `serverNames` 标记为禁用并回调 `onDone`，即「一键拒绝所有」。'''),
+    (73, 'before', '''`t3` 是标题文案：`N new MCP servers found in .mcp.json`，用模板字符串拼出数量。'''),
+    (82, 'before', '''用哨兵记忆每个选项（服务器名作 label 与 value），供 `SelectMulti` 渲染。'''),
+    (89, 'before', '''记忆 `SelectMulti`：默认全选，提交走 `onSubmit`，取消走 `handleEscRejectAll`，隐藏索引列。'''),
+    (100, 'before', '''记忆外层 `Dialog`：标题为 `t3`，副标题提示「选择要启用的」，颜色为 warning。'''),
+    (111, 'before', '''用哨兵记忆底部快捷键提示：空格选择、回车确认、Esc 拒绝全部。'''),
+    (127, 'before', '''`_temp` 把单个服务器名映射成 `{label, value}`，供选项渲染。'''),
+]

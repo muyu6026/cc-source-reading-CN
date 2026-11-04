@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (3, 'before', '''引入退出键绑定钩子 `useExitOnCtrlCDWithKeybindings`，Dialog 的 Esc/Ctrl-C/D 行为依赖它。'''),
+    (11, 'before', '''DialogProps：标题、副标题、子内容、取消回调，以及颜色、是否隐藏输入提示/边框等开关。'''),
+    (19, 'before', '''`inputGuide` 是一个接收 `exitState` 的自定义渲染函数，用于显示「再按一次退出」之类的动态提示。'''),
+    (21, 'before', '''一段较长的块注释，解释 `isCancelActive`：在嵌入文本框编辑时设为 false，让 Esc/Ctrl-C/D 落到文本框而非被 Dialog 吞掉。'''),
+    (30, 'before', '''Dialog 是几乎所有弹窗复用的底层容器，负责标题、边框、输入提示与取消键。'''),
+    (31, 'before', '''`_c(27)` 申请 27 个记忆槽位，Dialog 内部要记忆的片段较多（标题、副标题、底部提示、最终 Pane）。'''),
+    (43, 'before', '''颜色缺省为 `permission`，即 Dialog 默认走「权限」主题色；`isCancelActive` 缺省为 true。'''),
+    (45, 'before', '''调用退出键绑定钩子，拿到 `exitState`（含 keyName 与 pending 状态）。'''),
+    (57, 'before', '''把 Esc/n（`confirm:no`）绑定到 `onCancel`，并带 `Confirmation` 上下文，避免误触其他场景的取消键。'''),
+    (59, 'before', '''记忆底部输入提示：pending 时显示「再按 keyName 退出」，否则显示 Enter 确认 / Esc 取消的说明。'''),
+    (104, 'before', '''记忆底部输入提示框：若传了 `inputGuide` 就调用它（注入 exitState），否则用默认的 `defaultInputGuide`。'''),
+    (124, 'before', '''若要求隐藏边框，直接返回裸内容，不再套 `Pane` 外框。'''),
+    (127, 'before', '''否则用 `Pane` 包一层带颜色的外框，得到最终渲染结果 `t11`。'''),
+]

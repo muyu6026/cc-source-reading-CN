@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'before', '''从 `react/compiler-runtime` 引入编译器运行时。本文件是 React Compiler 的产物，下面的 `_c` 与 `$` 都是它注入的缓存机制，不是手写的 React 代码。'''),
+    (2, 'before', '''chalk 用于彩色终端输出，这里专门配合 `invert` 反色选项，把光标所在的文字反显。'''),
+    (5, 'before', '''复用上层的 `useVimInput` 与 `useClipboardImageHint`，本组件只是把输入状态「包一层」做渲染，不持有输入逻辑。'''),
+    (13, 'before', '''VimTextInput 是带 Vim 键位模式的文本输入框。它负责上色、反色、把 props 整理成一份稳定引用后传给子组件 `BaseTextInput`。'''),
+    (14, 'before', '''`_c(38)` 申请 38 个编译器记忆槽位 `$`。React Compiler 把每个需要记忆的值（颜色、props 包、回调、渲染结果）按固定下标放进 `$` 数组，靠下标比对依赖是否变化。'''),
+    (18, 'before', '''React Compiler 把从 props 取出的每个字段单独命名成 `t0`、`t1`……这种带编号的临时变量是编译产物，对应原代码里的 `props.value`、`props.onChange` 等。'''),
+    (33, 'before', '''`t15` 计算当前主题色：终端聚焦时用 chalk 反色，否则用透传占位函数 `_temp`。'''),
+    (42, 'before', '''本段是整份文件最关键的一处：React Compiler 把「props 对象」的记忆依赖**拍平**成一个超长条件。只要 27 个 props 字段之一变了，就重建对象并刷新 `$[2]..$[28]`；否则直接复用上次的结果 `$[28]`，不重建。'''),
+    (101, 'before', '''把整理好的稳定 props 包交给 `useVimInput`，由它持有真正的输入状态机（光标、历史、模式切换）。'''),
+    (102, 'before', '''从输入状态里取出当前模式 `mode` 与切模式函数 `setMode`。'''),
+    (106, 'before', '''记忆一个副作用：当 props 要求的初始模式与当前模式不一致时，挂载或更新时把模式重置回 `initialMode`。'''),
+    (124, 'before', '''`React.useEffect` 的真正调用点，依赖数组是 `[initialMode, mode, setMode]`——只有这三者变化才重跑重置逻辑。'''),
+    (125, 'before', '''最终把子组件 `BaseTextInput` 包进一个纵向 `Box`，并透传高亮、聚焦、mode 等状态。'''),
+    (135, 'before', '''返回记忆好的渲染结果 `t19`，避免在 props 未变时重复创建 JSX。'''),
+    (137, 'before', '''`_temp` 是编译器的透传占位：当不需要反色时直接原样返回文字，等价于 `text => text`。'''),
+]

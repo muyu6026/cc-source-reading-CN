@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''手写组件（非 React Compiler 产物），实现「导出对话」弹窗：可复制到剪贴板或存成文件。'''),
+    (8, 'before', '''`getCwd` 取当前工作目录，导出的文件就写在这里；`writeFileSync_DEPRECATED` 写文件。'''),
+    (16, 'before', '''ExportDialogProps：要导出的 `content`、默认文件名、完成回调（返回成功与否与消息）。'''),
+    (24, 'before', '''`ExportOption` 只有 `clipboard`（剪贴板）与 `file`（文件）两种。'''),
+    (25, 'before', '''ExportDialog 是「导出对话」弹窗，分「选方式」与「填文件名」两个子屏。'''),
+    (30, 'before', '''四个 `useState`：选中方式、文件名、光标偏移、是否显示文件名输入子屏。'''),
+    (39, 'before', '''`handleGoBack`：从文件名子屏退回选方式子屏（清空选中方式）。'''),
+    (43, 'before', '''`handleSelectOption`：选 clipboard 就立刻写入系统剪贴板并回调成功；选 file 则进入文件名输入子屏。'''),
+    (57, 'before', '''`handleFilenameSubmit`：确保文件名以 `.txt` 结尾（否则替换扩展名后补上），拼成完整路径后写文件，成功/失败都回调 `onDone`。'''),
+    (77, 'before', '''`handleCancel`：若在文件名子屏按 Esc，退回选方式；否则直接以「已取消」回调结束。'''),
+    (89, 'before', '''options 定义两个选项：复制到剪贴板、保存到当前目录文件。'''),
+    (99, 'before', '''`renderInputGuide` 按当前子屏切换底部快捷键提示：文件名子屏显示 Enter 保存 / Esc 返回。'''),
+    (113, 'before', '''把 `confirm:no` 绑定到 `handleCancel`，但仅当处于文件名子屏时才激活（避免把文件名里的 n 当成取消）。'''),
+    (118, 'before', '''渲染：外层 `Dialog` 标题为「Export Conversation」；未进文件名子屏时显示选项列表，否则显示文件名输入框。'''),
+]

@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (1, 'before', '''React Compiler 运行时入口。'''),
+    (5, 'before', '''`editPromptInEditor` 把当前 prompt 丢进外部编辑器，让用户用惯用编辑器写长文本。'''),
+    (12, 'before', '''从 `../types.js` 引入 `AgentWizardData`，即新建智能体向导的累积数据。'''),
+    (13, 'before', '''PromptStep 是「新建智能体」向导里的「系统提示词」一步：让用户填写并校验系统提示词。'''),
+    (14, 'before', '''`_c(20)` 申请 20 个记忆槽位。'''),
+    (15, 'before', '''从 `useWizard` 取出导航与数据更新函数，以及当前向导数据。'''),
+    (21, 'before', '''`systemPrompt` 以向导里已有的值为初值（为空则用空串），`cursorOffset` 初始指向文末。'''),
+    (25, 'before', '''首次渲染建立确认键上下文 `{context:`Settings`}`，供下面 Esc 返回用。'''),
+    (33, 'before', '''把 Esc（`confirm:no`）绑定到 `goBack`，上下文为 Settings。'''),
+    (35, 'before', '''记忆 `handleExternalEditor`：打开外部编辑器编辑 prompt，返回后更新内容与光标。'''),
+    (50, 'before', '''首次渲染建立 `chat:externalEditor` 的上下文字典 `{context:`Chat`}`。'''),
+    (58, 'before', '''把 `chat:externalEditor` 绑定到 `handleExternalEditor`（ctrl+g 默认）。'''),
+    (59, 'before', '''记忆 `handleSubmit`：trim 后为空则报错；否则写入向导数据并前进到下一步。'''),
+    (100, 'before', '''记忆输入区 `TextInput`：列宽固定 80、显示光标与焦点、同步光标偏移，提交走 `handleSubmit`。'''),
+    (109, 'before', '''记忆错误提示框：仅 `error` 非空时显示。'''),
+    (117, 'before', '''记忆整体布局：用 `WizardDialogLayout` 包住说明、输入区与错误提示，副标题为 System prompt。'''),
+]
