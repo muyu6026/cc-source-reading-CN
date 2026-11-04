@@ -50,6 +50,7 @@
 - 第 121 批：`2a116e5` · 15 文件/2,677 行/255 锚点 · 全仓 **1290/1902 · 395,705 行 · 77%（行）** · components **200/389 文件（51%）/ 64,892 行（79%）**。
 - 第 122 批：`db008a2` · 15 文件/2,446 行/201 锚点 · 全仓 **1305/1902 · 398,150 行 · 77%（行）** · components **215/389 文件（55%）/ 67,337 行（82%）**。
 - 第 123 批：`6a4b8bb` · 15 文件/2,204 行/139 锚点 · 全仓 **1320/1902 · 400,354 行 · 78%（行）** · components **230/389 文件（59%）/ 69,541 行（85%）**。
+- 第 124 批：`4b86725` · 15 文件/2,009 行/215 锚点 · 全仓 **1335/1902 · 402,363 行 · 78%（行）** · components **245/389 文件（63%）/ 71,550 行（87%）**。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -59,11 +60,11 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-04 第 121 批后）
-- 全仓 **1320/1902 文件（缺失 582）；400,354/513,237 行，按行数覆盖 78%**。
+## 当前状态（2026-11-04 第 124 批后）
+- 全仓 **1335/1902 文件（缺失 567）；402,363/513,237 行，按行数覆盖 78%**。
 - 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)。
-- `src/components` **230/389 文件（59%）/ 69,541/81,892 行（85%）**，为当前进行中最大子树，剩 159 份。
-- 下一批目标（components 按行数降序推进）：剩余 159 份按 `check-coverage.py src/components` 取 top 推进，当前候选 top：`VimTextInput.tsx`(140) · `TeleportProgress.tsx`(140) · `TagTabs.tsx`(139) · `design-system/Dialog.tsx`(138) · `permissions/rules/PermissionRuleInput.tsx`(138)（见索引下一批候选表）。
+- `src/components` **245/389 文件（63%）/ 71,550/81,892 行（87%）**，为当前进行中最大子树，剩 144 份。
+- 下一批目标（components 按行数降序推进）：剩余 144 份按 `check-coverage.py src/components` 取 top 推进，当前候选 top：`LogoV2/AnimatedClawd.tsx`(124) · `FileEditToolUpdatedMessage.tsx`(124) · `TextInput.tsx`(124) · `agents/new-agent-creation/wizard-steps/DescriptionStep.tsx`(123) · `ApproveApiKey.tsx`(123)（见索引下一批候选表）。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -78,6 +79,6 @@
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)。
-- 进行中：`src/components` **230/389 文件（59%）/ 69,541/81,892 行（85%）**，剩 159 份，为当前最大剩余块。
+- 进行中：`src/components` **245/389 文件（63%）/ 71,550/81,892 行（87%）**，剩 144 份，为当前最大剩余块。
 - 未启动：其余子树（bridge/cli/screens/skills/tasks/vim/keybindings/…）按 `check-coverage.py src` 取真实 top 降序推进。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。

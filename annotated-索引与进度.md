@@ -5833,3 +5833,17 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：15 个数据文件逐一对齐源文件；预检 215 锚点全过、零合并错误；`annotate.py` 十五次零 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 1335 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 691 条，0 失效；全仓 1335/1902 文件、402,363/513,237 行、78%（按行数覆盖）；components 245/389（剩 144 份）。
 
 **下一批候选（components 降序，建议取 15 份约 1,821 行）**：`FileEditToolUpdatedMessage.tsx`(124) · `LogoV2/AnimatedClawd.tsx`(124) · `TextInput.tsx`(124) · `ApproveApiKey.tsx`(123) · `agents/new-agent-creation/wizard-steps/DescriptionStep.tsx`(123) · `permissions/EnterPlanModePermissionRequest/EnterPlanModePermissionRequest.tsx`(122) · `permissions/PermissionRuleExplanation.tsx`(121) · `ClaudeInChromeOnboarding.tsx`(121) · `sandbox/SandboxDependenciesTab.tsx`(120) · `IdleReturnDialog.tsx`(118) · `shell/OutputLine.tsx`(118) · `HistorySearchDialog.tsx`(118) · `CompactSummary.tsx`(118) · `FallbackToolUseErrorMessage.tsx`(116) · `TeleportStash.tsx`(116)（components 已做 245/389，剩 144 份；全仓还剩 567 份）。
+
+### components batch 125 (10 files 1220 lines 125 anchors)
+
+本批十份均为 118–124 行的小组件，横跨「文件编辑消息摘要（增删统计 + 结构化 diff）、文本输入框（语音波形光标）、吉祥物点击动画、自定义 API key 审批、向导描述步骤、进入计划模式弹窗、Chrome 集成引导、权限解释归一化、沙箱依赖体检、上下文压缩占位」十类主题。全部为 React Compiler 产物（_c(n) 缓存槽 + t0..tN 临时变量），其中 TextInput 为手写组件（无 _c）。
+
+三条横切观察：
+
+- 「动画也要看时间窗口」：TextInput 注释解释了为何不做预热脉冲——约 120 毫秒的预热窗口对一秒周期的脉冲太短，根本来不及被看见；而预热期 50 毫秒一次的重渲染与用户 30–80 毫秒间隔的空格输入叠加会肉眼可见地卡顿。AnimatedClawd 反其道用 60 毫秒一帧的定时器链逐帧推进，每次 setTimeout 而非 interval，暂停与卸载天然正确。
+- 「归一化形状收拢展示分支」：PermissionRuleExplanation 把六种 PermissionDecisionReason 归一成 reasonString/configString/themeColor 三元组，所有分支判断收进纯函数 stringsForDecisionReason，组件只剩两段渲染；policySettings 下发的企业策略不显示「去哪改」提示，因为用户改不了。
+- 「固定占位防布局抖动」：AnimatedClawd 容器高度恒为 3，蹲下时脚行被裁掉而非撑开容器——「缩到画面下面再弹回来」的视觉全靠裁剪而非布局位移；SandboxDependenciesTab 的 seccomp 判定走 warnings 而非 errors，因为缺了它沙箱仍可运行。
+
+流程账：10 个数据文件逐一对齐源文件；预检 125 锚点全过、0 块内违例；`annotate.py` 十次零 `⚠`、一次无害 `⟳`（TextInput 62→60，锚点挪到注释段边界）；`check-fidelity.py` 全仓 1345 份 0 失败（较上批 +10）；`check-links.py` 源码链接 2361 条加内链 692 条，0 失效；全仓 1345/1902 文件、403,583/513,237 行、78.6%；components 273/407（剩 134 份）。
+
+**下一批候选（components 降序，建议取 10–15 份约 1,700 行）**：`HistorySearchDialog.tsx`(118) · `IdleReturnDialog.tsx`(118) · `shell/OutputLine.tsx`(118) · `FallbackToolUseErrorMessage.tsx`(116) · `TeleportStash.tsx`(116) · `MCPServerApprovalDialog.tsx`(115) · `permissions/FilesystemPermissionRequest/FilesystemPermissionRequest.tsx`(115) · `agents/new-agent-creation/wizard-steps/MemoryStep.tsx`(113) · `OutputStylePicker.tsx`(112) · `agents/ColorPicker.tsx`(112)（components 已做 273/407，剩 134 份；全仓还剩 557 份）。
