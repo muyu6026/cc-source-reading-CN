@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 129 批（2026-11-04）：components 第二十五批（15 文件 1,245 行，133 锚点）
+
+- 状态：完成并推送，commit `f97c8e7`。
+- 本批 15 份（components 最后一批 80–87 行小件，多数是设计系统基元与向导步骤）：`tasks/ShellProgress.tsx`(87→97，9 锚点) / `BypassPermissionsModeDialog.tsx`(87→97，9) / `design-system/ProgressBar.tsx`(86→95，8) / `LanguagePicker.tsx`(86→95，8) / `Spinner/utils.ts`(84→94，10) / 向导 `ColorStep.tsx`(84→94，9) / `FeedbackSurvey/useDebouncedDigitInput.ts`(82→94，12) / `TeammateViewHeader.tsx`(82→91，8) / `HelpV2/Commands.tsx`(82→92，9) / `AwsAuthStatusBox.tsx`(82→93，10) / `design-system/KeyboardShortcutHint.tsx`(81→89，7) / `teams/TeamStatus.tsx`(80→89，8) / `design-system/Ratchet.tsx`(80→91，10) / 向导 `MethodStep.tsx`(80→89，8) / 向导 `LocationStep.tsx`(80→89，8)。
+- 校验：预检 133 锚点全过；annotate 十五次零 ⚠ 零 ⟳（ShellProgress 路径含 Shell 走间接 runner）；check-fidelity 1400 份 0 失败；check-links 2361 + 698，0 失效。
+- 进度：全仓 1400/1902（408,969/513,237 行，79.7%）· components 328/407（剩 79 份共 3,755 行，总剩 502）。
+- 主题亮点：①「布局稳定靠棘轮与背景色」（Ratchet 只增不减 minHeight 外壳 + measureElement 量内层、上限夹 Math.min(height,rows)；ProgressBar 空段用 backgroundColor 加空格而非浅色字符）；②「latest-ref 防的是重计时不只是重跑」（useDebouncedDigitInput 回调入 ref + initialInputValue 记首帧 + setTimeout 可变参数传快照）；③「推荐项靠位置与文案」（MethodStep 的 recommended 排第一、LocationStep 项目级在前、Bypass 弹窗反过来把 No 排第一）；④「终端字形不可假设」（truncate 按显示宽度截、六帧字符表按 TERM 与平台分叉）。
+- 下批目标（components 降序 15 份约 1,124 行，最大件已降到 80 行）：`Spinner/SpinnerGlyph`(80) · `MessageResponse`(78) · `ClaudeCodeHint/PluginHintMenu`(78) · `design-system/Pane`(77) · `design-system/Byline`(77) · `permissions/rules/PermissionRuleDescription`(76) · `Spinner/useStalledAnimation`(76) · `RemoteCallout`(76) · `shell/ShellTimeDisplay`(74) · 向导 `ConfirmStepWrapper`(74) · `ClickableImageRef`(73) · `permissions/PermissionDialog`(72) · `SearchBox`(72) · `ui/OrderedList`(71) · `LogoV2/GuestPassesUpsell`(70)。
+
+
+
 ## 第 128 批（2026-11-04）：components 第二十四批（15 文件 1,387 行，133 锚点）
 
 - 状态：完成并推送，commit `5aee2c4`。

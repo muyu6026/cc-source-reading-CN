@@ -5907,3 +5907,18 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：15 个数据文件逐一对齐源文件；预检 133 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`（ShellProgress 路径含 Shell 子串，按惯例走间接 runner）；原文 1,245 行 → 批注版 1,389 行；`check-fidelity.py` 全仓 1400 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 697 条，0 失效；全仓 1400/1902 文件、408,969/513,237 行、79.7%；components 328/407（剩 79 份共 3,755 行）。
 
 **下一批候选（components 降序，建议取 15 份约 1,124 行，最大件已降到 80 行）**：`Spinner/SpinnerGlyph.tsx`(80) · `MessageResponse.tsx`(78) · `ClaudeCodeHint/PluginHintMenu.tsx`(78) · `design-system/Pane.tsx`(77) · `design-system/Byline.tsx`(77) · `permissions/rules/PermissionRuleDescription.tsx`(76) · `Spinner/useStalledAnimation.ts`(76) · `RemoteCallout.tsx`(76) · `shell/ShellTimeDisplay.tsx`(74) · `agents/new-agent-creation/wizard-steps/ConfirmStepWrapper.tsx`(74) · `ClickableImageRef.tsx`(73) · `permissions/PermissionDialog.tsx`(72) · `SearchBox.tsx`(72) · `ui/OrderedList.tsx`(71) · `LogoV2/GuestPassesUpsell.tsx`(70)（components 已做 328/407，剩 79 份共 3,755 行；全仓还剩 502 份）。
+
+### components batch 130 (15 files 1124 lines 136 anchors)
+
+本批十五份全部 ≤80 行，横跨「spinner 单帧渲染、消息响应前缀、插件推荐弹窗、Pane 区域壳、Byline 串联、权限规则人话描述、卡顿渐红 hook、远程控制提示、shell 时间显示、向导确认落盘、可点击图片引用、权限弹窗骨架、搜索框光标、有序列表编号、通行证推广」十五类主题。其中 PermissionDialog、Byline、Pane、OrderedList、MessageResponse 是被前面上百批业务组件反复引用的底层件，本批把「被引用的那一端」补齐。
+
+四条横切观察：
+
+- 「骨架与内容分离」：PermissionDialog 只定义骨架——上边框（左/右/底全关，视觉上是一条圆角横线而非卡片）、标题行 `justify space-between` 把 `titleRight` 推到最右、内容区 `paddingX` 可被调用方覆盖；标题区交给 PermissionRequestTitle。ConfirmStepWrapper 则相反地把活儿全揽下来：落盘、`setAppState` 重算 activeAgents、可选打开编辑器、打点、拼完成文案，ConfirmStep 只管展示。两条线都遵守「壳不含业务」。
+- 「渲染副作用与编译产物哨兵」：useStalledAnimation 在**渲染期**直接改 `lastTokenTime` 等五个 ref，靠「只在响应长度变长时触发」保证幂等，时钟由父组件传入因此终端失焦时会一起变慢；平滑用每帧逼近 10% 的指数逼近加 0.01 吸附阈值。Byline 里的 `early_return_sentinel` 是编译器重写提前 return 的产物（哨兵值 + `break bb0` + 事后比对），MessageResponse 则用 Context 记录「我已在另一个响应块里」来避免 ⎿ 嵌套重复。
+- 「降级链优先于报错」：SpinnerGlyph 主题色解析不出 RGB 就退两档（强度过半切 error 色，否则原色）而不是连续渐变；ClickableImageRef 在「图片不在 store」或「终端不支持 OSC 8」时退成带背景色的纯文本，且 Link 的 fallback 指向这份文本；PermissionRuleDescription 遇到「其它工具且带规则内容」直接返回 null，把展示交给调用方的原始兜底。
+- 「编号与对齐靠预计算」：OrderedList 先数一遍真正的列表项子元素，用总数位数做 `padStart` 对齐编号（十项时 1 要补成 01），并把父标记拼在前面支持 `1.1.` 式嵌套；SearchBox 没有真光标可用，靠把 `offset` 处字符渲染成 `inverse` 来模拟，offset 默认落在文本末尾，终端失焦时则不画光标。
+
+流程账：15 个数据文件逐一对齐源文件；预检 136 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`（ShellTimeDisplay 路径含 shell 子串，走间接 runner）；原文 1,124 行 → 批注版 1,272 行；`check-fidelity.py` 全仓 1415 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 698 条，0 失效；全仓 1415/1902 文件、410,093/513,237 行、79.9%；components 343/407（剩 64 份共 2,631 行）。
+
+**下一批候选（components 降序，建议取 15 份约 925 行，最大件已降到 68 行）**：`agents/ModelSelector.tsx`(68) · `LogoV2/VoiceModeNotice.tsx`(68) · `CustomSelect/select-option.tsx`(68) · `permissions/PermissionRequestTitle.tsx`(66) · `wizard/WizardDialogLayout.tsx`(65) · `MessageTimestamp.tsx`(63) · `mcp/CapabilitiesSection.tsx`(61) · `agents/new-agent-creation/wizard-steps/ToolsStep.tsx`(61) · `Spinner/FlashingChar.tsx`(61) · `LogoV2/FeedColumn.tsx`(59) · `LogoV2/EmergencyTip.tsx`(58) · `IdeStatusIndicator.tsx`(58) · `ConfigurableShortcutHint.tsx`(57) · `BashModeProgress.tsx`(56) · `App.tsx`(56)（components 已做 343/407，剩 64 份共 2,631 行；全仓还剩 487 份）。
