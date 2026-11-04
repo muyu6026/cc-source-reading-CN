@@ -6117,3 +6117,30 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 155 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、41 处良性 `⟳`；`check-fidelity.py` 全仓 **1485 份 0 失败**；`check-links.py` 源码链接 2366 条加内链 704 条，0 失效；全仓 **1485/1902 文件、426,763/513,237 行、83%**；`src/` 还剩 **417 份**。
 
 **下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`main.tsx`(4,684) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 417 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+
+### src batch 137 (main tsx 4684 lines 136 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，`src/` 散件阶段。本批单啃一头巨兽：CLI 程序入口 `src/main.tsx`（4,684 行，全仓现存第三大单文件），它是整个命令行工具的启动总入口，负责副作用导入、`main()` 与各模式分支、巨型 `run()`（Commander 构建器）、REPL 启动与全部子命令注册。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`main.tsx`](annotated/src/main.tsx) | 4,684→4,821 | 136 | CLI 程序入口：副作用 import 与最早性能检查点、按 feature 开关条件 require 的死代码消除、托管设置/会话遥测/迁移/安全预取等启动辅助、设置加载链、`main()` 与各模式分支、巨型 `run()` Commander 构建器（默认动作/MCP 连接/REPL 启动/子命令 mcp·plugin·agents·doctor 等）、尾部助手 |
+
+要点：
+
+- **`main.tsx`（136 锚点）**：文件顶部是「必须在所有其他 import 之前执行的副作用」——裸注释与 `performance.mark` 之类的最早检查点；随后是大量按 `feature('X')` 条件 `require` 的死代码消除（外部构建会整段剔除）。中段是启动辅助函数群：`logManagedSettings`（托管设置上报 Statsig）、`isBeingDebugged`、`logSessionTelemetry`、`runMigrations`、`prefetchSystemContextIfSafe`、`startDeferredPrefetches`，以及设置加载器 `loadSettingsFromFlag`/`eagerLoadSettings`/`initializeEntrypoint`。`main()`（约 585 行）负责模块顶层副作用之后的真正入口：安全初始化、argv 重写、各模式分支，最后调用 `run()`。
+- **`run()` 巨型 Commander 构建器**（约 884 行起，数千行）：注册全部选项与子命令，最后 `parse` 并返回 program。默认动作约 1006 行；MCP connect 约 2730 行；REPL 启动约 3733/3798/3806 行；子命令 `mcp`/`plugin`/`agents`/`doctor` 等约 3894–4505 行。
+- **子命令注册**：`mcp`、`plugin`、`agents`、`doctor` 等子命令各自挂在 Commander 程序上，批注点明每个子命令的职责边界与共享的 `preAction` 钩子。
+- `annotate.py` 对该 `.tsx` 尾部 base64 `sourceMappingURL` 巨行做了省略替换（标 `OK*`），未计入锚点。
+
+踩坑：
+
+- 数据文件名带完整相对路径 slug：`src_main_tsx_p1.py`（含 `src/` 前缀），与 `annotate.py` 的 `load_annotations` 派生规则一致。
+- 预检 136 锚点全过、0 块内违例、0 个英文双引号与反斜杠、`ast.parse` 全过。
+- `annotate.py` 良性 `⟳` 外移 2 处：`//` 注释段内的 `after` 自动挪到段边界（1120→1122、4314→4321），未劈开英文；零模板字符串外移。零 `⚠`。
+- `check-fidelity.py` 全仓 **1486 份 0 失败**（`OK*` 正常，sourceMappingURL 省略已计入）；`check-links.py` 源码链接 2367 条加内链 705 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 136 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、2 处良性 `⟳`；`check-fidelity.py` 全仓 **1486 份 0 失败**；`check-links.py` 源码链接 2367 条加内链 705 条，0 失效；全仓 **1486/1902 文件、431,447/513,237 行、84%**；`src/` 还剩 **416 份**。
+
+**下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 416 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
