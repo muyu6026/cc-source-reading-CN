@@ -1,0 +1,6 @@
+docs(annotated): components 第 132 批 15 文件 752 源行 103 锚点
+
+- 处理 components 剩余前 15 小文件（55→46 行档）：StatusNotices / Opus1mMergeNotice / KeybindingWarnings / ModelStep / CtrlOToExpand / AnimatedAsterisk / option-map / CostThresholdDialog / WorkerBadge / reconnectHelpers / DevBar / ExitFlow / ContextSuggestions / SandboxDoctorSection / FastIcon。
+- 15 个数据文件逐一对齐源文件；预检 103 锚点全过、0 块内违例；批注脚本十五次零告警、零外移提示。
+- check-fidelity 全仓 1445 份 0 失败；check-links 2361 源码链接 + 700 内链 0 失效。
+- 进度：全仓 1445/1902 文件、411,767/513,237 行、80%；components 355/389（剩 34 份）。下一步转 src 散件（cli/print.ts 5594 等巨文件）。
