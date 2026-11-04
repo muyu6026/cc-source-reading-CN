@@ -5922,3 +5922,17 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：15 个数据文件逐一对齐源文件；预检 136 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`（ShellTimeDisplay 路径含 shell 子串，走间接 runner）；原文 1,124 行 → 批注版 1,272 行；`check-fidelity.py` 全仓 1415 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 698 条，0 失效；全仓 1415/1902 文件、410,093/513,237 行、79.9%；components 343/407（剩 64 份共 2,631 行）。
 
 **下一批候选（components 降序，建议取 15 份约 925 行，最大件已降到 68 行）**：`agents/ModelSelector.tsx`(68) · `LogoV2/VoiceModeNotice.tsx`(68) · `CustomSelect/select-option.tsx`(68) · `permissions/PermissionRequestTitle.tsx`(66) · `wizard/WizardDialogLayout.tsx`(65) · `MessageTimestamp.tsx`(63) · `mcp/CapabilitiesSection.tsx`(61) · `agents/new-agent-creation/wizard-steps/ToolsStep.tsx`(61) · `Spinner/FlashingChar.tsx`(61) · `LogoV2/FeedColumn.tsx`(59) · `LogoV2/EmergencyTip.tsx`(58) · `IdeStatusIndicator.tsx`(58) · `ConfigurableShortcutHint.tsx`(57) · `BashModeProgress.tsx`(56) · `App.tsx`(56)（components 已做 343/407，剩 64 份共 2,631 行；全仓还剩 487 份）。
+
+### components batch 131 (15 files 925 lines 42 anchors)
+
+本批十五份全部 ≤68 行，是 components 清零冲刺里最小的一批：横跨「语音模式提示、下拉选项基元、智能体模型选择、权限请求标题、向导对话框外壳、消息时间戳、闪烁字符、MCP 能力区、新建智能体选工具步、信息流列、IDE 连接状态、紧急提示条、可配置快捷键、顶层 Provider 壳、Bash 进度区」十五类主题。这些都是被前面各批业务组件反复 import 的底层件或外壳，本批把「被引用的那一端」补齐，components 仅剩 49 份小文件即可清零。
+
+三条横切观察：
+
+- 「React 编译器重写是统一底色」：十五份全部由 `react/compiler-runtime` 的 `_c(N)` 记忆缓存驱动，依赖比对逻辑千篇一律——把相关 prop 解构出来，逐个与缓存槽比对，变了才重建 JSX。读这些文件要把 `_c(N)` 当成「组件记忆化的脚手架」，真正要理解的是被它包住的渲染分支。
+- 「外壳与内容分离是默认结构」：WizardDialogLayout / App / PermissionRequestTitle 都只拼「标题 + 内容 + 底部」三段的布局骨架，业务语义交给被包裹的子组件（Dialog / Provider / Byline）；EmergencyTip 则相反把「读动态配置 → 记忆化 → 看过即写回」全揽在自己身上，是少数带副作用的提示条。
+- 「降级链优先于报错」：FlashingChar 在 ANSI 主题取不出 RGB 时退两档（透明度过半切流光色，否则原色）；IdeStatusIndicator 在没连上 IDE 或无选区时直接 `return null`；MessageTimestamp 只在转录模式 + assistant + 含文本时才显示——三类组件都用「先判断前提、不满足就不渲染」代替抛错。
+
+流程账：15 个数据文件逐一对齐源文件；预检 42 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`（均为编译器产物，无 `//` 注释段、无多行模板，锚点只落函数签名行与语句/收尾行）；原文 925 行 → 批注版 962 行；`check-fidelity.py` 全仓 1430 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 699 条，0 失效；全仓 1430/1902 文件、411,015/513,237 行、80%；components 340/389（剩 49 份共约 2,068 行）。
+
+**下一批候选（components 降序，建议取 15 份约 712 行，最大件已降到 55 行）**：`KeybindingWarnings.tsx`(55) · `LogoV2/Opus1mMergeNotice.tsx`(55) · `StatusNotices.tsx`(55) · `agents/new-agent-creation/wizard-steps/ModelStep.tsx`(52) · `CtrlOToExpand.tsx`(51) · `LogoV2/AnimatedAsterisk.tsx`(50) · `CostThresholdDialog.tsx`(50) · `CustomSelect/option-map.ts`(50) · `permissions/WorkerBadge.tsx`(49) · `mcp/utils/reconnectHelpers.tsx`(49) · `DevBar.tsx`(49) · `ExitFlow.tsx`(48) · `ContextSuggestions.tsx`(47) · `FastIcon.tsx`(46) · `sandbox/SandboxDoctorSection.tsx`(46)（components 已做 340/389，剩 49 份共约 2,068 行；全仓还剩 472 份）。

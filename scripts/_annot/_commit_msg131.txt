@@ -1,0 +1,16 @@
+docs(annotated): components 第 131 批 15 文件 925 行 42 锚点
+
+按行数降序取 components 剩余前 15 小文件（56–68 行档）清零冲刺：
+LogoV2/VoiceModeNotice · CustomSelect/select-option · agents/ModelSelector ·
+permissions/PermissionRequestTitle · wizard/WizardDialogLayout · MessageTimestamp ·
+Spinner/FlashingChar · mcp/CapabilitiesSection · agents/.../ToolsStep ·
+LogoV2/FeedColumn · IdeStatusIndicator · LogoV2/EmergencyTip ·
+ConfigurableShortcutHint · App · BashModeProgress。
+
+- 15 个数据文件逐一对齐源文件；预检 42 锚点全过、0 块内违例。
+- annotate.py 十五次零 ⚠、零 ⟳（编译器产物，锚点只落函数签名行与语句/收尾行）。
+- 原文 925 行 → 批注版 962 行。
+- check-fidelity.py 全仓 1430 份 0 失败（较上批 +15）。
+- check-links.py 源码链接 2361 条加内链 699 条 0 失效。
+- 进度：全仓 1430/1902 文件 · 411,015/513,237 行 · 80%；components 340/389（剩 49 份）。
+- 更新 README 第 8 行进度与索引本批小节 + 下一批候选。
