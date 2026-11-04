@@ -6144,3 +6144,31 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 136 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、2 处良性 `⟳`；`check-fidelity.py` 全仓 **1486 份 0 失败**；`check-links.py` 源码链接 2367 条加内链 705 条，0 失效；全仓 **1486/1902 文件、431,447/513,237 行、84%**；`src/` 还剩 **416 份**。
 
 **下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 416 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+
+### src batch 138: commands/insights.ts (3200 src / 3264 annotated / 64 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，`src/` 散件阶段。本批单啃一头巨兽：`src/commands/insights.ts`（3,200 行，全仓现存第二大级单文件），它是 `/insights` 命令的核心——扫描本机会话日志、抽取结构化维度 facets、聚合统计、调 Opus 生成叙事洞察，最后渲染成自包含 HTML 报告。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`insights.ts`](annotated/src/commands/insights.ts) | 3,200→3,264 | 64 | /insights 命令：ant 环境远程 homespace 采集、SessionMeta/SessionFacets/AggregatedData 三套数据契约、extractToolStats 逐消息统计、facet 抽取与缓存闭环、detectMultiClauding 多开检测、6 段并行洞察生成、HTML 报告总装、generateUsageReport 四阶段主流程 |
+
+要点：
+
+- **`insights.ts`（64 锚点）**：文件四段分明——数据采集（仅 ant 生效的远程 homespace 拉取）、类型与常量（三套数据结构 + EXTENSION_TO_LANGUAGE / LABEL_MAP）、统计与洞察（extractToolStats 逐消息统计工具/语言/git/token/错误，aggregateData 聚合，generateParallelInsights 并发 6 板块 + At a Glance）、HTML 渲染与主流程（generateHtmlReport 总装自包含报告，generateUsageReport 分 Lite 扫描→加载缓存→facet 抽取→聚合→洞察→落盘四阶段）。
+- **远程采集条件剪枝**：`getRunningRemoteHosts` / `getRemoteHostSessionCount` / `collectFromRemoteHost` / `collectAllRemoteHostData` 四组函数体都用 `process.env.USER_TYPE === 'ant'` 三元包裹，非 ant 环境整段返回空，避免把内部数据通道带进公开发行版。
+- **facet 抽取与缓存**：`loadCachedFacets` / `saveFacets` / `extractFacetsFromAPI` 形成「先读缓存、未命中再调 Opus、结果落盘 0o600」的闭环；结构守卫 `isValidSessionFacets` 校验不过就删缓存重抽，脏数据不会遗留。
+- **多开检测**：`detectMultiClauding` 用 30 分钟滑动窗口找 s1→s2→s1 交错，把「并行开多个会话」量化成重叠事件数/涉及会话数/期间消息数。
+- **主流程四阶段**：`generateUsageReport` 先 Lite 扫元数据（几乎零成本），再以 50 并发加载 SessionMeta 缓存、10 并发解析未缓存 jsonl，最后 50 并发抽 facet；全程过滤元会话、损坏日志、极简/缓存预热会话，避免重复与噪音拉高指标。
+
+踩坑：
+
+- 数据文件名带完整相对路径 slug：`src_commands_insights_ts_p1.py`（含 `src/` 前缀），与 `annotate.py` 的 `load_annotations` 派生规则一致。
+- 预检 64 锚点全过、0 块内违例、0 个英文双引号与反斜杠、`ast.parse` 全过。
+- `annotate.py` 零 `⟳`、零 `⚠`：64 处锚点全部落在函数/类型收尾行或段注释之后，未触发块注释内/模板字符串外移。
+- `check-fidelity.py` 全仓 **1487 份 0 失败**；`check-links.py` 源码链接 2368 条加内链 706 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 64 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；`check-fidelity.py` 全仓 **1487 份 0 失败**；`check-links.py` 源码链接 2368 条加内链 706 条，0 失效；全仓 **1487/1902 文件、434,647/513,237 行、84%**；`src/` 还剩 **415 份**。
+
+**下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 415 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
