@@ -51,7 +51,7 @@
 - 第 122 批：`db008a2` · 15 文件/2,446 行/201 锚点 · 全仓 **1305/1902 · 398,150 行 · 77%（行）** · components **215/389 文件（55%）/ 67,337 行（82%）**。
 - 第 123 批：`6a4b8bb` · 15 文件/2,204 行/139 锚点 · 全仓 **1320/1902 · 400,354 行 · 78%（行）** · components **230/389 文件（59%）/ 69,541 行（85%）**。
 - 第 124 批：`4b86725` · 15 文件/2,009 行/215 锚点 · 全仓 **1335/1902 · 402,363 行 · 78%（行）** · components **245/389 文件（63%）/ 71,550 行（87%）**。
-- 第 125–131 批：components 清零冲刺连续推进（各 commit 见 automation 记忆与各日工作日志）。全仓累计至第 131 批 **1430/1902 · 411,015 行 · 80%（行）**；components **340/389 文件（87%）/ 80,202/81,892 行（98%）**，剩 49 份共约 2,068 行。
+- 第 125–134 批：components 清零冲刺 + 转 `src/` 散件连续推进（各 commit 见各日工作日志）。全仓累计至第 134 批 **1483/1902 · 416,163 行 · 81%（行）**；components **已 389/389 全清（81,892 行）**，`src/ink` **96/96 全清（19,859 行）**，src/ 剩 419 份。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -61,11 +61,11 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-04 第 131 批后）
-- 全仓 **1430/1902 文件（缺失 472）；411,015/513,237 行，按行数覆盖 80%**。
-- 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)。
-- `src/components` **340/389 文件（87%）/ 80,202/81,892 行（98%）**，为当前进行中最大子树，剩 49 份共约 2,068 行（全部 ≤55 行，下一批即可接近清零）。
-- 下一批目标（components 按行数降序推进）：剩余 49 份按 `check-coverage.py src/components` 取 top 推进，当前候选 top：`KeybindingWarnings.tsx`(55) · `LogoV2/Opus1mMergeNotice.tsx`(55) · `StatusNotices.tsx`(55) · `agents/new-agent-creation/wizard-steps/ModelStep.tsx`(52) · `CtrlOToExpand.tsx`(51)；components 清零后转 `src/` 散件（cli/print.ts 5594、screens/REPL.tsx 5006、main.tsx 4684 等巨文件，最后优先级）。
+## 当前状态（2026-11-04 第 134 批后）
+- 全仓 **1483/1902 文件（缺失 419）；416,163/513,237 行，按行数覆盖 81%**。
+- 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)、`src/components`(389/389)、`src/ink`(96/96)。
+- `src/components` **389/389 全清（81,892 行）**；`src/ink` **96/96 全清（19,859 行）**。
+- 当前阶段：进入 `src/` 散件。下一批真正榜首（来自 `check-coverage.py src` 实时）：`cli/print.ts`(5,594)、`screens/REPL.tsx`(5,006)、`main.tsx`(4,684)；其后 `commands/insights.ts`(3,200)、`bridge/bridgeMain.ts`(2,999)、`native-ts/yoga-layout/index.ts`(2,578)、`bridge/replBridge.ts`(2,406)、`commands/plugin/ManagePlugins.tsx`(2,215)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -79,7 +79,7 @@
 - 预检脚本的 `ROOT` 须用 Windows 绝对路径 `D:/CC泄露源码分析`，不可用 Git Bash 风格 `/d/CC泄露源码分析`——混合分隔符会让 `os.path.exists` 判 False、15 份数据文件全报「MISSING」（第 62 批踩过，改成 `D:/` 即过）。
 
 ## 目录进度账
-- 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)。
-- 进行中：`src/components` **340/389 文件（87%）/ 80,202/81,892 行（98%）**，剩 49 份，为当前最大剩余块。
-- 未启动：其余子树（bridge/cli/screens/skills/tasks/vim/keybindings/…）按 `check-coverage.py src` 取真实 top 降序推进。
+- 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)、`src/components`(389)、`src/ink`(96)。
+- 进行中：进入 `src/` 散件阶段（按 `check-coverage.py src` 取真实 top 降序推进）。
+- 未启动：其余子树（bridge/cli/screens/skills/tasks/vim/keybindings/…）。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。
