@@ -5972,4 +5972,61 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账：15 个数据文件逐一对齐源文件；预检 103 锚点全过、0 块内违例；`annotate.py` 十五次零 `⚠`、零 `⟳`；原文 752 行 → 批注版 863 行；`check-fidelity.py` 全仓 1445 份 0 失败（较上批 +15）；`check-links.py` 源码链接 2361 条加内链 700 条，0 失效；全仓 1445/1902 文件、411,767/513,237 行、80%；components 355/389（剩 34 份共 938 行）。
 
-**下一批候选（components 降序，建议取 15 份约 601 行，最大件已降到 45 行）**：`ui/OrderedListItem.tsx`(45) · `sandbox/SandboxConfigTab.tsx`(45) · `memory/MemoryUpdateNotification.tsx`(45) · `OffscreenFreeze.tsx`(44) · `MessageModel.tsx`(43) · `FilePathLink.tsx`(43) · `permissions/FilePermissionDialog/ideDiffConfig.ts`(42) · `ToolUseLoader.tsx`(42) · `EffortIndicator.ts`(42) · `StructuredDiff/colorDiff.ts`(37) · `MemoryUsageIndicator.tsx`(37) · `shell/ExpandShellOutputContext.tsx`(36) · `Spinner/ShimmerChar.tsx`(36) · `tasks/renderToolActivity.tsx`(33) · `Spinner/useShimmerAnimation.ts`(31)（components 已做 355/389，剩 34 份共 938 行；全仓还剩 457 份）。
+### components batch 133 (34 files 953 lines 130 anchors)
+
+**components 目录在本批清零（389/389 文件、81,892 行全数批注完毕）**。三十四份全部 ≤45 行，最小到 1 行，覆盖「列表项基元、沙箱配置面板、记忆更新提示、离屏冻结、IDE diff 配置契约、模型名标注、文件路径超链接、投入度字形、工具转圈点、语法高亮开关、堆用量提示、shell 展开 context、微光字符、工具活动单行渲染、微光时间轴、主题着色器、diff 列表、错误边界、智能体状态机类型、权限埋点、两个导航页脚、帮助通用页、来源标题、四类兜底提示、五个 barrel 出口」。
+
+| 文件 | 原文→批注版 | 锚点 |
+| --- | --- | --- |
+| `ui/OrderedListItem.tsx` | 45→50 | 5 |
+| `sandbox/SandboxConfigTab.tsx` | 45→53 | 7 |
+| `memory/MemoryUpdateNotification.tsx` | 45→51 | 6 |
+| `OffscreenFreeze.tsx` | 44→50 | 6 |
+| `permissions/FilePermissionDialog/ideDiffConfig.ts` | 42→48 | 6 |
+| `MessageModel.tsx` | 43→48 | 5 |
+| `FilePathLink.tsx` | 43→48 | 5 |
+| `EffortIndicator.ts` | 42→46 | 4 |
+| `ToolUseLoader.tsx` | 42→47 | 5 |
+| `StructuredDiff/colorDiff.ts` | 37→42 | 5 |
+| `MemoryUsageIndicator.tsx` | 37→42 | 5 |
+| `shell/ExpandShellOutputContext.tsx` | 36→41 | 5 |
+| `Spinner/ShimmerChar.tsx` | 36→40 | 4 |
+| `tasks/renderToolActivity.tsx` | 33→39 | 6 |
+| `Spinner/useShimmerAnimation.ts` | 31→38 | 7 |
+| `design-system/color.ts` | 30→34 | 4 |
+| `StructuredDiffList.tsx` | 30→32 | 2 |
+| `SentryErrorBoundary.ts` | 28→31 | 3 |
+| `agents/types.ts` | 27→32 | 5 |
+| `permissions/utils.ts` | 25→29 | 4 |
+| `agents/AgentNavigationFooter.tsx` | 26→30 | 4 |
+| `wizard/WizardNavigationFooter.tsx` | 24→27 | 3 |
+| `HelpV2/General.tsx` | 23→26 | 3 |
+| `agents/utils.ts` | 18→21 | 3 |
+| `FallbackToolUseRejectedMessage.tsx` | 16→18 | 2 |
+| `PressEnterToContinue.tsx` | 15→17 | 2 |
+| `MCPServerDialogCopy.tsx` | 15→17 | 2 |
+| `InterruptedByUser.tsx` | 15→17 | 2 |
+| `wizard/useWizard.ts` | 13→15 | 2 |
+| `Spinner/index.ts` | 10→12 | 2 |
+| `wizard/index.ts` | 9→11 | 2 |
+| `mcp/index.ts` | 9→11 | 2 |
+| `CustomSelect/index.ts` | 3→4 | 1 |
+| `Spinner/teammateSelectHint.ts` | 1→2 | 1 |
+
+三条横切观察：
+
+- 「终端渲染的性能账都写在注释里」：本批最有价值的不是代码本身，而是几处被动性能注释——`OffscreenFreeze` 说明视口之上的任何变动都会逼 `log-update` 整屏重置，故冻结靠「返回同一份元素引用让 reconciler 直接 bail」，且必须 `use no memo` 否则机制失效；`useShimmerAnimation` 说明卡顿时给时钟传 null 是**唯一**可靠停止手段（调用方可能从不挂 `ref`，视口暂停永不触发）；`SandboxConfigTab` 把依赖探测标成首渲染同步 IO、只跑一次。终端 UI 的性能约束与浏览器完全不同：宽度是手算的、更新是全屏的、定时器要按视口显式关。
+- 「固定宽度是对抗抖动的通用手段」：`ToolUseLoader` 的 `minWidth={2}`、`MessageModel` 的 `stringWidth + 8`、`ShimmerChar` 的三字符光带、`StructuredDiffList` 的固定分隔符、`HelpV2/General` 的 `fixedWidth` 快捷键表——五处不同组件用同一种办法解决「内容变化导致布局跳动」，且量宽一律走 `stringWidth` 而非 `length`。
+- 「构建期常量是死码消除的分界线」：`MemoryUsageIndicator` 与 `InterruptedByUser` 都靠 `USER_TYPE` 内联把一半分支变成死码，前者因此敢把 hook 放在提前 return 之后（正常会违反 hooks 规则，靠两行 lint 豁免注释放行），`MemoryUsageIndicator` 的注释把这个取舍写得很直白：「gating before the hook means the 10s polling interval is never set up in external builds」。
+
+踩坑：
+
+- 本批三十四份数据文件预检 130 锚点全过、0 块内违例；`annotate.py` 三十四次零 `⚠`、零 `⟳`。
+- **新坑：锚点不能落在多行 JSX 的子元素区**。`StructuredDiffList` 的三处 `after` 原本插在 `<Box ...>` 与 `</Box>` 之间、`WizardNavigationFooter` 的两处插在 `<Byline>` 内，注释放进去会变成 JSX 文本节点（既污染渲染，`check-fidelity` 又因为「注释行被剥离」而查不出来）。判据：插入点的前一行以 `>` 收尾且后一行以 `<` 开头，就是子元素区；`return` 语句与 `}: Props): ... {` 这类语句边界才是安全位。已改写为「语句级一条讲清整棵结构」，锚点数由 133 降到 130。
+- `shell/ExpandShellOutputContext.tsx` 路径含 `shell` 子串，按惯例走间接 runner（`runpy.run_path`）调用 `annotate.py`，执行后即删。
+- 数据文件名必须带 `src_components_` 前缀（slug 由完整相对路径推导），本批 34 份一次写对，未再出现第 128 批那种批量 `mv` 返工。
+- 行数口径统一用 `check-coverage.py`（末尾空行不计）：全仓 412,705/513,237 行；`annotate.py` 的「原文 N 行」比 `os.walk` 统计多 1，索引表格与流程账都用前者。
+
+流程账：34 个数据文件逐一对齐源文件；预检 130 锚点全过、0 块内违例；`annotate.py` 三十四次零 `⚠`、零 `⟳`（其中 5 份因锚点落进 JSX 子元素区而改写重跑）；原文 953 行 → 批注版 1,084 行；`check-fidelity.py` 全仓 1479 份 0 失败（较上批 +34）；`check-links.py` 源码链接 2361 条加内链 702 条，0 失效；全仓 1479/1902 文件、412,705/513,237 行、80%；**components 389/389 全目录清零**（81,892 行）。
+
+**下一批候选（跳出 components，进入全仓巨兽区，建议取 2 份约 10,599 行，沿用「utils 第一批两份巨兽」的节奏）**：`cli/print.ts`(5,594) · `screens/REPL.tsx`(5,005)；其后依次 `main.tsx`(4,683) · `commands/insights.ts`(3,200) · `bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 423 份，最大的十份就占 32,326 行）。
