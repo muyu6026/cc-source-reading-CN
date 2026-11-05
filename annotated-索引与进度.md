@@ -6679,3 +6679,44 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：7 个数据文件逐一对齐源文件；预检首轮 207 锚点报 5 项（defaultBindings 三处展开劈开 + 一处常量多行劈开 + 一处升序违规），逐一修复后仍 207；`annotate.py` 七次共 2 处 `⟳`（mcp 一处、init 一处），零 `⚠`；两项专项扫描（块末注脚、解构劈开）首轮抓 defaultBindings 多处并全部处置，复扫零输出；`check-fidelity.py` 全仓 **1541 份 0 失败**（较上批 +7）；`check-links.py` 源码链接 2416 条加内链 721 条，0 失效；全仓 **1541/1902 文件、476,792/513,237 行、92.9%**；`src/` 还剩 **361 份 / 36,806 行**。
 
 **下一批候选（370–442 行档之上沿，单批约 7 份）**：`types/permissions.ts`(441) · `cli/update.ts`(422) · `remote/SessionsWebSocket.ts`(404) · `screens/ResumeConversation.tsx`(399) · `types/textInputTypes.ts`(387) · `bridge/createSession.ts`(384) · `buddy/CompanionSprite.tsx`(371) · `commands/copy/copy.tsx`(371) · `bridge/replBridgeTransport.ts`(370) · `native-ts/file-index/index.ts`(370)（全仓还剩 361 份；500 行以上已清零）
+
+### src batch 154: 370-441 line tier, 10 files (3916 src, 4136 annotated, 217 anchors)
+
+370–441 行档（紧接第 153 批的 339–363 档之上沿，吞掉 370 行起的前 10 大文件）：权限系统纯类型层、update 命令主流程、CCR 会话 WebSocket 客户端、恢复会话界面、文本输入框类型、桥接会话创建、/copy 命令、陪伴精灵渲染、桥接 v1/v2 传输适配、纯 TS 模糊文件搜索。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`types/permissions.ts`](annotated/src/types/permissions.ts) | 441→469 | 28 | 权限系统纯类型层：PermissionResult 判别联合、六种结果变体的语义边界、allow/ask/deny 的职责划分、与运行时的桥接契约 |
+| [`cli/update.ts`](annotated/src/cli/update.ts) | 422→448 | 26 | update 命令主流程：版本比对、平台与架构判定、更新通道选择、降级与锁定检测 |
+| [`remote/SessionsWebSocket.ts`](annotated/src/remote/SessionsWebSocket.ts) | 404→425 | 21 | CCR 会话 WebSocket 客户端：连接生命周期、消息分帧、重连退避、心跳与超时、错误三级分类 |
+| [`screens/ResumeConversation.tsx`](annotated/src/screens/ResumeConversation.tsx) | 398→419 | 20 | 恢复会话界面（React Compiler 产物）：会话清单、选择态、恢复入口、空态 |
+| [`types/textInputTypes.ts`](annotated/src/types/textInputTypes.ts) | 387→402 | 15 | 文本输入框类型：输入值 / 光标 / 组合输入（IME）三态的形状、受控与非受控的判别 |
+| [`bridge/createSession.ts`](annotated/src/bridge/createSession.ts) | 384→408 | 24 | 桥接会话创建：create/get/archive/标题四类端点、参数归一、错误翻译 |
+| [`commands/copy/copy.tsx`](annotated/src/commands/copy/copy.tsx) | 371→388 | 17 | /copy 命令：把当前会话或选区拷贝成可分享片段、格式装配、剪贴板写入 |
+| [`buddy/CompanionSprite.tsx`](annotated/src/buddy/CompanionSprite.tsx) | 370→389 | 18 | 陪伴精灵渲染：精灵资源加载、帧动画循环、交互热区、状态驱动切换 |
+| [`bridge/replBridgeTransport.ts`](annotated/src/bridge/replBridgeTransport.ts) | 370→387 | 17 | 桥接 v1/v2 传输适配：两套协议的鉴权头与信封、版本协商、错误映射 |
+| [`native-ts/file-index/index.ts`](annotated/src/native-ts/file-index/index.ts) | 370→401 | 31 | 纯 TS 模糊文件搜索：查询分词、评分排序、路径归一、大小写不敏感匹配 |
+
+要点：
+
+- **权限层只定义形状不碰执行**：types/permissions.ts 把 PermissionResult 拆成判别联合的六种变体，allow/ask/deny 的语义边界写在类型里，真正的裁决在运行时模块；新增判定分支时编译器会逼你补类型，不会漏。
+- **update 命令把「能否更」与「怎么更」分开**：cli/update.ts 先比对当前版本与发布通道，再决定走自动更新还是提示手动；平台与架构判定、降级与锁定检测是两条独立检查，互不污染。
+- **CCR WebSocket 客户端是「可重连的帧流」**：remote/SessionsWebSocket.ts 把连接生命周期、消息分帧、重连退避、心跳超时四件事绑在一起，错误按网络 / 协议 / 业务三级分类，和本地会话最不同。
+- **恢复会话界面是 React Compiler 产物**：ResumeConversation.tsx 满屏 `_c(n)` 记忆槽与 `t1..tN` 临时名，锚点只能落函数签名与语句收尾，不能插进 JSX——所以锚点密度偏低（20）。
+- **文本输入框类型只描述状态形状**：textInputTypes.ts 把输入值、光标位置、组合输入（IME）三态的形状与受控 / 非受控的判别写清楚，真正的渲染与事件处理在组件里，类型层不掺逻辑。
+- **桥接会话层是四端点契约**：createSession.ts 把 create/get/archive/标题四类端点、参数归一、错误翻译收在一个文件，对端只认这组形状，不在调用方散落协议细节。
+- **/copy 命令把「选什么」与「怎么贴」分离**：copy.tsx 先确定拷贝范围（当前会话或选区），再装配分享格式并写剪贴板，格式装配与写入是两套职责。
+- **陪伴精灵是资源驱动的渲染**：CompanionSprite.tsx 精灵资源加载、帧动画循环、交互热区、状态切换都围绕一个资源表转，状态机只是选择器。
+- **桥接传输适配的核心是「版本协商」**：replBridgeTransport.ts 把 v1/v2 两套协议的鉴权头与信封差异收敛到统一接口，错误映射表决定哪种协议错误该翻译成致命错误。
+- **纯 TS 模糊搜索是「评分排序」而非「精确匹配」**：file-index/index.ts 把查询分词、路径归一、大小写不敏感后按评分排序，没有命中的硬阈值，靠排序把最像的顶上来。
+
+踩坑：
+
+- **replBridgeTransport.ts 两处自审错误已修**：数据文件头写成 `# -*- coding: utf-8-*-`（末尾多一杠），改为 `# -*- coding: utf-8 -*-`；一处锚点行号写错（原文 `let getAuthHeaders` 实际在第 169 行而非 166 行），改为 `(169, 'before', ...)`。
+- **createSession.ts 一处良性 `⟳`**：锚点 358 原本落在 `//` 注释段中部，annotate.py 自动挪到段边界 357，语义未断，零 `⚠`。
+- **file-index 数据文件触发 `_preflight_one.py` 的 slug 怪癖**：该脚本 slug 只替换 `/` 和 `.`、不替换 `-`，对 `native-ts/file-index/index.ts` 拼出的 slug 与文件名不匹配而断言失败；但 annotate.py 与本批预检都用 `replace('-','_')`，数据文件名正确。处置：用连字符感知的临时脚本单独验证该文件（importlib+ast+行号 / pos / 引号 / 反斜杠 / 重复 / 升序全检）→ PASS，31 锚点有序。这是一个脚本怪癖而非数据错误。
+- 其余 9 个文件零 `⟳`、零 `⚠`，预检首轮即全过（file-index 用连字符感知脚本补验，余 9 个用 `_preflight_one.py` 直跑）。
+
+流程账：10 个数据文件逐一对齐源文件；预检首轮 217 锚点全过；`annotate.py` 十次共 1 处良性 `⟳`（createSession 358→357）、零 `⚠`；`check-fidelity.py` 全仓 **1551 份 0 失败**（较上批 +10）；`check-links.py` 源码链接 2423 条加内链 722 条，0 失效；全仓 **1551/1902 文件、480,502/513,237 行、93.6%**；`src/` 还剩 **351 份 / 32,735 行**。
+
+**下一批候选（300–366 行档，单批约 10 份）**：`interactiveHelpers.tsx`(366) · `cli/handlers/auth.ts`(330) · `types/logs.ts`(330) · `commands/install-github-app/setupGitHubActions.ts`(325) · `commands/context/context-noninteractive.ts`(325) · `cost-tracker.ts`(323) · `commands/review/reviewRemote.ts`(316) · `keybindings/KeybindingProviderSetup.tsx`(308) · `remote/sdkMessageAdapter.ts`(302) · `commands/install.tsx`(300)（全仓还剩 351 份；440 行以上已清零）
