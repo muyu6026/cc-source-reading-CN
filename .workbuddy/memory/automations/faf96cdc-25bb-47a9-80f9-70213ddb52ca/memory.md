@@ -1,5 +1,15 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 141 批（2026-11-05）：bridge/replBridge.ts 巨兽（2,406 行，170 锚点）
+
+- 状态：完成并推送，commit `59408ff`。
+- 内容：REPL 侧远程控制桥。锚点分层：`BridgeCoreParams` 去 bootstrap 化与注入式回调（避免命令注册表打进 Agent SDK 包）、初始历史冲刷闸门（不走会话创建事件，因 STREAM_ONLY 必丢）、`doReconnect` 双策略重建 + 四道中止检查 + 两处「轮询已自愈」让位、`v2Generation` 治「两次并发都看到 transport===null」的判反竞态、v1/v2 传输与鉴权分叉（v2 强制 JWT）、拆除顺序（发结果→并行 stopWork+archive→关传输→注销→清指针）、轮询循环状态机（满容量心跳五退出、挂起检测 60s、15 分钟**时长**放弃阈值）、`onHeartbeatFatal` 治 25 分钟死窗口。
+- 校验：预检 170 锚点全过；annotate 零 `⚠`、三处 `⟳`（557→551、1115→1111、1176→1174，均为英文注释段中部挪到段首，与已有锚点同段可接受）；fidelity 1490 份 0 失败；links 2371+709 0 失效。
+- 进度：全仓 1490/1902 文件、442,630/513,237 行、86%；src 剩 412 份 / 70,915 行。
+- 踩坑：①**括号笔误**——长列表里连续三处把 `)` 写成 `]`，`ast.parse` 一次只报第一处，改一处跑一次很慢；批量写长列表后应先用 `grep -P "^\s+\(\d+, '(before|after|after_block)', '.*'\],$"` 扫一遍。②`before` 锚点又落到块注释内（`(107)` 想挂 `POST /v1/sessions. Injected because...` 那行，它在 `/** */` 里），预检 `bslot` 拦下改到字段行 L119——与第 140 批同类，**这条坑已连续两批出现**。
+- 预检脚本改名 `_precheck_141.py`（内容即上一批结构，改 BATCH）。
+- 下批目标：`commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009)。
+
 ## 第 140 批（2026-11-05）：native-ts/yoga-layout/index.ts 巨兽（2,578 行，164 锚点）
 
 - 状态：完成并推送，commit `2970049`。
