@@ -958,3 +958,13 @@
 - 校验：预检 84 锚点全过、0 英文引号/反斜杠；annotate.py 零 `⟳` 零 `⚠`；check-fidelity 1488 份 0 失败；check-links 2369 源链 + 707 内链 0 失效。
 - 决策延续：巨兽（2999 行，略低于 3000 阈值）单批 1 份封顶——与 insights.ts(3200) 同档；下一批 yoga-layout/index.ts(2578)。
 - 下一批目标（巨兽降序）：native-ts/yoga-layout/index.ts(2578) · bridge/replBridge.ts(2406) · commands/plugin/ManagePlugins.tsx(2214) · entrypoints/sdk/coreSchemas.ts(1889) · bootstrap/state.ts(1758) · skills/loadSkillsDir.ts(1086)。
+
+## 第 147 批（2026-11-05）：src 散件 1000 行档收尾五件套（恢复上批遗留未提交批注）
+- 状态：完成并推送，commit `2f875be`（0901d36..2f875be）。
+- 背景：开工时工作树有上一批（147 计划）遗留未提交产物——4 份已 annotate 的 annotated 文件 + 5 份数据文件（color_diff/index.ts 只写数据没 annotate、整体未 commit）。这些是自动化自己的半成品（非他人改动），故按「恢复」而非丢弃处理：重跑 annotate.py 补齐 5 份、修 2 处保真违例、提交推送。
+- 本批 5 份（800–1009 行档）：`src/bridge/remoteBridgeCore.ts`(1008→1089, 81)、`src/native-ts/color-diff/index.ts`(999→1061, 62)、`src/cli/transports/ccrClient.ts`(998→1062, 64)、`src/commands/plugin/ManageMarketplaces.tsx`(838→879, 40)、`src/commands/plugin/BrowseMarketplace.tsx`(802→845, 42)。合计 5 文件 4,645 源行 / 4,936 批注版 / 289 锚点。
+- 进度：全仓 **1500/1902 文件 / 455,295 行 / 88.7%**；src 剩 402 份 / 58,247 行。hooks/utils/components/ink/services/tools/bootstrap/coordinator 均全清。
+- 校验：预检 289 锚点全过、0 英文引号/反斜杠；annotate.py 五次共 13 处良性 `⟳`、零 `⚠`；check-fidelity 1500 份 0 失败；check-links 2377 源链 + 715 内链 0 失效。
+- 踩坑（补规矩 7 实例）：首轮 check-fidelity 两处 FAIL（判据 5 劈开未结束的多行表达式）——ccrClient `export type CCRInitFailReason =` 联合首行 `(49,'after')`、remoteBridgeCore `type ArchiveTelemetryStatus =` 首行 `(956,'after')` 都落在多行类型首行，中文插进联合成员之间劈开语句；按规矩 7 改到联合收尾行（`| 'worker_register_failed'` / `| 'server_5xx'`）后复验 0 失败。印证「after 也不落跨行类型首行」。
+- 注：本记忆文件此前只续写到第 139 批（约 10-26）；实际 git 已推进到 146（yoga-layout→PluginSettings 等巨兽/大文件批），本次补记 147，数字以脚本实算为准。
+- 下一批目标（500–570 行档，单批约 10 份）：state/AppStateStore.ts(569) · commands/plugin/UnifiedInstalledCell.tsx(565) · vim/operators.ts(556) · commands/thinkback/thinkback.tsx(550) · bridge/sessionRunner.ts(550) · bridge/bridgeApi.ts(539) · commands/terminalSetup/terminalSetup.tsx(531) · bridge/bridgeUI.ts(530) · tasks/LocalShellTask/LocalShellTask.tsx(523) · buddy/sprites.ts(514)；1,000 行档已清零，之后进 500–570 行档。
