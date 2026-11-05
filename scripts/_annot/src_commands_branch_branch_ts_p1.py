@@ -1,0 +1,17 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级批注：`branch.ts` 实现「/branch」命令——把当前会话的转录文件复制出一个分叉会话，保留原始元数据并追加 `forkedFrom` 溯源信息，同时处理分叉命名冲突与 resume 接管。'''),
+    (5, 'after', '''依赖引入：crypto 的随机 UUID、文件系统 API、会话与日志类型、存储工具以及转义工具。'''),
+    (15, 'after', '''`PathTraversalError`：专门表示路径校验发现穿越或注入尝试的错误类型。'''),
+    (54, 'after', '''`deriveFirstPrompt`：从首条用户消息派生单行标题，折叠空白以避免多行内容（粘贴的栈、代码）污染 resume 提示。'''),
+    (63, 'after', '''`sanitizePathKey`：拒绝空字节、URL 编码穿越、Unicode 归一化攻击、反斜杠与绝对路径等危险键，做防御纵深处理。'''),
+    (78, 'after', '''`isTeamMemoryEnabled`：团队记忆是自动记忆的子目录，因此必须自动记忆先开启，再读特性开关决定是否启用。'''),
+    (86, 'after', '''`getTeamMemPath`：团队记忆目录，拼接自动记忆目录与 `team` 子目录后做归一化。'''),
+    (94, 'after', '''`getTeamMemEntrypoint`：团队记忆的 `MEMORY.md` 入口文件绝对路径，同样落在自动记忆目录下。'''),
+    (96, 'after', '''主链过滤：只保留 `isTranscriptMessage` 且非 sidechain 的条目，排除侧链与元数据条目。'''),
+    (111, 'after', '''`contentReplacementRecords`：把原会话的 content-replacement 记录拍平出来，分叉后必须带上，否则「-r」重建时会把已替换结果误判为 FROZEN。'''),
+    (173, 'after', '''`createFork`：核心函数。读取当前转录、重建分叉会话的每条主链消息并写入新会话文件，搬运 content-replacement 记录以保证预算替换状态可追溯，最后返回分叉路径。'''),
+    (220, 'after', '''`isTeamMemPath`：轻量判定（仅 `resolve` 加前缀匹配，不解析符号链接），用于读路径时快速判断是否在团队记忆目录下。'''),
+    (256, 'after', '''`validateTeamMemWritePath`：写入校验。先做字符串级快速拒绝，再做真实符号链接解析二次确认，两关都过才返回解析路径。'''),
+    (284, 'after', '''`validateTeamMemKey`：对来自服务端的相对键做清洗、拼接与双重校验，防止恶意键逃逸出团队记忆目录。'''),
+    (292, 'after', '''`isTeamMemFile`：组合判断——既要团队记忆已启用，又要路径落在团队记忆目录内。'''),
+]

@@ -6760,3 +6760,46 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 - **块末注脚第四种形态：`} else if` 之前**。`cli/handlers/auth.ts` 一处锚点描述的是退回分支，却站在 `if` 分支的收尾处，读起来像上一段的总结。专项扫描按「讲括号里还是括号外」判据抓到，挪进分支体内，并删掉与紧邻英文注释重复的部分，改成只说差异（只填三个字段）。
 - **JSDoc 内部的锚点由预检 `[bslot]` 拦下**：`KeybindingProviderSetup.tsx` 原锚点落在块注释的 ` * Global chord interceptor…` 行，改为挂函数签名。
 - **编译器产物的解构续行第三次踩到**：`}, setLoadResult] = useState(…)` 与 `} = await render(…)` 都匹配 `[split]` 判据，`before` 会把模式与赋值劈开，改挂语句首行。
+
+流程账（第 155 批）：10 个数据文件逐一对齐源文件；annotate 十次零 ⟳ 零 ⚠（编译器产物居多，锚点均挂在函数/类型收尾行）；check-fidelity 全仓 1561 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1561/1902 文件、483,727/513,237 行、94.3%；`src/` 还剩 341 份。
+
+**下一批候选（280–297 行档，单批约 10 份）**：`model.tsx`(297) · `branch.ts`(296) · `teamMemPaths.ts`(292) · `hooks.ts`(290) · `compact.ts`(287) · `upstreamproxy.ts`(285) · `chrome.tsx`(285) · `loremIpsum.ts`(282) · `HybridTransport.ts`(282) · `addCommand.ts`(280)（`src/` 还剩 341 份；440 行以上已清零）
+
+### src batch 156: 280-297 line tier, 10 files (2876 src, 2973 annotated, 95 anchors)
+
+280–297 行档（接第 155 批下沿，取剩余 280 行以上的全部 10 份，280 行档就此清零）：模型切换命令 UI、会话分叉命令、团队记忆路径安全校验、钩子类型与 schema、压缩命令、上游代理接线、Chrome 扩展菜单、填充文本技能、混合传输、MCP add 子命令。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/model/model.tsx`](annotated/src/commands/model/model.tsx) | 297→310 | 12 | `/model` 命令交互式选择器：主循环模型/显示模型/effort 切换，组织白名单、Opus/Sonnet 1M 可达性与 Fast mode 联动 |
+| [`commands/branch/branch.ts`](annotated/src/commands/branch/branch.ts) | 296→311 | 15 | `/branch` 命令：复制当前会话转录成分叉会话，搬运 content-replacement 记录，命名冲突处理与 resume 接管 |
+| [`memdir/teamMemPaths.ts`](annotated/src/memdir/teamMemPaths.ts) | 292→305 | 13 | 团队记忆路径安全计算与写入校验，防御路径穿越与符号链接逃逸（PSR M22186/22187） |
+| [`types/hooks.ts`](annotated/src/types/hooks.ts) | 290→302 | 12 | 钩子系统的类型与 Zod 校验 schema：同步/异步响应、各事件专有输出、回调上下文与聚合结果 |
+| [`commands/compact/compact.ts`](annotated/src/commands/compact/compact.ts) | 287→294 | 7 | `/compact` 命令：会话记忆压缩优先，否则响应式/传统压缩，统一缓存清理与回显 |
+| [`upstreamproxy/upstreamproxy.ts`](annotated/src/upstreamproxy/upstreamproxy.ts) | 285→294 | 9 | CCR 容器侧代理接线：读令牌、屏蔽 dump、下载 CA、启动本地中继并注入代理环境变量，失败开放 |
+| [`commands/chrome/chrome.tsx`](annotated/src/commands/chrome/chrome.tsx) | 285→293 | 7 | `/chrome` 命令对话框：安装/重连 Chrome 扩展、管理站点权限、切换默认启用 |
+| [`skills/bundled/loremIpsum.ts`](annotated/src/skills/bundled/loremIpsum.ts) | 282→288 | 6 | 仅供内部的填充文本技能，用经验证的「单 token」英文词随机拼装占位文本 |
+| [`cli/transports/HybridTransport.ts`](annotated/src/cli/transports/HybridTransport.ts) | 282→290 | 8 | 混合传输：读走 WebSocket、写走 HTTP POST，串行批处理 + 指数退避 + 背压 |
+| [`commands/mcp/addCommand.ts`](annotated/src/commands/mcp/addCommand.ts) | 280→286 | 6 | `mcp add` 子命令：stdio/SSE/HTTP 三传输，作用域/环境变量/请求头/OAuth/XAA 校验 |
+
+要点：
+
+- **模型切换三类开关彼此独立**：组织白名单（`isModelAllowed`）、1M 上下文可达性（Opus 与 Sonnet 分开判，Sonnet 4.5 规则不同放过）、快模式联动；校验顺序固定，失败各回显可读消息，`handleModelChange` 走默认/别名/自定义校验三条路径。
+- **`model.tsx` 是 React Compiler 产物**：组件以 `_c` 缓存哨兵 + `$` 数组做惰性记忆化，真正业务逻辑在 `useEffect`/`call` 里；记忆化样板（如 `_temp` 取值函数）可跳过，注释只挂状态、选项、动作与回显层。
+- **`createFork` 必须搬运 content-replacement 记录**：否则「`claude -r {forkId}`」重建时把已替换结果误判为 FROZEN，导致计费重算与永久超额。
+- **团队记忆路径全部双关校验**：先 `resolve` 字符串级快速拒绝，再 `realpath` 最深现有祖先做符号链接二次确认；用 realpath 而非 resolve 才能防 symlink 逃逸到 team 目录外。
+- **`chrome.tsx` 同为 React Compiler 产物**：`ClaudeInChromeMenu` 的选项与动作都用缓存哨兵惰性构造，可读部分只在状态/选项/动作层，扩展是否安装与是否订阅决定选项集合。
+- **`HybridTransport` 写走 HTTP POST 而非 WebSocket**：借 `SerialBatchEventUploader` 做串行批处理、指数退避加抖动与背压；`stream_event` 用 100ms 缓冲聚合，`close` 用 `Promise.race` 在排空与宽限期之间取先到者。
+- **`addCommand` 的 XAA（SEP-990）前置校验在 add 时失败**：要求 client-id、client-secret 与已配置的 xaaIdp 三者齐备，否则报错，避免拖到 auth 阶段才暴露。
+- **`loremIpsum` 仅 `USER_TYPE=ant` 注册**：素材是经 API token 计数验证的「单 token」英文词表，目标 token 数封顶 50 万，超出则说明并截断。
+
+踩坑：
+
+- **React Compiler 产物里 JSX 都单行闭合**：本批 `model.tsx` 与 `chrome.tsx` 的 JSX 全部落在单行（如 `t4 = <ModelPicker .../>;`），锚点一律挂在函数/类型收尾行或语句行，绝不插进 JSX 内部——插进 JSX 会破坏 tsx 结构且 check-fidelity 看不出来。
+- **多行 `/** */` 块注释不挂锚点**：`teamMemPaths`/`upstreamproxy`/`hooks` 含多行块注释，本批锚点全部挂在块外的函数收尾行（如 `PathTraversalError`、`initUpstreamProxy`、`syncHookResponseSchema`），由 check-fidelity「块内禁中文」硬判据兜底，零命中。
+- **跨行三元不挂 `after`**：`compact.ts` 的 `reactiveCompact` 三元（`const ... = feature(...) ? (require(...)) : null`）锚到收尾行 `: null`，避免 check-fidelity「未结束表达式中间插注释」判据误报；预检已排除所有行尾 `=`/`?` 收尾的锚点。
+- **模板字符串内部禁插注释**：`loremIpsum` 的长字符串与 `model.tsx` 模板字面量均由 check-fidelity 的模板纯度判据兜底；本批无命中，无需外移（`⟳`）。
+
+流程账（第 156 批）：10 个数据文件逐一对齐源文件；预检 95 锚点全过；annotate 十次零 ⟳ 零 ⚠；check-fidelity 全仓 1571 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1571/1902 文件、486,603/513,237 行、94.8%；`src/` 还剩 331 份。
+
+**下一批候选（270–278 行档，单批约 10 份）**：`memdir/paths.ts`(278) · `commands/install-github-app/OAuthFlowStep.tsx`(276) · `cli/transports/SerialBatchEventUploader.ts`(275) · `commands/resume/resume.tsx`(275) · `commands/mobile/mobile.tsx`(274) · `memdir/memoryTypes.ts`(271) · `commands/fast/fast.tsx`(269) · `commands/mcp/xaaIdpCommand.ts`(266) · `bridge/types.ts`(262) · `commands/init-verifiers.ts`(262)（`src/` 还剩 331 份；440 行以上已清零）

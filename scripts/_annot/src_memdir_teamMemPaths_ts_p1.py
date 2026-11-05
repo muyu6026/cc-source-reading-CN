@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (1, 'before', '''文件级批注：`teamMemPaths.ts` 提供团队记忆路径的安全计算与写入校验，重点防御路径穿越与符号链接逃逸攻击（对应安全工单 PSR M22186 与 M22187）。'''),
+    (5, 'after', '''依赖引入：fs 的 `lstat`/`realpath`、path 工具、特性开关与自动记忆路径工具。'''),
+    (15, 'after', '''`PathTraversalError`：表示路径校验发现穿越或注入尝试的专用错误类型。'''),
+    (63, 'after', '''`sanitizePathKey`：拒绝空字节、URL 编码穿越、Unicode 归一化攻击、反斜杠与绝对路径等危险键，做防御纵深。'''),
+    (78, 'after', '''`isTeamMemoryEnabled`：团队记忆是自动记忆的子目录，故自动记忆未开启时直接返回假，否则读特性开关。'''),
+    (86, 'after', '''`getTeamMemPath`：返回团队记忆目录，拼接自动记忆目录与 `team` 子目录并归一化，末尾带分隔符。'''),
+    (94, 'after', '''`getTeamMemEntrypoint`：返回团队记忆的 `MEMORY.md` 入口路径，按项目根作用域隔离。'''),
+    (171, 'after', '''`realpathDeepestExisting`：沿目录树向上找到真实存在的祖先并对符号链接做 realpath，逐层检测悬空链接与符号链接环，防止逃逸到 team 目录之外。'''),
+    (206, 'after', '''`isRealPathWithinTeamDir`：两边都做 realpath 后比较真实文件系统位置，并要求前缀后带分隔符以防御「team-evil」假匹配。'''),
+    (220, 'after', '''`isTeamMemPath`：轻量判定，仅用 `resolve` 消除「..」段并做前缀匹配，不解析符号链接。'''),
+    (256, 'after', '''`validateTeamMemWritePath`：写入校验。先字符串级快速拒绝，再解析最深现有祖先的符号链接做二次确认，两关都过才返回解析路径。'''),
+    (284, 'after', '''`validateTeamMemKey`：对来自服务端的相对键做清洗、拼接与双重校验，防止恶意键逃逸。'''),
+    (292, 'after', '''`isTeamMemFile`：组合判断——既要团队记忆已启用，又要路径落在团队记忆目录内。'''),
+]
