@@ -1,0 +1,18 @@
+ANNOTATIONS = [
+    (8, 'before', '''formatDuration：把毫秒时长格式化成「5m 30s」这类可读字符串'''),
+    (21, 'before', '''decodeJwtPayload：不校验签名地解码 JWT 载荷段，剥离 `sk-ant-si-` 前缀；解析失败返回 null'''),
+    (38, 'before', '''decodeJwtExpiry：从 JWT 解出 `exp` 过期时间（Unix 秒），解析不出返回 null'''),
+    (52, 'before', '''TOKEN_REFRESH_BUFFER_MS：到期前 5 分钟触发刷新的缓冲时间'''),
+    (55, 'before', '''FALLBACK_REFRESH_INTERVAL_MS：新令牌过期未知时回退的刷新间隔（30 分钟）'''),
+    (58, 'before', '''MAX_REFRESH_FAILURES：连续失败上限，超过即放弃整条刷新链'''),
+    (61, 'before', '''REFRESH_RETRY_DELAY_MS：getAccessToken 返回 undefined 时的重试延迟（60 秒）'''),
+    (72, 'before', '''createTokenRefreshScheduler：创建在令牌到期前主动刷新的调度器，独立桥与 REPL 桥共用'''),
+    (89, 'before', '''三个模块级 Map：timers 持有刷新定时器、failureCounts 记连续失败、generations 记代次以作废在途刷新'''),
+    (96, 'before', '''nextGeneration：自增某会话代次，让在途的 doRefresh 知道自己已过期应跳过'''),
+    (102, 'before', '''schedule：按令牌 exp 计算延迟并注册刷新定时器；无法解码时保留已有定时器不破坏刷新链'''),
+    (147, 'before', '''scheduleFromExpiresIn：用显式 TTL（秒）排程刷新，用于不透明 JWT（如服务端直接给 expires_in）'''),
+    (165, 'before', '''doRefresh：真正执行刷新——取访问令牌、判代次过期、失败计数重试、成功后回调 onRefresh 并排后续刷新'''),
+    (232, 'before', '''cancel：作废单个会话的定时器并自增代次'''),
+    (243, 'before', '''cancelAll：作废所有会话的定时器与代次，用于整体关闭'''),
+    (255, 'after', '''返回四个公开方法：schedule / scheduleFromExpiresIn / cancel / cancelAll'''),
+]

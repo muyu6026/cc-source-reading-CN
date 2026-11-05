@@ -6841,4 +6841,36 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 157 批）：10 个数据文件逐一对齐源文件；预检 155 锚点全过；annotate 十次零 ⟳ 零 ⚠；check-fidelity 全仓 1581 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1581/1902 文件、489,311/513,237 行、95.3%；`src/` 还剩 321 份。
 
-**下一批候选（234–256 行档，单批约 10 份）**：`commands/init.ts`(256) · `bridge/jwtUtils.ts`(256) · `cli/remoteIO.ts`(255) · `keybindings/resolver.ts`(244) · `commands/security-review.ts`(243) · `keybindings/KeybindingContext.tsx`(243) · `commands/btw/btw.tsx`(243) · `context/notifications.tsx`(240) · `keybindings/schema.ts`(236) · `constants/oauth.ts`(234)（`src/` 还剩 321 份；440 行以上已清零）
+### src batch 158: 234-256 line tier, 10 files (2447 src, 2556 annotated, 107 anchors)
+
+234–256 行档（接第 157 批下沿，取剩余 234 行以上前 10 份，260 行档就此清零）：JWT 编解码与校验工具、/init 项目初始化向导、CLI 远程 IO 适配层、键位解析器、/security-review 安全评审命令、键位上下文 React Provider、/btw 侧栏提示命令、全局通知上下文、键位配置 schema、OAuth 常量集。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridge/jwtUtils.ts`](annotated/src/bridge/jwtUtils.ts) | 256→272 | 16 | 桥接层 JWT 工具：token 生成/解析、签名验证、过期与 audience 校验；签名错与格式错两类失败路径分离 |
+| [`commands/init.ts`](annotated/src/commands/init.ts) | 256→262 | 6 | /init 命令：项目初始化向导；OLD/NEW_INIT_PROMPT 巨型模板串（仅包壳可注），引导生成 CLAUDE.md 与记忆配置 |
+| [`cli/remoteIO.ts`](annotated/src/cli/remoteIO.ts) | 255→269 | 14 | CLI 远程 IO 适配层：把本地 fs/网络/提示调用重定向到远端，远端执行命令时的输入输出桥接 |
+| [`keybindings/resolver.ts`](annotated/src/keybindings/resolver.ts) | 244→255 | 11 | 键位解析器：按键事件→已注册动作匹配，处理作用域/优先级/上下文过滤 |
+| [`commands/security-review.ts`](annotated/src/commands/security-review.ts) | 243→249 | 6 | /security-review 命令：SECURITY_REVIEW_MARKDOWN 巨型模板（仅包壳可注），生成安全评审报告 |
+| [`keybindings/KeybindingContext.tsx`](annotated/src/keybindings/KeybindingContext.tsx) | 242→253 | 10 | 键位上下文 Provider：按当前 UI 状态决定哪些快捷键生效，作用域随界面切换 |
+| [`commands/btw/btw.tsx`](annotated/src/commands/btw/btw.tsx) | 242→252 | 9 | /btw 命令 UI：侧栏/浮层提示组件，跨会话传递简短信息 |
+| [`context/notifications.tsx`](annotated/src/context/notifications.tsx) | 239→252 | 13 | 通知上下文 Provider：全局通知队列、去重、展示与自动消失 |
+| [`keybindings/schema.ts`](annotated/src/keybindings/schema.ts) | 236→244 | 8 | 键位配置 schema：快捷键定义校验/归一化，类型与默认值集中管理 |
+| [`constants/oauth.ts`](annotated/src/constants/oauth.ts) | 234→248 | 14 | OAuth 常量集：授权端点、scope、client 配置、回调地址等集中定义 |
+
+要点：
+
+- **JWT 工具是桥接层认证基础**：签名/过期/audience 三类校验缺一不可；token 解析失败必须区分「格式错」与「签名错」两条路径，错误提示不可混为一谈。
+- **/init 与 /security-review 都是「模板为主体」命令**：批注只挂在包壳的 import/对象定义/结束处，绝不进巨型模板内部——否则会污染生成给用户的 CLAUDE.md 与评审报告；这是固定限制。
+- **键位三件套分工清晰**：schema 定义并校验格式、resolver 做事件→动作匹配、KeybindingContext 管 UI 作用域；三者依赖集中类型，改动其一要先看另两处的契约。
+- **notifications 用队列加去重防刷屏**：全局通知过多时合并同源；remoteIO 是「本地调用重定向到远端」的适配层，命令在远端跑时所有 IO 经它中转。
+
+踩坑：
+
+- **模板字符串内部禁插注释是硬约束**：init.ts 的 OLD/NEW_INIT_PROMPT 与 security-review.ts 的 SECURITY_REVIEW_MARKDOWN 都是巨型模板，annotate.py 自动把模板声明行的 before 锚外移到模板前一行（各 1 处良性 `⟳`）；grep 证实两文件模板内中文计数均为 0，无泄漏。
+- **零 `⚠`**：本批无锚点落入块注释内部；多行 `/** */` 块注释全部绕开，由 check-fidelity「块内禁中文」硬判据兜底。
+- **预检 107 锚点一次全过**（含 importlib 执行拦截 NameError、`ast.parse`、无重复锚点、文本无英文双引号与反斜杠），annotate 十次除两处良性外移外零 ⟳ 零 ⚠。
+
+流程账（第 158 批）：10 个数据文件逐一对齐源文件；预检 107 锚点全过；annotate 十次 2 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1591 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1591/1902 文件、491,761/513,237 行、95.8%（按行数）；`src/` 还剩 311 份。
+
+**下一批候选（211–231 行档，单批约 10 份）**：`commands/install-github-app/ApiKeyStep.tsx`(231) · `types/generated/events_mono/growthbook/v1/growthbook_experiment_event.ts`(223) · `schemas/hooks.ts`(222) · `context/stats.tsx`(220) · `skills/bundledSkills.ts`(220) · `constants/outputStyles.ts`(216) · `types/command.ts`(216) · `commands/tag/tag.tsx`(215) · `server/directConnectManager.ts`(213) · `commands/install-github-app/ChooseRepoStep.tsx`(211)（`src/` 还剩 311 份；440 行以上已清零）

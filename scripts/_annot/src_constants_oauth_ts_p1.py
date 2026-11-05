@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''OAuth 配置：按环境选择 prod / staging / local，集中管理各端点与 scope'''),
+    (4, 'before', '''OauthConfigType：配置类型（prod / staging / local）'''),
+    (6, 'before', '''getOauthConfigType：ant 环境下按环境变量决定 staging / local，否则 prod'''),
+    (18, 'before', '''fileSuffixForOauthConfig：根据配置类型返回配置文件名后缀'''),
+    (33, 'before', '''CLAUDE_AI_INFERENCE_SCOPE / CLAUDE_AI_PROFILE_SCOPE / OAUTH_BETA_HEADER：OAuth 权限范围与 beta 头常量'''),
+    (39, 'before', '''CONSOLE_OAUTH_SCOPES / CLAUDE_AI_OAUTH_SCOPES / ALL_OAUTH_SCOPES：控制台与 Claude.ai 的权限范围并集'''),
+    (60, 'before', '''OauthConfig：OAuth 配置对象的类型定义（各端点与 client id 等）'''),
+    (84, 'before', '''PROD_OAUTH_CONFIG：生产环境 OAuth 配置（常规运行使用）'''),
+    (113, 'before', '''MCP_CLIENT_METADATA_URL：MCP OAuth 的客户端元数据文档 URL（CIMD / SEP-991）'''),
+    (118, 'before', '''STAGING_OAUTH_CONFIG：预发环境配置，仅 ant 构建带 staging 标志时存在（字面量检查做死代码消除）'''),
+    (148, 'before', '''getLocalOauthConfig：本地开发三件套（:8000 api / :4000 claude-ai / :3000 console）的 OAuth 配置'''),
+    (179, 'before', '''ALLOWED_OAUTH_BASE_URLS：自定义 OAuth URL 仅允许 FedStart / PubSec 部署，防令牌外泄'''),
+    (186, 'before', '''getOauthConfig：按类型选配置，并允许用环境变量整体覆盖为已审批的 FedStart 端点或覆盖 CLIENT_ID'''),
+    (234, 'after', '''oauth 模块结束'''),
+]

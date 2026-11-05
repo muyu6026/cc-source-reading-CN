@@ -1,0 +1,15 @@
+ANNOTATIONS = [
+    (1, 'before', '''通知系统：基于 AppState 的队列式通知（文本 / JSX），支持优先级、折叠与失效'''),
+    (5, 'before', '''Priority：通知优先级（立即 / 高 / 中 / 低）'''),
+    (6, 'before', '''BaseNotification：通知基类，含 key、失效列表、优先级、超时与 fold 合并函数'''),
+    (24, 'before', '''TextNotification 与 JSXNotification：文本或自定义 JSX 两种通知形态'''),
+    (33, 'before', '''Notification：两种通知的联合类型'''),
+    (34, 'before', '''DEFAULT_TIMEOUT_MS：默认通知超时（8 秒）'''),
+    (38, 'before', '''useNotifications：核心 Hook——addNotification 入队、removeNotification 出队、processQueue 推进显示'''),
+    (78, 'before', '''addNotification：处理 immediate 优先级（立即清旧定时器并展示）与非即时通知（入队 / fold / 去重）'''),
+    (193, 'before', '''removeNotification：按 key 移除当前或队列中的通知并清理定时器'''),
+    (224, 'after', '''挂载时若初始状态已有通知则立即推进队列（仅挂载一次，直接读 store 而非订阅）'''),
+    (230, 'before', '''PRIORITIES：优先级到数值的映射（数值越小越优先）'''),
+    (236, 'before', '''getNext：从队列取出优先级最高的通知（reduce 比较映射值）'''),
+    (240, 'after', '''notifications 模块结束'''),
+]

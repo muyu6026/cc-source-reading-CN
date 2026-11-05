@@ -1,0 +1,16 @@
+ANNOTATIONS = [
+    (1, 'before', '''RemoteIO：SDK 模式的双向流处理，带会话追踪与传输抽象'''),
+    (35, 'before', '''RemoteIO 继承 StructuredIO，封装 SDK 模式的双向流与会话追踪'''),
+    (44, 'before', '''构造函数：建立输入流、按 URL 选传输、挂接数据 / 关闭回调、初始化 CCR v2'''),
+    (98, 'before', '''setOnData：收到数据写入输入流；桥 + 调试模式同时回显到 stdout'''),
+    (106, 'before', '''setOnClose：连接断开时结束输入流以触发优雅关闭'''),
+    (116, 'before', '''若启用 CCR v2：先校验必须是 SSE 传输，再建 CCRClient 并注册内部事件读写器'''),
+    (172, 'before', '''所有回调挂好后再连接，避免早期 SSE 帧因回调未接而丢失'''),
+    (184, 'before', '''定时发送 keep_alive 帧防止上游代理回收空闲会话（仅桥模式且间隔大于 0）'''),
+    (199, 'before', '''注册优雅关闭清理：连接时登记 close 清理函数'''),
+    (217, 'before', '''flushInternalEvents：把未刷的内部事件交给 CCR 客户端或返回空 Promise'''),
+    (221, 'before', '''internalEventsPending：未决内部事件数，供上游轮询'''),
+    (231, 'before', '''write：把消息交 CCR 或传输写出；桥模式下 control_request 或调试时回显 stdout'''),
+    (247, 'before', '''close：清理 keep_alive 定时器、关闭传输与输入流'''),
+    (255, 'after', '''RemoteIO 类结束：封装 SDK 模式的双向流、CCR v2 集成与优雅关闭'''),
+]
