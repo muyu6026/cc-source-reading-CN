@@ -6294,3 +6294,33 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 84 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；原文 2,215 行 → 批注版 2,300 行；`check-fidelity.py` 全仓 **1491 份 0 失败**；`check-links.py` 源码链接 2372 条加内链 710 条，0 失效；全仓 **1491/1902 文件、444,845/513,237 行、86%**；`src/` 还剩 **411 份 / 68,700 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000)（全仓还剩 411 份；`cli/transports/ccrClient.ts`(999) 紧随其后，之后是 900 行档）。
+
+### src batch 143: entrypoints/sdk/coreSchemas.ts (1889 src / 2040 annotated / 151 anchors)
+
+第五头巨兽：`src/entrypoints/sdk/coreSchemas.ts`（1,890 行）。文件头一句话定死了它的地位——**SDK 所有可序列化类型都以这里的 zod schema 为单一真相源**，TS 类型是生成产物、提交进仓库只为 IDE 补全。整份文件没有一行业务逻辑，全是契约：27 个钩子事件、6 种权限变更指令、24 种 SDK 消息、13 种超额禁用原因。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`entrypoints/sdk/coreSchemas.ts`](annotated/src/entrypoints/sdk/coreSchemas.ts) | 1,889→2,040 | 151 | SDK 类型单一真相源：用量/输出格式/MCP 配置/权限/钩子三层契约/技能与模型信息/代理定义/24 种消息联合 |
+
+要点：
+
+- **`lazySchema` 全包裹，一举三得**：① 打破循环引用——`PermissionUpdateSchema` 的 `setMode` 分支引用 50 行之后才定义的 `PermissionModeSchema`，`SyncHookJSONOutputSchema` 引用下方十五个专属输出，`FastModeStateSchema` 定义在文件最后却被前面三处引用；② 模块加载期只登记工厂不建树，把 zod 的构造成本摊到首次解析；③ 声明顺序与依赖顺序彻底解耦，可以按「主题」而非「拓扑」组织文件。
+- **占位符 + `TypeOverrideMap`**：五个 `z.unknown()`（`APIUserMessage`/`APIAssistantMessage`/`RawMessageStreamEvent`/`UUID`/`NonNullableUsage`）在 zod 侧放行一切，`scripts/generate-sdk-types.ts` 再按映射表替换成真实外部类型。这样 zod 能描述消息形状，又不必把 `@anthropic-ai/sdk` 的类型搬进来。
+- **`.and()` 而不是 `.extend()`**：注释明写理由——生成 TS 时能保留 `BaseHookInput & {...}` 的交叉写法，读起来更贴近契约本意。`.extend()` 会把基底字段摊平，丢失「所有钩子共享一块底板」这个事实。
+- **判别式三处不同取舍**：① 钩子输出用 `async: z.literal(true)` 当判别字段（同步输出里根本没有这个键，天然互斥）；② 思考配置用 `union` 而非 `discriminatedUnion`，靠每支的 `type` 字面量让 zod 自动择优；③ 权限更新用 `discriminatedUnion('type')`，前三分支三字段完全同形**仍拆开写**——为了生成出来的 TS 能按 `type` 自然收窄。
+- **用「键的存在性」当开关**（本批最巧的一处）：`capabilities.experimental['claude/channel']` 存在即代表该插件在已批准频道白名单里，据此决定要不要弹启用提示；`PromptRequestSchema.prompt` 字段本身就是请求 ID，「这一行有它」就等于「这是一条提问」——行式 JSONL 协议里，这比加一个 `type` 字段少一层判断。
+- **命名是分界线**：消息流（`session_id`/`tool_use_id`/`is_error`）全蛇形，会话列表信息（`sessionId`/`lastModified`/`fileSize`）全驼峰。前者是流式协议，后者是 API 表面——改字段名之前先确认自己在哪一侧。
+- **契约文档长在 schema 上**：`memory` 字段的 describe 直接把三个目录路径写出来；`agent_id` 与 `agent_type` 的 describe 明确「用前者判断是否在子代理里，不要用后者」；`preserved_segment` 的 describe 解释后缀保留锚在摘要、前缀保留锚在边界。这些信息没有第二处，删掉 describe 就等于删掉文档。
+- **枚举即排障手册**：`overageDisabledReason` 13 种（未开通/组织禁用/余额不足/席位档位零额度/组零额度/服务级禁用…）、`SDKAssistantMessageError` 7 种、`EXIT_REASONS` 6 档（`bypass_permissions_disabled` 单列，因为它属于「被策略关掉」而非用户主动退出）。
+
+踩坑：
+
+- **`.describe(` 跨行是这类文件最大的陷阱，而且分两级**：`after` 落在 `.describe(` 与字符串之间会**直接语法错误**，预检能拦；落在 describe 收尾之后则**语法合法但语义错位**，预检不报、`annotate.py` 也不报 `⚠`。本次踩到后者两处——`capabilities` 那条落进了外层对象体的末尾（缩进 0 却处在 `{ }` 内、紧跟 `})`），`决策分类` 那条悬在两个同级注释之间。
+- 判据补一条：**插入点后一行是 `})`、`),`、`]` 这类收尾行时，`after` 注释会变成「块末注脚」**，脱离它描述的字段。识别方法是扫描「顶格中文注释 + 前一行有缩进 + 后一行有缩进」，本次全文件扫出 17 处，其中 15 处是正常的对象属性边界，2 处需改。
+- 修法：并入上一条 `before` 锚点的文本，而不是硬挪行号——锚点 153 → 151，产物更短也更连贯。
+- 首个锚点落在第 1 行 `before`，插在 `/**` 文件头块注释之前，产物第 1 行即中文批注、第 2 行起是原文头注释，未被劈开。
+
+流程账：1 个数据文件对齐源文件；预检 151 锚点全过、0 块内违例（首次 153，合并两处后 151）；`annotate.py` 两次均零 `⚠`、零 `⟳`；原文 1,889 行 → 批注版 2,040 行；`check-fidelity.py` 全仓 **1492 份 0 失败**；`check-links.py` 源码链接 2373 条加内链 711 条，0 失效；全仓 **1492/1902 文件、446,734/513,237 行、87%**；`src/` 还剩 **410 份 / 66,810 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999)（全仓还剩 410 份；之后是 `commands/plugin` 的 838/802 两份与 `cli/transports/WebSocketTransport.ts`(801)，800 行档清完就进 700 行档）。
