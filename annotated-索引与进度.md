@@ -6720,3 +6720,43 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：10 个数据文件逐一对齐源文件；预检首轮 217 锚点全过；`annotate.py` 十次共 1 处良性 `⟳`（createSession 358→357）、零 `⚠`；`check-fidelity.py` 全仓 **1551 份 0 失败**（较上批 +10）；`check-links.py` 源码链接 2423 条加内链 722 条，0 失效；全仓 **1551/1902 文件、480,502/513,237 行、93.6%**；`src/` 还剩 **351 份 / 32,735 行**。
 
 **下一批候选（300–366 行档，单批约 10 份）**：`interactiveHelpers.tsx`(366) · `cli/handlers/auth.ts`(330) · `types/logs.ts`(330) · `commands/install-github-app/setupGitHubActions.ts`(325) · `commands/context/context-noninteractive.ts`(325) · `cost-tracker.ts`(323) · `commands/review/reviewRemote.ts`(316) · `keybindings/KeybindingProviderSetup.tsx`(308) · `remote/sdkMessageAdapter.ts`(302) · `commands/install.tsx`(300)（全仓还剩 351 份；440 行以上已清零）
+
+### src batch 155: 300-366 line tier, 10 files (3225 src, 3561 annotated, 333 anchors)
+
+300–366 行档（接第 154 批下沿，取剩余 300 行以上的全部 10 份，300 行档就此清零）：交互式启动外壳、会话记录类型全集、认证命令处理器、GitHub Actions 安装、/context 取数渲染、计费追踪、远程评审、键位装配、SDK 消息适配、安装命令。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`interactiveHelpers.tsx`](annotated/src/interactiveHelpers.tsx) | 366→408 | 41 | 交互式启动的公共外壳：对话框 Promise 化、渲染后退出三件套、引导与信任检查清单、渲染参数与帧回调 |
+| [`types/logs.ts`](annotated/src/types/logs.ts) | 330→360 | 30 | 会话落盘的全部记录形态：消息快照、两类标题、压缩提交与快照、工作树三态、条目联合与排序 |
+| [`cli/handlers/auth.ts`](annotated/src/cli/handlers/auth.ts) | 330→364 | 34 | 登录三条路径（环境刷新令牌 / 浏览器 / 登出）与状态查询的字段优先级、退出码语义 |
+| [`commands/install-github-app/setupGitHubActions.ts`](annotated/src/commands/install-github-app/setupGitHubActions.ts) | 325→354 | 29 | 工作流文件写入（探版本、换密钥名、base64 提交）与安装主流程、失败分级与自救提示 |
+| [`commands/context/context-noninteractive.ts`](annotated/src/commands/context/context-noninteractive.ts) | 325→357 | 32 | /context 的取数与表格渲染：三步变换复现、策略状态行、分类表与按需出现的分节 |
+| [`cost-tracker.ts`](annotated/src/cost-tracker.ts) | 323→351 | 28 | 计费状态的存读、按规范名聚合显示、附带用量的递归累加与指标上报 |
+| [`commands/review/reviewRemote.ts`](annotated/src/commands/review/reviewRemote.ts) | 316→353 | 37 | 远程评审：门禁四态、拉取请求与分支两条启动路径、调优参数的逐字段清洗 |
+| [`keybindings/KeybindingProviderSetup.tsx`](annotated/src/keybindings/KeybindingProviderSetup.tsx) | 308→343 | 34 | 键位装配（同步首载 + 热重载）与组合键拦截器的分派分支、ref 与 state 双写 |
+| [`remote/sdkMessageAdapter.ts`](annotated/src/remote/sdkMessageAdapter.ts) | 302→334 | 32 | SDK 消息到内部消息的逐类转换、用户消息的两个开关、未知类型的前向兼容 |
+| [`commands/install.tsx`](annotated/src/commands/install.tsx) | 300→337 | 36 | 安装命令的状态机与视图分支、清理时机、退场延时与参数解析 |
+
+要点：
+
+- **启动检查清单本身就是顺序依赖**：引导 → 信任 → 会话标志 → 灰度重初始化 → 环境变量 → 遥测。环境变量必须排在信任之后，否则未信任仓库能带进有副作用的变量；仓库路径映射同理，早写会污染传送。
+- **退出三件套顺序固定**：渲染 → 卸载 → beforeExit → 退出。先卸载是因为回调可能还要写终端，Ink 占着屏幕会打架；beforeExit 必须 await，否则清理会被退出截断。
+- **会话记录有三种写入语义**：提交只追加按序重放，快照后者覆盖前者，工作树状态是 null 与 undefined 的三态。AI 标题与用户改名分成两种记录，是为了让读取偏好稳定、重写元数据时不覆盖改名、条件更新只匹配用户标题。
+- **两条登录路径在安装令牌之后完全汇合**：组织校验、事件上报、退出码都一样。差异只在取令牌：环境变量直换刷新令牌，跳过整个授权码环节，也因此要自己补引导完成标记。
+- **失败分必需与可容忍**：角色与首令牌日期查不到只记调试日志（受限作用域本来就没权限），控制台账号建不出 API 密钥必须抛——没有密钥等于完全不可用。
+- **写工作流文件先探版本号再提交**：接口没有幂等写，已存在就必须带 sha。失败分两路：422 且提到 sha 时按「已存在」给可执行的下一步，其余附三条自救路径。拉取请求不直接建，而是开对比页让用户确认。
+- **/context 的三步变换必须与主查询逐字一致**：压缩边界裁剪 → 投影替换 → 微压缩存根。少一步百分比就会与模型实际收到的量对不上。权限读取器传函数不传值，分析过程长，中途状态早已变化。
+- **计费快照先比会话号再读**：项目配置只有一个槽位，号不一致就要返回空，宁可显示零也不能把上一场花费算进来。窗口与输出上限在读取时重算，落盘会随版本升级过期。
+- **远程评审门禁是四态而不是布尔**：团体套餐直接放行（配额接口只服务个人订阅）、配额或用量缺失都放行（服务端计费兜底）、余额低于门槛就拦、其余需用户确认一次。
+- **分支模式传合并基点 SHA 而非分支名**：容器准备阶段会移除远端引用，按名字解析必然失败；SHA 在提交历史里可达，`git diff` 直接可用。算不出基点属于用户环境问题，就地返回可读原因，不该静默退到本地评审。
+- **键位装配的关键是「ref 与 state 双写」**：待完成组合键写 ref 给解析函数同步读，写 state 只为触发界面；激活上下文同理，等一次渲染就已经晚了。
+- **拦截器必须比输入框更早注册**：否则组合键的第二个键会被输入框吃掉。且只有原本已在组合键中时才由它调用处理器——单键命中交给常规绑定层，两边都调会执行两次。
+- **适配层对未知类型一律忽略并记日志**：服务端可能先上线新类型，客户端不该因此崩掉整场会话。用户消息按内容块形状判断是不是工具结果，父工具号被硬编码成空，根本区分不出来。
+- **安装流程的清理必须排在原生安装成功之后**：先删旧的可能把用户唯一能用的版本删掉。通道只在用户显式指定时写回设置，从默认值推出来的不该反过来改偏好。
+
+踩坑：
+
+- **块末注脚第四种形态：`} else if` 之前**。`cli/handlers/auth.ts` 一处锚点描述的是退回分支，却站在 `if` 分支的收尾处，读起来像上一段的总结。专项扫描按「讲括号里还是括号外」判据抓到，挪进分支体内，并删掉与紧邻英文注释重复的部分，改成只说差异（只填三个字段）。
+- **JSDoc 内部的锚点由预检 `[bslot]` 拦下**：`KeybindingProviderSetup.tsx` 原锚点落在块注释的 ` * Global chord interceptor…` 行，改为挂函数签名。
+- **编译器产物的解构续行第三次踩到**：`}, setLoadResult] = useState(…)` 与 `} = await render(…)` 都匹配 `[split]` 判据，`before` 会把模式与赋值劈开，改挂语句首行。
