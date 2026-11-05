@@ -6906,4 +6906,37 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 159 批）：10 个数据文件逐一对齐源文件；预检 107 锚点全过；annotate 十次 1 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1601 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1601/1902 文件、493,948/513,237 行、96.2%（按行数）；`src/` 还剩 301 份。
 
-**下一批候选（197–210 行档，单批约 10 份）**：`bridge/trustedDevice.ts`(210) · `commands/rate-limit-options/rate-limit-options.tsx`(210) · `bridge/bridgePointer.ts`(210) · `constants/spinnerVerbs.ts`(204) · `keybindings/parser.ts`(203) · `bridge/bridgeEnabled.ts`(202) · `commands/bridge-kick.ts`(200) · `state/AppState.tsx`(200) · `vim/types.ts`(199) · `skills/bundled/skillify.ts`(197)（`src/` 还剩 301 份；440 行以上已清零）
+### src batch 160: 197-210 line tier, 10 files (2035 src, 2147 annotated, 110 anchors)
+
+197–210 行档（接第 159 批下沿，取剩余 197 行以上前 10 份，196 行档就此清零）：限流选项菜单、桥接可信设备令牌、崩溃恢复指针、旋转动词词表、键位解析器、桥接资格运行时检查、应用状态容器、桥接故障注入命令、vim 状态机类型、skillify 技能模板。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/rate-limit-options/rate-limit-options.tsx`](annotated/src/commands/rate-limit-options/rate-limit-options.tsx) | 210→226 | 15 | 限流弹出的选项菜单（升级/超额用量/取消）；React 编译器产物，全套 `_c` 缓存槽 |
+| [`bridge/trustedDevice.ts`](annotated/src/bridge/trustedDevice.ts) | 210→224 | 14 | 桥接可信设备令牌来源：注册/读取/清除，特性开关分级灰度 |
+| [`bridge/bridgePointer.ts`](annotated/src/bridge/bridgePointer.ts) | 210→223 | 13 | 远程控制会话崩溃恢复指针，跨 worktree 查找最新指针 |
+| [`constants/spinnerVerbs.ts`](annotated/src/constants/spinnerVerbs.ts) | 204→209 | 5 | 加载提示旋转动词默认词表与自定义读取（replace/追加） |
+| [`keybindings/parser.ts`](annotated/src/keybindings/parser.ts) | 203→213 | 10 | 键位字符串解析：按键/和弦/平台展示四类转换 |
+| [`bridge/bridgeEnabled.ts`](annotated/src/bridge/bridgeEnabled.ts) | 202→213 | 11 | 桥接模式资格运行时检查：多套开关与可操作诊断消息 |
+| [`state/AppState.tsx`](annotated/src/state/AppState.tsx) | 200→212 | 11 | 应用状态 React Context Provider 与若干 `useAppState` 订阅钩子 |
+| [`commands/bridge-kick.ts`](annotated/src/commands/bridge-kick.ts) | 200→210 | 10 | ant 专属桥接故障注入命令，手动触发恢复路径测试 |
+| [`vim/types.ts`](annotated/src/vim/types.ts) | 199→212 | 13 | vim 模式状态机类型定义（类型本身即文档） |
+| [`skills/bundled/skillify.ts`](annotated/src/skills/bundled/skillify.ts) | 197→205 | 8 | 内置 skillify 技能：把会话流程沉淀为可复用 SKILL.md 的提示词模板 |
+
+要点：
+
+- **桥接子系统四件套串起来看**：`trustedDevice` 管身份令牌、`bridgePointer` 管崩溃恢复、`bridgeEnabled` 管资格开关、`bridge-kick` 管测试注入；它们靠 GrowthBook 特性标与 env 变量分层控制，外部构建靠 `feature()` 守卫剔除内联字符串字面量（正向三元模式，负向 `if (!feature)` 不会剔除）。
+- **React Compiler 产物两处**：`rate-limit-options` 与 `AppState` 都是编译器产物，`_c(N)` 缓存槽 + `$` 缓存对象，缓存三件套（哨兵判断→算并存回→否则读缓存）贯穿组件；注释只挂函数签名与语句行，绝不进 JSX 内部。
+- **「模板或数据即文档」三处**：`spinnerVerbs` 默认词表、`vim/types` 类型联合、`skillify` 提示词模板——批注挂在包壳 import/声明/结束处，不进模板内部（否则污染生成给用户的 SKILL.md）。
+- **小工具单一职责**：`parser` 把 `ctrl+shift+k` 翻成结构化对象、`spinnerVerbs` 只查设置拼词表，边界清晰、无副作用。
+
+踩坑：
+
+- **`after` 落在 `//` 注释段中部被自动外移**：`trustedDevice.ts` 的 `(39,'after')` 原落在一行 `//` 注释中部（39–44 整段是 memoize 说明），annotate 判为「// 注释段中部」自动外移到段边界 44（`⟳` 39→44）；落点在段尾、通顺。
+- **模板声明行 before 锚被自动外移（两处良性）**：`bridge-kick.ts` 的 `(40,'before')` 与 `skillify.ts` 的 `(22,'before')` 原落在模板字符串起始行，annotate 判为「模板字符串内部」自动外移到模板前一行（`⟳` 40→40 / 22→22）；grep 确认两模板内中文计数均为 0，无泄漏。
+- 其余八份零 `⟳` 零 `⚠`：块注释内部零中文（文件头 `/* */` 经 `(1,'after')` 落块后、字段级 `/** */` 全部绕开），由 check-fidelity「块内禁中文」硬判据兜底。
+- 预检 110 锚点一次全过（`ast.parse`、无重复锚点、文本无英文双引号与反斜杠）；`bridgeEnabled` 初版一处 `'BRIDGE_MODE'` 单引号嵌套被 `ast.parse` 拦下，改反引号包裹后通过。
+
+流程账（第 160 批）：10 个数据文件逐一对齐源文件；预检 110 锚点全过；annotate 十次 3 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1611 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1611/1902 文件、495,983/513,237 行、96.6%（按行数）；`src/` 还剩 291 份。
+
+**下一批候选（182–196 行档，单批约 10 份）**：`keybindings/useKeybinding.ts`(196) · `entrypoints/mcp.ts`(196) · `skills/bundled/claudeApi.ts`(196) · `commands/install-github-app/CheckExistingSecretStep.tsx`(190) · `context.ts`(189) · `commands/remote-setup/remote-setup.tsx`(187) · `types/generated/google/protobuf/timestamp.ts`(187) · `vim/textObjects.ts`(186) · `commands/effort/effort.tsx`(183) · `commands/remote-setup/api.ts`(182)（`src/` 还剩 291 份；440 行以上已清零）
