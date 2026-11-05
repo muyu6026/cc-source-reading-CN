@@ -56,6 +56,7 @@
 - 第 136 批：`e9ce276` · 1 文件/5,005 行/155 锚点（screens/REPL.tsx CLI 终端 UI 根组件，5,005→5,223 行）· 全仓 **1485/1902 · 426,763 行 · 83%（行）**；src/ 剩 417 份。
 - 第 137 批：`05c56c6` · 1 文件/4,684 行/136 锚点（src/main.tsx CLI 程序入口，4,684→4,821 行）· 全仓 **1486/1902 · 431,447 行 · 84%（行）**；src/ 剩 416 份。
 - 第 138 批：`4f8a501` · 1 文件/3,200 行/64 锚点（src/commands/insights.ts /insights 命令核心，3,200→3,264 行）· 全仓 **1487/1902 · 434,647 行 · 84%（行）**；src/ 剩 415 份。
+- 第 139–159 批：见各日工作日志（`2026-11-03.md`–`2026-11-06.md`）。期间 `src/` 散件由 256 行档连续扫至 211 行档；全仓累计至第 159 批 **1601/1902 · 493,948 行 · 96.2%（按行数）**；src/ 剩 301 份；新增 `src/schemas` 1/1 清零。
 
 ## 学习路线定案：零基础六层制（2026-10-27，用户要求）
 - 用户明确：**0 基础，旧路线颗粒度不够精细** → 已重构为六层关卡制，落在 `docs/00-零基础学习路线.md` + `docs/00a-TypeScript地基.md`，README 的「学习路线」章节换为六层总览，旧七步降级为「进阶路线（七步，按模块读）」**保留不删**。
@@ -65,11 +66,11 @@
 - **约束（后续维护必守）**：路线里点名的文件必须已批注，否则「看批注版」是死链——本批就是因为这个才补 `commands/clear/` 剩余三份。以后改路线要先跑 `check-links.py`。
 - 00a 讲义的取材原则：**只讲本仓库真实出现的语法**，每条配文件+行号；已覆盖 satisfies vs 类型标注、三种 `?`、`?.`/`??`/`!`、async/await（含「删掉 await 就是逻辑 bug」）、`.js` 后缀、循环依赖拆第三方、`void` 前缀、数组/对象解构。
 
-## 当前状态（2026-11-05 第 138 批后）
-- 全仓 **1487/1902 文件（缺失 415）；434,647/513,237 行，按行数覆盖 84%**。
-- 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)、`src/components`(389/389)、`src/ink`(96/96)。
+## 当前状态（2026-11-06 第 159 批后）
+- 全仓 **1601/1902 文件（缺失 301）；493,948/513,237 行，按行数覆盖 96.2%**。
+- 已清零目录：`src/services`(130/130)、`src/tools`(184/184)、`src/commands/clear`(4/4)、`src/hooks`(104/104)、`src/utils`(564/564)、`src/components`(389/389)、`src/ink`(96/96)、`src/schemas`(1/1)。
 - `src/components` **389/389 全清（81,892 行）**；`src/ink` **96/96 全清（19,859 行）**。
-- 当前阶段：进入 `src/` 散件（巨兽）。下一批真正榜首（来自 `check-coverage.py src` 实时）：`bridge/bridgeMain.ts`(2,999)、`native-ts/yoga-layout/index.ts`(2,578)、`bridge/replBridge.ts`(2,406)；其后 `commands/plugin/ManagePlugins.tsx`(2,214)、`entrypoints/sdk/coreSchemas.ts`(1,889)、`bootstrap/state.ts`(1,758)。（insights.ts 已于第 138 批完成；main.tsx 已于第 137 批完成；screens/REPL.tsx 已于第 136 批完成。）
+- 当前阶段：`src/` 散件按 `check-coverage.py src` 真实 top 降序连续推进，已扫完 256 行以下全部档。下一批（197–210 行档）：`bridge/bridgePointer.ts`(210)、`bridge/trustedDevice.ts`(210)、`commands/rate-limit-options/rate-limit-options.tsx`(210)、`constants/spinnerVerbs.ts`(204)、`keybindings/parser.ts`(203)、`bridge/bridgeEnabled.ts`(202)、`commands/bridge-kick.ts`(200)、`state/AppState.tsx`(200)、`vim/types.ts`(199)、`skills/bundled/skillify.ts`(197)。
 
 ## 反复踩坑固化（写数据文件前必看）
 - 正文里**不要出现任何英文引号 `"` 或反斜杠 `\`**（预检第 5 条 + 安全敏感源码）；写 shell/TS 字面量用中文描述式表述或「」/反引号。
@@ -83,7 +84,7 @@
 - 预检脚本的 `ROOT` 须用 Windows 绝对路径 `D:/CC泄露源码分析`，不可用 Git Bash 风格 `/d/CC泄露源码分析`——混合分隔符会让 `os.path.exists` 判 False、15 份数据文件全报「MISSING」（第 62 批踩过，改成 `D:/` 即过）。
 
 ## 目录进度账
-- 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)、`src/components`(389)、`src/ink`(96)。
-- 进行中：进入 `src/` 散件阶段（按 `check-coverage.py src` 取真实 top 降序推进）。
-- 未启动：其余子树（bridge/cli/screens/skills/tasks/vim/keybindings/…）。
+- 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)、`src/components`(389)、`src/ink`(96)、`src/schemas`(1)。
+- 进行中：`src/` 散件阶段（按 `check-coverage.py src` 取真实 top 降序推进）；累计 **1601/1902 文件 · 493,948/513,237 行 · 96.2%（按行数）**；`src/` 剩 **301 份**。
+- 子树分布（check-coverage.py src）：commands 40/207 · bridge 12/31 · cli 12/19 · keybindings 7/14 · constants 3/21 · skills 6/20 · context 2/9 · types 8/11 · tasks 4/12 · state 1/6 · vim 2/5 · buddy 2/6 · entrypoints 5/8 · memdir 4/8 · native-ts 3/4 · remote 3/4 · query 1/4 · server 1/3 · (根目录) 10/18；migrations 0/11 · plugins 0/2 · assistant 0/1 · voice 0/1 · moreright 0/1 · outputStyles 0/1 等下沿仍未启动（schemas 1/1 本批清空）。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。

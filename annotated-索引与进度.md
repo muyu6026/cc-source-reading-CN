@@ -6873,4 +6873,37 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 158 批）：10 个数据文件逐一对齐源文件；预检 107 锚点全过；annotate 十次 2 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1591 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1591/1902 文件、491,761/513,237 行、95.8%（按行数）；`src/` 还剩 311 份。
 
-**下一批候选（211–231 行档，单批约 10 份）**：`commands/install-github-app/ApiKeyStep.tsx`(231) · `types/generated/events_mono/growthbook/v1/growthbook_experiment_event.ts`(223) · `schemas/hooks.ts`(222) · `context/stats.tsx`(220) · `skills/bundledSkills.ts`(220) · `constants/outputStyles.ts`(216) · `types/command.ts`(216) · `commands/tag/tag.tsx`(215) · `server/directConnectManager.ts`(213) · `commands/install-github-app/ChooseRepoStep.tsx`(211)（`src/` 还剩 311 份；440 行以上已清零）
+### src batch 159: 211-231 line tier, 10 files (2187 src, 2298 annotated, 107 anchors)
+
+211–231 行档（接第 158 批下沿，取剩余 211 行以上前 10 份，210 行档就此清零）：GitHub App 安装向导的两步（填 Key / 选仓库）、GrowthBook 实验事件 protobuf 生成代码、hook 的 Zod schema 聚合、React 统计存储、打包技能注册中心、输出风格总表、命令系统类型全集、/tag 命令界面、直连会话管理器。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/install-github-app/ApiKeyStep.tsx`](annotated/src/commands/install-github-app/ApiKeyStep.tsx) | 231→242 | 10 | GitHub App 安装向导「填写 API Key」步骤：复用已有钥匙 / 新建钥匙 / OAuth 令牌三选项切换与提交 |
+| [`types/generated/events_mono/growthbook/v1/growthbook_experiment_event.ts`](annotated/src/types/generated/events_mono/growthbook/v1/growthbook_experiment_event.ts) | 223→233 | 10 | GrowthBook 实验分配事件 protobuf 生成代码：事件数据契约与 JSON 双向编解码 |
+| [`schemas/hooks.ts`](annotated/src/schemas/hooks.ts) | 222→233 | 11 | hook 的 Zod 校验 schema 聚合：命令 / 提示 / HTTP / 代理四类与 matcher 配置，专解循环依赖 |
+| [`context/stats.tsx`](annotated/src/context/stats.tsx) | 220→233 | 12 | React 统计存储与上下文：蓄水池采样直方图、五类统计钩子 |
+| [`skills/bundledSkills.ts`](annotated/src/skills/bundledSkills.ts) | 220→232 | 12 | 打包技能注册中心：定义类型、注册 / 取出、参考文件安全落盘 |
+| [`constants/outputStyles.ts`](annotated/src/constants/outputStyles.ts) | 216→225 | 9 | 输出风格总表与解析：内置讲解 / 学习型两种预设及优先级覆盖 |
+| [`types/command.ts`](annotated/src/types/command.ts) | 216→230 | 14 | 命令系统类型全集：本地 / 提示词 / JSX 三类命令、上下文与可用环境声明 |
+| [`commands/tag/tag.tsx`](annotated/src/commands/tag/tag.tsx) | 215→224 | 8 | /tag 命令界面：给当前会话加标签或切换移除，含确认弹窗 |
+| [`server/directConnectManager.ts`](annotated/src/server/directConnectManager.ts) | 213→225 | 12 | 直连会话管理器：WebSocket 对接后端、消息分发与权限回应 |
+| [`commands/install-github-app/ChooseRepoStep.tsx`](annotated/src/commands/install-github-app/ChooseRepoStep.tsx) | 211→221 | 9 | GitHub App 安装向导「选择仓库」步骤：复用当前仓库或手动输入地址 |
+
+要点：
+
+- **四种形态同批处理，锚点策略随之切换**：protoc 生成代码（growthbook）只挂类型 / 函数收尾行；Zod schema 聚合（hooks）用 `(1,'after')` 落文件头 `/* */` 块后、`(16,'after_block')` 落 `//` 段后；React Compiler 产物（ApiKeyStep / ChooseRepoStep / tag）只挂函数签名与语句行、绝不插进 JSX 内部；常规 TS 模块（stats / bundledSkills / outputStyles / command / directConnectManager）挂函数 / 类型声明与语句行。
+- **hook schema 把循环依赖拆到独立模块**：settings/types.ts 与 plugins/schemas.ts 互相引用，抽到 schemas/hooks.ts 后双方都从这一处 import，判别联合聚合四类 hook。
+- **stats 用三个 Map 分管三类指标**：标量、直方图（蓄水池采样加分位数）、集合（基数），getAll 时统一汇总成扁平字典。
+- **bundledSkills 的参考文件落盘是安全重头戏**：进程内一次性随机数加受限权限位加 O_NOFOLLOW 加独占创建，抵御符号链接攻击，且不在 EEXIST 时删后重试。
+- **directConnectManager 把 WebSocket 帧当 stream-json 处理**：逐行解析、过滤 control_request / keep_alive 等控制类消息，未知子类型必须回送错误以免服务端空等。
+
+踩坑：
+
+- **模板声明行 before 锚被自动外移**：outputStyles.ts 的 `(30,'before')` 原落在 `EXPLANATORY_FEATURE_PROMPT` 模板字符串起始行，annotate 判为「模板字符串内部」自动外移到模板前一行（`⟳` 30→30），落点通顺——中文注释在 const 之前、模板内容之外（grep 确认模板内中文计数为 0）。印证「模板声明行的 before 锚会被外移，出现 ⟳ 要回 grep 确认」。
+- **其余九份零 `⟳` 零 `⚠`**：块注释内部零中文（hooks 头部 `/* */` 经 `(1,'after')` 落块后、字段级 `/** */` 全部绕开），由 check-fidelity「块内禁中文」硬判据兜底。
+- **预检 107 锚点一次全过**（importlib 执行拦截 NameError、`ast.parse`、无重复锚点、文本无英文双引号与反斜杠），annotate 十次仅 1 处良性外移。
+
+流程账（第 159 批）：10 个数据文件逐一对齐源文件；预检 107 锚点全过；annotate 十次 1 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1601 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1601/1902 文件、493,948/513,237 行、96.2%（按行数）；`src/` 还剩 301 份。
+
+**下一批候选（197–210 行档，单批约 10 份）**：`bridge/trustedDevice.ts`(210) · `commands/rate-limit-options/rate-limit-options.tsx`(210) · `bridge/bridgePointer.ts`(210) · `constants/spinnerVerbs.ts`(204) · `keybindings/parser.ts`(203) · `bridge/bridgeEnabled.ts`(202) · `commands/bridge-kick.ts`(200) · `state/AppState.tsx`(200) · `vim/types.ts`(199) · `skills/bundled/skillify.ts`(197)（`src/` 还剩 301 份；440 行以上已清零）
