@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""第 140 批数据文件预检（单文件巨兽）。"""
+"""第 141 批数据文件预检（单文件巨兽）。"""
 import os
 import ast
 import importlib.util
@@ -7,7 +7,7 @@ import importlib.util
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ANNOT_DIR = os.path.join(ROOT, 'scripts', '_annot')
 BATCH = [
-    ('src/native-ts/yoga-layout/index.ts', 'src_native_ts_yoga_layout_index_ts'),
+    ('src/bridge/replBridge.ts', 'src_bridge_replBridge_ts'),
 ]
 VALID_POS = {'before', 'after', 'after_block'}
 errors = []

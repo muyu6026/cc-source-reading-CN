@@ -6233,3 +6233,34 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 164 锚点全过、0 块内违例（含升序、去重、英文双引号/反斜杠/换行、`before` 落块注释、`after` 落闭括号前六类新校验）；`annotate.py` 二次运行后零 `⚠`、一处 `⟳`；原文 2,578 行 → 批注版 2,742 行；`check-fidelity.py` 全仓 **1489 份 0 失败**；`check-links.py` 源码链接 2370 条加内链 708 条，0 失效；全仓 **1489/1902 文件、440,224/513,237 行、85%**；`src/` 还剩 **413 份 / 73,322 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758) · `skills/loadSkillsDir.ts`(1,086) · `commands/plugin/PluginSettings.tsx`(1,071)（全仓还剩 413 份；1,000 行档还有 `bridge/remoteBridgeCore.ts`、`native-ts/color-diff/index.ts`、`cli/transports/ccrClient.ts` 三份）。
+
+### src batch 141: bridge/replBridge.ts (2406 src / 2576 annotated / 170 anchors)
+
+第三头巨兽：`src/bridge/replBridge.ts`（2,406 行）。这是 REPL（本地终端会话）接入 remote-control 的桥——用户从手机或网页接管本地那个正在跑的 Claude Code 会话时，所有消息都经过这里：注册环境、创建会话、轮询工作项、连入口 WebSocket、双向搬运消息、断线重连、拆除。`bridgeMain.ts` 是独立桥（单会话进程，无 TUI），这份是 REPL 版（有 TUI、有初始历史、有标题推导）。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridge/replBridge.ts`](annotated/src/bridge/replBridge.ts) | 2,406→2,576 | 170 | REPL 侧远程控制桥：`initBridgeCore` 注册建会话、`doReconnect` 双策略重建、`onWorkReceived` 接传输、v1/v2 分叉、`doTeardownImpl` 拆除、`startWorkPollLoop` 轮询状态机 |
+
+要点：
+
+- **去 bootstrap 化的参数对象**：`BridgeCoreParams` 把 cwd/会话 ID/git/OAuth 全变成显式字段，好让不跑 `main.tsx` 的守护进程也能用。一批回调（`createSession`/`archiveSession`/`toSDKMessages`/`onAuth401`/`getPollIntervalConfig`）都是**注入**而不是 import，理由是同一条：这些模块会经 `config.ts → file.ts → permissions → sessionStorage → commands.ts` 把整个命令注册表加 React 树拖进 Agent SDK 打出来的包。`toSDKMessages` 的默认实现故意是**抛错**而不是返回空数组——静默返回空会让消息凭空消失。
+- **初始历史不走会话创建事件**：这类事件用 `STREAM_ONLY` 持久化，且发布时机早于 CCR 界面订阅，必丢。所以改为入口 WebSocket 连上之后再冲刷，用 `FlushGate` 拦住期间新产生的消息，防交错；`onStateChange('connected')` 要等冲刷完成才发。
+- **两个「会话作用域」的重置必须在任何 await 之前**（`doReconnect` 策略 2）：SSE 序号与入站 UUID 去重都是会话级的。带着旧序号过去，`lastSequenceNum` 会卡在高位，下次重连发 `from_sequence_num=旧值` 而新流从 1 开始 → 中间事件静默全丢。更隐蔽的是顺序问题：若先把 `currentSessionId` 换成 B、却在 `await writeBridgePointer` 之后才重置序号，就存在「handle 返回 B 的会话 ID 配 A 的序号」的窗口——这个组合恰好能通过守护进程的会话 ID 校验，等于让校验失效。
+- **`v2Generation` 专治一种判反了的竞态**：`transport` 为 null 时连来两次工作项，两次都 `registerWorker`（服务端 epoch 递增），**后**解析出的那次才是对的；但「`transport !== null`」这个判断会保留先解析的（旧 epoch）、丢弃后解析的。代际号不看 transport 状态，能独立判出谁新。
+- **`doReconnect` 的四道中止检查**：在 `stopWork` await、`registerBridgeEnvironment` await、`archiveSession` await、`createSession` await（最长 15 秒）之后各有一次 `pollController.signal.aborted` 判定。少一处就会在用户已经退出时继续重建、或留下泄漏的环境/会话。另有两处「轮询循环已自行恢复」的让位判断（比较 `currentWorkId` 是否被改、`transport` 是否已被装上）。
+- **v1/v2 只在传输与鉴权上分叉**：v1 是 `HybridTransport`（WS 读 + POST 写，优先 OAuth，因为有标准刷新流程）；v2 是 SSE 读 + CCR 写，**强制 JWT**（`register_worker` 要校验 `session_id` 声明，OAuth 令牌不带）。开关来自服务端工作密钥里的 `use_code_sessions`，环境变量只是内网强制覆盖。
+- **拆除的顺序是排过的**：发结果消息 → 并行 `stopWork` + `archiveSession` → 关传输 → 注销环境 → 清指针。`transport.write` 只入队（上传器在入队即 resolve），中间的 200–500ms 就是结果 POST 的排空窗口；反过来先关再归档只能靠那个没人 await 的 3 秒宽限期，`forceExit` 可能在 POST 中途杀 socket。常驻（perpetual）模式的拆除是**纯本地行为**——不发结果、不 stopWork、不关传输，让服务端按 300 秒租约自己把工作项退回 pending。
+- **轮询循环的状态机**：满容量时进「心跳模式」（只心跳不轮询），五个退出条件（轮询截止、鉴权失败、容量唤醒、配置被关、中止）；退出后按原因决定是 `continue` 还是付一次睡眠。放弃阈值是 15 分钟**时长**而不是错误次数（指数退避下两者不成正比）。另有「进程挂起检测」——满容量睡眠超期 60 秒以上即判定合盖/STOP，下一轮强制快轮询一次。
+- **`onHeartbeatFatal` 的存在理由是一条实测故障**：工作项 JWT 过期后传输彻底没用，没有这个回调会走满 10 分钟退避，而租约只有 300 秒 → 约 25 分钟死窗口。
+
+踩坑：
+
+- 数据文件里连续写错三处括号：`(574, ...']`、`(651, ...']`、以及第 49 行整体错位。`ast.parse` 一次只报第一个，所以改一处跑一次——批量写长列表时建议先用 grep 校验 `\],$` 结尾的行。
+- **`before` 锚点不能指向块注释内部的行**（与第 140 批同类坑）：本批 `(107, 'before')` 想挂在 `POST /v1/sessions. Injected because ...` 那行前，而它在 `/** ... */` 里。预检 `bslot` 规则拦下，改到 `createSession:` 字段行（L119）。
+- 3 个 `⟳` 移位：`557→551`、`1115→1111`、`1176→1174`，都是落在英文注释段中部被挪到段首。前两处与已有锚点同段落，产物读起来是「中文总述两条 + 英文原注 + 代码」，可接受。
+- `check-fidelity.py` 全仓 **1490 份 0 失败**；`check-links.py` 源码链接 2371 条加内链 709 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 170 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、三处 `⟳`；原文 2,406 行 → 批注版 2,576 行；`check-fidelity.py` 全仓 **1490 份 0 失败**；`check-links.py` 源码链接 2371 条加内链 709 条，0 失效；全仓 **1490/1902 文件、442,630/513,237 行、86%**；`src/` 还剩 **412 份 / 70,915 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009)（全仓还剩 412 份；1,000 行档还有 `native-ts/color-diff/index.ts`、`cli/transports/ccrClient.ts`）。
