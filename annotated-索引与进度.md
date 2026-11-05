@@ -6264,3 +6264,33 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 170 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、三处 `⟳`；原文 2,406 行 → 批注版 2,576 行；`check-fidelity.py` 全仓 **1490 份 0 失败**；`check-links.py` 源码链接 2371 条加内链 709 条，0 失效；全仓 **1490/1902 文件、442,630/513,237 行、86%**；`src/` 还剩 **412 份 / 70,915 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`commands/plugin/ManagePlugins.tsx`(2,215) · `entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009)（全仓还剩 412 份；1,000 行档还有 `native-ts/color-diff/index.ts`、`cli/transports/ccrClient.ts`）。
+
+### src batch 142: commands/plugin/ManagePlugins.tsx (2215 src / 2300 annotated / 84 anchors)
+
+第四头巨兽：`src/commands/plugin/ManagePlugins.tsx`（2,215 行）。`/plugin` 命令的主界面——一个组件承担 11 个视图（列表、详情、配置、两种确认页、被下架详情、失败插件详情、MCP 三级子页），管理插件与 MCP 服务器。整个文件是 **React Compiler 产物**（`s_0`/`item_0`/`error_0` 这类数字后缀重命名、`newStates[index]!` 非空断言）。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/plugin/ManagePlugins.tsx`](annotated/src/commands/plugin/ManagePlugins.tsx) | 2,215→2,300 | 84 | 插件管理主界面：11 视图状态机、unifiedItems 五源合并与分组保序排序、四动作权限闸门、两种确认页、MCP 子页分派、斜杠命令直连与自动动作 |
+
+要点：
+
+- **`ViewState` 是 11 变体联合**：三个字符串字面量加八个带 `type` 的对象。带参数的几个（options schema、cleanup 体积、flagged/failed 条目、MCP 客户端与工具）把上下文直接嵌进状态，避免开一堆并列 `useState` 让它们失步。
+- **`unifiedItems` 的五源合并**（本文件最复杂的一段）：插件、插件内嵌 MCP（按 `plugin:插件名:服务器名` 命名约定识别，第三段之后全部拼回名字因为服务器名本身可能含冒号）、独立 MCP（排除 `ide` 与 `plugin:` 前缀）、加载失败的插件（**从错误列表反推**——它们不在 `loadAllPlugins` 结果里，否则用户会看到「设置里有、界面里没有」）、被下架插件。合并的硬约束是「插件与其子 MCP 必须相邻」，所以不能整组排序：先切成「插件 + 紧随的缩进 MCP」组，组内保序、组间按插件名排，独立 MCP 再单独排。
+- **两个 ref 而非 state**：`hasAutoNavigated` 防止用户离开后又被拽回详情页（父组件的 `targetPlugin` 永不清空）；`pendingAutoActionRef` 存「跳转之后要执行的动作」（`/plugin uninstall X`），被一个依赖 `viewState`/`selectedPlugin` 的一次性 effect 消费，用完即清——不清会重复卸载。
+- **`handleSingleOperation` 的两层权限闸门**：内置插件只能启停（不许更新卸载）；托管作用域只能更新（启停卸载都拒）。**enable/disable 刻意不传 scope**：此处的 `pluginScope` 来自 `installed_plugins.json`（文件缓存位置），与设置里的作用域可能不一致，传进去会触发跨作用域保护性拒绝，让下游自动探测才对。
+- **卸载的三道前置**：① 在 `.claude/settings.json`（团队共享）里启用 → 转到「只在我本地禁用」确认页，因为直接卸载会影响其他协作者；判定必须**直接读设置文件**，因为 `pluginScope` 可能是 `user` 而同一插件同时被项目级启用。② 有 `CLAUDE_PLUGIN_DATA` 且是最后一个安装作用域 → 才问「要不要连数据一起删」；多作用域时下游本就不删，再弹窗说「删」却什么都不删是在骗用户。③ 从未真正安装过（只在 `enabledPlugins` 留了记录）→ 到三个可编辑设置源里抹掉那条记录。
+- **两种确认页用不同的输入机制，各有理由**：`confirm-project-uninstall` 用 `useKeybindings`（y/esc）；`confirm-data-cleanup` **必须用原始 `useInput`**——`Confirmation` 上下文把回车映射成 `confirm:yes`，那会让「回车」变成删数据的破坏性默认（而界面文案只写 y 删、n 留）；且这里 `n` 与 `esc` 是**两个不同动作**（保留数据 vs 取消），键位系统里两者都映射成 `confirm:no`。
+- **`handleSingleOperation` 的 latest-ref**：它每次渲染都是新函数，直接进 effect 依赖会让 effect 每渲染都跑；用 ref 每渲染更新、effect 只依赖 `viewState` 与 `selectedPlugin`。
+- **操作完不按「是不是 enable」判断要不要弹配置**，而是重读设置看插件此刻是否启用——安装流程本身会启用插件，所以从菜单进来时第一项显示的往往是「禁用」。
+
+踩坑：
+
+- 括号 `],$` 前置扫描（第 141 批的教训）这次零命中，84 个锚点一次过预检。
+- **JSX 子元素区专项扫描**：本批是 TSX，注释若落进 `<Box>` 与 `</Box>` 之间会变成 JSX 文本节点，而 `check-fidelity` 因「剥注释行再比对」查不出来。用「插入点前一行以 `>` 收尾且后一行以 `<` 开头」的判据扫了全部 84 条，**零命中**——因为锚点全部落在语句行（`const`/`return`/`if`）与函数签名之前。
+- 产物末尾的 sourceMappingURL（本文件 232,956 字符）按惯例被 `annotate.py` 替换成两行说明，所以「插入注释 85 行」比锚点数多 1。
+- `check-fidelity.py` 全仓 **1491 份 0 失败**；`check-links.py` 源码链接 2372 条加内链 710 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 84 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；原文 2,215 行 → 批注版 2,300 行；`check-fidelity.py` 全仓 **1491 份 0 失败**；`check-links.py` 源码链接 2372 条加内链 710 条，0 失效；全仓 **1491/1902 文件、444,845/513,237 行、86%**；`src/` 还剩 **411 份 / 68,700 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000)（全仓还剩 411 份；`cli/transports/ccrClient.ts`(999) 紧随其后，之后是 900 行档）。
