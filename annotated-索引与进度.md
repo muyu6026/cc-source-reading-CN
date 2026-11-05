@@ -6352,3 +6352,33 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 110 锚点全过、0 块内违例（首次 112，两处合并后 110）；`annotate.py` 零 `⚠`、零 `⟳`；原文 1,758 行 → 批注版 1,868 行；`check-fidelity.py` 全仓 **1493 份 0 失败**；`check-links.py` 源码链接 2374 条加内链 712 条，0 失效；全仓 **1493/1902 文件、448,492/513,237 行、87%**；`src/` 还剩 **409 份 / 65,051 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838)（全仓还剩 409 份；1,000 行档在本批之后只剩五份，之后进 838/802/801 的 800 行档）。
+
+### src batch 145: skills/loadSkillsDir.ts (1086 src / 1188 annotated / 102 anchors)
+
+第七头巨兽：`src/skills/loadSkillsDir.ts`（1,087 行）。技能装载器全部逻辑所在——**双轨目录**（新式 `skills/` 只认目录格式，遗留 `commands/` 两种都认）、五路并行加载、按真实路径去重、路径条件技能的延迟激活、会话内动态发现。装载器本身是 `memoize` 的，按工作目录做键。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`skills/loadSkillsDir.ts`](annotated/src/skills/loadSkillsDir.ts) | 1,086→1,188 | 102 | 技能装载：六来源、前置元数据 18 个字段、提示词生成闭包、去重与优先级、条件技能、动态发现、MCP 注册间接层 |
+
+要点：
+
+- **`getPromptForCommand` 是整份文件的心脏**，四步顺序不能换：加目录前缀 → 参数替换 → 占位符替换 → 决定要不要执行内联 shell。参数替换必须排在占位符之前，因为参数值里可能本身就含占位符文本。
+- **安全边界只有两处判断**：① `loadedFrom !== 'mcp'` —— MCP 技能来自远端、不可信，正文里的内联 shell 一律不执行；② 目录发现时查 `isPathGitignored`，挡住 `node_modules/pkg/.claude/skills` 那种被默默加载的技能。两处的注释都写明「真正的安全边界是调用时的信任对话」，代码本身只是止损。
+- **内联 shell 的免弹窗靠注入权限规则**：`getAppState` 被包了一层，把技能声明的 `allowed-tools` 塞进 `alwaysAllowRules.command`，于是技能自己声明的工具范围内执行 shell 不逐条弹窗——这是「技能自带权限声明」的落地机制。
+- **去重按 `realpath` 而不是 inode**，注释给了两个具体失败场景：虚拟文件系统/容器里 inode 恒为 0，另一类文件系统会丢精度（附了 issue 链接）。流程是**先并行算身份、再同步去重**，因为解析是异步的、先到先得的判定是同步的。
+- **合并顺序即优先级**：组织统管 → 用户级 → 项目级（由深到浅）→ 附加目录 → 遗留命令。去重时先到先得；动态发现则反着来——浅的先写、深的覆盖，于是「离文件近的优先」在 Map 上自动成立。
+- **条件技能是「分流 + 搬家」**：带 `paths` 前置元数据且未激活的技能不进返回值，只进待激活表；命中路径时从待激活表**删掉**、写进动态表、名字记进存活集合（存活集合要跨缓存清理，否则每次清缓存都会退回待激活）。匹配用忽略库，与项目指令文件的条件规则同一套语义。
+- **`--bare` 的语义被注释钉死**：跳过全部自动发现，只加载显式 `--add-dir`，但技能锁依然生效——**精简模式不是策略旁路**。
+- **尾部那三十行是依赖图的注脚**：MCP 技能模块不能直接动态引入本文件（一条边扇成多处环），也不能用变量拼的说明符（能过依赖检查，但打包后运行时解析不到），于是改用「叶子注册表」——本文件写一次、幂等。
+
+踩坑：
+
+- 数据文件里一处引号未闭合（第 75 行锚点文本），`ast.parse` 直接报出，改一行即过。
+- 首轮产物有一处落在 `}` 与 `} catch (error) {` 之间——块末注脚扫描（正则里加了 `catch` 分支）抓到。挪到 `try {` 之前后语义更贴切：**兜住单个技能意外的就是这个 try，不是那个 catch**。
+- 两处英文注释块（`git check-ignore` 那段 6 行、`ignore() throws on empty strings` 那段 4 行）内都有诱人的锚点位置，`bslot` 判据提前避开了——第 144 批踩过的坑本批零复发。
+- 三个函数名带 `Skills`、路径含 `skills/`，但都不含 `bash`/`shell`/`powershell` 子串，`annotate.py` 可直接跑，不走间接 runner。
+
+流程账：1 个数据文件对齐源文件；预检 102 锚点全过、0 块内违例；`annotate.py` 两次均零 `⚠`、零 `⟳`；原文 1,086 行 → 批注版 1,188 行；`check-fidelity.py` 全仓 **1494 份 0 失败**；`check-links.py` 源码链接 2375 条加内链 713 条，0 失效；全仓 **1494/1902 文件、449,578/513,237 行、87%**；`src/` 还剩 **408 份 / 63,964 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838) · `commands/plugin/BrowseMarketplace.tsx`(802)（全仓还剩 408 份；1,000 行档只剩四份，之后是 838/802/801 的 800 行档）。
