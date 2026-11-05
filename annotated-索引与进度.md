@@ -6643,3 +6643,39 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：7 个数据文件逐一对齐源文件；预检首轮 309 锚点报 3 项（1 处解构劈开、2 处块注释内部），修完再删减模板内 10 条与重复 2 条，最终 297；`annotate.py` 七次共 3 处 `⟳`（ultraplan 一处注释段中部、relay 一处注释段中部、schedule 一处模板外移），逐处确认良性；两项专项扫描抓 8 处并全部处置，复扫零输出；`check-fidelity.py` 全仓 **1534 份 0 失败**（较上批 +7）；`check-links.py` 源码链接 2409 条加内链 720 条，0 失效；全仓 **1534/1902 文件、474,139/513,237 行、92.4%**；`src/` 还剩 **368 份 / 39,098 行**。
 
 **下一批候选（370–442 行档，单批约 7 份）**：`types/permissions.ts`(441) · `cli/update.ts`(422) · `remote/SessionsWebSocket.ts`(404) · `screens/ResumeConversation.tsx`(399) · `types/textInputTypes.ts`(387) · `bridge/createSession.ts`(384) · `commands/copy/copy.tsx`(371)（全仓还剩 368 份；500 行以上已清零）
+
+### src batch 153: 339-363 line tier, 7 files (2444 src, 2653 annotated, 207 anchors)
+
+339–363 行档（紧接第 152 批的 370–475 档之下沿）：插件类型契约、mcp 子命令处理器、插件选项对话框、远端会话管理器、入口初始化、默认键位大表、内置键位技能。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`types/plugin.ts`](annotated/src/types/plugin.ts) | 363→395 | 32 | 插件类型契约：内置插件定义四件套、PluginError 六类判别联合、错误消息翻译分派 |
+| [`cli/handlers/mcp.tsx`](annotated/src/cli/handlers/mcp.tsx) | 362→394 | 31 | mcp 子命令处理器：add/remove/list/get 分派、StdinPrefixedTransport、配置读写合并、OAuth 与 headers |
+| [`commands/plugin/PluginOptionsDialog.tsx`](annotated/src/commands/plugin/PluginOptionsDialog.tsx) | 357→376 | 18 | 插件选项对话框：React Compiler 产物的表单状态、启用开关、设置项渲染、提交校验 |
+| [`remote/RemoteSessionManager.ts`](annotated/src/remote/RemoteSessionManager.ts) | 343→373 | 30 | 远端会话管理器：连接建立与重连、句柄缓存、心跳超时、错误三级分类 |
+| [`entrypoints/init.ts`](annotated/src/entrypoints/init.ts) | 340→373 | 33 | 入口初始化：配置与特性开关装配、单例就位、子命令路由前准备、信号与退出清理 |
+| [`keybindings/defaultBindings.ts`](annotated/src/keybindings/defaultBindings.ts) | 340→370 | 30 | 默认键位大表 DEFAULT_BINDINGS：按上下文分组、平台差异、VT 模式检测、特性开关条件注入 |
+| [`skills/bundled/keybindings.ts`](annotated/src/skills/bundled/keybindings.ts) | 339→372 | 33 | 内置键位技能：把键位排查与新增指南打包成技能提示词，与 defaultBindings 互为补充 |
+
+要点：
+
+- **插件类型契约是「形状」而非「实现」**：types/plugin.ts 把内置插件定义、判别联合错误、错误消息翻译三者分离；错误穷尽六种子类，翻译函数靠判别字段分派，新增类型编译器会逼你补分支。
+- **mcp 处理器把传输细节藏进辅助类**：StdinPrefixedTransport 把 MCP 协议流量从标准输入抽离，命令处理器只管读写配置与分派动作，不直接碰套接字。
+- **插件选项对话框是 React Compiler 产物**：满屏 `_c(n)` 记忆槽与 `t1..tN` 临时变量，锚点只能落在函数签名与语句收尾，绝不能插进 JSX 或 `_c` 调用内部——这正是本文件锚点密度最低（18）的原因。
+- **远端会话管理器的本质是可重连的连接**：连接建立、句柄缓存、心跳与超时、错误三级分类（网络/协议/业务）是它和本地会话最不同的地方。
+- **入口初始化「先装配后路由」**：配置与特性开关先就位，各类单例再装配，最后才进子命令路由；信号与退出的清理函数必须成对注册，否则会漏掉某条清理路径。
+- **默认键位是「真相源」大表**：按上下文分组，平台差异（Windows alt+v vs 其余 ctrl+v）、运行时能力（VT 模式检测）、特性开关（KAIROS / QUICK_SEARCH / MESSAGE_ACTIONS）三路条件注入，都用展开运算符合并进同一张表。
+- **meta/super 双绑是给 kitty 协议终端留的后路**：同一动作绑两个修饰键，终端不支持其中一个时另一个仍能触发，避免「绑了却按不出来」。
+- **内置键位技能把文档当数据**：键位冲突排查与新增指南打包成技能提示词，与 defaultBindings.ts 的真相源互为补充，改键位时两边要一起看。
+
+踩坑：
+
+- **defaultBindings.ts 三处展开表达式劈开语句**：`...(feature('KAIROS') || feature('KAIROS_BRIEF') ? {...} : {})` 这类条件注入，初始锚点落在 `?` 之前的开行（L45 / L52 / L268），把对象字面量从中间切开；check-fidelity 报「中文批注插在了未结束的多行表达式中间，语句被劈开」。处置：全部挪到展开闭合行（L47 / L59 / L295，均以 `},` 或 `})` 结尾）。
+- **defaultBindings.ts 一处常量声明多行劈开**：`const SUPPORTS_TERMINAL_VT_MODE =`（源行 21–25 跨五行）的 `after` 锚点原本落在 `=` 之后的开行，把表达式切开；挪到闭合行 L25（以 `))` 结尾）才过关。
+- **defaultBindings.ts 一处预检升序违规**：挪动后 L295 的锚点在数据文件里排到了 L290 之前，触发 `[order]`。处置：把 `L290` 条目调到 `L295` 之前（两者行号本已升序 290<295，只是列表位置写反）。
+- **mcp.tsx 与 init.ts 各一处 `⟳` 自动外移**（mcp L187→188、init L108→109），落在模板字符串 / 注释段中部，逐处确认落点仍通顺，良性。
+
+流程账：7 个数据文件逐一对齐源文件；预检首轮 207 锚点报 5 项（defaultBindings 三处展开劈开 + 一处常量多行劈开 + 一处升序违规），逐一修复后仍 207；`annotate.py` 七次共 2 处 `⟳`（mcp 一处、init 一处），零 `⚠`；两项专项扫描（块末注脚、解构劈开）首轮抓 defaultBindings 多处并全部处置，复扫零输出；`check-fidelity.py` 全仓 **1541 份 0 失败**（较上批 +7）；`check-links.py` 源码链接 2416 条加内链 721 条，0 失效；全仓 **1541/1902 文件、476,792/513,237 行、92.9%**；`src/` 还剩 **361 份 / 36,806 行**。
+
+**下一批候选（370–442 行档之上沿，单批约 7 份）**：`types/permissions.ts`(441) · `cli/update.ts`(422) · `remote/SessionsWebSocket.ts`(404) · `screens/ResumeConversation.tsx`(399) · `types/textInputTypes.ts`(387) · `bridge/createSession.ts`(384) · `buddy/CompanionSprite.tsx`(371) · `commands/copy/copy.tsx`(371) · `bridge/replBridgeTransport.ts`(370) · `native-ts/file-index/index.ts`(370)（全仓还剩 361 份；500 行以上已清零）
