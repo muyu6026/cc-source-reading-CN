@@ -6324,3 +6324,31 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 151 锚点全过、0 块内违例（首次 153，合并两处后 151）；`annotate.py` 两次均零 `⚠`、零 `⟳`；原文 1,889 行 → 批注版 2,040 行；`check-fidelity.py` 全仓 **1492 份 0 失败**；`check-links.py` 源码链接 2373 条加内链 711 条，0 失效；全仓 **1492/1902 文件、446,734/513,237 行、87%**；`src/` 还剩 **410 份 / 66,810 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999)（全仓还剩 410 份；之后是 `commands/plugin` 的 838/802 两份与 `cli/transports/WebSocketTransport.ts`(801)，800 行档清完就进 700 行档）。
+
+### src batch 144: bootstrap/state.ts (1758 src / 1868 annotated / 110 anchors)
+
+第六头巨兽：`src/bootstrap/state.ts`（1,759 行）。整份文件只有一个对象——`STATE`，约一百个字段的进程级可变单例，外加一百多个 getter/setter。**没有任何业务逻辑，也没有任何订阅机制**：界面侧靠 getter 现读，靠组件自己的调度去重渲染。原注释密度全仓最高，三处大写警告（`DO NOT ADD MORE STATE HERE` / `ALSO HERE` / `AND ESPECIALLY HERE`）本身就是这份文件的设计说明。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bootstrap/state.ts`](annotated/src/bootstrap/state.ts) | 1,758→1,868 | 110 | 全局单例：会话身份、成本与耗时口径、遥测计数器、路径不变式、四个 beta 头锁存、滚动排空、技能与团队追踪 |
+
+要点：
+
+- **它是 import DAG 的叶子，所有跨模块需求都要绕开 import**。文件里四种绕法各有一处注释说明：① 会话切换信号放模块作用域、由调用方自己 `subscribe`（否则要 import 监听者）；② 会话内 cron 任务的类型**就地定义**而不从 cron 模块引入；③ 项目指令文件内容缓存到状态里，断掉「分类器 → 指令文件 → 文件系统权限 → 分类器」这个环；④ `waitForScrollIdle` 手写轮询，因为隔离规则禁止从工具层引入 `sleep`。看懂这四条，就看懂了为什么这份文件里有那么多看着该抽出去的东西。
+- **一整族字段的共同目的只有一个：别击穿服务端提示缓存**。四个 beta 头（自动模式、快速模式、缓存编辑、清思考）都是「粘性锁存」——一旦开启就一直发，因为头部本身变化会让 5–7 万 token 的提示缓存失效；`promptCache1hEligible` 首次求值即锁存，同理；`pendingPostCompaction` 让压缩后第一次成功调用能被打标，从而把「压缩导致的未命中」与「TTL 过期」区分开。
+- **路径不变式**：所有路径 setter 都过 `normalize('NFC')`，其中 `originalCwd` 还先 `realpathSync` —— 不解析软链接的话，同一目录的软链路径与真实路径会被当成两个项目，会话存储就分叉了。`realpath` 失败时退回原始路径，兜底的是云存储挂载那种按分量 stat 的虚拟文件系统。
+- **两种「返回值保持引用稳定」的技巧**（都写在注释里）：`getSlowOperations()` 无数据时返回模块级 `EMPTY_SLOW_OPERATIONS`，让调用方的 setState 靠 `Object.is` 直接跳过；有数据但一条都没过期时**不新建数组**，保持原引用，于是每 500ms 的轮询不会重渲染。前提也写清楚了——写入函数是先整体替换再 push，所以交出去的数组永不被就地改。
+- **两处调度技巧**：交互时间戳默认只打脏标记、由渲染循环在下一帧统一 `Date.now()`（每次按键取时间是纯浪费），但副作用回调里必须传 `immediate`，否则用户发呆等权限弹窗时永远等不到下一帧；滚动排空用 150ms 去抖 + `unref()`，后台定时任务查旗标直接跳过，把事件循环让给渲染帧。
+- **命名被工具链反向约束的少见样本**：字段叫 `userMsgOptIn` 是为了避开构建期字符串过滤器排除的两个子串（`BriefTool`、`SendUserMessage`），注释直接把两个子串写出来——名字不是为了表意最优，而是为了过构建。
+- **口径分离**：总耗时区分「含重试」与「不含重试」；当轮 token 用量用轮开始时的快照做差；成本累加时每模型用量**整体替换**（那是快照）而总额才累加。
+
+踩坑：
+
+- **JSDoc 块注释内部仍是雷区**：`updateLastInteractionTime` 的文档注释跨 12 行，第二条锚点原本落在 `Pass immediate = true when...` 那一行，预检 `bslot` 直接拦下（`before` 落在块注释内部）。改为并入第一条 `before` 锚点，110 锚点。这是第 140、141 批同类坑的第三次出现——**判据稳定有效：目标行以 `*` 或 `*/` 开头即块注释内部**。
+- 第 143 批新增的「块末注脚」扫描本批**零命中**：110 条里有大量注释落在对象属性之间（`...(...)` 条件展开、字段声明之间），但后一行没有一个是 `}`/`),`/`]` 这类收尾行。
+- 三处内联大写警告（`DO NOT ADD MORE STATE HERE` 等）都在断言行之前，`before` 插入后中文批注紧贴英文警告，读起来是「警告 + 为什么」的配对。
+
+流程账：1 个数据文件对齐源文件；预检 110 锚点全过、0 块内违例（首次 112，两处合并后 110）；`annotate.py` 零 `⚠`、零 `⟳`；原文 1,758 行 → 批注版 1,868 行；`check-fidelity.py` 全仓 **1493 份 0 失败**；`check-links.py` 源码链接 2374 条加内链 712 条，0 失效；全仓 **1493/1902 文件、448,492/513,237 行、87%**；`src/` 还剩 **409 份 / 65,051 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838)（全仓还剩 409 份；1,000 行档在本批之后只剩五份，之后进 838/802/801 的 800 行档）。
