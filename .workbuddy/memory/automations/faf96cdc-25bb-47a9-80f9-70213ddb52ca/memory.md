@@ -995,3 +995,12 @@
 - 新坑（**已写进预检，成为第 17 条判据 `[split]`**）：`before` 落在 `} = await ...` 这类**解构续行**上，中文注释会被塞进模式与赋值之间——语法合法（注释可出现在任何空白处）所以 fidelity 与语法检查都过不了这一关，只有块末注脚扫描能看出来。判据：目标行命中 `^[}\])]\s*=` 即报错。首发两例都在 `terminalSetup.tsx`（属性列表与 defaults 的两次解构）。
 - 另一条口径提醒：`buddy/sprites.ts` 的 `{E}` 是**源码字符串里的字面量占位符**，批注里不能写同样的花括号形式，否则读者分不清。
 - 下一批目标（470–510 行档，单批约 7 份）：commands/bridge/bridge.tsx(509) · memdir/memdir.ts(507) · keybindings/validate.ts(498) · vim/transitions.ts(490) · tasks/LocalMainSessionTask.ts(479) · skills/bundled/updateConfig.ts(475) · query/stopHooks.ts(473)；500 行以上已清零。
+
+## 第 151 批（2026-11-05）：470–510 行档七件套（远程控制命令 + 记忆目录提示词 + 键位校验 + vim 状态机 + 后台主会话 + 配置技能 + 停止钩子）
+- 状态：完成并推送，commit `25c2118`（28cca17..25c2118）。
+- 本批 7 份：`commands/bridge/bridge.tsx`(509→548, 38)、`memdir/memdir.ts`(507→551, 44)、`keybindings/validate.ts`(498→528, 30)、`vim/transitions.ts`(490→524, 34)、`tasks/LocalMainSessionTask.ts`(479→523, 44)、`skills/bundled/updateConfig.ts`(475→490, 15)、`query/stopHooks.ts`(473→510, 37)。合计 3,431 源行 / 3,674 批注版 / 242 锚点。
+- 主线：① **预检的顺序就是设计**——远程控制先策略、再禁用原因、最后版本与凭据；策略必须等加载完再判（缓存未就绪读到旧值会给误导性拒绝）；预检分支必须与连接侧逐字一致（助手模式常驻只能走旧版）。② **双上限分开报**——记忆入口受行数与字节双重约束，字节按截断前原文计量（切完再量会低估），切字节回退到最后换行。③ **构建器只读不建目录**，团队目录挂在自动目录下所以只 mkdir 一次。④ **重复键必须回原始字符串查**——解析器静默取最后一个，信息已丢。⑤ **零是动作不是计数前缀**；两级计数相乘；替换字符态收到空输入要取消（否则退格变成删字符）。⑥ **后台任务的输出绝不能写主会话那份记录**（清空后重链会污染）；中止要复用调用方控制器；通知的检查与置位必须同一笔状态更新。⑦ **模板字符串里的批注只能贴声明前**——配置技能整份是提示词，块内插注释会变提示词内容。⑧ **阻断错误与阻止继续是两级**，后者优先；团队成员双链（任务完成 → 空闲）任一条要求停就立即返回。
+- 校验：预检 242 锚点一次全过；`annotate.py` 七次共 **4 处 `⟳`**（全在 updateConfig，全部是模板字符串外移，全良性）、零 `⚠`；专项扫描首轮抓 3 处块末注脚并全部处置，复扫零输出；fidelity **1527 份 0 失败**；links 2409 源链 + 720 内链 0 失效。全仓 **1527/1902 文件 / 470,926 行 / 91.8%**；src 剩 375 份 / 42,311 行。
+- 新坑（**块末注脚的第三种形态**）：**描述下一分支却站在上一分支末尾**——`} else if` 之前插的注释会被读成上一分支的总结。本轮 `validate.ts` 两处都是这个形态（196 与 220），处置是挪进 `} else if (...) {` 之后。第二种是 `return` 与 `} catch` 之间（stopHooks 456），挪进 catch 块内。**判据升级思路**：专项扫描里凡 `[TAIL]` 命中 `} else` / `} catch` / `{` 的，逐条看文案是否讲的是「接下来的分支」。
+- 另一条口径记录：`bridge.tsx` 末尾无换行（sourcemap 替换成两行注释后不带换行），`split(chr(10))-1` 会少算 1 行；用 `splitlines()` 才与 annotate 报的 548 一致。**交叉校验脚本要用 splitlines。**
+- 下一批目标（440–475 行档，单批约 7 份）：keybindings/loadUserBindings.ts(472) · commands/ultraplan.tsx(471) · history.ts(464) · bridge/bridgeMessaging.ts(461) · upstreamproxy/relay.ts(455) · skills/bundled/scheduleRemoteAgents.ts(447) · entrypoints/agentSdkTypes.ts(443)。
