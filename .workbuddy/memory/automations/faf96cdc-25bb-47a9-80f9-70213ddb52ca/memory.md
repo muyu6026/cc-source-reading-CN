@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 144 批（2026-11-05）：bootstrap/state.ts 巨兽（1,758 行，110 锚点）
+
+- 状态：完成并推送，commit `44cde3d`。
+- 内容：全局可变单例 `STATE`（约百字段 + 一百多个 getter/setter，**无订阅机制**，界面靠 getter 现读）。锚点分层：会话身份与目录不变式、成本与耗时口径、遥测八计数器、四个 beta 头锁存、滚动排空、技能/团队/cron 追踪、测试重置。
+- 四条主线（都是「为什么放在这里」的答案）：① **bootstrap 是 import DAG 叶子**，四种绕法——会话切换信号放模块作用域由调用方 `subscribe`、会话 cron 任务类型**就地定义**、项目指令内容缓存断掉「分类器→指令文件→权限→分类器」环、`waitForScrollIdle` 手写轮询（隔离规则禁止引入 `sleep`）；② **一族字段只为不击穿服务端提示缓存**——自动模式/快速模式/缓存编辑/清思考四个 beta 头都是粘性锁存（头部变化会让 5–7 万 token 缓存失效），`promptCache1hEligible` 首次求值即锁存，`pendingPostCompaction` 读一次即消费；③ **路径不变式**——所有 setter 过 `normalize('NFC')`，`originalCwd` 先 `realpathSync`（不解析软链会让同一目录被当成两个项目），失败退回原始路径（云存储挂载按分量 stat 会 EPERM）；④ **两处引用稳定技巧**——`getSlowOperations` 空态返回模块级 `EMPTY_SLOW_OPERATIONS` 让 setState 靠 Object.is 跳过，有条目但没过期时**不新建数组**保持原引用（每 500ms 轮询不重渲染）。
+- 调度两处：交互时间戳默认只打脏标记、渲染循环下一帧统一 `Date.now()`，但 useEffect 里必须传 `immediate`（否则用户发呆等弹窗永远等不到下一帧）；滚动排空 150ms 去抖 + `unref()`。
+- 命名受工具链反向约束的少见样本：字段叫 `userMsgOptIn` 是为避开构建期字符串过滤器排除的两个子串（`BriefTool`/`SendUserMessage`）。
+- 校验：预检 110 锚点全过；annotate 零 `⚠` 零 `⟳`；fidelity 1493 份 0 失败；links 2375+713 0 失效。
+- **坑（同类第三次）**：JSDoc 块注释内部——`updateLastInteractionTime` 的文档注释跨 12 行，第二条锚点落在 `Pass immediate = true...` 行，`bslot` 拦下，并入第一条 `before`（112→110）。判据稳定：**目标行以 `*` 或 `*/` 开头即块注释内部**。第 143 批新增的「块末注脚」扫描本批零命中（虽大量注释落在对象属性之间，但后一行无一是 `}`/`),`/`]`）。
+- 进度：全仓 1493/1902 文件、448,492/513,237 行、87%；src 剩 409 份 / 65,051 行。
+- 下批目标：`skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838)。
+
 ## 第 143 批（2026-11-05）：entrypoints/sdk/coreSchemas.ts 巨兽（1,889 行，151 锚点）
 
 - 状态：完成并推送，commit `9dcfd99`。
