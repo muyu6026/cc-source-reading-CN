@@ -1,5 +1,17 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 143 批（2026-11-05）：entrypoints/sdk/coreSchemas.ts 巨兽（1,889 行，151 锚点）
+
+- 状态：完成并推送，commit `9dcfd99`。
+- 内容：SDK 所有可序列化类型的单一真相源，1890 行零业务逻辑全是契约。锚点分层：用量/输出格式/MCP 配置（stdio 的 type optional 是向后兼容）/权限（判别联合 + setMode 用 z.lazy 破前向引用）/钩子三层（27 事件 → 输入联合 → 同步异步输出联合）/技能与模型信息/代理定义/24 种消息联合/会话列表信息。
+- 核心机制三条：① **`lazySchema` 全包裹，一举三得**——破循环引用（`PermissionModeSchema` 定义在被引用处之后 50 行、`SyncHookJSONOutputSchema` 引用下方 15 个专属输出、`FastModeStateSchema` 在文件最后），冷启动不建树，声明顺序与依赖顺序解耦；② **占位符 + `TypeOverrideMap`**——五个 `z.unknown()` 在 zod 侧放行，生成 TS 时替换成 `@anthropic-ai/sdk` 的真实类型；③ **`.and()` 而非 `.extend()`**——生成类型保留 `BaseHookInput & {...}` 交叉写法。
+- 两个「用键存在性当开关」：`capabilities.experimental['claude/channel']` 存在 = 白名单命中；`PromptRequestSchema.prompt` 字段存在 = 这是一条提问行（行式 JSONL 协议，比加 type 字段少一层判断）。
+- 命名分界：消息流全 snake_case（流式协议），会话列表信息全 camelCase（API 表面）。
+- **新坑（会复发，已加判据）**：`.describe(` 跨行有两级陷阱。`after` 落在 `.describe(` 与字符串之间 → 语法错误（预检能拦）；落在 describe **收尾之后** → 语法合法、预检不报、`annotate.py` 也不报 `⚠`，但注释成了「块末注脚」而脱离它描述的字段。本批踩到两处（`capabilities` 那条落进外层对象体末尾紧跟 `})`；`决策分类` 那条悬在两个同级注释之间）。**判据：插入点后一行是 `})`、`),`、`]` 这类收尾行时，`after` 注释即错位**；识别脚本 = 扫「顶格中文注释 + 前一行有缩进 + 后一行有缩进」，全文件 17 命中里 15 是正常属性边界、2 需改。修法是并入上一条 `before` 锚点，而不是硬挪行号（153→151）。
+- 校验：预检 151 锚点全过；annotate 两次均零 `⚠` 零 `⟳`；fidelity 1492 份 0 失败；links 2374+712 0 失效。
+- 进度：全仓 1492/1902 文件、446,734/513,237 行、87%；src 剩 410 份 / 66,810 行。
+- 下批目标：`bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999)。
+
 ## 第 142 批（2026-11-05）：commands/plugin/ManagePlugins.tsx 巨兽（2,215 行，84 锚点）
 
 - 状态：完成并推送，commit `f4d54ce`。
