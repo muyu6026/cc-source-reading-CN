@@ -6411,3 +6411,32 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 84 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；原文 1,072 行 → 批注版 1,157 行；`check-fidelity.py` 全仓 **1495 份 0 失败**；`check-links.py` 源码链接 2376 条加内链 714 条，0 失效；全仓 **1495/1902 文件、450,650/513,237 行、87%**；`src/` 还剩 **407 份 / 62,892 行**。
 
 **下一批候选（巨兽单批 1 份封顶）**：`bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838) · `commands/plugin/BrowseMarketplace.tsx`(802) · `cli/transports/WebSocketTransport.ts`(801)（全仓还剩 407 份；1,000 行档只剩三份，之后是 838/802/801 的 800 行档，清完进 700 行档）。
+
+### src batch 147: 1000-line tier finale, 5 files (4645 src, 4936 annotated, 289 anchors)
+
+回头扫 800–1,009 行档：把「巨兽单批 1 份封顶」阶段留下的五份中行数较大的清掉（之前只啃了 2,000+ 行的几头巨兽）。五份覆盖 CCR 远程控制桥核心、终端彩色 diff 移植、CCR v2 worker 协议客户端、插件市场两个界面。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridge/remoteBridgeCore.ts`](annotated/src/bridge/remoteBridgeCore.ts) | 1,008→1,089 | 81 | CCR 远程控制桥的共享核心：归档遥测状态机、archiveSession 归档流程、会话生命周期与崩溃恢复指针 |
+| [`native-ts/color-diff/index.ts`](annotated/src/native-ts/color-diff/index.ts) | 999→1,061 | 62 | 终端彩色 diff 的 TypeScript 移植：highlight.js 懒加载、词级 diff、ANSI 转义、ColorDiff/ColorFile 渲染器 |
+| [`cli/transports/ccrClient.ts`](annotated/src/cli/transports/ccrClient.ts) | 998→1,062 | 64 | CCR v2 worker 生命周期协议客户端：epoch 管理、状态上报、心跳、事件/内部事件/投递三路上传器、流式文本累加 |
+| [`commands/plugin/ManageMarketplaces.tsx`](annotated/src/commands/plugin/ManageMarketplaces.tsx) | 838→879 | 40 | 插件市场管理界面：增删市场源、刷新、错误态与组织托管提示 |
+| [`commands/plugin/BrowseMarketplace.tsx`](annotated/src/commands/plugin/BrowseMarketplace.tsx) | 802→845 | 42 | 插件市场浏览界面：搜索、分类、安装、详情与卡片网格 |
+
+要点：
+
+- **remoteBridgeCore 是 CCR 桥的「无 UI 内核」**：archiveSession 把会话归档到兼容层（`/v1/sessions`，不是 `/v1/code/sessions`），归档状态用归档遥测状态机（`ok` / `skipped_no_token` / `network_error` / `server_4xx` / `server_5xx`）统一聚合，比散落的若干布尔更干净（仅 `archive_timeout` 区分 `ECONNABORTED` 与其他网络错误）。
+- **color-diff 是 Rust syntect+bat 思路的 TS 复刻**：为了不在模块求值期付出约 50MB highlight.js 的代价，hljs 做成懒加载；词 diff 用 `diffArrays`，按码点推进以正确处理代理对与全角宽度；ANSI 转义分 truecolor / 256 色 / ansi 三档。
+- **ccrClient 把「写操作」统一收口到 `this.request()`**：四个串行批量上传器（`workerState` / `event` / `internalEvent` / `delivery`）各管一类上报；401/403 区分「令牌过期确定性退出」与「令牌有效但服务端抖动计入重试阈值（10）」。
+- **两个插件市场界面是 React Compiler 产物**（`_c` 记忆槽、`t0..tN` 临时变量、`bbNN:` 标签块）；锚点只落函数签名行与语句/收尾行，零 `⟳` 零 `⚠`。
+
+踩坑：
+
+- 两份 `.tsx` 末尾 base64 `sourceMappingURL` 按惯例省略，`fidelity` 标 `OK*`（插入注释行数 = 锚点数 + 1，差值 1 属正常）。
+- 首轮 `check-fidelity` 两处 FAIL（判据 5：劈开未结束的多行表达式）——ccrClient 的 `export type CCRInitFailReason =` 联合类型首行 `(49,'after')`、remoteBridgeCore 的 `type ArchiveTelemetryStatus =` 首行 `(956,'after')` 都落在多行类型首行，中文插在联合成员之间把语句劈开；按规矩 7 改到该联合类型的收尾行（`| 'worker_register_failed'` 与 `| 'server_5xx'`）后复验 0 失败。印证「`after` 也不落跨行类型首行」。
+- `⟳` 属正常良性外移：ccrClient 4 处、remoteBridgeCore 6 处、ManageMarketplaces 1 处、color-diff 2 处 `//` 注释段中部的锚点被自动挪到段边界，落点在英文注释块之后、未劈开英文。
+
+流程账：5 个数据文件逐一对齐源文件；预检 289 锚点全过、无英文双引号/反斜杠、`ast.parse` 全过；`annotate.py` 五次共 13 处良性 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 **1500 份 0 失败**；`check-links.py` 源码链接 2377 条加内链 715 条，0 失效；全仓 **1500/1902 文件、455,295/513,237 行、88.7%**；`src/` 还剩 **402 份 / 58,247 行**。
+
+**下一批候选（进入 500–570 行档，单批约 10 份）**：`state/AppStateStore.ts`(569) · `commands/plugin/UnifiedInstalledCell.tsx`(565) · `vim/operators.ts`(556) · `commands/thinkback/thinkback.tsx`(550) · `bridge/sessionRunner.ts`(550) · `bridge/bridgeApi.ts`(539) · `commands/terminalSetup/terminalSetup.tsx`(531) · `bridge/bridgeUI.ts`(530) · `tasks/LocalShellTask/LocalShellTask.tsx`(523) · `buddy/sprites.ts`(514)（全仓还剩 402 份；1,000 行档已清零，之后是 500–570 行档）。

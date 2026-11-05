@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+# 批注数据：source/src/commands/plugin/ManageMarketplaces.tsx
+# 规则：文本禁止英文双引号「"」与反斜杠「\」；用「」或『』代替双引号；专名用反引号。
+# 注意：React 编译器产物，JSX 内部不能插注释；锚点只落函数/类型签名行（before）与收尾行（after）。
+# 末行 sourceMappingURL 由 annotate.py 自动省略，绝不在此锚到该行。
+
+ANNOTATIONS = [
+    (37, 'after', '''Props：组件入参——视图切换 setViewState、错误处理 error/setError、结果 setResult、退出态 exitState、可选的目标市场 targetMarketplace 与动作 action（update/remove）。'''),
+    (47, 'after', '''MarketplaceState：单个市场的展示状态（名称、来源、插件列表、待更新/待移除/自动更新标记）。'''),
+    (48, 'after', '''InternalViewState：内部视图三态——list（列表）/ details（详情）/ confirm-remove（确认移除）。'''),
+    (49, 'before', '''ManageMarketplaces：插件市场管理主组件。列出所有已配置市场，支持更新/移除单个市场、切换自动更新，并可在传入 targetMarketplace+action 时自动执行。'''),
+    (59, 'after', '''一组 useState：市场状态列表、加载中、选中项、处理中、错误/进度/成功信息、内部视图、选中市场、详情菜单索引、自动动作防重放 ref。'''),
+    (69, 'after', '''hasAttemptedAutoAction：防止自动动作被重复执行的 ref 标志（自动执行只跑一次）。'''),
+    (71, 'after', '''首个 useEffect：组件挂载时加载所有市场及其已装插件。依赖 [targetMarketplace, action, error]。'''),
+    (73, 'before', '''loadMarketplaces：异步加载函数——读配置、加载全部插件、带优雅降级地加载市场，组装展示状态。'''),
+    (87, 'after', '''遍历市场构造 states：过滤出从该市场安装的插件，填名称/来源/插件数/自动更新标记。'''),
+    (107, 'after', '''排序规则：claude-plugin-directory 永远排第一，其余按字母序。'''),
+    (116, 'after', '''处理加载错误：formatMarketplaceLoadingErrors 区分 warning（仅提示）与 error（抛异常）。'''),
+    (126, 'after', '''自动执行目标动作：若传入 targetMarketplace 且未尝试过自动动作且无外部错误，则定位目标并标记 update/remove 或仅展示详情。'''),
+    (154, 'after', '''catch：加载失败把错误写回 setError 与 setProcessError。'''),
+    (169, 'after', '''hasPendingChanges：是否还有未应用的 update/remove 待改动。'''),
+    (174, 'after', '''getPendingCounts：统计待更新与待移除的数量，用于摘要显示。'''),
+    (184, 'before', '''applyChanges：应用所有待改动。依次处理移除（先禁用该市场插件再删源）、更新（刷新市场并升级已装插件版本），最后清缓存、回调、重载数据并回写成功信息。'''),
+    (198, 'after', '''处理移除分支：先遍历已装插件调用 createPluginId 并置 enabledPlugins 为 false（禁用/卸载），再真正移除市场源。'''),
+    (215, 'after', '''removeMarketplaceSource：从配置中真正移除市场源，并记 tengu_marketplace_removed 事件。'''),
+    (224, 'after', '''处理更新分支：refreshMarketplace 单市场刷新（带进度回调），记 tengu_marketplace_updated。'''),
+    (238, 'after', '''刷新后升级插件版本：updatePluginsForMarketplaces 把已装插件升到新版本，避免 loader 缓存与 installed_plugins.json 版本错配导致 .orphaned_at 误标（见 #29512）。'''),
+    (252, 'after', '''clearAllCaches：改动后清空所有缓存。'''),
+    (260, 'after', '''重新加载市场数据：刷新后以新时间戳重建 states，保持详情视图的选中引用同步。'''),
+    (305, 'after', '''组装成功信息：按 updatedCount/removedCount 拼提示（更新含插件升级数），详情视图停留显示、否则 2 秒后回菜单。'''),
+    (343, 'before', '''confirmRemove：把选中市场标记为待移除并立即 applyChanges。'''),
+    (356, 'after', '''buildDetailsMenuOptions：详情视图菜单项——浏览插件、更新市场、自动更新开关（全局未禁用时）、移除市场。'''),
+    (390, 'before', '''handleToggleAutoUpdate：切换该市场的自动更新（setMarketplaceAutoUpdate），并同步本地两个状态引用。'''),
+    (412, 'after', '''useKeybinding confirm:no：详情/确认视图下按 Esc 回到列表并重置详情菜单索引。'''),
+    (421, 'after', '''useKeybinding confirm:no：列表视图有待改动时按 Esc 清除所有待改动并重置选中。'''),
+    (434, 'after', '''useKeybinding confirm:no：列表视图无待改动时按 Esc 退出到父菜单。'''),
+    (444, 'after', '''useKeybindings：列表导航——上/下移动选中，回车进入详情或应用待改动，选中 0 项即「添加市场」。'''),
+    (473, 'after', '''useInput：列表视图 u/r 快捷键——u 切换待更新、r 进入确认移除视图。'''),
+    (493, 'after', '''useKeybindings：详情视图导航——上/下移动菜单，回车按选项执行浏览/更新/切换自动更新/移除。'''),
+    (527, 'after', '''useInput：确认移除视图 y/n 输入——y 确认移除，n 取消回列表。'''),
+    (540, 'after', '''loading 为真时渲染加载态。'''),
+    (564, 'after', '''无市场时渲染空态：提示添加市场及快捷键。'''),
+    (593, 'after', '''确认移除视图：展示市场名与将卸载的插件数，y 确认 / n 取消。'''),
+    (675, 'after', '''详情视图：展示市场名/来源/插件数/已装插件、处理中指示、成功与错误、菜单项，并在自动更新开启时显示说明。'''),
+    (760, 'after', '''列表视图收尾：渲染市场列表、待改动摘要、处理中与错误提示，并在底部挂载 ManageMarketplacesKeyHints 快捷键提示组件。'''),
+    (762, 'after', '''ManageMarketplacesKeyHintsProps：底部快捷键提示子组件的入参。'''),
+    (766, 'before', '''ManageMarketplacesKeyHints：React 编译器生成的子组件（_c(18) 缓存），按 hasPendingActions 渲染对应的快捷键提示（apply/select/cancel 等）。'''),
+]
