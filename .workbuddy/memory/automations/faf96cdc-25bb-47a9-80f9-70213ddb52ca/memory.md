@@ -977,3 +977,12 @@
 - 新坑（写进流水线）：**改锚点行号之后必须同时把它移到正确位置**，否则预检报 `[order] 未升序`——`ast.parse` 与字段校验都不管顺序，`annotate` 也会照插但产物乱序。本批 commands.ts 把 (387) 改成 (359) 后忘记重排，报了一次。
 - 块注释内部这条坑第四次复发（SSETransport / commands.ts 各一处）。处置模板：并入上一条锚点，或挪到最近的语句边界（类声明前、`try {` 前）。
 - 下一批目标（500–650 行档，单批约 6–7 份）：commands/ide/ide.tsx(646) · commands/install-github-app/install-github-app.tsx(587) · screens/Doctor.tsx(575) · state/AppStateStore.ts(570) · bridge/initReplBridge.ts(570) · commands/plugin/UnifiedInstalledCell.tsx(565) · vim/operators.ts(557)。
+
+## 第 149 批（2026-11-05）：500–650 行档七件套（桥接接线层 + 状态总表 + vim 操作符 + 两处编译产物界面 + 安装向导 + 诊断屏）
+- 状态：完成并推送，commit `589cf57`（d30250c..589cf57）。
+- 本批 7 份：`commands/ide/ide.tsx`(646→697, 51)、`commands/install-github-app/install-github-app.tsx`(587→631, 44)、`screens/Doctor.tsx`(575→617, 42)、`state/AppStateStore.ts`(570→613, 44)、`bridge/initReplBridge.ts`(570→623, 54)、`commands/plugin/UnifiedInstalledCell.tsx`(565→596, 31)、`vim/operators.ts`(557→606, 50)。合计 4,067 源行 / 4,383 批注版 / 316 锚点。
+- 主线：① **门禁顺序本身就是设计**——桥接把 OAuth 检查排在组织策略之前，否则控制台登录用户会先撞上缓存里的旧策略看到误导报错；令牌覆盖存在时整段跳过钥匙串检查。② **跨进程退避用内容寻址代替显式清理**——死令牌记过期时间戳，重登换新令牌后键自然不匹配；计数封顶三次连写盘也封顶。③ **「该刷新」与「已报废」是两个判断**——带五分钟提前量的过期判定只适合前者；只剩三分钟但刷新接口抖一下会误判死刑。④ **标题推导是带竞态保护的状机**——两触三点（首条占位、首条生成、第三条全文生成），回填需同时满足序号未变 + 会话未换 + 用户未手动改名。⑤ **两份编译器产物读法一致**：`_c(N)` 槽位总数、`$[k] !== dep` 依赖比较、哨兵＝无依赖永久缓存；真信息在原始结构（状态图标优先级：待切换 → 错误 → 禁用 → 启用）。⑥ **断开连接要防自动重连**——先 `onclose = () => {}` 再关，清状态时客户端/同前缀工具/同前缀命令三处一起清。⑦ **vim 范围计算四情况**——改词到词尾、整行带尾换行、含尾动作仅向后前进、`snapOutOfImageRef` 防劈开图片占位。⑧ **状态表的分界不是审美的**——`DeepImmutable` 只能包纯数据，含函数/可变结构必须在交叉类型另一半；`getDefaultAppState` 是函数而非常量（多处初始化需互不共享的集合）。
+- 校验：预检首轮 318 锚点报 1 项 `[order]`（UnifiedInstalledCell 把 524 改 505 忘重排），修正后 316 全过；**annotate 七次零 `⟳` 零 `⚠`，首次整批无自动纠正**；两项专项扫描抓到 3 处并处置（见下）；fidelity **1513 份 0 失败**；links 2395 源链 + 718 内链 0 失效。全仓 **1513/1902 文件 / 463,754 行 / 90.4%**；src 剩 389 份 / 49,483 行。
+- 新坑（写进流水线）：**讲「回调依赖表」的注释必须贴在回调开头，贴在结尾就变成块的脚注**——install-github 的 (182) 落在 `}` 与 `}, [deps])` 之间，扫描抓到后并入 `useCallback` 起点。另：**注释文案要与落位方向一致**——AppStateStore 的「下面全是含函数的字段」落在 `}> & {` 之前的类型体内（描述「下面」而身在上半段末尾），改成收口式表述才成立。还有：**与紧邻英文注释重复的中文锚点直接删掉**——initReplBridge 的归档 catch 处两处重复，删掉后把结论并进「归档超时一点五秒」那条。
+- `[order]` 复现：这是「改行号必须同时重排位置」这条规则的**第一次复现**（上一批在 commands.ts 上刚犯过）。
+- 下一批目标（500–560 行档，单批约 7 份）：commands/thinkback/thinkback.tsx(554) · bridge/sessionRunner.ts(550) · bridge/bridgeApi.ts(539) · commands/terminalSetup/terminalSetup.tsx(531) · bridge/bridgeUI.ts(530) · tasks/LocalShellTask/LocalShellTask.tsx(523) · buddy/sprites.ts(514)；600 行以上已清零。
