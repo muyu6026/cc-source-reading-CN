@@ -6440,3 +6440,38 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：5 个数据文件逐一对齐源文件；预检 289 锚点全过、无英文双引号/反斜杠、`ast.parse` 全过；`annotate.py` 五次共 13 处良性 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 **1500 份 0 失败**；`check-links.py` 源码链接 2377 条加内链 715 条，0 失效；全仓 **1500/1902 文件、455,295/513,237 行、88.7%**；`src/` 还剩 **402 份 / 58,247 行**。
 
 **下一批候选（进入 500–570 行档，单批约 10 份）**：`state/AppStateStore.ts`(569) · `commands/plugin/UnifiedInstalledCell.tsx`(565) · `vim/operators.ts`(556) · `commands/thinkback/thinkback.tsx`(550) · `bridge/sessionRunner.ts`(550) · `bridge/bridgeApi.ts`(539) · `commands/terminalSetup/terminalSetup.tsx`(531) · `bridge/bridgeUI.ts`(530) · `tasks/LocalShellTask/LocalShellTask.tsx`(523) · `buddy/sprites.ts`(514)（全仓还剩 402 份；1,000 行档已清零，之后是 500–570 行档）。
+
+### src batch 148: 800-line tier, 6 files (4392 src, 4678 annotated, 284 anchors)
+
+继第 147 批清完 1,000 行档之后，回头补齐 660–800 行档：两条传输实现的完整重连与保活策略、控制协议 schema、斜杠命令总表、后台代理任务状态机、插件发现界面。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`cli/transports/WebSocketTransport.ts`](annotated/src/cli/transports/WebSocketTransport.ts) | 800→853 | 53 | WebSocket 传输：Bun/Node 双栈、指数退避重连、休眠检测、环形缓冲重放、ping 与保活双定时器 |
+| [`commands/plugin/DiscoverPlugins.tsx`](annotated/src/commands/plugin/DiscoverPlugins.tsx) | 781→816 | 34 | 插件发现界面：多市场聚合、安装数排序、批量安装、搜索与分页、六种空态 |
+| [`commands.ts`](annotated/src/commands.ts) | 754→812 | 58 | 斜杠命令总表：条件导入死代码消除、技能三路装载、可用性判定、两份安全白名单 |
+| [`cli/transports/SSETransport.ts`](annotated/src/cli/transports/SSETransport.ts) | 711→753 | 42 | SSE 读 + POST 写传输：分帧解析、序号去重与续传、存活计时器、写侧重试 |
+| [`tasks/LocalAgentTask/LocalAgentTask.tsx`](annotated/src/tasks/LocalAgentTask/LocalAgentTask.tsx) | 683→731 | 47 | 本地代理任务：进度追踪器、通知去重、retain/diskLoaded/驱逐期限、后台信号表 |
+| [`entrypoints/sdk/controlSchemas.ts`](annotated/src/entrypoints/sdk/controlSchemas.ts) | 663→713 | 50 | 控制协议 schema：21 种请求、控制响应与错误、8 分支标准输出、5 分支标准输入 |
+
+要点：
+
+- **两条传输是同一套策略的两种实现**：都做指数退避 + 正负 25% 抖动 + 10 分钟总预算，都区分永久拒绝与可重试错误。差别在判活手段——WebSocket 靠 ping/pong 与 tick 间隔突变，SSE 靠 45 秒无帧（服务端每 15 秒发 keepalive，漏三次即判死）。
+- **WebSocket 的难点全在「别留下幽灵对象」**：事件处理器必须是稳定的类属性箭头函数，重连前先 `removeWsListeners` 再 `close`，否则每次重连遗留一个 WS 对象加五个闭包。Bun 用 `removeEventListener`、ws 包用 `off`，混用会静默失效。
+- **重放语义是「确认后才丢」**：带 uuid 的出站消息进环形缓冲，重连时按服务端 `x-last-request-id` 驱逐已确认部分；重放后坚决不清缓冲，因为连接可能在重放后、服务端处理前再断。
+- **SSE 的续传靠双通道**：`from_sequence_num` 查询参数给服务端定位，`Last-Event-ID` 头给中间层重放；去重集合超过 1000 条就修剪远低于高水位的序号，只有靠近高水位的还有价值。
+- **`commands.ts` 是死代码消除的样板**：用 `feature()` 构建期常量加 `require` 条件导入，对外构建里整段消失；`INTERNAL_ONLY_COMMANDS` 再加一道 `USER_TYPE === 'ant' && !IS_DEMO` 的运行时门。
+- **三层缓存必须从外往里清**：`lodash memoize` 的外层命中时根本走不到内层，只清内层等于没清——这条注释是踩坑后写的。
+- **`LocalAgentTask` 区分「看着」与「持有」**：`viewingAgentTaskId` 是正在看谁，`retain` 是正在持有谁，后者才阻止驱逐并触发磁盘引导。`diskLoaded` 保证每个 retain 周期只读一次侧链。
+- **通知去重靠原子检查并置位**：检查 `notified` 与写回必须在同一次状态更新里完成，否则并发完成会发两条。
+
+踩坑：
+
+- 两条 `before` 落进 JSDoc 块内部（`SSETransport` 的 `* Each event: client_event ...` 行、`commands.ts` 的 `* Not memoized — auth state ...` 行），预检 `bslot` 直接拦下。处置是并入相邻锚点：前者挪到类声明前，后者与「判定按提供方分两类」合并成一条。**这是块注释内部这条坑第四次复发**，判据仍是「目标行以 `*` 或 `*/` 开头」。
+- `commands.ts` 两处「失败返空」类注释落在 `}` 与 `} catch` 之间，块末注脚扫描抓到。按第 145 批的处置挪到 `try {` 之前，语义才准。
+- 调整锚点行号后忘了重排顺序，预检报 `[order] L359 未升序（上一处 L374）`——改行号后必须把该条移到正确位置，`ast.parse` 与字段校验都不会替你检查这个。
+- `LocalAgentTask` 一处 `⟳`：`(252,'before')` 原本指向模板字符串起点，annotate 自动外移到字符串之前，落点仍通顺（XML 消息拼装处）。
+
+流程账：6 个数据文件逐一对齐源文件；预检首轮 286 锚点报 2 项 `bslot`，修正后 284 锚点全过；`annotate.py` 六次共 1 处良性 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 **1506 份 0 失败**（较上批 +6）；`check-links.py` 源码链接 2382 条加内链 716 条，0 失效；全仓 **1506/1902 文件、459,687/513,237 行、89%**；`src/` 还剩 **396 份 / 53,848 行**。
+
+**下一批候选（进入 500–650 行档，单批约 6–7 份）**：`commands/ide/ide.tsx`(646) · `commands/install-github-app/install-github-app.tsx`(587) · `screens/Doctor.tsx`(575) · `state/AppStateStore.ts`(570) · `bridge/initReplBridge.ts`(570) · `commands/plugin/UnifiedInstalledCell.tsx`(565) · `vim/operators.ts`(557)（全仓还剩 396 份；800 行档已清零，之后是 500–590 行档）。
