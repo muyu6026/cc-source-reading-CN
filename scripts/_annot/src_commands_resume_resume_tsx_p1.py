@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '''/resume 命令：列出并恢复历史会话。支持按 UUID、自定义标题、跨项目 worktree 自动检测，对跨目录的会话给出可复制的切换命令而非直接恢复。'''),
+    (30, 'after', '''ResumeResult：未找到会话或多匹配两种错误结果，供 help 文案复用。'''),
+    (38, 'after', '''resumeHelpMessage：把错误结果渲染成面向用户的提示串。'''),
+    (88, 'after', '''ResumeError：错误态展示组件（编译器产物，用 $ 缓存槽复用计算结果）。'''),
+    (98, 'after', '''ResumeCommand 各状态：日志列表、worktree 路径、加载中、恢复中、是否展示全部项目，以及终端尺寸与模态上下文。'''),
+    (122, 'after', '''loadLogs：按是否全部项目加载消息日志，过滤出可恢复的会话；空结果直接 onDone 结束。'''),
+    (130, 'after', '''初始化：拉取 worktree 路径后加载本仓同仓会话日志。'''),
+    (135, 'after', '''handleToggleAllProjects：切换全部项目开关后重新加载日志。'''),
+    (171, 'after', '''handleSelect：选定会话后做跨项目/跨目录判定——同仓 worktree 直接恢复，不同项目给出可复制命令，同目录则继续恢复。lite 日志需先补齐完整消息。'''),
+    (176, 'after', '''handleCancel：取消恢复，以 system 显示呈现。'''),
+    (189, 'after', '''主渲染：加载/恢复中显示 Spinner，否则渲染 LogSelector（高度按是否模态减半），并挂载智能检索回调。'''),
+    (193, 'after', '''filterResumableSessions：过滤可恢复会话——排除侧链且排除当前会话自身。'''),
+    (210, 'after', '''无参数时直接渲染选择器组件。'''),
+    (215, 'after', '''载入本仓同仓会话日志用于检索（含 worktree）。'''),
+    (224, 'after', '''先尝试按 UUID 过滤并按时修改时间倒序；命中即用该日志恢复。'''),
+    (240, 'after', '''enriched 没命中时再走直接文件查找（处理被 enrichLogs 过滤掉的会话，比如首条消息过大导致抽取失败）。'''),
+    (243, 'after', '''再按自定义标题精确匹配（仅当功能开启）；恰好一命中即恢复。'''),
+    (255, 'after', '''多匹配给出错误提示，单匹配失败则继续。'''),
+    (273, 'after', '''无匹配最终给出 not found 错误组件。'''),
+    (274, 'after', '''call 命令入口收尾：封装 onResume 处理 context.resume 调用与失败回退。'''),
+]

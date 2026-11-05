@@ -6803,3 +6803,42 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 156 批）：10 个数据文件逐一对齐源文件；预检 95 锚点全过；annotate 十次零 ⟳ 零 ⚠；check-fidelity 全仓 1571 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1571/1902 文件、486,603/513,237 行、94.8%；`src/` 还剩 331 份。
 
 **下一批候选（270–278 行档，单批约 10 份）**：`memdir/paths.ts`(278) · `commands/install-github-app/OAuthFlowStep.tsx`(276) · `cli/transports/SerialBatchEventUploader.ts`(275) · `commands/resume/resume.tsx`(275) · `commands/mobile/mobile.tsx`(274) · `memdir/memoryTypes.ts`(271) · `commands/fast/fast.tsx`(269) · `commands/mcp/xaaIdpCommand.ts`(266) · `bridge/types.ts`(262) · `commands/init-verifiers.ts`(262)（`src/` 还剩 331 份；440 行以上已清零）
+
+### src batch 157: 262-278 line tier, 10 files (2708 src, 2867 annotated, 155 anchors)
+
+262–278 行档（接第 156 批下沿，取剩余 270 行以上前 10 份，260 行档就此清零）：自动记忆路径安全校验、OAuth 安装步骤组件、串行批量事件上传器、/resume 会话恢复、移动端下载二维码、记忆类型分类与提示词段落、/fast 快速模式开关、XAA IdP 连接子命令、verifier 生成器、桥接层协议与接口类型。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`memdir/paths.ts`](annotated/src/memdir/paths.ts) | 278→298 | 20 | 自动记忆目录路径解析/校验/规范化；安全门禁拒绝相对/盘符根/UNC/空字节路径；远端覆盖优先于设置；memoize 按 projectRoot |
+| [`commands/install-github-app/OAuthFlowStep.tsx`](annotated/src/commands/install-github-app/OAuthFlowStep.tsx) | 276→291 | 14 | OAuth 授权步骤组件：starting→about_to_retry 状态机，浏览器授权拿「推理专用」令牌，失败可重试且不破坏已有登录 |
+| [`cli/transports/SerialBatchEventUploader.ts`](annotated/src/cli/transports/SerialBatchEventUploader.ts) | 275→289 | 14 | 串行批量事件上传器：批处理+指数退避+背压；连续失败超限丢弃该批；不可序列化项就地丢弃防队列中毒 |
+| [`commands/resume/resume.tsx`](annotated/src/commands/resume/resume.tsx) | 275→296 | 20 | /resume 命令：按 UUID/标题/跨项目 worktree 恢复；lite 日志先补齐全文；跨目录只给可复制切换命令 |
+| [`commands/mobile/mobile.tsx`](annotated/src/commands/mobile/mobile.tsx) | 274→291 | 16 | /mobile 命令：iOS/Android 下载二维码；React Compiler 产物用缓存哨兵惰性记忆化，状态初始空串防首帧闪烁 |
+| [`memdir/memoryTypes.ts`](annotated/src/memdir/memoryTypes.ts) | 271→282 | 11 | 记忆四类（user/feedback/project/reference）分类与提示词段落；含忽略记忆与漂移两条安全闸门（eval 验证） |
+| [`commands/fast/fast.tsx`](annotated/src/commands/fast/fast.tsx) | 269→285 | 15 | /fast 命令：快速模式开关与选择器；组织级开关先于任何切换；冷却/过载两态分开渲染 |
+| [`commands/mcp/xaaIdpCommand.ts`](annotated/src/commands/mcp/xaaIdpCommand.ts) | 266→286 | 20 | claude mcp xaa 子命令：IdP 连接 setup/login/show/clear；写前全量校验，keychain 槽仅写入成功后清 |
+| [`commands/init-verifiers.ts`](annotated/src/commands/init-verifiers.ts) | 262→267 | 5 | /init-verifiers 命令：生成 verifier 技能的五阶段向导提示词（巨型模板串，仅包壳可注） |
+| [`bridge/types.ts`](annotated/src/bridge/types.ts) | 262→282 | 20 | 桥接层协议与依赖接口类型总集：环境注册/工作轮询/会话生成/心跳/状态展示 |
+
+要点：
+
+- **路径校验是自动记忆的安全核心**：既要规范化（剥尾部分隔符、NFC 归一化）又要防穿越（拒绝相对/盘符根/UNC/空字节，normalize 后再比前缀）；远端覆盖变量优先于 settings，~ 展开仅限设置来源。
+- **OAuthFlowStep 拿到的是「推理专用」令牌**：因此用 saveOAuthTokensIfNeeded 直接落库，刻意绕开 performLogout，避免销毁用户已有的登录会话；错误/成功/重试三段状态机干净分离。
+- **上传器的三件套是串行 + 批处理 + 背压**：背压用 promise 队列而非忙等；不可序列化项（BigInt/循环引用/toJSON 抛错）必须就地丢弃，否则会毒化队列让 flush 永久挂起；服务端 Retry-After 加抖动防止多会话共享限流时同时重击。
+- **/resume 跨项目判定分三层**：同仓 worktree 直接恢复、不同项目给出可复制切换命令、同目录继续恢复；lite 日志需先补齐完整消息，enriched 未命中再走直接文件查找兜底。
+- **记忆类型分类只存不可推导的上下文**：代码模式/架构/git 历史/文件结构都不该存；合并/单人两套段落故意平铺（非共用规格生成），含「忽略记忆」「漂移警告」两条 eval 验证过的安全闸门。
+- **XAA IdP 连接写前全量校验**：避免半写入状态（设置写了但 keychain 缺失）；keychain 槽仅在设置写入成功后才清，同 issuer 不同 client 也要清（缓存 token 的 aud 与旧 secret 均只适配旧 client）；http 仅限 loopback。
+- **init-verifiers 本质是一份提示词**：引导 Claude 检测项目、配置工具、与用户问答、最终写出 verifier 技能；不覆盖单测/类型检查（那由标准构建流程负责）。
+- **bridge/types 是桥接层所有跨进程契约的集中定义**：worker_type 本仓窄类型（exhaustiveness 用）与后端不透明字符串分离；CCR v2 选择器透传；各类依赖接口（ApiClient/Spawner/Logger）便于测试替换。
+
+踩坑：
+
+- **锚点全部挂在函数/类型收尾行或语句行**：编译器产物（resume/mobile/fast）的 JSX 均为单行闭合（如 `t27 = <T0 .../>;`），注释只挂状态/选项/动作与回显层，绝不插进 JSX 内部——插进 JSX 会破坏 tsx 结构且 check-fidelity 看不出来。
+- **init-verifiers 是巨型模板字符串**：批注只挂在包壳的 import/对象定义/结束处，不进模板内部（否则会污染生成给用户的提示词）；这是「模板为主体」文件的固定限制。
+- **多行 `/** */` 块注释不挂锚点**：memoryTypes 顶部与各处含多行块注释，锚点全部挂在块外的函数收尾行（如 `parseMemoryType`、`getAutoMemPath`），由 check-fidelity「块内禁中文」硬判据兜底，零命中。
+- **本批预检 155 锚点一次全过**（含 [split]/[bslot]/[TAIL] 扫描），annotate 十次零 ⟳ 零 ⚠；专项块末注脚扫描零输出。
+
+流程账（第 157 批）：10 个数据文件逐一对齐源文件；预检 155 锚点全过；annotate 十次零 ⟳ 零 ⚠；check-fidelity 全仓 1581 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1581/1902 文件、489,311/513,237 行、95.3%；`src/` 还剩 321 份。
+
+**下一批候选（234–256 行档，单批约 10 份）**：`commands/init.ts`(256) · `bridge/jwtUtils.ts`(256) · `cli/remoteIO.ts`(255) · `keybindings/resolver.ts`(244) · `commands/security-review.ts`(243) · `keybindings/KeybindingContext.tsx`(243) · `commands/btw/btw.tsx`(243) · `context/notifications.tsx`(240) · `keybindings/schema.ts`(236) · `constants/oauth.ts`(234)（`src/` 还剩 321 份；440 行以上已清零）

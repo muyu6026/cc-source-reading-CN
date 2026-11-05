@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '''桥接层（remote-control）的协议与依赖接口类型总集：从环境注册、工作项轮询、会话生成、到存活心跳与状态展示，所有跨进程契约都在这里定义。'''),
+    (2, 'after', '''DEFAULT_SESSION_TIMEOUT_MS：每会话默认超时 24 小时。'''),
+    (6, 'after', '''BRIDGE_LOGIN_INSTRUCTION：拼到桥接鉴权错误后的登录指引文案。'''),
+    (11, 'after', '''BRIDGE_LOGIN_ERROR：未登录就跑 claude remote-control 时打印的完整错误（含登录指引）。'''),
+    (14, 'after', '''REMOTE_CONTROL_DISCONNECTED_MSG：用户断开远程控制时展示的提示。'''),
+    (21, 'after', '''WorkData：环境回传的工作负载形状（会话或健康检查）。'''),
+    (31, 'after', '''WorkResponse：pollForWork 取回的工作项，secret 是 base64url 编码的 JSON。'''),
+    (51, 'after', '''WorkSecret：会话凭证载荷，含 ingress token、api base url、来源 git 信息、auth、可选 CCR v2 选择器 use_code_sessions 等。'''),
+    (52, 'after', '''SessionDoneStatus：会话结束三态——完成 / 失败 / 被打断。'''),
+    (55, 'after', '''SessionActivityType：活动类型——工具启动 / 文本 / 结果 / 错误。'''),
+    (61, 'after', '''SessionActivity：单条活动记录（类型 + 摘要 + 时间戳），用于状态行展示。'''),
+    (69, 'after', '''SpawnMode：远程控制选工作目录的策略——单会话（结束即拆桥）、worktree（每会话隔离 git worktree）、同目录（共享 cwd，可能互相踩踏）。'''),
+    (79, 'after', '''BridgeWorkerType：本代码库产生的已知 worker_type，注册时作为 metadata.worker_type 让 claude.ai 按来源过滤（如助手标签只显示助手 worker）。后端视其为不透明字符串。'''),
+    (115, 'after', '''BridgeConfig：桥接实例配置——目录、机器名、分支、仓库、最大会话数、生成模式、是否沙箱、各类 UUID 与基础 URL 等。'''),
+    (131, 'after', '''PermissionResponseEvent：回传给会话的控制响应事件，外层 subtype 为 success，内层 response 携带权限决策载荷。'''),
+    (176, 'after', '''BridgeApiClient：桥接对后端的依赖接口——注册/轮询/确认/停止/注销环境，发送权限响应，归档与会话重连，以及轻量存活心跳。'''),
+    (190, 'after', '''SessionHandle：本地持有的一次会话句柄——done 承诺、kill/forceKill、活动环缓冲、访问令牌与 stderr 环缓冲、写 stdin、刷新令牌。'''),
+    (207, 'after', '''SessionSpawnOpts：生成子会话的选项——会话 id、sdk url、令牌、是否走 CCR v2、epoch，以及首个真实用户消息回调（用于推导标题）。'''),
+    (211, 'after', '''SessionSpawner：生成接口的抽象——给定选项与目录产出一个 SessionHandle。'''),
+    (262, 'after', '''BridgeLogger：状态展示接口全集——横幅、会话起止/失败、各类实时状态（空闲/重连/失败）、二维码、会话计数与标题、调试日志路径等。'''),
+]

@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '''本文件负责自动记忆（memdir）路径的解析、校验与规范化。所有记忆文件统一落在「自动记忆目录」下，形如 {base}/projects/{规范化cwd}/memory/。与路径安全相关的校验集中在此，防止恶意设置把写入豁免导向敏感目录。'''),
+    (31, 'after', '''读取总开关环境变量 CLAUDE_CODE_DISABLE_AUTO_MEMORY 的原始值，后面用 isEnvTruthy / isEnvDefinedFalsy 区分「开 / 关 / 未设」三态。'''),
+    (41, 'after', '''--bare / SIMPLE 模式：prompts.ts 已在系统提示里用 SIMPLE 提前返回砍掉了记忆段落，这里再挡住另一半记忆逻辑（抽取代理、自动梦境、团队同步等）。'''),
+    (55, 'after', '''isAutoMemoryEnabled：自动记忆总开关。按优先级链判定——环境变量优先，其次 SIMPLE 模式，远端无持久化目录时关闭，settings.json 可项目级退出，其余默认开启。'''),
+    (70, 'after', '''isExtractModeActive：feature 开关 tengu_passport_quail 关掉就直接不跑；注意调用方还须额外用 feature('EXTRACT_MEMORIES') 把关，因为 feature() 只有写在 if 条件里才会被 tree-shake 掉。'''),
+    (77, 'after', '''isExtractModeActive 收尾：非交互会话或开启了 slate_thimble 时才激活后台抽取。'''),
+    (86, 'after', '''getMemoryBaseDir：记忆根目录。远端覆盖变量 CLAUDE_CODE_REMOTE_MEMORY_DIR 优先，否则回退到 ~/.claude。'''),
+    (90, 'after', '''getMemoryBaseDir 收尾：返回远端目录或默认配置家目录。'''),
+    (93, 'after', '''两个常量：自动记忆子目录名 memory，以及入口文件名 MEMORY.md。'''),
+    (134, 'after', '''仅 settings 来源支持 ~ 展开；环境变量覆盖不展开（它由 Cowork/SDK 以绝对路径传入）。裸 ~ 或其父目录会被拒绝，否则等价于把整份 $HOME 纳入匹配。'''),
+    (138, 'after', '''先 normalize 去掉尾部分隔符，再补回恰好一个分隔符，以匹配 getAutoMemPath 的「尾部分隔符契约」，最后用 NFC 归一化。'''),
+    (150, 'after', '''validateMemoryPath：规范化并校验候选路径。安全门禁拒绝相对路径、根/近根、Windows 盘符根、UNC 网络路径、以及含空字节的路径（空字节能绕过 normalize 并在 syscall 处截断）。'''),
+    (166, 'after', '''getAutoMemPathOverride：远端直接覆盖整条路径（Cowork 用），绕过逐段计算，常用于按空间隔离挂载。'''),
+    (186, 'after', '''getAutoMemPathSetting：从受信任的设置来源逐项回退读取 autoMemoryDirectory，并支持 ~ 展开。刻意排除项目级设置（会被提交进仓库），否则恶意仓库可设为 ~/.ssh 借文件系统写入豁免拿到敏感目录写权限。'''),
+    (196, 'after', '''hasAutoMemPathOverride：返回覆盖是否生效，作为「SDK 调用方显式启用了自动记忆机制」的信号（例如决定自定义系统提示下是否注入记忆提示）。'''),
+    (205, 'after', '''getAutoMemBase：优先用规范 git 根，让同一仓库的所有 worktree 共享同一套自动记忆目录（不同 worktree 的 cwd 不同但 git 根相同）。'''),
+    (235, 'after', '''getAutoMemPath：记忆目录主解析。顺序为 覆盖变量 → 设置 → {base}/projects/{cwd}/memory/。用 memoize 按 projectRoot 缓存，因为渲染期每个工具调用都会触发一次。'''),
+    (251, 'after', '''getAutoMemDailyLogPath：按日期生成日志文件路径 logs/YYYY/MM/YYYY-MM-DD.md，供助手模式（feature('KAIROS')）边工作边追加，再由夜间 /dream 技能蒸馏成主题文件与 MEMORY.md。'''),
+    (259, 'after', '''getAutoMemEntrypoint：返回自动记忆目录里的 MEMORY.md 入口，解析顺序与 getAutoMemPath 一致。'''),
+    (278, 'after', '''isAutoMemPath：判断某绝对路径是否落在自动记忆目录内，用于文件系统写入豁免。先 normalize 防止用 .. 段做路径穿越绕过匹配。'''),
+]

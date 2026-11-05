@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+ANNOTATIONS = [
+    (1, 'before', '''claude mcp xaa 子命令：管理 XAA（SEP-990）IdP 连接。该连接是用户级的——配置一次，所有启用 XAA 的 MCP 服务器复用。凭据分两处：settings.xaaIdp（非机密）与按 issuer 索引的 keychain 槽（机密）。'''),
+    (24, 'after', '''registerMcpXaaIdpCommand：注册 xaa 子命令树（setup / login / show / clear）。'''),
+    (44, 'after', '''setup action：配置 IdP 连接，供所有 XAA 服务器一次性初始化。'''),
+    (58, 'after', '''issuer URL 校验失败即退出，错误信息回显原始输入。'''),
+    (74, 'after', '''仅 loopback 允许 http（用于一致性测试桩 IdP）；其余情况强制 https，否则 client secret 与授权码会在明文下泄露。'''),
+    (85, 'after', '''callbackPort 校验：必须为正整數，否则下轮启动 Zod .positive() 失败，触发与 issuer 相同的设置中毒——整份 userSettings 解析成 null。'''),
+    (93, 'after', '''client-secret 模式：要求 MCP_XAA_IDP_CLIENT_SECRET 环境变量存在，否则报错。'''),
+    (99, 'after', '''先读旧配置，待写入成功后再清理过期 keychain 槽——clear 之后就读不到旧 issuer 了。'''),
+    (112, 'after', '''写回 settings（xaaIdp 三字段）。注意 callbackPort 必须显式传入（含 undefined），mergeWith 只在显式 undefined 时删除，条件展开会泄漏旧端口。'''),
+    (121, 'after', '''仅在设置写入成功后才清旧 keychain 槽；否则写入失败会留下指向旧 issuer 却已丢密钥的状态。同 issuer 不同 client 也要清（缓存 token 的 aud 与旧 secret 都只对旧 client 有效）。'''),
+    (148, 'after', '''setup 收尾：写入成功则提示已配置，secret 写入失败给出可重试提示。'''),
+    (150, 'after', '''login 子命令：缓存 IdP id_token，使 XAA 服务器静默认证。'''),
+    (169, 'after', '''login action：默认走 OIDC 浏览器登录；支持 --force 重登与 --id-token 直接注入（测试用）。'''),
+    (180, 'after', '''直接注入路径：跳过缓存检查与 OIDC，写入即操作；issuer 取自 settings（唯一事实源），避免多一个易失同步的开关。'''),
+    (196, 'after', '''已缓存有效 token 时直接跳过，避免重复登录；--force 会先清缓存。'''),
+    (217, 'after', '''login 收尾：浏览器流程成功后提示后续服务器将静默认证；失败回显错误。'''),
+    (219, 'after', '''show 子命令：打印当前 IdP 配置与密钥/登录状态。'''),
+    (241, 'after', '''show 收尾：逐行输出 issuer、client id、回调端口、密钥是否入库、是否已登录。'''),
+    (243, 'after', '''clear 子命令：清空 IdP 配置与缓存的 id_token。'''),
+    (265, 'after', '''clear 收尾：先写 undefined 触发删除，再清 keychain 槽；写入失败则保留密钥以免悬空。'''),
+]
