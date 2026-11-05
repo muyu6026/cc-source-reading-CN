@@ -6475,3 +6475,41 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：6 个数据文件逐一对齐源文件；预检首轮 286 锚点报 2 项 `bslot`，修正后 284 锚点全过；`annotate.py` 六次共 1 处良性 `⟳`、零 `⚠`；`check-fidelity.py` 全仓 **1506 份 0 失败**（较上批 +6）；`check-links.py` 源码链接 2382 条加内链 716 条，0 失效；全仓 **1506/1902 文件、459,687/513,237 行、89%**；`src/` 还剩 **396 份 / 53,848 行**。
 
 **下一批候选（进入 500–650 行档，单批约 6–7 份）**：`commands/ide/ide.tsx`(646) · `commands/install-github-app/install-github-app.tsx`(587) · `screens/Doctor.tsx`(575) · `state/AppStateStore.ts`(570) · `bridge/initReplBridge.ts`(570) · `commands/plugin/UnifiedInstalledCell.tsx`(565) · `vim/operators.ts`(557)（全仓还剩 396 份；800 行档已清零，之后是 500–590 行档）。
+
+### src batch 149: 500-650 line tier, 7 files (4067 src, 4383 annotated, 316 anchors)
+
+进入 500–650 行档：REPL 桥接的接线层、应用状态总表、vim 操作符族、两处编译器产物的界面组件、GitHub 应用安装状态机、诊断屏。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/ide/ide.tsx`](annotated/src/commands/ide/ide.tsx) | 646→697 | 51 | IDE 命令：四个子屏、连接超时兜底、断开时先摘监听再清三处状态、工作区路径压缩 |
+| [`commands/install-github-app/install-github-app.tsx`](annotated/src/commands/install-github-app/install-github-app.tsx) | 587→631 | 44 | 安装向导：十一节点状态机、gh 三查、仓库与密钥探测、两条安装路径 |
+| [`screens/Doctor.tsx`](annotated/src/screens/Doctor.tsx) | 575→617 | 42 | 诊断屏：承诺解包加挂起边界、哨兵缓存的环境校验、并行目录检查、九个区块装配 |
+| [`state/AppStateStore.ts`](annotated/src/state/AppStateStore.ts) | 570→613 | 44 | 应用状态总表：深度不可变与可变部分的切割、惰性加载破环、默认状态工厂 |
+| [`bridge/initReplBridge.ts`](annotated/src/bridge/initReplBridge.ts) | 570→623 | 54 | 桥接接线层：六道门禁、跨进程退避、标题三级推导、两条路径分派 |
+| [`commands/plugin/UnifiedInstalledCell.tsx`](annotated/src/commands/plugin/UnifiedInstalledCell.tsx) | 565→596 | 31 | 统一列表项：四种条目类型、状态图标优先级、哨兵缓存的常量节点 |
+| [`vim/operators.ts`](annotated/src/vim/operators.ts) | 557→606 | 50 | vim 操作符：十个纯函数、范围计算的四种情况、按字形簇前进 |
+
+要点：
+
+- **门禁的顺序本身就是设计**：桥接把 OAuth 检查排在组织策略之前，否则用控制台登录的人会先读到缓存里的旧组织策略，看到一句完全误导的报错。同理令牌覆盖（环境变量）一旦存在就整段跳过钥匙串相关的检查——过期的钥匙串令牌与本次连接无关，不该拖住它。
+- **跨进程退避用内容寻址代替显式清理**：死令牌记的是它的过期时间戳，重新登录换出新令牌后键自然不再匹配，不需要任何清理逻辑。计数上限三次，到了就早退，写盘也被封顶三次。
+- **「该刷新」与「已报废」是两个判断**：带五分钟提前量的过期判定适合前者，不适合后者——只剩三分钟但刷新接口恰好抖一下，缓冲式判定会误判死刑。所以第二步显式比较真实过期时间。
+- **标题推导是带竞态保护的状态机**：三条消息两个触发点，生成走后台。回填时要同时满足三个条件——生成序号未变（防乱序覆盖）、会话没换（防环境丢失后写到旧会话）、用户没在这期间手动改名。
+- **两份编译器产物的读法完全一样**：`_c(N)` 是槽位总数，`$[k] !== dep` 是依赖比较，哨兵值表示「没有依赖，永久缓存」。看懂这三件事之后，那些 `t1..t17` 就只是被提升的表达式。真正的信息在原始结构里——状态图标的优先级（待切换 → 错误 → 禁用 → 启用）与类型标签的位置。
+- **断开连接要防的是自动重连**：先 `onclose = () => {}` 再关闭，否则客户端会立刻重连，等于断不掉。清状态时客户端、同前缀工具、同前缀命令三处一起清，少一处就留下幽灵条目。
+- **vim 范围计算有四种情况**：改词的特例（到词尾而非下个词首）、整行动作的扩展（带上结尾换行）、含尾动作的前进（只在向后选时做）、以及把范围推到图片占位符之外——最后这条是为了不让一次删除把占位符劈成两半。
+- **状态表的分界不是审美的**：`DeepImmutable` 只能包纯数据字段，含函数或可变结构的部分必须在交叉类型的另一半，否则类型系统会把 `Map`、`Set`、回调全部冻死。
+- **`getDefaultAppState` 是函数而不是常量**：多处初始化必须拿到互不共享的集合与映射；而它内部的惰性加载是为了破环——队友模块反过来要读应用状态，静态导入会成环。
+
+踩坑：
+
+- `UnifiedInstalledCell` 一处锚点顺序错：把 `(524,…)` 改成 `(505,…)` 时忘了移到 `(517,…)` 之前，预检报 `[order]`。**这是「改行号必须同时重排位置」这条规则的第一次复现**，上一批在 `commands.ts` 上刚犯过。
+- `install-github-app` 的「依赖表列全」注释落在 `}` 与 `}, [deps])` 之间——块末注脚扫描抓到。处置是并入 `useCallback` 起点的锚点，不再单列。**教训：讲回调依赖的注释要贴在回调开头，贴在结尾就变成块的脚注。**
+- `initReplBridge` 的「归档函数没有异常捕获」落在对象字面量的最后一个字段与 `.catch(` 之间，且与紧邻的英文注释完全重复。处置是删掉该锚点，把结论并进「归档超时一点五秒」那条。
+- `AppStateStore` 的「交叉类型分界」原本文案是「下面全是含函数或可变结构的字段」，但落位在 `}> & {` 之前的类型体内——描述「下面」而身在上半段末尾。改成收口式表述（上半段到此收口）才对得上位置。
+- 本轮 `annotate.py` 七次**零 `⟳`、零 `⚠`**，这是第一次整批没有自动纠正。
+
+流程账：7 个数据文件逐一对齐源文件；预检首轮 318 锚点报 1 项 `[order]`，修正后 316 锚点全过；`annotate.py` 七次零自动纠正；两项专项扫描（JSX 子元素区、块末注脚）抓到 3 处并已处置，余下 11 处命中全是 `} else` 分支注释，属预期；`check-fidelity.py` 全仓 **1513 份 0 失败**（较上批 +7）；`check-links.py` 源码链接 2388 条加内链 717 条，0 失效；全仓 **1513/1902 文件、463,754/513,237 行、90.4%**；`src/` 还剩 **389 份 / 49,483 行**。
+
+**下一批候选（500–560 行档，单批约 7 份）**：`commands/thinkback/thinkback.tsx`(554) · `bridge/sessionRunner.ts`(550) · `bridge/bridgeApi.ts`(539) · `commands/terminalSetup/terminalSetup.tsx`(531) · `bridge/bridgeUI.ts`(530) · `tasks/LocalShellTask/LocalShellTask.tsx`(523) · `buddy/sprites.ts`(514)（全仓还剩 389 份；600 行以上已清零，之后集中在 500–560）
