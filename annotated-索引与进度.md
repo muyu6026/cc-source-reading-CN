@@ -6200,3 +6200,36 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 84 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；`check-fidelity.py` 全仓 **1488 份 0 失败**；`check-links.py` 源码链接 2369 条加内链 707 条，0 失效；全仓 **1488/1902 文件、437,646/513,237 行、85%**；`src/` 还剩 **414 份**。
 
 **下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758) · `skills/loadSkillsDir.ts`(1,086)（全仓还剩 414 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+### src batch 140: native-ts/yoga-layout/index.ts (2578 src / 2742 annotated / 164 anchors)
+
+第二头巨兽：`src/native-ts/yoga-layout/index.ts`（2,578 行）。这是 Meta yoga（flexbox 布局引擎）的**纯 TypeScript 重写**，用来替换上游的 WASM 包。动机很直接：Ink 是终端 UI，一次布局要跑上千节点，跨 JS/WASM 边界的调用开销已经超过算法本身，所以整份重写成 JS。文件头用五个段落把「Ink 真用到的、为规范一致性实现但不用的、明确不实现的」三档特性列清楚，这是这类移植件最省事的维护手段。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`yoga-layout/index.ts`](annotated/src/native-ts/yoga-layout/index.ts) | 2,578→2,742 | 164 | yoga 的 TS 移植：Value/Edge 值模型、Node 的三层布局缓存、layoutNode 六步 flexbox 算法、多趟弹性长度解析、像素网格舍入 |
+
+要点：
+
+- **值模型与 NaN 哨兵**：`Value` 是「单位标记 + 数值」，缺失用 `Unit.Undefined` 而不是 undefined，数值位一律 NaN。`resolveValue` 是全文件唯一的像素求值点；`isDefined` 就是 `!isNaN`；`sameFloat` 把 NaN 与 NaN 视为相等——缓存比对必须用它，否则未定义尺寸的节点永远不命中。
+- **9 边塌缩到 4 边**：`Style` 保留 yoga 的 9 槽边数组（便于 setter 直接写下标），`resolveEdge` 用四层回退链（具体边 → 水平/垂直 → all → start/end）塌缩成物理值，之后全程只走 4 元组。
+- **三层布局缓存**（性能主体）：单槽 layout 缓存、4 槽多槽缓存（扁平 Float64Array，槽 i 占 `_cIn[i*8..]` 与 `_cOut[i*2..]`）、单槽 measure 缓存，外层还有 `computeFlexBasis` 的六字段 basis 缓存。**关键教训是输入与输出必须分开提交**：输入在 `layoutNode` 开头写、输出在算完后由 `commitCacheOutputs` 写，否则命中时返回的是上次调用残留的尺寸——那就是 scrollbox 视口高度 33→2624、滚动条归零、屏幕全黑的 bug。
+- **`isDirty_` 只在布局趟清除**：measure 趟在前、layout 趟在后，measure 阶段清脏会让后面的 layout 命中上一次布局的旧缓存（那时子节点还没插入），于是 ScrollBox 内容高度永不增长、粘性滚动跟不上新内容。
+- **代际戳代替脏标记做缓存闸门**：`_fbGen`/`_cGen` 记录写入时的 `_generation`，同代际的缓存天然新鲜（子树这一趟没变过），于是虚拟滚动全新挂载的脏项也能从第 2 次调用起命中——1593 节点树从 10.5 万次访问降到 1 万。
+- **`layoutNode` 六步**：STEP 1 算 flex-basis 并换行（用夹紧后的「假设主轴尺寸」判断，不是原始 basis）；STEP 2+3 逐行解析弹性长度并测交叉尺寸；STEP 4 定容器尺寸（AtMost 不是硬上限、只有 Scroll 才钳制）；STEP 5 定位（align-content 分多行空间、每行重新拉伸、justify-content 与 auto margin、基线对齐、relative 偏移、反向主轴从尾部倒推）；STEP 6 绝对定位子节点。
+- **多维「按需付代价」**：`_hasAutoMargin`/`_hasPosition`/`_hasPadding`/`_hasBorder`/`_hasMargin` 五个布尔把热点路径上的 1.1 万次边解析调用压成一次分支判断；`boundAxis` 的「两个 min/max 都没设」快速路径覆盖每趟 3.2 万次调用中的绝大多数；`resolveEdges4Into` 把 4 次调用的共享回退提到循环外并写入预分配数组。
+- **文本节点与其他节点舍入不同**（对齐上游 PixelGrid.cpp）：文本位置向下取整（换行文字绝不超过分配列）、宽度有小数则向上取整（避免裁掉最后一个字形），其余走四舍五入；宽高用「绝对右下角减绝对左上角」算，避免逐层累积漂移。
+- **`parseDimension` 把 Infinity 当未定义**：这不是防御性代码而是实际需求——Ink 传 `height={Infinity}` 表示不限制（LogSelector 的 maxHeight 默认值），存成字面点值会让节点高度变成无穷并摧毁下游布局。
+
+踩坑：
+
+- 数据文件名 slug 要把 `-` 也替换掉：`src_native_ts_yoga_layout_index_ts_p1.py`（`native-ts`、`yoga-layout` 各有一个连字符）。
+- 首次跑 `annotate.py` 报了 **1 个 `⚠`**：第 8 号 `after` 锚点落在文件头的块注释内部（`*   - flex-direction ...` 那行）。**教训**：`after` 锚点若指向块注释内的行，插入的 `//` 会劈开英文段落；判据是目标行以 `*` 或 `*/` 开头。改到 `*/` 之后（L40 `before`）才干净。
+- 另有 **2 个 `after` 落在语句与闭括号之间**（`_yogaLiveNodes++` 与 `roundValue` 的最后一条赋值），预检的 `aslot` 规则拦住并改为 `before`。这条规则是本批新加进预检脚本的。
+- 1 个无害 `⟳`：1356→1355，锚点原本落在 `// ownerW/H are the reference sizes...` 英文注释段中部，被自动挪到段边界。
+- 函数体内 `before` 锚点若前一行是空行，插入的注释会**顶格**（annotate 不做缩进对齐）。历史产物里两种风格并存（`bridgeMain.ts` 里 98 行带缩进、44 行顶格），不影响 `check-fidelity`，按既有惯例不追改。
+- `check-fidelity.py` 全仓 **1489 份 0 失败**；`check-links.py` 源码链接 2370 条加内链 708 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 164 锚点全过、0 块内违例（含升序、去重、英文双引号/反斜杠/换行、`before` 落块注释、`after` 落闭括号前六类新校验）；`annotate.py` 二次运行后零 `⚠`、一处 `⟳`；原文 2,578 行 → 批注版 2,742 行；`check-fidelity.py` 全仓 **1489 份 0 失败**；`check-links.py` 源码链接 2370 条加内链 708 条，0 失效；全仓 **1489/1902 文件、440,224/513,237 行、85%**；`src/` 还剩 **413 份 / 73,322 行**。
+
+**下一批候选（巨兽单批 1 份封顶）**：`bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758) · `skills/loadSkillsDir.ts`(1,086) · `commands/plugin/PluginSettings.tsx`(1,071)（全仓还剩 413 份；1,000 行档还有 `bridge/remoteBridgeCore.ts`、`native-ts/color-diff/index.ts`、`cli/transports/ccrClient.ts` 三份）。
