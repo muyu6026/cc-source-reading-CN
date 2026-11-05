@@ -1,5 +1,19 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 145 批（2026-11-05）：skills/loadSkillsDir.ts 巨兽（1,086 行，102 锚点）
+
+- 状态：完成并推送，commit `c1151af`。
+- 内容：技能装载器全逻辑。**双轨目录**（新式 `skills/` 只认 `目录名/SKILL.md`，遗留 `commands/` 两种都认）、五路并行加载（managed/user/project/additional/legacy，每路各自的门控）、按 `realpath` 去重（先并行算身份再同步 first-wins）、合并顺序即优先级、条件技能「分流+搬家」、会话内动态发现（向上走到 cwd 不含 cwd）、忽略库匹配路径。
+- **心脏是 `getPromptForCommand`**，四步顺序不可换：加目录前缀 → 参数替换 → 占位符替换（`${CLAUDE_SKILL_DIR}` Windows 反斜杠转正斜杠、`${CLAUDE_SESSION_ID}`）→ 决定是否执行内联 shell。
+- **安全边界两处**：① `loadedFrom !== 'mcp'`（MCP 技能远端不可信，正文内联 shell 一律不执行）；② 目录发现查 `isPathGitignored`（挡 `node_modules/pkg/.claude/skills`）。两处注释都写明「真正的安全边界是调用时的信任对话」。
+- **内联 shell 免弹窗的机制**：`getAppState` 被包一层，把技能声明的 `allowed-tools` 塞进 `alwaysAllowRules.command`。
+- **`--bare` 语义**：跳过全部自动发现、只加载显式 `--add-dir`，但技能锁仍生效——精简模式不是策略旁路。
+- **尾部三十行是依赖图注脚**：MCP 技能模块不能直接动态 import 本文件（一条边扇成多处环），也不能用变量拼的说明符（过得了 dep-cruiser，打包后运行时解析不到），改用叶子注册表写一次幂等。
+- 校验：预检 102 锚点全过；annotate 两次均零 `⚠` 零 `⟳`；fidelity 1494 份 0 失败；links 2376+714 0 失效。
+- **坑**：① 数据文件一处引号未闭合（`ast.parse` 立刻报出）；② 一处锚点落在 `}` 与 `} catch` 之间——**块末注脚扫描的正则要加 `catch` 分支才抓得到**（`^(\}|\)|\]|\}\),|\),|\],|catch)`）；挪到 `try {` 之前语义更准（兜住意外的是 try 不是 catch）。bslot 本批零复发。
+- 进度：全仓 1494/1902 文件、449,578/513,237 行、87%；src 剩 408 份 / 63,964 行。
+- 下批目标：`commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000) · `cli/transports/ccrClient.ts`(999) · `commands/plugin/ManageMarketplaces.tsx`(838) · `commands/plugin/BrowseMarketplace.tsx`(802)。
+
 ## 第 144 批（2026-11-05）：bootstrap/state.ts 巨兽（1,758 行，110 锚点）
 
 - 状态：完成并推送，commit `44cde3d`。
