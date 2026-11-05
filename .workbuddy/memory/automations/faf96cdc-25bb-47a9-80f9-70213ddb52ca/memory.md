@@ -1004,3 +1004,11 @@
 - 新坑（**块末注脚的第三种形态**）：**描述下一分支却站在上一分支末尾**——`} else if` 之前插的注释会被读成上一分支的总结。本轮 `validate.ts` 两处都是这个形态（196 与 220），处置是挪进 `} else if (...) {` 之后。第二种是 `return` 与 `} catch` 之间（stopHooks 456），挪进 catch 块内。**判据升级思路**：专项扫描里凡 `[TAIL]` 命中 `} else` / `} catch` / `{` 的，逐条看文案是否讲的是「接下来的分支」。
 - 另一条口径记录：`bridge.tsx` 末尾无换行（sourcemap 替换成两行注释后不带换行），`split(chr(10))-1` 会少算 1 行；用 `splitlines()` 才与 annotate 报的 548 一致。**交叉校验脚本要用 splitlines。**
 - 下一批目标（440–475 行档，单批约 7 份）：keybindings/loadUserBindings.ts(472) · commands/ultraplan.tsx(471) · history.ts(464) · bridge/bridgeMessaging.ts(461) · upstreamproxy/relay.ts(455) · skills/bundled/scheduleRemoteAgents.ts(447) · entrypoints/agentSdkTypes.ts(443)。
+
+## 第 152 批（2026-11-05）：370–475 行档七件套（键位热重载 + 超计划命令 + 历史存储 + 桥接消息层 + 上游代理隧道 + 定时远端代理 + SDK 类型门面）
+- 状态：完成并推送，commit `83118f3`（261ea7a..83118f3）。
+- 本批 7 份：`keybindings/loadUserBindings.ts`(472→509, 37)、`commands/ultraplan.tsx`(471→519, 47)、`history.ts`(464→511, 47)、`bridge/bridgeMessaging.ts`(461→505, 44)、`upstreamproxy/relay.ts`(455→505, 50)、`skills/bundled/scheduleRemoteAgents.ts`(447→479, 32)、`entrypoints/agentSdkTypes.ts`(443→483, 40)。合计 3,213 源行 / 3,511 批注版 / 297 锚点。
+- 主线：① **写稳定阈值要配小一个量级的轮询间隔**（500ms/200ms），否则观察不到静止过程；监听目录而非文件（删了重建会丢事件）；初始化标志在确认可监听后才置位。② **远端会再解析一遍提示词**——命令行在剥标签前做关键词识别，主提示词必须避开功能名。③ **脱离式轮询三守卫**：返回后重查任务状态、清地址比对本次 URL、失败路径自归档。④ **两条收尾路径互不抢占**：云端执行跳过归档（归档无运行中检查会杀执行），回传本地交给对话框，finally 只处理失败。⑤ **历史撤销要同时对付缓冲与磁盘**（时间戳跳过集，两条读取路径都遵守）；锁要先建文件；序列化在清空缓冲之前。⑥ **两种运行时写语义相反**：Bun 返回实际字节数需自排队，Node 自缓冲只报背压。⑦ **建连后禁发明文**（会破坏 TLS 流），两个收尾处理器都要被「首胜」标志挡住第二次。⑧ **模板为主体的文件要提前按「模板外可见节点」算锚点预算**。
+- 校验：预检首轮 309 报 3 项（1 处 `[split]` 解构劈开、2 处 `[bslot]` JSDoc 内部），修完再删模板内 10 条与重复 2 条 → 297 全过；annotate 七次 3 处 `⟳` 良性；专项扫描首轮抓 8 处块末注脚并全部处置（`} catch` 3、`} else` 1、`} finally` 2、回调参数之间 2），复扫零输出；fidelity **1534 份 0 失败**；links 2416 源链 + 721 内链 0 失效。全仓 **1534/1902 文件 / 474,139 行 / 92.4%**；src 剩 368 份 / 39,098 行。
+- 新坑（**块末注脚已成本批主要形态，8 处**）：判据升级——扫描命中 `} catch` / `} else` / `} finally` 时，先看中文讲的是括号里面还是外面的事；讲里面就挪进去。另：**以模板字符串为主体的文件（技能提示词）锚点预算要按「模板外语法节点」算**，否则会一次堆十几条外移到同一行（本批 scheduleRemoteAgents 首发 11 条）。
+- 下一批目标（370–442 行档，单批约 7 份）：types/permissions.ts(441) · cli/update.ts(422) · remote/SessionsWebSocket.ts(404) · screens/ResumeConversation.tsx(399) · types/textInputTypes.ts(387) · bridge/createSession.ts(384) · commands/copy/copy.tsx(371)。
