@@ -1,5 +1,14 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 142 批（2026-11-05）：commands/plugin/ManagePlugins.tsx 巨兽（2,215 行，84 锚点）
+
+- 状态：完成并推送，commit `f4d54ce`。
+- 内容：`/plugin` 主界面，一个组件 11 个视图。锚点分层：ViewState 11 变体联合（参数嵌进状态避免多个 useState 失步）、`unifiedItems` 五源合并（插件/内嵌 MCP/独立 MCP/失败插件/下架插件）+「插件与子 MCP 必须相邻」的分组保序排序、四动作权限闸门（内置只能启停、托管只能更新）、**enable/disable 刻意不传 scope**（installed_plugins.json 的作用域 ≠ 设置作用域，传了触发跨作用域保护）、卸载三道前置（项目级共享→转本地禁用确认页；有数据目录且最后作用域才问删除；从未真装→抹三个设置源的记录）、两种确认页输入机制差异（confirm-data-cleanup 必须原始 useInput：Confirmation 把回车映射成 confirm:yes 会让回车变成删数据的破坏性默认，且 n/esc 是不同动作）、latest-ref 自动动作。
+- 校验：预检 84 锚点全过；annotate 零 `⚠` 零 `⟳`；**JSX 子元素区专项扫描 84 条零命中**（判据：插入点前一行以 `>` 收尾且后一行以 `<` 开头）；fidelity 1491 份 0 失败；links 2372+710 0 失效。
+- 进度：全仓 1491/1902 文件、444,845/513,237 行、86%；src 剩 411 份 / 68,700 行。
+- 产物末尾 sourceMappingURL（本文件 232,956 字符）被替换成两行说明，所以「插入注释行数」比锚点数多 1——这是正常差值，不是漏锚。
+- 下批目标：`entrypoints/sdk/coreSchemas.ts`(1,890) · `bootstrap/state.ts`(1,759) · `skills/loadSkillsDir.ts`(1,087) · `commands/plugin/PluginSettings.tsx`(1,072) · `bridge/remoteBridgeCore.ts`(1,009) · `native-ts/color-diff/index.ts`(1,000)。
+
 ## 第 141 批（2026-11-05）：bridge/replBridge.ts 巨兽（2,406 行，170 锚点）
 
 - 状态：完成并推送，commit `59408ff`。
