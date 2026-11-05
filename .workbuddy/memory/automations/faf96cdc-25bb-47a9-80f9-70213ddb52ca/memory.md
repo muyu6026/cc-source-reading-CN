@@ -1022,3 +1022,10 @@
 - 另一条：**编译器产物的解构续行第三次踩到**——`}, setLoadResult] = useState(…)` 与 `} = await render(…)` 都命中 `[split]`，`before` 会劈开模式与赋值，改挂语句首行。
 - 行数口径补充：这些带 sourcemap 的文件末尾无换行，`split(chr(10))` 会少算 1 行；索引数字统一用 `splitlines()`。
 - 下一批目标（276–297 行档十件套）：commands/model/model.tsx(297) · commands/branch/branch.ts(296) · memdir/teamMemPaths.ts(292) · types/hooks.ts(290) · commands/compact/compact.ts(287) · upstreamproxy/upstreamproxy.ts(285) · commands/chrome/chrome.tsx(285) · skills/bundled/loremIpsum.ts(282) · cli/transports/HybridTransport.ts(282) · commands/mcp/addCommand.ts(280)。
+
+## 第 160 批（2026-11-06）：src 散件 197–210 行档十件套
+- 状态：完成并推送，commit `c97ac78`。
+- 本批 10 份（197–210 行档）：rate-limit-options.tsx(210) · trustedDevice(210) · bridgePointer(210) · spinnerVerbs(204) · parser(203) · bridgeEnabled(202) · AppState.tsx(200) · bridge-kick(200) · vim/types(199) · skillify(197)。合计 2,035 源行 / 2,147 批注版 / 110 锚点。
+- 进度：全仓 1611/1902 文件 / 495,983 行 / 96.6%；src 剩 291 份。
+- 校验：预检 110 锚点一次全过（bridgeEnabled 初版 `'BRIDGE_MODE'` 单引号嵌套被 ast.parse 拦下，改反引号后过）；annotate 十次 3 处良性 ⟳（trustedDevice // 段中部 39→44、bridge-kick/skillify 模板声明行 before 外移到模板前）、零 ⚠；fidelity 1611 份 0 失败；links 2483+728 0 失效。
+- 下一批目标（182–196 行档十件套）：keybindings/useKeybinding.ts(196) · entrypoints/mcp.ts(196) · skills/bundled/claudeApi.ts(196) · install-github-app/CheckExistingSecretStep.tsx(190) · context.ts(189) · remote-setup/remote-setup.tsx(187) · types/generated/.../timestamp.ts(187) · vim/textObjects.ts(186) · effort/effort.tsx(183) · remote-setup/api.ts(182)。
