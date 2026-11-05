@@ -1,5 +1,16 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 140 批（2026-11-05）：native-ts/yoga-layout/index.ts 巨兽（2,578 行，164 锚点）
+
+- 状态：完成并推送，commit `2970049`。
+- 内容：Meta yoga flexbox 引擎的纯 TS 重写（替代 WASM 包，动机是跨 JS/WASM 边界调用的开销超过算法本身）。锚点集中在算法阶段边界：值模型（Value/NaN 哨兵/`sameFloat`）、9 边塌缩 4 边（四层回退链）、三层布局缓存 + basis 缓存（输入输出必须分开提交）、`layoutNode` 六步、多趟弹性长度解析（§9.7 冻结法）、绝对定位五分支、像素网格舍入（文本与其他节点不同）、`parseDimension` 把 Infinity 当未定义。
+- 校验：预检 164 锚点全过（含新加的升序/去重/换行/`before` 落块注释/`after` 落闭括号前五类断言）；annotate 二次运行后零 `⚠`、一处无害 `⟳`（1356→1355）；check-fidelity 1489 份 0 失败；check-links 2370+708 0 失效。
+- 进度：全仓 1489/1902 文件、440,224/513,237 行、85%；src 剩 413 份 / 73,322 行。
+- **新坑（会复发）**：`after` 锚点若指向**块注释内部**的行（以 `*` 或 `*/` 开头），插入的 `//` 会劈开英文段落——annotate 报 `⚠`。本批第 8 号锚点原想挂在文件头 `- flex-direction ...` 那行后，实际落在 `/** ... */` 里，改到 `*/` 之后（L40 `before`）才干净。判据已写进 `_precheck_140.py` 的 `bslot` 规则。
+- 另一类：`after` 落在「语句行与紧跟的 `}` 之间」读起来别扭（本批 2 处），预检用 `aslot` 规则拦下改 `before`。
+- 预检脚本沿用「单文件版」：`_precheck_140.py` 在 `precheck_run.py` 结构上加了升序、去重、换行、长度、落位五类断言，后续巨型单文件批次可直接改 BATCH 复用。
+- 下批目标：`bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758) · `skills/loadSkillsDir.ts`(1,086) · `commands/plugin/PluginSettings.tsx`(1,071)。巨兽单批 1 份封顶。
+
 ## 第 133 批（2026-11-04）：components 收尾清零（34 文件 953 行，130 锚点）
 
 - 状态：完成并推送，commit `084d2c8`。**components 目录自此 389/389 全清（81,892 行）**。
