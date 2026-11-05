@@ -6172,3 +6172,31 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账：1 个数据文件对齐源文件；预检 64 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；`check-fidelity.py` 全仓 **1487 份 0 失败**；`check-links.py` 源码链接 2368 条加内链 706 条，0 失效；全仓 **1487/1902 文件、434,647/513,237 行、84%**；`src/` 还剩 **415 份**。
 
 **下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`bridge/bridgeMain.ts`(2,999) · `native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758)（全仓还剩 415 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。
+
+### src batch 139: bridgeMain.ts (2999 src / 3083 annotated / 84 anchors)
+
+`services/` `tools/` `hooks/` `components/` `ink/` 均已清零，`src/` 散件阶段（巨兽单批 1 份封顶）。本批单啃一头巨兽：`src/bridge/bridgeMain.ts`（2,999 行，全仓现存最大级单文件之一），它是 Claude Code `remote-control`（远程控制桥）的核心——把本地环境注册到云端、轮询服务端下发的「工作项」并在本机派生会话子进程、心跳保活、错误退避、优雅关闭；另有无界面守护进程 worker 变体。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridgeMain.ts`](annotated/src/bridge/bridgeMain.ts) | 2,999→3,083 | 84 | remote-control 桥：runBridgeLoop 轮询与工作分发引擎、bridgeMain CLI 入口、runBridgeHeadless 守护进程 worker 变体 |
+
+要点：
+
+- **配置与退避基线**：`BackoffConfig` 与 `DEFAULT_BACKOFF` 定义连接与通用两套独立的指数退避（首跳 2s 与 0.5s、封顶 2min 与 30s、放弃 10min）；`pollSleepDetectionThresholdMs` 取连接封顶两倍作为休眠唤醒阈值，机器睡过觉就重置错误预算。
+- **轮询循环 `runBridgeLoop`（约 1,460 行）**：拉取 `pollForWork` 后按 `work.data.type` 分流（healthcheck 仅 ACK、session 生成或复用、default 忽略未知）；达容量时进入「非独占心跳模式」只发心跳不轮询，按截止时间或容量唤醒信号跳出；连接与通用错误各走独立退避轨道并检测系统休眠；循环退出后 SIGTERM 等待宽限期再 SIGKILL 优雅关闭活跃会话、stopWork 通知服务端、归档并注销环境。
+- **会话生命周期**：`safeSpawn` 把派生失败转成字符串便于区分；`onSessionTimeout` 看门狗杀掉的会话记为 failed 而非 interrupted；`onSessionDone` 统一清理状态、停止工作项、归档或拆除环境；多会话完成后回到空闲继续轮询，单会话则 abort 干净退出。
+- **CCR v2 与令牌刷新**：`secret.use_code_sessions` 走 CCR v2（注册为 worker、取 epoch、指向 /v1/code/sessions），v1 用 Session-Ingress WebSocket；`tokenRefresh` 在 JWT 过期前 5 分钟刷新，v2 走 `reconnectSession` 触发服务端重投递，避免 5h 静默死亡。
+- **CLI 入口 `bridgeMain`**：解析参数（`parseArgs` 支持 --spawn、--capacity、--session-id、--continue）、校验信任对话框与登录、`KAIROS` 门控的多会话与续接特性、注册环境、预建空会话、`w` 键在 same-dir 与 worktree 间切换并持久化、崩溃恢复指针每小时刷新。
+- **无界面变体 `runBridgeHeadless`**：守护进程 worker 入口，无 readline、无 TUI、无 process.exit，配置与认证来自调用方（daemon.json 或 IPC），致命错误抛出让 worker 映射退出码；`createHeadlessBridgeLogger` 把 BridgeLogger 全部方法收敛到单个行日志函数。
+
+踩坑：
+
+- 数据文件名带完整相对路径 slug：`src_bridge_bridgeMain_ts_p1.py`（含 `src/` 前缀），与 `annotate.py` 的 `load_annotations` 派生规则一致。
+- 预检 84 锚点全过、0 块内违例、0 个英文双引号与反斜杠、`ast.parse` 全过。
+- `annotate.py` 零 `⟳`、零 `⚠`：84 处锚点全部落在函数或类型收尾行、签名前、或段注释之后，未触发块注释内与模板字符串外移。
+- `check-fidelity.py` 全仓 **1488 份 0 失败**（`OK*` 正常，sourceMappingURL 省略已计入）；`check-links.py` 源码链接 2369 条加内链 707 条，0 失效。
+
+流程账：1 个数据文件对齐源文件；预检 84 锚点全过、0 块内违例；`annotate.py` 零 `⚠`、零 `⟳`；`check-fidelity.py` 全仓 **1488 份 0 失败**；`check-links.py` 源码链接 2369 条加内链 707 条，0 失效；全仓 **1488/1902 文件、437,646/513,237 行、85%**；`src/` 还剩 **414 份**。
+
+**下一批候选（巨兽仍在榜首，单批 1 份封顶）**：`native-ts/yoga-layout/index.ts`(2,578) · `bridge/replBridge.ts`(2,406) · `commands/plugin/ManagePlugins.tsx`(2,214) · `entrypoints/sdk/coreSchemas.ts`(1,889) · `bootstrap/state.ts`(1,758) · `skills/loadSkillsDir.ts`(1,086)（全仓还剩 414 份；巨兽单批 1 份封顶，清完后再回头扫 800–1,000 行档的 `commands/plugin`、`cli/transports` 集群）。

@@ -862,3 +862,19 @@
 - **`source/` 真路径是 `source/src/...`**：相对路径 `src/...` 是 `source/` 之下的二级目录；`ls source/cli/print.ts` 会找不到，要 `source/src/cli/print.ts`。
 - **components 这批全是 React 编译器产物（react/compiler-runtime 的 `_c(N)` 缓存 + `//# sourceMappingURL` 巨行）**：无 `//` 注释段、无多行模板，锚点只落函数签名行（`before`）与语句/收尾行（`after`），十五次零 `⟳` 零 `⚠`；巨行 sourcemap 由 annotate.py 自动省略并补 2 行说明（批注版行数 = 源 -15 + 42 + 30）。
 - **预检脚本 ROOT 用 `D:/...` 而非 `/d/`**：混用分隔符会让 `os.path.exists` 误判（历史踩过）。
+
+## 第 138 批（2026-11-05）：src 散件阶段首啃巨兽 insights.ts
+- 状态：完成并推送，commit `4f8a501`（d6130d3..4f8a501）。
+- 本批：`src/commands/insights.ts`（3,200→3,264 行，64 锚点）。`/insights` 命令核心：ant 环境远程 homespace 采集、SessionMeta/SessionFacets/AggregatedData 三套数据契约、extractToolStats 逐消息统计、facet 抽取+缓存闭环（0o600）、detectMultiClauding 多开检测、6 段并行洞察生成、HTML 报告总装、generateUsageReport 四阶段主流程。
+- 进度：全仓 **1487/1902 文件 / 434,647 行 / 84%**；src 剩 415 份。hooks/utils/components 早已全清，现处于 `src/` 散件（巨兽）阶段。
+- 校验：预检 64 锚点全过、0 英文引号/反斜杠；annotate.py 零 `⟳` 零 `⚠`；check-fidelity 1487 份 0 失败；check-links 2368 源链 + 706 内链 0 失效。
+- 决策：巨兽（>3000 行）单批 1 份封顶——3200 行全文进上下文已占满令牌预算，2 头巨兽同批会溢出；下一个是 bridgeMain.ts(2999)。
+- 下一批目标（巨兽降序）：bridge/bridgeMain.ts(2999) · native-ts/yoga-layout/index.ts(2578) · bridge/replBridge.ts(2406) · commands/plugin/ManagePlugins.tsx(2214) · entrypoints/sdk/coreSchemas.ts(1889) · bootstrap/state.ts(1758)。
+
+## 第 139 批（2026-11-05）：src 散件阶段第二头巨兽 bridgeMain.ts
+- 状态：完成并推送，commit `（本批提交）`。
+- 本批：`src/bridge/bridgeMain.ts`（2,999→3,083 行，84 锚点）。remote-control 桥核心：runBridgeLoop 轮询/工作分发引擎（约 1460 行）、bridgeMain CLI 入口、runBridgeHeadless 守护进程 worker 变体；含 CCR v2 注册、JWT 主动刷新、会话生命周期、SIGTERM→宽限期→SIGKILL 优雅关闭、w 键切换生成模式、崩溃恢复指针。
+- 进度：全仓 **1488/1902 文件 / 437,646 行 / 85%**；src 剩 414 份。hooks/utils/components/ink 早已全清，现处于 `src/` 散件（巨兽）阶段。
+- 校验：预检 84 锚点全过、0 英文引号/反斜杠；annotate.py 零 `⟳` 零 `⚠`；check-fidelity 1488 份 0 失败；check-links 2369 源链 + 707 内链 0 失效。
+- 决策延续：巨兽（2999 行，略低于 3000 阈值）单批 1 份封顶——与 insights.ts(3200) 同档；下一批 yoga-layout/index.ts(2578)。
+- 下一批目标（巨兽降序）：native-ts/yoga-layout/index.ts(2578) · bridge/replBridge.ts(2406) · commands/plugin/ManagePlugins.tsx(2214) · entrypoints/sdk/coreSchemas.ts(1889) · bootstrap/state.ts(1758) · skills/loadSkillsDir.ts(1086)。
