@@ -7325,3 +7325,44 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 170 批）：15 个数据文件逐一对齐源文件；预check 81 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，零 `⟳` 零 `⚠`（修完块注释 / 重复锚点后复跑通过）；check-fidelity 全仓 1743 份 0 失败（较上批 +15）；check-links 2610 源码链 + 738 内链 0 失效；全仓 1743/1902 文件、510,208/513,237 行、99%（按行数）；`src/` 还剩 159 份 / 约 3,033 行（59 行档已清零，52 行以上全清零，下一档起点 51 行）。
 
 **下一批候选（51→43 行档，单批约 15 份）**：`migrations/resetProToOpusDefault.ts`(51) · `migrations/resetAutoModeOptInForDefaultOffer.ts`(51) · `commands/pr_comments/index.ts`(50) · `commands/release-notes/release-notes.ts`(50) · `commands/sandbox-toggle/index.ts`(50) · `bridge/bridgeConfig.ts`(48) · `migrations/migrateSonnet1mToSonnet45.ts`(48) · `tasks/types.ts`(46) · `query/config.ts`(46) · `migrations/migrateFennecToOpus.ts`(45) · `constants/figures.ts`(45) · `cli/transports/transportUtils.ts`(45) · `skills/mcpSkillBuilders.ts`(44) · `types/ids.ts`(44) · `bridge/bridgePermissionCallbacks.ts`(43)（`src/` 还剩 159 份 / 约 3,033 行；59 行档已清零，52 行以上全清零，下一档起点 51 行）
+
+### src batch 171: 44-52 line tier, 15 files (715 src, 893 annotated, 178 anchors)
+
+44–52 行档（接第 170 批下沿，补入被漏列的 52 行档 betas.ts + 清零 51–44 行档的 14 份散件）：beta 头常量清单、四类一次性迁移脚本、/release-notes 与 /pr_comments 两个命令、/sandbox 命令外壳、bridge 鉴权/URL 集中层、任务状态联合类型与后台守卫、query 配置快照、终端符号常量表、传输层选择、MCP 技能注册表、会话/智能体 ID 品牌类型。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`constants/betas.ts`](annotated/src/constants/betas.ts) | 52→76 | 24 | beta 头常量清单（按「能力名+日期」命名，多数按开关启用）：Bedrock/Vertex 特殊下发规则 |
+| [`migrations/resetAutoModeOptInForDefaultOffer.ts`](annotated/src/migrations/resetAutoModeOptInForDefaultOffer.ts) | 51→63 | 12 | 一次性迁移：清空旧 AutoMode 弹窗用户的 skipAutoPermissionPrompt 让新版选项浮现（幂等、ant 内部、完成标志存全局配置） |
+| [`migrations/resetProToOpusDefault.ts`](annotated/src/migrations/resetProToOpusDefault.ts) | 51→66 | 15 | 一次性迁移：Pro 用户默认模型迁到 Opus 4.5（第一方+Pro 才动，其余标记完成跳过） |
+| [`commands/release-notes/release-notes.ts`](annotated/src/commands/release-notes/release-notes.ts) | 50→62 | 12 | /release-notes 命令：500ms 超时拉取变更日志，失败回退本地缓存 |
+| [`commands/pr_comments/index.ts`](annotated/src/commands/pr_comments/index.ts) | 50→55 | 5 | /pr_comments 命令：迁到插件，市场私有期提示词指导 gh 拉取 PR 评论（模板不可注） |
+| [`commands/sandbox-toggle/index.ts`](annotated/src/commands/sandbox-toggle/index.ts) | 50→65 | 15 | /sandbox 命令：动态 description getter 拼装图标+文案，隐藏/立即执行/懒加载 |
+| [`migrations/migrateSonnet1mToSonnet45.ts`](annotated/src/migrations/migrateSonnet1mToSonnet45.ts) | 48→58 | 10 | 一次性迁移：sonnet[1m] 固定为 sonnet-4-5-20250929[1m]（用户层设置+内存覆盖） |
+| [`bridge/bridgeConfig.ts`](annotated/src/bridge/bridgeConfig.ts) | 48→58 | 10 | bridge 鉴权/URL 解析集中层：ant 内部 env 覆盖优先，否则 OAuth 钥匙串/生产配置 |
+| [`tasks/types.ts`](annotated/src/tasks/types.ts) | 46→56 | 10 | 全部任务状态联合类型 + 后台任务守卫 isBackgroundTask（类型收窄） |
+| [`query/config.ts`](annotated/src/query/config.ts) | 46→58 | 12 | query() 入口一次性快照的不可变配置 QueryConfig（运行期门，刻意排除 feature() 门） |
+| [`migrations/migrateFennecToOpus.ts`](annotated/src/migrations/migrateFennecToOpus.ts) | 45→55 | 10 | 一次性迁移：fennec 别名映射到 Opus 4.6（四条规则，仅用户层、幂等） |
+| [`constants/figures.ts`](annotated/src/constants/figures.ts) | 45→55 | 10 | 终端符号常量表（按平台/分组：状态/媒体/MCP/审查/旗标/引用/桥接） |
+| [`cli/transports/transportUtils.ts`](annotated/src/cli/transports/transportUtils.ts) | 45→58 | 13 | 按 URL 与环境变量选择传输层（SSE > Hybrid > WebSocket） |
+| [`skills/mcpSkillBuilders.ts`](annotated/src/skills/mcpSkillBuilders.ts) | 44→52 | 8 | MCP 技能发现所需两函数的写一次注册表（依赖图叶子，破循环） |
+| [`types/ids.ts`](annotated/src/types/ids.ts) | 44→56 | 12 | 会话/智能体 ID 品牌类型（编译期防混用）+ 转换/校验函数 |
+
+要点：
+
+- **本批是 src 散件收尾的「常量/配置/迁移/命令外壳/类型」最小文件档（44–52 行）**，多为纯常量、类型定义、一次性迁移脚本或命令外壳，彼此无重依赖。
+- **一次性迁移脚本的共性：幂等 + 只在特定来源动手**：resetProToOpus 只读 userSettings 且不匹配即跳过；resetAutoMode 把完成标志存全局配置（跨设置重置保留）；migrateSonnet1m/migrateFennec 都只动 userSettings 同源读写保证幂等——「跑一次就退场」的脚本要把「已经满足」也当正常路径。
+- **两类集中层**：bridgeConfig 把十余处 ant 内部 env 覆盖收敛成两个 Override getter + 两个解析函数（开发覆盖优先、否则 OAuth/生产）；query/config 把 query() 入口的不可变快照与运行期门拆出来，刻意排除 feature() 门以保摇树死代码消除。
+- **编译期安全两种手段**：ids 用 branded types 防 sessionId/agentId 混用；tasks/types 用 TaskState 联合 + isBackgroundTask 类型守卫做运行时收窄。
+- **命令外壳两形态**：release-notes 自己跑 fetch+格式化；pr_comments 把提示词整体塞进模板交给插件（模板内是禁区，锚点只落在外壳结构行）。
+
+踩坑：
+
+- **多行赋值劈开 7 处（betas×4、tasks/types×2、transportUtils×1）**：锚点落在以 `=` 结尾的多行赋值首行（如 `export const X =`、`sseUrl.pathname =`、`export type X =`），判据 5（不劈开未结束的多行表达式）初跑 fidelity 报 3 文件失败；全部移到赋值收尾行（值行/联合末行）后复跑通过——与第 168 批同款教训：跨行 `const x =`（含三元/对象字面量/联合类型）首行绝不放 after。
+- **3 处良性 `⟳`（betas 10→12、tasks/types 1→2、transportUtils 24→25）**：锚点落在 `//` 注释段中部，annotate 自动挪到段边界（工具搜索说明块 / 文件头注释块 / sdk-url 注释块之后），已 grep 确认落点通顺、未劈开英文。
+- **模板字符串不可注（pr_comments）**：第 13–46 行整段多行模板，按规则锚点只落在外壳结构行（import/导出/函数声明/数组收尾），模板内部由「不在其内落锚」原则保护。
+- **预检 178 锚点一次全过（修完 7 处 split 后零错零警）**，零 `⟳`-外风险。
+
+流程账（第 171 批）：15 个数据文件逐一对齐源文件（52 行档 betas.ts 补入 + 51–44 行档 14 份散件）；预check 178 锚点全过（ast.parse、行界、重复、禁字符、升序、bslot、split、TAIL——修完 7 处 after 落 `=` 首行的 split 后零错零警）；annotate 十五次，3 处良性 `⟳`（注释段边界自动挪移），零 `⚠`；check-fidelity 全仓 1758 份 0 失败（较上批 +15）；check-links 2625 源码链 + 739 内链 0 失效；全仓 1758/1902 文件、510,923/513,237 行、99%（按行数）；`src/` 还剩 144 份 / 约 2,314 行（52 行档已清零，44 行以上全清零，下一档起点 43 行）。
+
+**下一批候选（43→33 行档，单批约 15 份）**：`bridge/bridgePermissionCallbacks.ts`(43) · `migrations/migrateOpusToOpus1m.ts`(43) · `commands/thinkback-play/thinkback-play.ts`(43) · `tasks/LocalShellTask/guards.ts`(41) · `query/deps.ts`(40) · `migrations/migrateBypassPermissionsAcceptedToSettings.ts`(40) · `tasks.ts`(39) · `commands/vim/vim.ts`(38) · `context/mailbox.tsx`(38) · `commands/upgrade/upgrade.tsx`(38) · `buddy/prompt.ts`(36) · `bridge/replBridgeHandle.ts`(36) · `skills/bundled/claudeInChrome.ts`(34) · `state/store.ts`(34) · `commands/exit/exit.tsx`(33)（`src/` 还剩 144 份 / 约 2,314 行；52 行档已清零，44 行以上全清零，下一档起点 43 行）
