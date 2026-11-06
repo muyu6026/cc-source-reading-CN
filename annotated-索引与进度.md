@@ -7464,3 +7464,39 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 **下一批候选（19→13 行档，单批约 15 份）**：`commands/rate-limit-options/index.ts`(19) · `commands/reload-plugins/index.ts`(18) · `commands/thinkback-play/index.ts`(17) · `commands/extra-usage/extra-usage.tsx`(17) · `commands/heapdump/heapdump.ts`(17) · `commands/extra-usage/extra-usage-noninteractive.ts`(16) · `commands/color/index.ts`(16) · `commands/stickers/stickers.ts`(16) · `commands/model/index.ts`(16) · `commands/session/index.ts`(16) · `commands/upgrade/index.ts`(16) · `commands/copy/index.ts`(15) · `commands/remote-env/index.ts`(15) · `commands/install-github-app/CheckGitHubStep.tsx`(15) · `commands/compact/index.ts`(15)（`src/` 还剩 99 份 / 约 975 行；24 行档已清零，19 行以上全清零，下一档起点 19 行）
 
+## src batch 175: 19-15 line tier, 15 files (244 src, 302 annotated, 58 anchors)
+
+本批是 `src/` 散件收尾的「最小命令件专场」续集——15 份全部 ≤19 行，主题集中在「命令元数据壳与实现体 / 双入口命令 / 隐藏动画与贴纸 / 远端环境 / 错误标识常量」，全部是 `satisfies Command` 收口 + 懒加载实现的同构模式：
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/rate-limit-options/index.ts`](annotated/src/commands/rate-limit-options/index.ts) | 19→23 | 4 | `/rate-limit-options` 元数据壳：仅订阅用户可见、隐藏命令，懒加载实现 |
+| [`commands/reload-plugins/index.ts`](annotated/src/commands/reload-plugins/index.ts) | 18→22 | 4 | `/reload-plugins` 三层刷新命令元数据；SDK 调用者改用 `query.reloadPlugins()` 控制请求 |
+| [`commands/heapdump/heapdump.ts`](annotated/src/commands/heapdump/heapdump.ts) | 17→21 | 4 | 堆转储命令实现：调 `performHeapDump` 生成堆与诊断文件，成功返回两路径 |
+| [`commands/extra-usage/extra-usage.tsx`](annotated/src/commands/extra-usage/extra-usage.tsx) | 17→21 | 4 | `/extra-usage` 交互入口：跑用量统计，未登录则渲染登录组件（含 base64 sourcemap，批注版保留） |
+| [`commands/thinkback-play/index.ts`](annotated/src/commands/thinkback-play/index.ts) | 17→21 | 4 | /thinkback-play 隐藏命令：仅播放动画，由 thinkback 技能在生成完成后调用 |
+| [`commands/stickers/stickers.ts`](annotated/src/commands/stickers/stickers.ts) | 16→20 | 4 | `/stickers` 命令：打开贴纸商城页面，失败回退带地址的提示 |
+| [`commands/extra-usage/extra-usage-noninteractive.ts`](annotated/src/commands/extra-usage/extra-usage-noninteractive.ts) | 16→20 | 4 | `/extra-usage` 非交互版：返回纯文本提示，按是否打开浏览器组织文案 |
+| [`commands/color/index.ts`](annotated/src/commands/color/index.ts) | 16→20 | 4 | `/color` 元数据壳：设置 prompt 颜色、立即执行，懒加载（`/* */` 头，批注落块外） |
+| [`commands/session/index.ts`](annotated/src/commands/session/index.ts) | 16→20 | 4 | `/session`（别名 `remote`）：仅远程模式显示会话 URL 与二维码 |
+| [`commands/model/index.ts`](annotated/src/commands/model/index.ts) | 16→20 | 4 | `/model`：动态描述当前模型，是否立即执行由通用工具判断 |
+| [`commands/upgrade/index.ts`](annotated/src/commands/upgrade/index.ts) | 16→20 | 4 | `/upgrade`：升级到 Max，仅 `claude-ai` 渠道、非企业版 |
+| [`commands/compact/index.ts`](annotated/src/commands/compact/index.ts) | 15→19 | 4 | `/compact`：压缩会话保留摘要，可带自定义指令，非交互可用 |
+| [`commands/copy/index.ts`](annotated/src/commands/copy/index.ts) | 15→19 | 4 | `/copy` 元数据壳：复制最近回复到剪贴板，懒加载（`/* */` 头，批注落块外） |
+| [`commands/remote-env/index.ts`](annotated/src/commands/remote-env/index.ts) | 15→19 | 4 | `/remote-env`：配置 teleport 默认远端环境，订阅且策略允许 |
+| [`constants/errorIds.ts`](annotated/src/constants/errorIds.ts) | 15→17 | 2 | 错误标识常量文件：混淆编号追踪 `logError` 来源，单 const 导出便于死代码消除 |
+
+- **命令双件与单件同构**：`/extra-usage` 再次拆成「`extra-usage.tsx` 交互入口 + `extra-usage-noninteractive.ts` 非交互纯文本」两件套，与早前 `/cost`、`/passes`、`/context` 同构；其余 12 份全是「元数据壳：类型 + 名称 + 描述 + 懒加载入口 + `satisfies Command` 收口」，靠 `isHidden` / `isEnabled` / `get description()` / `get immediate()` 做动态资格与文案。
+- **三条动态资格条件**：订阅判断（`isClaudeAISubscriber`）、企业版排除（`getSubscriptionType() !== 'enterprise'`）、策略门禁（`isPolicyAllowed('allow_remote_sessions')`）组合出「远程会话 / 升级 / 用量」三类命令的可见性；`session` 与 `remote-env` 都用 `get isHidden()` 反向隐藏，满足时才显形。
+- **两份 `/* */` 头自动落块外**：`color/index.ts` 与 `copy/index.ts` 的文件头 JSDoc 用 `(1,'after')` 锚点，由 annotate 自动挪到块注释之后（grep 确认落点通顺）；`errorIds.ts` 的 `Next ID: 346` 头注释同样用 `(1,'after')`，批注落块后、常量定义前。
+
+踩坑：
+
+- **零 `⟳` 零 `⚠` 零块注释内中文**：14 份锚点全部落在代码语句行 / 函数收尾行 / 对象字面量 `{` 起始行 / 多行注释段尾（`thinkback-play` 的 `//` 段用 `after_block`），未触发任何结构性保护；`extra-usage.tsx` 的 base64 sourcemap 行因不足 4000 字符被保留（fidelity 判定 0 失败，标 `OK` 而非 `OK*`）。
+- **判据 5 前置规避**：本批刻意不把 `after` 落在以 `=` 结尾的多行首行（如 `upgrade.ts` 的 `isEnabled: () =>` 跨行表达式、`model.ts` 的 `get description()` 返回模板串），统一锚到收尾行或属性行，fidelity 初跑即 0 失败、无需回修。
+- **小文件密度**：15 份 ≤19 行，单份锚点 2–4 个、合计 58，密度克制，避免把一句话的命令壳拆碎。
+
+流程账（第 175 批）：15 个数据文件逐一对齐源文件；预check 58 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 十五次，零 `⟳` 零 `⚠`；check-fidelity 全仓 1818 份 0 失败（较上批 +15）；check-links 2670 源码链 + 743 内链 0 失效；全仓 1818/1902 文件、512,506/513,237 行、99%（按行数）；`src/` 还剩 84 份 / 约 731 行（19 行档已清零，下一档起点 15 行）。
+
+**下一批候选（15→13 行档，单批约 15 份）**：`commands/install-github-app/CheckGitHubStep.tsx`(15) · `commands/login/index.ts`(14) · `commands/review/ultrareviewEnabled.ts`(14) · `commands/branch/index.ts`(14) · `commands/privacy-settings/index.ts`(14) · `commands/keybindings/index.ts`(13) · `commands/install-github-app/index.ts`(13) · `commands/effort/index.ts`(13) · `commands/rewind/rewind.ts`(13) · `commands/hooks/hooks.tsx`(13) · `commands/rewind/index.ts`(13) · `skills/bundled/verifyContent.ts`(13) · `commands/thinkback/index.ts`(13) · `commands/chrome/index.ts`(13) · `commands/btw/index.ts`(13)（`src/` 还剩 84 份 / 约 731 行；19 行档已清零，下一档起点 15 行）
+
