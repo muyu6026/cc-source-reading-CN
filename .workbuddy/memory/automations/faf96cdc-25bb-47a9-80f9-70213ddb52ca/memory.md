@@ -1,5 +1,14 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 174 批（2026-11-06）：src 散件收尾 24→19 行档 15 件套（335 源行 / 386 批注版 / 51 锚点）
+
+- 状态：完成并推送，commit `5a6f4bf`（7440e56..5a6f4bf）。
+- 内容：src 散件最小文件档——`/passes` 双件（入口 passes.tsx + 壳 index.ts）、`/cost` 双件（实现 cost.ts + 壳 index.ts）、`/context` 双入口、单命令壳五份（/statusline、/terminal-setup、/version、/voice、/web-setup）、`replLauncher.tsx` 启动器、`costHook.ts` 成本 Hook、`plugins/bundled/index.ts` 内置插件脚手架、`migrations/...ReplBridgeEnabled...` 配置键迁移。
+- 校验：预检 51 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 十五次零 `⟳` 零 `⚠`；fidelity 全仓 1803 份 0 失败；links 2670 源链 + 743 内链 0 失效。
+- 坑：两份 `/* */` 头（bundled/index.ts、cost/index.ts）的 `(1,'after')` 锚点由 annotate 自动挪到块注释之后（grep 确认通顺）；判据 5 前置规避——`after` 不落以 `=`/`?` 结尾的多行首行，统一锚到收尾行或 `{` 起始行，初跑即 0 失败。
+- 进度：全仓 1803/1902 文件、512,262/513,237 行、99%；src 剩 99 份 / 约 975 行（24 行档清零，19 行档新下沿）。
+- 下批目标（19→13 行档）：`commands/rate-limit-options/index.ts`(19) · `commands/reload-plugins/index.ts`(18) · `commands/thinkback-play/index.ts`(17) · `commands/extra-usage/extra-usage.tsx`(17) · `commands/heapdump/heapdump.ts`(17) · `commands/extra-usage/extra-usage-noninteractive.ts`(16) · `commands/color/index.ts`(16) · `commands/stickers/stickers.ts`(16) · `commands/model/index.ts`(16) · `commands/session/index.ts`(16) · `commands/upgrade/index.ts`(16) · `commands/copy/index.ts`(15) · `commands/remote-env/index.ts`(15) · `commands/install-github-app/CheckGitHubStep.tsx`(15) · `commands/compact/index.ts`(15)。
+
 ## 第 170 批（2026-11-06）：src 散件收尾 38–59 行档 15 件套（842 源行 / 81 锚点）
 
 - 状态：完成并推送，commit `24dd937`（a57261f..24dd937）。
