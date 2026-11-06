@@ -7428,3 +7428,39 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 **下一批候选（24→17 行档，单批约 15 份）**：`commands/passes/passes.tsx`(24) · `commands/statusline.tsx`(24) · `commands/cost/cost.ts`(24) · `commands/context/index.ts`(24) · `replLauncher.tsx`(23) · `commands/terminalSetup/index.ts`(23) · `plugins/bundled/index.ts`(23) · `commands/cost/index.ts`(23) · `costHook.ts`(22) · `commands/version.ts`(22) · `migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.ts`(22) · `commands/passes/index.ts`(22) · `commands/remote-setup/index.ts`(20) · `commands/voice/index.ts`(20) · `commands/files/files.ts`(19)（`src/` 还剩 114 份 / 约 1,310 行；33 行档已清零，24 行以上全清零，下一档起点 24 行）
 
+## 第 174 批（2026-11-06）：24→19 行档十五件套（/passes 双件 / /cost 双件 / /context 双入口 / /statusline / /terminal-setup / /version / /voice / /web-setup / /files / REPL 启动器 / 成本 Hook / 内置插件脚手架 / 配置键迁移）
+
+本批是 `src/` 散件收尾的「最小命令件专场」——15 份全部 ≤24 行，主题高度集中在「命令元数据壳与实现体 / 双入口命令 / 启动器与 Hook / 内置插件脚手架 / 一次性配置迁移」，彼此独立但共同补齐命令表的最后几块拼图：
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/passes/passes.tsx`](annotated/src/commands/passes/passes.tsx) | 24→27 | 3 | `/passes` 入口：首次访问写标记 + 上报埋点 + 挂载卡券界面 |
+| [`commands/statusline.tsx`](annotated/src/commands/statusline.tsx) | 24→28 | 4 | `/statusline` 命令：prompt 类型 + 预授权 `Read`/`Edit`，用子代理按 PS1 生成状态栏 |
+| [`commands/context/index.ts`](annotated/src/commands/context/index.ts) | 24→27 | 3 | `/context` 双入口：交互彩色网格 / 非交互纯文本，靠 `isHidden`/`isEnabled` 互斥 |
+| [`commands/cost/cost.ts`](annotated/src/commands/cost/cost.ts) | 24→28 | 4 | `/cost` 实现体（懒加载）：订阅分支文案 + 内部员工强制显示成本 |
+| [`commands/terminalSetup/index.ts`](annotated/src/commands/terminalSetup/index.ts) | 23→26 | 3 | `/terminal-setup`：按终端配置换行键绑定与提示音，原生协议时自动隐藏 |
+| [`plugins/bundled/index.ts`](annotated/src/plugins/bundled/index.ts) | 23→25 | 2 | 内置插件初始化脚手架：说明哪些功能该做成可开关插件（`/* */` 头，批注落块外） |
+| [`commands/cost/index.ts`](annotated/src/commands/cost/index.ts) | 23→26 | 3 | `/cost` 元数据壳：实现懒加载以缩短启动，订阅用户隐藏命令 |
+| [`src/replLauncher.tsx`](annotated/src/replLauncher.tsx) | 23→27 | 4 | REPL 启动器：动态导入 `App` + `REPL` 并一次性渲染，重组件均懒加载 |
+| [`migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.ts`](annotated/src/migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.ts) | 22→26 | 4 | 一次性迁移：旧键 `replBridgeEnabled` 改名为对外 `remoteControlAtStartup`，幂等 |
+| [`commands/version.ts`](annotated/src/commands/version.ts) | 22→25 | 3 | `/version`：打印运行版本（区分构建时间），仅 `USER_TYPE=ant` 启用 |
+| [`src/costHook.ts`](annotated/src/costHook.ts) | 22→26 | 4 | `useCostSummary` Hook：进程退出时打印并落盘总成本 |
+| [`commands/passes/index.ts`](annotated/src/commands/passes/index.ts) | 22→26 | 4 | `/passes` 元数据壳：按奖励/资格动态生成描述与隐藏，懒加载实现 |
+| [`commands/voice/index.ts`](annotated/src/commands/voice/index.ts) | 20→23 | 3 | `/voice`：切换语音模式，GrowthBook + 运行期开关双重门控 |
+| [`commands/remote-setup/index.ts`](annotated/src/commands/remote-setup/index.ts) | 20→23 | 3 | `/web-setup`：网页端配置引导，特性开关 + 策略双重校验 |
+| [`commands/files/files.ts`](annotated/src/commands/files/files.ts) | 19→23 | 4 | `/files`：列出上下文已读文件清单，绝对路径转相对路径 |
+
+- **命令双件对照四组**：`/cost` 与 `/passes` 都拆成「`index.ts` 元数据壳 + 实现文件」两件套——壳里用 `get description()` / `get isHidden()` 做动态文案与资格反向隐藏、用 `satisfies Command` 收口，实现则懒加载并承载真正的业务逻辑（`cost.ts` 的订阅分支文案 + 内部员工强制显示、`passes.tsx` 的首次访问写标记 + 上报埋点）。`/context`（交互彩色网格 / 非交互纯文本）与这两组不同，它把交互版与非交互版写成两个并列 `const`，靠 `isHidden`/`isEnabled` 与对方互斥。
+- **单命令壳五份同质**：`/statusline`（prompt 类型 + 预授权 `Read`/`Edit` + 子代理按 PS1 生成状态栏）、`/terminal-setup`（按终端配置换行键绑定与提示音、`isHidden` 在原生支持 CSI u / Kitty 协议时自动隐藏）、`/version`（打印运行版本、区分构建时间、仅 `USER_TYPE=ant` 启用）、`/voice`（GrowthBook 杀开关 + 运行期语音开关双重门控）、`/web-setup`（名为 `web-setup`，特性开关 `tengu_cobalt_lantern` + `allow_remote_sessions` 策略双重校验）。
+- **启动器与 Hook 各一**：`replLauncher.tsx` 动态导入 `App` 与 `REPL` 并一次性渲染启动，重组件均懒加载以控体积；`costHook.ts` 的 `useCostSummary` 把「进程退出时打印并落盘总成本」包进 `useEffect`、空依赖只跑一次，并在 `exit` 事件上挂载/卸载。
+- **内置插件脚手架与迁移各一**：`plugins/bundled/index.ts` 是内置插件初始化模块——顶部 `/* */` 大注释说明哪些功能应做成可开关插件、哪些是自动启用的捆绑技能，目前 `initBuiltinPlugins` 尚未注册任何插件（`(1,'after')` 锚点自动落到块注释之后）；`migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.ts` 是一次性的配置键改名迁移，幂等（旧键存在且新键未设才搬运），用无类型断言读旧键、搬完即删。
+
+踩坑：
+
+- **零 `⟳` 零 `⚠` 零块注释内中文**：两份 `/* */` 头（`bundled/index.ts`、`cost/index.ts`）的 `(1,'after')` 锚点由 annotate 自动挪到块注释之后（grep 确认落点通顺）；其余 13 份锚点全部落在代码语句行 / 函数收尾行 / 对象字面量 `{` 起始行，未触发任何结构性保护。预检 51 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）。
+- **判据 5 前置规避**：本批刻意不把 `after` 落在以 `=` / `?` 结尾的多行首行（如 `cost.ts` 的 `value =` 跨行赋值、`passes.tsx` 的函数签名），统一锚到收尾行或 `{` 起始行，fidelity 初跑即 0 失败、无需回修。
+
+流程账（第 174 批）：15 个数据文件逐一对齐源文件；预check 51 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 十五次，零 `⟳` 零 `⚠`；check-fidelity 全仓 1803 份 0 失败（较上批 +15）；check-links 2670 源码链 + 743 内链 0 失效；全仓 1803/1902 文件、512,262/513,237 行、99%（按行数）；`src/` 还剩 99 份 / 约 975 行（24 行档已清零，19 行以上全清零，下一档起点 19 行）。
+
+**下一批候选（19→13 行档，单批约 15 份）**：`commands/rate-limit-options/index.ts`(19) · `commands/reload-plugins/index.ts`(18) · `commands/thinkback-play/index.ts`(17) · `commands/extra-usage/extra-usage.tsx`(17) · `commands/heapdump/heapdump.ts`(17) · `commands/extra-usage/extra-usage-noninteractive.ts`(16) · `commands/color/index.ts`(16) · `commands/stickers/stickers.ts`(16) · `commands/model/index.ts`(16) · `commands/session/index.ts`(16) · `commands/upgrade/index.ts`(16) · `commands/copy/index.ts`(15) · `commands/remote-env/index.ts`(15) · `commands/install-github-app/CheckGitHubStep.tsx`(15) · `commands/compact/index.ts`(15)（`src/` 还剩 99 份 / 约 975 行；24 行档已清零，19 行以上全清零，下一档起点 19 行）
+
