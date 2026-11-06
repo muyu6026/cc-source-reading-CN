@@ -85,6 +85,6 @@
 
 ## 目录进度账
 - 已清零：`src/services`(130)、`src/tools`(184)、`src/hooks`(104)、`src/commands/clear`(4)、`src/utils`(564)、`src/components`(389)、`src/ink`(96)、`src/schemas`(1)。
-- 进行中：`src/` 散件阶段（按 `check-coverage.py src` 取真实 top 降序推进）；累计 **1601/1902 文件 · 493,948/513,237 行 · 96.2%（按行数）**；`src/` 剩 **301 份**。
-- 子树分布（check-coverage.py src）：commands 40/207 · bridge 12/31 · cli 12/19 · keybindings 7/14 · constants 3/21 · skills 6/20 · context 2/9 · types 8/11 · tasks 4/12 · state 1/6 · vim 2/5 · buddy 2/6 · entrypoints 5/8 · memdir 4/8 · native-ts 3/4 · remote 3/4 · query 1/4 · server 1/3 · (根目录) 10/18；migrations 0/11 · plugins 0/2 · assistant 0/1 · voice 0/1 · moreright 0/1 · outputStyles 0/1 等下沿仍未启动（schemas 1/1 本批清空）。
+- 进行中：`src/` 散件阶段（按 `check-coverage.py src` 取真实 top 降序推进）；累计 **1621/1902 文件 · 497,875/513,237 行 · 97.0%（按行数）**；`src/` 剩 **281 份 / 15,362 行**。
+- 子树分布（check-coverage.py src）：commands 46/207 · bridge 15/31 · cli 12/19 · keybindings 9/14 · constants 4/21 · skills 8/20 · context 2/9 · types 9/11 · tasks 4/12 · state 2/6 · vim 4/5 · buddy 2/6 · entrypoints 6/8 · memdir 4/8 · native-ts 3/4 · remote 3/4 · query 1/4 · server 1/3 · (根目录) 11/18；migrations 0/11 · plugins 0/2 · assistant 0/1 · voice 0/1 · moreright 0/1 · outputStyles 0/1 等下沿仍未启动。
 - 新增经验：`annotate.py` **按数据文件列表顺序插入、不按行号排序**——写数据文件时锚点必须按行号升序；偷懒可在文件末尾加 `ANNOTATIONS.sort(key=lambda a: a[0])`（第 59 批三份都加了）。
