@@ -7286,3 +7286,42 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 169 批）：15 个数据文件逐一对齐源文件；预check 155 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，5 处良性 `⟳`（模板起始行 + 四段 `//` 注释边界自动挪移），零 `⚠`；check-fidelity 全仓 1728 份 0 失败（较上批 +15）；check-links 2610 源码链 + 738 内链 0 失效；全仓 1728/1902 文件、509,366/513,237 行、99%（按行数）；`src/` 还剩 174 份 / 约 3,871 行（73 行档已清零，61 行以上全清零，下一档起点 60 行）。
 
 **下一批候选（59→52 行档，单批约 15 份）**：`keybindings/useShortcutDisplay.ts`(59) · `context/modalContext.tsx`(58) · `commands/review/ultrareviewCommand.tsx`(58) · `commands/privacy-settings/privacy-settings.tsx`(58) · `server/types.ts`(57) · `migrations/migrateLegacyOpusToCurrent.ts`(57) · `commands/theme/theme.tsx`(57) · `commands/review.ts`(57) · `bridge/sessionIdCompat.ts`(57) · `constants/toolLimits.ts`(56) · `bridge/capacityWake.ts`(56) · `voice/voiceModeEnabled.ts`(54) · `memdir/memoryAge.ts`(53) · `commands/keybindings/keybindings.ts`(53) · `keybindings/template.ts`(52)（`src/` 还剩 174 份 / 约 3,871 行；73 行档已清零，61 行以上全清零，下一档起点 60 行）
+
+### src batch 170: 38-59 line tier, 15 files (842 src, 926 annotated, 81 anchors)
+
+38–59 行档（清掉 batch 169 末尾列出的「59→52 行档」15 份散件，均为命令入口、类型定义、迁移脚本、上下文 / 常量 / 模板）：快捷键显示 Hook、远程评审命令、隐私设置对话框、模态上下文、主题命令、服务端类型、Opus 旧模型迁移、/review 双命令、CCR 会话 ID 兼容、容量唤醒原语、工具体积常量、语音开关、记忆年龄、/keybindings 命令、快捷键模板生成器。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`src/keybindings/useShortcutDisplay.ts`](annotated/src/keybindings/useShortcutDisplay.ts) | 59→65 | 6 | 非 React 快捷键显示文本 Hook：回退兜底 + 埋点上报 |
+| [`src/commands/review/ultrareviewCommand.tsx`](annotated/src/commands/review/ultrareviewCommand.tsx) | 58→65 | 6 | 远程评审命令：启动远程查虫、超额确认弹窗、结果回传 |
+| [`src/commands/privacy-settings/privacy-settings.tsx`](annotated/src/commands/privacy-settings/privacy-settings.tsx) | 58→66 | 7 | 隐私设置命令：Grove 资格判定 + 设置开关对话框 |
+| [`src/context/modalContext.tsx`](annotated/src/context/modalContext.tsx) | 58→66 | 7 | 模态槽上下文：模态内行列数 / 滚动句柄 + 终端尺寸回退 |
+| [`src/commands/theme/theme.tsx`](annotated/src/commands/theme/theme.tsx) | 57→64 | 7 | 主题选择器命令：设主题 + 取消，React 编译器产物 |
+| [`src/server/types.ts`](annotated/src/server/types.ts) | 57→63 | 6 | 服务端类型：连接响应、配置、会话状态与索引 |
+| [`src/migrations/migrateLegacyOpusToCurrent.ts`](annotated/src/migrations/migrateLegacyOpusToCurrent.ts) | 57→63 | 6 | 迁移：旧 Opus 写死串收敛为 opus 别名（幂等） |
+| [`src/commands/review.ts`](annotated/src/commands/review.ts) | 57→62 | 5 | /review（本地）与 /ultrareview（远程）两命令定义 |
+| [`src/bridge/sessionIdCompat.ts`](annotated/src/bridge/sessionIdCompat.ts) | 57→61 | 4 | CCR v2 兼容：cse_/session_ 会话 ID 双向换装 |
+| [`src/bridge/capacityWake.ts`](annotated/src/bridge/capacityWake.ts) | 56→62 | 6 | 容量唤醒原语：合并中止信号 + 主动唤醒 |
+| [`src/constants/toolLimits.ts`](annotated/src/constants/toolLimits.ts) | 56→61 | 5 | 工具结果体积常量：单条 / 单消息 / 令牌 / 字节上限 |
+| [`src/voice/voiceModeEnabled.ts`](annotated/src/voice/voiceModeEnabled.ts) | 54→58 | 4 | 语音模式开关：鉴权 + GrowthBook 杀开关 + 总开关 |
+| [`src/memdir/memoryAge.ts`](annotated/src/memdir/memoryAge.ts) | 53→57 | 4 | 记忆年龄：天数 / 可读年龄 / 时效提醒文本 |
+| [`src/commands/keybindings/keybindings.ts`](annotated/src/commands/keybindings/keybindings.ts) | 53→58 | 5 | /keybindings 命令：写模板（wx 独占）+ 拉起编辑器 |
+| [`src/keybindings/template.ts`](annotated/src/keybindings/template.ts) | 52→55 | 3 | 快捷键模板生成器：过滤保留键 + 包成 JSON 配置 |
+
+要点：
+
+- **本批是 src 散件收尾阶段的最小文件档**，行数 38–59，绝大多数是命令入口函数、纯类型 / 常量定义、迁移脚本或配置模板，彼此无重依赖，适合批量收口。
+- **四个 React Compiler 产物**（ultrareviewCommand / privacy-settings / modalContext / theme）：统一以 `_c(n)` memo 缓存 + 解构重命名（`t0`/`t1`/`t2`）做记忆化；JSX 全程不插 `//`，锚点只落在函数收尾行、签名结束行与代码语句行；末尾 base64 sourcemap 由 annotate 换成一句中文说明（标 OK*）。
+- **两个兼容 / 迁移主题成对**：sessionIdCompat（`cse_`↔`session_` 会话 ID 双向换装，同一 UUID 换前缀）+ migrateLegacyOpusToCurrent（旧 Opus 串收敛为 `opus` 别名），都强调幂等与「只在特定来源动手」——前者 SDK 路径不注册门控故 shim 默认启用，后者只读 userSettings 且不匹配即跳过。
+- **容量唤醒原语（capacityWake）是本批唯一的小状态机**：`createCapacityWake` 持有可重置中止控制器，对外暴露 `signal()`（合并内外两个中止源 + 双向清理）与 `wake()`（中止并重建以触发下一轮复检），专供 bridge 两个轮询循环复用。
+- **工具体积常量（toolLimits）按「单条 → 单消息聚合 → 令牌 → 字节」四级递进**，最后一项 `MAX_TOOL_RESULTS_PER_MESSAGE_CHARS` 由 GrowthBook 开关 `tengu_hawthorn_window` 运行时覆盖，防并行工具爆量。
+
+踩坑：
+
+- **capacityWake 一处锚点初放块注释内**：原想把「CapacityWake 接口」说明放在 type 内部（`/**` 文档注释续行处），落到块注释内部触发 `⚠ 1 个锚点落在块注释内`；按规则改到 type 收尾 `}` 之后（行 26），并重跑 annotate 清零 `⚠`，预检也抓出该行与另一条 `after` 锚点重复（同为行 26）已分离到函数签名行（行 28）。
+- **中文批注计数比锚点数多 8 行**：四个 `.tsx` 末尾 base64 sourcemap 被 annotate 换成 2 行中文说明（共 8 行），属预期行为（check-fidelity 标 OK*），非漏锚；CJK 占比门槛下短锚点仍计为批注。
+
+流程账（第 170 批）：15 个数据文件逐一对齐源文件；预check 81 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，零 `⟳` 零 `⚠`（修完块注释 / 重复锚点后复跑通过）；check-fidelity 全仓 1743 份 0 失败（较上批 +15）；check-links 2610 源码链 + 738 内链 0 失效；全仓 1743/1902 文件、510,208/513,237 行、99%（按行数）；`src/` 还剩 159 份 / 约 3,033 行（59 行档已清零，52 行以上全清零，下一档起点 51 行）。
+
+**下一批候选（51→43 行档，单批约 15 份）**：`migrations/resetProToOpusDefault.ts`(51) · `migrations/resetAutoModeOptInForDefaultOffer.ts`(51) · `commands/pr_comments/index.ts`(50) · `commands/release-notes/release-notes.ts`(50) · `commands/sandbox-toggle/index.ts`(50) · `bridge/bridgeConfig.ts`(48) · `migrations/migrateSonnet1mToSonnet45.ts`(48) · `tasks/types.ts`(46) · `query/config.ts`(46) · `migrations/migrateFennecToOpus.ts`(45) · `constants/figures.ts`(45) · `cli/transports/transportUtils.ts`(45) · `skills/mcpSkillBuilders.ts`(44) · `types/ids.ts`(44) · `bridge/bridgePermissionCallbacks.ts`(43)（`src/` 还剩 159 份 / 约 3,033 行；59 行档已清零，52 行以上全清零，下一档起点 51 行）
