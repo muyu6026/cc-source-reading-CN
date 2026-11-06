@@ -7247,3 +7247,42 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 168 批）：15 个数据文件逐一对齐源文件；预check 186 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，2 处良性 `⟳`（注释段边界自动挪移），初跑 fidelity 5 处 split-expression 失败→定位为 after 锚落在多行 `=`/`{` 首行→全部改到收尾行复跑通过；check-fidelity 全仓 1713 份 0 失败（较上批 +15）；check-links 2580 源码链 + 736 内链 0 失效；全仓 1713/1902 文件、508,372/513,237 行、99%（按行数）；`src/` 还剩 189 份 / 4,865 行（83 行档已清零，75 行以上全清零，下一档起点 74 行）。
 
 **下一批候选（<75 行档，单批约 15 份）**：`commands/install-github-app/WarningsStep.tsx`(73) · `bridge/flushGate.ts`(71) · `cli/handlers/agents.ts`(70) · `skills/bundled/simplify.ts`(69) · `constants/systemPromptSections.ts`(68) · `migrations/migrateSonnet45ToSonnet46.ts`(67) · `commands/rename/generateSessionName.ts`(67) · `commands/createMovedToPluginCommand.ts`(65) · `commands/install-github-app/CreatingStep.tsx`(65) · `commands/context/context.tsx`(64) · `context/QueuedMessageContext.tsx`(63) · `keybindings/shortcutFormat.ts`(63) · `entrypoints/sdk/coreTypes.ts`(62) · `migrations/migrateAutoUpdatesToSettings.ts`(61) · `commands/reload-plugins/reload-plugins.ts`(61)（`src/` 还剩 189 份 / 4,865 行；83 行档已清零，75 行以上全清零，下一档起点 74 行）
+
+### src batch 169: 61-73 line tier, 15 files (989 src, 1148 annotated, 155 anchors)
+
+61–73 行档（接第 168 批下沿，清零 73 行档仅余的 WarningsStep，并顺吃 72–61 行档的 14 份散件）：GitHub App 安装向导的「警告汇总 / 创建中」两步、刷写期消息闸门、claude agents 子命令、simplify 内置技能、系统提示段落、Sonnet 4.5→4.6 模型串迁移、会话名生成、迁移到插件命令工厂、/context 命令、非 React 快捷键显示、排队消息上下文、SDK 公共类型再导出、自动更新偏好迁移、/reload-plugins 命令。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/install-github-app/WarningsStep.tsx`](annotated/src/commands/install-github-app/WarningsStep.tsx) | 73→79 | 5 | GitHub App 安装向导「警告汇总」步骤（React 编译器产物）：确认键绑定、警告面板渲染 |
+| [`bridge/flushGate.ts`](annotated/src/bridge/flushGate.ts) | 71→82 | 11 | 刷写期消息闸门状态机：start / enqueue / end / drop / deactivate 五态 |
+| [`cli/handlers/agents.ts`](annotated/src/cli/handlers/agents.ts) | 70→82 | 12 | claude agents 子命令：加载并分组打印智能体清单 |
+| [`skills/bundled/simplify.ts`](annotated/src/skills/bundled/simplify.ts) | 69→77 | 8 | simplify 内置技能：三阶段提示词（识别改动→并行三评审→修复）+ 注册 |
+| [`constants/systemPromptSections.ts`](annotated/src/constants/systemPromptSections.ts) | 68→80 | 12 | 系统提示段落：记忆化 / 易失 / 解析 / 清空四种构造 |
+| [`migrations/migrateSonnet45ToSonnet46.ts`](annotated/src/migrations/migrateSonnet45ToSonnet46.ts) | 67→80 | 13 | 模型串迁移：Pro/Max/Team Premium 的 Sonnet 4.5 串迁到 sonnet 别名（幂等） |
+| [`commands/rename/generateSessionName.ts`](annotated/src/commands/rename/generateSessionName.ts) | 67→80 | 13 | 用 Haiku 生成 kebab-case 会话名（失败降级返回 null） |
+| [`commands/install-github-app/CreatingStep.tsx`](annotated/src/commands/install-github-app/CreatingStep.tsx) | 65→75 | 9 | GitHub App 安装向导「创建中」步骤（进度面板，React 编译器产物） |
+| [`commands/createMovedToPluginCommand.ts`](annotated/src/commands/createMovedToPluginCommand.ts) | 65→74 | 9 | 「已迁移到插件」命令工厂：包成 builtin 命令，私有市场走专属提示词 |
+| [`commands/context/context.tsx`](annotated/src/commands/context/context.tsx) | 64→76 | 11 | /context 命令：先转 API 视图再做微压缩与上下文用量可视化 |
+| [`keybindings/shortcutFormat.ts`](annotated/src/keybindings/shortcutFormat.ts) | 63→74 | 11 | 非 React 快捷键显示文本获取 + fallback 去重上报 |
+| [`context/QueuedMessageContext.tsx`](annotated/src/context/QueuedMessageContext.tsx) | 63→74 | 10 | 排队消息上下文 Provider：按布局决定内边距并注入上下文 |
+| [`entrypoints/sdk/coreTypes.ts`](annotated/src/entrypoints/sdk/coreTypes.ts) | 62→70 | 8 | SDK 公共类型再导出（HOOK_EVENTS / EXIT_REASONS 常量数组） |
+| [`migrations/migrateAutoUpdatesToSettings.ts`](annotated/src/migrations/migrateAutoUpdatesToSettings.ts) | 61→72 | 11 | 自动更新偏好迁移到 settings.json 环境变量（保留用户意图） |
+| [`commands/reload-plugins/reload-plugins.ts`](annotated/src/commands/reload-plugins/reload-plugins.ts) | 61→73 | 12 | /reload-plugins 命令：刷新活跃插件并返回统计文案 |
+
+要点：
+
+- **本批是「安装向导两步 + 桥接闸门 + 子命令 / 技能 / 迁移 + 上下文 / 快捷键 / SDK 类型」混合散件**，行数 61–73，均为命令入口、状态机、迁移脚本或常量再导出，无重依赖。
+- **两个 React Compiler 产物（WarningsStep / CreatingStep）**：以 `$` 缓存 + `_c(n)` 槽位做记忆化，JSX 全程不插注释，锚点只落在函数收尾行与代码语句行；末尾 base64 sourcemap 由 annotate 换成一句中文说明（标 OK*）。
+- **迁移脚本成对**：migrateSonnet45ToSonnet46（模型串→别名）与 migrateAutoUpdatesToSettings（偏好→环境变量）都强调幂等与「保留用户意图」——前者只读 userSettings、不匹配即跳过，后者仅当用户显式关闭自动更新才动手。
+- **模板主体文件只挂模板外节点**：simplify.ts 的 SIMPLIFY_PROMPT 是一整段多行模板，锚点只放在 import、注册调用与 getPromptForCommand 上，模板内部由 annotate 的 `⟳` 外移保护。
+
+踩坑：
+
+- **5 处良性 `⟳`**（simplify 4→4、shortcutFormat 9→15 与 17→18、coreTypes 1→9、reload-plugins 11→23）：前一处是锚点落在多行模板起始行（before 仍留在模板前，通顺）；后四处是锚点落在 `//` 注释段中部，annotate 自动挪到段边界（TODO 块 / fallback 说明块 / 文件头块 / CCR 注释块之后），已 grep 确认落点通顺、未劈开英文。
+- **biome-ignore 指令不被隔断**：agents.ts 有三处 `// biome-ignore lint/suspicious/noConsole::` 紧随 `console.log`，锚点统一放在 `console.log` 之后（而非指令行），保证 biome-ignore 直接覆盖目标语句。
+- **跨行表达式首行不放 after**：本批多行 import（systemPromptSections 1–6、agents 6–13/14–17、migrateSonnet45 1–15、generateSessionName 1–8 等）的锚点全部落在闭合 `}`/`from` 行，未劈开 import。
+
+流程账（第 169 批）：15 个数据文件逐一对齐源文件；预check 155 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，5 处良性 `⟳`（模板起始行 + 四段 `//` 注释边界自动挪移），零 `⚠`；check-fidelity 全仓 1728 份 0 失败（较上批 +15）；check-links 2610 源码链 + 738 内链 0 失效；全仓 1728/1902 文件、509,366/513,237 行、99%（按行数）；`src/` 还剩 174 份 / 约 3,871 行（73 行档已清零，61 行以上全清零，下一档起点 60 行）。
+
+**下一批候选（59→52 行档，单批约 15 份）**：`keybindings/useShortcutDisplay.ts`(59) · `context/modalContext.tsx`(58) · `commands/review/ultrareviewCommand.tsx`(58) · `commands/privacy-settings/privacy-settings.tsx`(58) · `server/types.ts`(57) · `migrations/migrateLegacyOpusToCurrent.ts`(57) · `commands/theme/theme.tsx`(57) · `commands/review.ts`(57) · `bridge/sessionIdCompat.ts`(57) · `constants/toolLimits.ts`(56) · `bridge/capacityWake.ts`(56) · `voice/voiceModeEnabled.ts`(54) · `memdir/memoryAge.ts`(53) · `commands/keybindings/keybindings.ts`(53) · `keybindings/template.ts`(52)（`src/` 还剩 174 份 / 约 3,871 行；73 行档已清零，61 行以上全清零，下一档起点 60 行）
