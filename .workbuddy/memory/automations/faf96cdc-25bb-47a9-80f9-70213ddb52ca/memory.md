@@ -1,5 +1,14 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 176 批（2026-11-07）：src 散件收尾 15→13 行档 15 件套（201 源行 / 265 批注版 / 64 锚点）
+
+- 状态：完成并推送，commit `2eebd1b`。
+- 内容：src 散件最小命令件终章——`/install-github-app/CheckGitHubStep`(React Compiler 状态文案) · `/login`(动态描述壳) · `/ultrareview`(运行期开关，`/* */` 头) · `/privacy-settings`(订阅门控) · `/branch`(条件别名) · `/keybindings` · `/btw`(旁支提问) · `/rewind`(别名 checkpoint + 实现) · `/think-back`(Statsig 门) · `/hooks`(配置入口，含 sourcemap) · `/effort`(档位) · `/install-github-app`(壳) · `skills/bundled/verifyContent`(构建期内联文案) · `/chrome`(Beta 设置)。
+- 校验：预检 64 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 十五次，1 处良性 `⟳`（verifyContent.ts (1) 落双行 `//` 段首行自动挪到段边界 1→2），零 `⚠`；fidelity 全仓 1833 份 0 失败；links 2685 源码链 + 744 内链 0 失效。
+- 坑：判据前置规避——`after` 不落以 `=`/`?` 结尾的多行首行（login 三元、`install-github-app` 数组），统一锚到收尾行或属性行，初跑即 0 失败；`ultrareview` 的 `/* */` 头用 `(8,'before')` 落块后、verifyContent 的 `//` 段用 `after` 自动挪移，块内零中文。
+- 进度：全仓 1833/1902 文件、512,707/513,237 行、99%；src 剩 69 份 / 约 530 行（15 行档清零，12 行档新下沿）。
+- 下批目标（12→11 行档）：`commands/tag/index.ts`(12) · `commands/heapdump/index.ts`(12) · `commands/agents/agents.tsx`(12) · `commands/install-slack-app/index.ts`(12) · `commands/mcp/index.ts`(12) · `commands/rename/index.ts`(12) · `commands/exit/index.ts`(12) · `commands/files/index.ts`(12) · `commands/status/index.ts`(12) · `commands/resume/index.ts`(12) · `commands/doctor/index.ts`(12) · `commands/release-notes/index.ts`(11) · `commands/hooks/index.ts`(11) · `commands/export/index.ts`(11) · `commands/vim/index.ts`(11)。
+
 ## 第 174 批（2026-11-06）：src 散件收尾 24→19 行档 15 件套（335 源行 / 386 批注版 / 51 锚点）
 
 - 状态：完成并推送，commit `5a6f4bf`（7440e56..5a6f4bf）。
@@ -1084,3 +1093,11 @@
 - 校验：预检 98 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次 1 处良性 ⟳（guards.ts 文件头 // 块中部自动挪移），零 ⚠；check-fidelity 1773 份 0 失败；check-links 2640 源码链 + 740 内链 0 失效。
 - 注：165–171 批已在之前运行并推送（git 可见），但本记忆文件上次只续写到 164，本次补记 172；数字以脚本实算为准。
 - 下一批候选（33→24 行档）：commands/exit/exit.tsx(33) · PluginTrustWarning.tsx(32) · ndjsonSafeStringify.ts(32) · extra-usage/index.ts(31) · cli/exit.ts(31) · verify.ts(30) · fpsMetrics.tsx(30) · install-slack-app.ts(30) · useMoreRight.tsx(26) · feedback/index.ts(26) · fast/index.ts(26) · desktop/index.ts(26) · bridge/index.ts(26) · feedback/feedback.tsx(25) · cyberRiskInstruction.ts(24)。
+
+## 第 175 批（2026-11-07）：src 散件 19→15 行档十五件套
+- 状态：完成并推送，commit `03fe634`（1e4078a..03fe634）。
+- 本批 15 份（19→15 行档）：rate-limit-options、reload-plugins、heapdump、extra-usage 双入口（tsx + noninteractive）、thinkback-play、stickers、color、session、model、upgrade、compact、copy、remote-env、errorIds。合计 244 源行 / 302 批注版 / 58 锚点；**19 行档清零**。
+- 进度：全仓 **1818/1902 文件 / 512,506 行 / 99%**；src 剩 84 份 / 731 行。
+- 校验：预检 58 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源路径对应）；annotate 十五次零 `⟳` 零 `⚠`；check-fidelity **1818 份 0 失败**；check-links 2670 源链 + 743 内链 0 失效。
+- 主线：15 份全是命令元数据壳同构模式——`satisfies Command` 收口 + 懒加载实现；`/extra-usage` 是交互/非交互双入口（与早前 `/cost`、`/passes`、`/context` 同构）；`color` 与 `copy` 的文件头 JSDoc 用 `(1,'after')` 自动落块外；`errorIds.ts` 为混淆编号常量表（Next ID 346）。
+- 下一批目标（15→13 行档，单批约 15 份）：CheckGitHubStep(15) · login/index(14) · ultrareviewEnabled(14) · branch/index(14) · privacy-settings(14) · keybindings/index(13) · install-github-app/index(13) · effort(13) · rewind/rewind(13) · hooks/hooks.tsx(13) · rewind/index(13) · verifyContent(13) · thinkback/index(13) · chrome/index(13) · btw(13)。
