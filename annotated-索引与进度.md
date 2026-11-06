@@ -6975,3 +6975,39 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 161 批）：10 个数据文件逐一对齐源文件；预检 133 锚点全过；annotate 十次 3 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1621 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1621/1902 文件、497,875/513,237 行、97.0%（按行数）；`src/` 还剩 281 份。
 
 **下一批候选（156–175 行档，单批约 10–14 份）**：`bridge/inboundAttachments.ts`(175) · `commands/plugin/usePagination.ts`(171) · `state/onChangeAppState.ts`(171) · `cli/handlers/autoMode.ts`(170) · `bridge/codeSessionApi.ts`(168) · `bridge/envLessBridgeConfig.ts`(165) · `bridge/bridgeStatusUtil.ts`(163) · `commands/plugin/AddMarketplace.tsx`(162) · `plugins/builtinPlugins.ts`(159) · `commands/commit-push-pr.ts`(158) · `tasks/DreamTask/DreamTask.ts`(157) · `constants/files.ts`(156) · `entrypoints/sandboxTypes.ts`(156)（`src/` 还剩 281 份；182 行以上已清零）
+
+### src batch 162: 172-175 line tier, 10 files (1662 src, 1802 annotated, 139 anchors)
+
+172–175 行档（接第 161 批下沿，取剩余 172 行以上前 10 份，176 行档就此清零）：桥接入站附件、应用状态变更钩子、插件列表分页、auto-mode 子命令、代码会话接口、免环境桥接配置、桥接状态文案、加市场界面、内置插件注册表、提交推送建单命令。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridge/inboundAttachments.ts`](annotated/src/bridge/inboundAttachments.ts) | 175→191 | 16 | 桥接入站附件：从消息里取附件标识、逐个下载落盘、把路径引用插到最后一个文本块 |
+| [`state/onChangeAppState.ts`](annotated/src/state/onChangeAppState.ts) | 171→185 | 14 | 集中的状态变更钩子：权限模式同步到外部、模型与视图偏好落盘、设置变化清凭据缓存 |
+| [`commands/plugin/usePagination.ts`](annotated/src/commands/plugin/usePagination.ts) | 171→184 | 13 | 插件列表分页 Hook：以选中项为锚算滚动偏移，页式 API 全为空实现只为兼容 |
+| [`cli/handlers/autoMode.ts`](annotated/src/cli/handlers/autoMode.ts) | 170→183 | 13 | auto-mode 子命令：打印默认/合并规则，以及把自定义规则交给模型评审 |
+| [`bridge/codeSessionApi.ts`](annotated/src/bridge/codeSessionApi.ts) | 168→182 | 14 | 代码会话两个接口：建会话与取桥接凭据，响应逐层校验、纪元兼容字符串 |
+| [`bridge/envLessBridgeConfig.ts`](annotated/src/bridge/envLessBridgeConfig.ts) | 165→181 | 16 | 免环境桥接配置：九项超时与上限的默认值、边界理由、远端覆盖与版本地板 |
+| [`bridge/bridgeStatusUtil.ts`](annotated/src/bridge/bridgeStatusUtil.ts) | 163→176 | 13 | 桥接状态文案：状态机五态、链接拼装、微光动画的可视列切分、超链接包裹 |
+| [`commands/plugin/AddMarketplace.tsx`](annotated/src/commands/plugin/AddMarketplace.tsx) | 162→175 | 12 | 添加市场界面（React 编译器产物）：解析输入、拉取落配置、按运行模式收尾 |
+| [`plugins/builtinPlugins.ts`](annotated/src/plugins/builtinPlugins.ts) | 159→173 | 14 | 内置插件注册表：以 @builtin 后缀识别、三级启用优先级、技能转命令的来源取舍 |
+| [`commands/commit-push-pr.ts`](annotated/src/commands/commit-push-pr.ts) | 158→172 | 14 | 提交推送建单命令：提示词分节拼装、隐身模式撤掉三项附加、展开前补放行规则 |
+
+要点：
+
+- **两个「收口点」是本批主线**：`onChangeAppState` 把权限模式的八条以上改法收到一处，先转外部名再比，避免内部模式外泄与来回切换的噪音；`commit-push-pr` 在执行嵌入命令前给应用状态补一条放行规则，正文里的提交与建单命令因此免确认。
+- **桥接四件同批读完，能看到分层**：`codeSessionApi` 只管请求形状与响应校验，`envLessBridgeConfig` 只管超时与上限，`bridgeStatusUtil` 只管把状态画成文案，`inboundAttachments` 只管把网页端上传的图落到本地。
+- **配置即文档**：免环境桥接那九项，每一项的边界都写得出理由——心跳下界防抖、抖动上限保证最长间隔仍小于过期、刷新提前量上界防语义反转、归档超时上界压在退出预算内。
+- **兼容层的代价写在名字里**：`usePagination` 的翻页三函数是空实现，返回值仍叫「页」；`builtinPlugins` 的技能来源写 `bundled` 而不是 `builtin`，都是为不打断既有调用方与展示链路。
+- **两份编译器产物处理一致**：`AddMarketplace` 的 sourcemap 换成两行说明，中文注释只挂语句行不进 JSX；`commit-push-pr` 的提示词是模板字符串，锚点只挂在模板外的声明与拼接处。
+
+踩坑：
+
+- **模板字符串里一条被自动外移（1 处 `⟳`，良性）**：`commit-push-pr.ts` 的 `(57)` 原落在 `return` 后的模板起点，annotate 判为「模板内部」外移到 57，落点在 `return` 之前、模板之外，通顺。
+- **eslint 指令隔断判据本批零命中**：`AddMarketplace.tsx` 的 `// eslint-disable-next-line react-hooks/exhaustive-deps` 与其目标 `}, []);` 之间只隔一行 `// biome-ignore`，锚点改挂 `useEffect` 起行，未插入其间。
+- **其余九份零 `⟳` 零 `⚠`**：两项专项扫描（JSX 子元素区、块末注脚）零输出。
+- **预检 139 锚点一次全过**（`ast.parse`、slug 与源路径一一对应、无重复锚点、文本无英文双引号与反斜杠、行号升序、无解构续行）。
+
+流程账（第 162 批）：10 个数据文件逐一对齐源文件；预检 139 锚点全过；annotate 十次 1 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1631 份 0 失败（较上批 +10）；check-links 2503 源码链 + 730 内链 0 失效；全仓 1631/1902 文件、499,537/513,237 行、97.3%（按行数）；`src/` 还剩 271 份。
+
+**下一批候选（134–157 行档，单批约 12 份）**：`tasks/DreamTask/DreamTask.ts`(157) · `entrypoints/sandboxTypes.ts`(156) · `constants/files.ts`(156) · `context/overlayContext.tsx`(151) · `commands/voice/voice.ts`(150) · `buddy/types.ts`(148) · `constants/github-app.ts`(144) · `state/teammateViewHelpers.ts`(141) · `memdir/findRelevantMemories.ts`(141) · `bridge/debugUtils.ts`(141) · `commands/session/session.tsx`(140) · `commands/plugin/PluginOptionsFlow.tsx`(135)（`src/` 还剩 271 份 / 13,700 行；176 行以上已清零）
