@@ -7366,3 +7366,44 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 171 批）：15 个数据文件逐一对齐源文件（52 行档 betas.ts 补入 + 51–44 行档 14 份散件）；预check 178 锚点全过（ast.parse、行界、重复、禁字符、升序、bslot、split、TAIL——修完 7 处 after 落 `=` 首行的 split 后零错零警）；annotate 十五次，3 处良性 `⟳`（注释段边界自动挪移），零 `⚠`；check-fidelity 全仓 1758 份 0 失败（较上批 +15）；check-links 2625 源码链 + 739 内链 0 失效；全仓 1758/1902 文件、510,923/513,237 行、99%（按行数）；`src/` 还剩 144 份 / 约 2,314 行（52 行档已清零，44 行以上全清零，下一档起点 43 行）。
 
 **下一批候选（43→33 行档，单批约 15 份）**：`bridge/bridgePermissionCallbacks.ts`(43) · `migrations/migrateOpusToOpus1m.ts`(43) · `commands/thinkback-play/thinkback-play.ts`(43) · `tasks/LocalShellTask/guards.ts`(41) · `query/deps.ts`(40) · `migrations/migrateBypassPermissionsAcceptedToSettings.ts`(40) · `tasks.ts`(39) · `commands/vim/vim.ts`(38) · `context/mailbox.tsx`(38) · `commands/upgrade/upgrade.tsx`(38) · `buddy/prompt.ts`(36) · `bridge/replBridgeHandle.ts`(36) · `skills/bundled/claudeInChrome.ts`(34) · `state/store.ts`(34) · `commands/exit/exit.tsx`(33)（`src/` 还剩 144 份 / 约 2,314 行；52 行档已清零，44 行以上全清零，下一档起点 43 行）
+
+### src batch 172: 33-43 line tier, 15 files (576 src, 675 annotated, 98 anchors)
+
+33–43 行档（接第 171 批下沿，清零 43→33 行档的 15 份散件）：Opus 合并迁移、/thinkback-play 动画命令、桥接权限回调契约与类型守卫、本地 shell 任务状态守卫、query 依赖注入、危险模式提示迁移、任务注册表、Mailbox 上下文、/vim 模式切换、/upgrade 升级命令、伙伴开场文案、REPL 桥接全局句柄、极简状态仓库、claude-in-chrome 技能注册、通用日期工具。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`migrations/migrateOpusToOpus1m.ts`](annotated/src/migrations/migrateOpusToOpus1m.ts) | 43→50 | 7 | Opus 合并迁移：设置里固定为 opus 的用户在合并开启时迁到 opus[1m]；CLI --model opus 属运行时覆盖不动设置；Pro/3P 跳过，幂等 |
+| [`commands/thinkback-play/thinkback-play.ts`](annotated/src/commands/thinkback-play/thinkback-play.ts) | 43→50 | 7 | /thinkback-play 命令：从已装 thinkback 插件目录取动画并播放；内/外市场按 USER_TYPE 区分插件 id |
+| [`bridge/bridgePermissionCallbacks.ts`](annotated/src/bridge/bridgePermissionCallbacks.ts) | 43→52 | 9 | 桥接权限回调类型契约（sendRequest/sendResponse/cancelRequest/onResponse）+ 解析结果类型守卫 isBridgePermissionResponse |
+| [`tasks/LocalShellTask/guards.ts`](annotated/src/tasks/LocalShellTask/guards.ts) | 41→48 | 7 | 纯类型与类型守卫：LocalShellTask 状态结构独立出来，避免非 React 消费者拉入 React/ink；isLocalShellTask 按 type 收窄 |
+| [`query/deps.ts`](annotated/src/query/deps.ts) | 40→46 | 6 | query() 的 I/O 依赖注入类型：callModel/微压缩/自动压缩/uuid 抽出来，测试可塞假实现 |
+| [`migrations/migrateBypassPermissionsAcceptedToSettings.ts`](annotated/src/migrations/migrateBypassPermissionsAcceptedToSettings.ts) | 40→47 | 7 | 迁移：全局 bypassPermissionsModeAccepted 搬到 settings.json 的 skipDangerousModePermissionPrompt，幂等、失败只记日志 |
+| [`tasks.ts`](annotated/src/tasks.ts) | 39→46 | 7 | 任务总注册表：汇总各任务实现，按构建期 feature 开关条件加载 workflow/monitor 任务 |
+| [`context/mailbox.tsx`](annotated/src/context/mailbox.tsx) | 38→42 | 4 | Mailbox 的 React 上下文（编译器产物）：Provider 注入共享实例，useMailbox 取出，不在 Provider 内则抛错 |
+| [`commands/vim/vim.ts`](annotated/src/commands/vim/vim.ts) | 38→46 | 8 | /vim 命令：在 vim 与 normal 模式间切换；旧 emacs 按 normal 处理，写回设置并打点 |
+| [`commands/upgrade/upgrade.tsx`](annotated/src/commands/upgrade/upgrade.tsx) | 38→46 | 7 | /upgrade 命令：已是最高 Max 20x 则提示无需升级；否则开浏览器并登录切换 API 计费账户 |
+| [`buddy/prompt.ts`](annotated/src/buddy/prompt.ts) | 36→42 | 6 | 伙伴开场文案与附件构造：角色说明 + 仅在首次为该伙伴出现时插入 companion_intro 附件 |
+| [`bridge/replBridgeHandle.ts`](annotated/src/bridge/replBridgeHandle.ts) | 36→41 | 5 | 全局持有当前 REPL 桥接 handle 的指针，让树外调用方也能调用；与 bridgeDebug 同款每进程一桥理由 |
+| [`state/store.ts`](annotated/src/state/store.ts) | 34→39 | 5 | 极简通用状态仓库：getState/setState/subscribe，Object.is 判等跳过无变化 |
+| [`skills/bundled/claudeInChrome.ts`](annotated/src/skills/bundled/claudeInChrome.ts) | 34→40 | 6 | 登记内置技能 claude-in-chrome：浏览器工具名映射成 mcp__claude-in-chrome__*，拼装激活提示词 |
+| [`constants/common.ts`](annotated/src/constants/common.ts) | 33→40 | 7 | 通用日期工具：本地 ISO 日期、memoize 的会话起始日期（稳缓存）、本地月份年份 |
+
+要点：
+
+- **本批是 src 散件收尾的「迁移脚本 / 命令外壳 / 类型契约 / 工具常量」最小文件档（33–43 行）**，多为纯类型、一次性迁移、命令入口或独立工具函数，彼此无重依赖。
+- **一次性迁移脚本的共性：幂等 + 只看特定来源**：migrateOpusToOpus1m 要求设置恰好是 opus 才动、且与默认主循环模型相同则写 undefined 回落；migrateBypassPermissionsAcceptedToSettings 只在尚未设置时写、且整体包 try/catch 只记日志——「跑一次就退场」的脚本要把「已经满足」也当正常路径。
+- **契约即文档**：bridgePermissionCallbacks 把请求/响应/取消/订阅四个回调和解析守卫集中定义，调用方与桥接层靠类型耦合不靠共享状态；guards.ts 同理把 LocalShellTask 状态独立成纯类型，让 print/stopTask 不必把 React 拉进模块图。
+- **依赖注入一种模式**：query/deps 用 typeof fn 让签名与真实实现自动同步，把 4 个 I/O 抽出来供测试塞假实现，范围刻意收窄以验证模式再扩。
+- **编译器产物两处（mailbox.tsx、upgrade.tsx）读法一致**：_c 缓存槽 + $[k] 依赖比较；升级命令的登录组件返回 JSX，锚点只落函数签名/语句行，不进 JSX 内部。
+
+踩坑：
+
+- **1 处良性 `⟳`（guards.ts 1→3）**：文件头三行是 `//` 注释块，我的 (1,'after') 锚点落进块中部，annotate 自动挪到块边界（第 3 行之后），已 grep 确认落点通顺、未劈开英文。其余 14 份零 `⟳` 零 `⚠`。
+- **.tsx 末尾 sourcemap 替换**：mailbox.tsx / upgrade.tsx 末尾 base64 sourcemap 被 annotate 换成中文说明行（标 OK*），中文批注行数比锚点数各多 1 属预期。
+- **预检 98 锚点一次全过**（ast.parse、行界、重复、禁字符、升序、bslot、split、TAIL 全绿），零 `⟳`-外风险。
+
+流程账（第 172 批）：15 个数据文件逐一对齐源文件；预check 98 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，1 处良性 `⟳`（guards.ts 文件头 `//` 块中部自动挪移到块边界），零 `⚠`；check-fidelity 全仓 1773 份 0 失败（较上批 +15）；check-links 2640 源码链 + 740 内链 0 失效；全仓 1773/1902 文件、511,499/513,237 行、99%（按行数）；`src/` 还剩 111 份 / 约 1,929 行（43 行档已清零，33 行以上全清零，下一档起点 33 行）。
+
+**下一批候选（33→24 行档，单批约 15 份）**：`commands/exit/exit.tsx`(33) · `commands/plugin/PluginTrustWarning.tsx`(32) · `cli/ndjsonSafeStringify.ts`(32) · `commands/extra-usage/index.ts`(31) · `cli/exit.ts`(31) · `skills/bundled/verify.ts`(30) · `context/fpsMetrics.tsx`(30) · `commands/install-slack-app/install-slack-app.ts`(30) · `moreright/useMoreRight.tsx`(26) · `commands/feedback/index.ts`(26) · `commands/fast/index.ts`(26) · `commands/desktop/index.ts`(26) · `commands/bridge/index.ts`(26) · `commands/feedback/feedback.tsx`(25) · `constants/cyberRiskInstruction.ts`(24)（`src/` 还剩 111 份 / 约 1,929 行；43 行档已清零，33 行以上全清零，下一档起点 33 行）
+
