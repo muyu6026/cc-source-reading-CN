@@ -7050,3 +7050,40 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 163 批）：12 个数据文件逐一对齐源文件；预检首轮 178 锚点全过，合并两条后 176；annotate 十二次 4 处良性 `⟳`、零 `⚠`；三项专项扫描（JSX 子元素区、块末注脚、eslint 指令隔断）首轮 2 处命中并全部处置，复扫零输出；check-fidelity 全仓 1643 份 0 失败（较上批 +12）；check-links 2513 源码链 + 731 内链 0 失效；全仓 1643/1902 文件、501,297/513,237 行、97.7%（按行数）；`src/` 还剩 259 份 / 11,940 行。
 
 **下一批候选（124–135 行档，单批约 12 份）**：`bridge/bridgeDebug.ts`(135) · `native-ts/yoga-layout/enums.ts`(134) · `dialogLaunchers.tsx`(133) · `buddy/companion.ts`(133) · `cli/transports/WorkerStateUploader.ts`(131) · `commands/brief.ts`(130) · `keybindings/reservedShortcuts.ts`(127) · `bridge/workSecret.ts`(127) · `tasks/InProcessTeammateTask/InProcessTeammateTask.tsx`(126) · `commands/add-dir/add-dir.tsx`(126) · `context/promptOverlayContext.tsx`(125) · `Task.ts`(125)（`src/` 还剩 259 份 / 11,940 行；157 行以上已清零）
+
+### src batch 164: 124-135 line tier, 12 files (1552 src, 1730 annotated, 174 anchors)
+
+124–135 行档（接第 163 批下沿，取剩余 124 行以上前 12 份，135 行档就此清零）：桥接故障注入、Yoga 枚举、对话框启动器、伙伴抽取、状态上报器、brief 命令、保留快捷键表、工作凭据、进程内队友任务、/add-dir 命令、浮层传送门、任务基类型。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`bridge/bridgeDebug.ts`](annotated/src/bridge/bridgeDebug.ts) | 135→148 | 13 | 桥接故障注入：四方法白名单、致命与瞬时两类伪造、按方法名消费队列 |
+| [`native-ts/yoga-layout/enums.ts`](annotated/src/native-ts/yoga-layout/enums.ts) | 134→142 | 8 | Yoga 枚举表：const 对象而非 TS 枚举、位标志与序号的区分、同名值类型 |
+| [`dialogLaunchers.tsx`](annotated/src/dialogLaunchers.tsx) | 133→150 | 16 | 对话框启动器：七处内联 JSX 的薄封装、动态导入、取消与错误的两种返回 |
+| [`buddy/companion.ts`](annotated/src/buddy/companion.ts) | 133→150 | 17 | 伙伴抽取：自研伪随机、盐值哈希、单槽缓存、骨骼重算与灵魂存储的合并 |
+| [`cli/transports/WorkerStateUploader.ts`](annotated/src/cli/transports/WorkerStateUploader.ts) | 131→148 | 17 | 状态上报器：在飞加待发两槽、补丁合并、无限重试与抖动退避 |
+| [`commands/brief.ts`](annotated/src/commands/brief.ts) | 130→145 | 15 | brief 命令：灰度的两道门、只在开启时校验权限、工具清单与提醒双写 |
+| [`keybindings/reservedShortcuts.ts`](annotated/src/keybindings/reservedShortcuts.ts) | 127→141 | 14 | 保留快捷键：三张表的分工、组合键逐段归一化、修饰键排序 |
+| [`bridge/workSecret.ts`](annotated/src/bridge/workSecret.ts) | 127→142 | 15 | 工作凭据：base64url 解码后逐项校验、两套标签比对、世代号类型兼容 |
+| [`tasks/InProcessTeammateTask/InProcessTeammateTask.tsx`](annotated/src/tasks/InProcessTeammateTask/InProcessTeammateTask.tsx) | 126→143 | 16 | 进程内队友任务：请求关停打标记、消息注入的终态判断、按代理 id 找任务 |
+| [`commands/add-dir/add-dir.tsx`](annotated/src/commands/add-dir/add-dir.tsx) | 126→142 | 15 | 添加目录命令（编译器产物）：会话级与持久化两条路径、沙箱刷新时序 |
+| [`context/promptOverlayContext.tsx`](annotated/src/context/promptOverlayContext.tsx) | 125→140 | 14 | 浮层传送门（编译器产物）：四 context 拆分、写函数引用稳定、卸载即清 |
+| [`Task.ts`](annotated/src/Task.ts) | 125→139 | 14 | 任务基类型：七种类型与五个状态、id 前缀表、字符集与熵的取舍 |
+
+要点：
+
+- **本批的主题是「两个槽 / 两张表 / 两条路」**：状态上报器只有在飞与待发两个槽，所以永远不需要背压；保留快捷键分三张表是因为「我们硬编码的」与「终端截走的」原因不同；添加目录的记住与不记住只差一个落盘来源。多处设计都是「把差异压到一个维度上」。
+- **四份编译器产物或模板型代码**：`add-dir`、`promptOverlayContext` 带 `_c(n)` 槽位；`dialogLaunchers` 与 `add-dir` 末尾是 base64 source map（已换成两行说明）。读法与前面一致：槽位比较条件即依赖数组。
+- **两处「无限重试 + 抖动」的对照**：状态上报器无限重试且退避封顶后叠抖动（避免同批客户端同步撞车）；伙伴抽取则完全相反——同一 id 必得同一结果，所以连随机数都是自己实现的确定性版本。一个是最终一致，一个是可复现。
+- **失败语义分三层写清楚**：`dialogLaunchers` 里安装向导要区分「用户取消」（返回空）与「安装失败」（Promise 拒绝）；`brief` 里只有开启要过权限门，关闭始终允许；`InProcessTeammateTask` 里只有终态拒收消息，空闲仍可接收。
+- **`workSecret` 的世代号是协议级细节**：序列化库会把 64 位整数转成字符串，所以既要接受字符串也要接受数字，且必须过安全整数校验——否则后续每次心跳都会带上溢出后的值。
+
+踩坑：
+
+- **本批零 `⟳` 零 `⚠`**：十二次注入全部按原位落点，没有一条被判为模板内部。原因之一是 `github-app` 那类整份模板的文件本批没有，`brief` 的提醒模板是嵌在表达式里的多行字符串，锚点都挂在它外层。
+- **三项专项扫描零命中**：JSX 子元素区、块末注脚、eslint 指令隔断均无输出。块末注脚这一项连续两批（163 两处、164 零处）说明「先看中文讲括号里还是括号外」这条判据在日常写法里已经生效。
+- **预检 174 锚点一次全过**：本批有两处锚点落在 `/**` 起行（JSDoc 之前），因为 JSDoc 内部是禁区，而声明前的说明又确实该写在那里。
+
+流程账（第 164 批）：12 个数据文件逐一对齐源文件；预检 174 锚点全过；annotate 十二次**零 `⟳` 零 `⚠`**；三项专项扫描零输出；check-fidelity 全仓 1655 份 0 失败（较上批 +12）；check-links 2525 源码链 + 732 内链 0 失效；全仓 1655/1902 文件、502,849/513,237 行、98.0%（按行数，本轮跨过 502,000 行与 98%）；`src/` 还剩 247 份 / 10,388 行。
+
+**下一批候选（110–124 行档，单批约 12 份）**：`skills/bundled/batch.ts`(124) · `commands/plugin/PluginErrors.tsx`(124) · `commands/plan/plan.tsx`(122) · `tasks/InProcessTeammateTask/types.ts`(121) · `keybindings/match.ts`(120) · `migrations/migrateEnableAllProjectMcpServersToSettings.ts`(118) · `commands/extra-usage/extra-usage-core.ts`(118) · `commands/plugin/pluginDetailsHelpers.tsx`(117) · `constants/tools.ts`(112) · `commands/add-dir/validation.ts`(110) · `cli/handlers/util.tsx`(110) · `bridge/pollConfig.ts`(110)（`src/` 还剩 247 份 / 10,388 行；135 行以上已清零）
