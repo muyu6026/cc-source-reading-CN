@@ -7168,3 +7168,43 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 166 批）：14 个数据文件逐一对齐源文件；预检 204 锚点全过（含 parseArgs/loadOutputStylesDir 多行赋值修正与 1 处 TAIL 软警告）；annotate 十四次，零 `⟳` 零 `⚠`；check-fidelity 全仓 1684 份 0 失败（较上批 +14）；check-links 2552 源码链 + 734 内链 0 失效；全仓 1684/1902 文件、505,940/513,237 行、98%（按行数，本轮跨过 505,000 行）；`src/` 还剩 218 份 / 7,297 行（103 行档已清零，94 行以上全清零，下一档起点 93 行）。
 
 **下一批候选（<94 行档，单批约 13–15 份）**：`query/tokenBudget.ts`(93) · `commands/color/color.ts`(93) · `skills/bundled/loop.ts`(92) · `commands/commit.ts`(92) · `commands/export/export.tsx`(91) · `commands/memory/memory.tsx`(90) · `server/createDirectConnectSession.ts`(88) · `context/voice.tsx`(88) · `assistant/sessionHistory.ts`(87) · `commands/rename/rename.ts`(87) · `constants/xml.ts`(86) · `commands/install-github-app/ErrorStep.tsx`(85) · `commands/mcp/mcp.tsx`(85) · `ink.ts`(85)（`src/` 还剩 218 份 / 7,297 行；103 行档已清零，94 行以上全清零，下一档起点 93 行）
+
+### src batch 167: 84-93 line tier, 14 files (1237 src, 1385 annotated, 144 anchors)
+
+84–93 行档（接第 166 批下沿，清零 93 行档仅余的 2 份 tokenBudget / color，并顺吃 84–92 行档的 12 份散件）：自动续跑/停止的 token 预算判定器、/color 设色命令、/loop 循环技能、/commit 提交命令、/export 导出命令、/memory 记忆编辑命令、直连会话创建、语音状态 React 上下文、/rename 改名命令、会话历史分页拉取、消息 XML 标签常量表、ink 渲染再导出层、/mcp 开关命令、安装 GitHub App 错误展示页。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`query/tokenBudget.ts`](annotated/src/query/tokenBudget.ts) | 93→106 | 13 | 自动续跑/停止的 token 预算判定器：阈值、追踪器、继续/停止决策、递减检测 |
+| [`commands/color/color.ts`](annotated/src/commands/color/color.ts) | 93→104 | 11 | /color 命令：队友禁设、空参提示、重置别名、跨会话持久化、AppState 即时生效 |
+| [`skills/bundled/loop.ts`](annotated/src/skills/bundled/loop.ts) | 92→100 | 8 | /loop 技能：间隔解析规则、cron 转换表、调度文案、Kairos cron 开关 |
+| [`commands/commit.ts`](annotated/src/commands/commit.ts) | 92→102 | 10 | /commit 命令：git 安全协议、白名单、HEREDOC 提交信息、alwaysAllow 注入 |
+| [`commands/export/export.tsx`](annotated/src/commands/export/export.tsx) | 90→101 | 10 | /export 命令（编译器产物）：时间戳/首提示文件名、写盘或弹对话框 |
+| [`commands/memory/memory.tsx`](annotated/src/commands/memory/memory.tsx) | 89→99 | 9 | /memory 命令（编译器产物）：建目录/建文件、拉编辑器、编辑器变量探测 |
+| [`server/createDirectConnectSession.ts`](annotated/src/server/createDirectConnectSession.ts) | 88→97 | 9 | 直连服务器建会话：Bearer 鉴权、fetch 兜底、zod 解析、config 映射 |
+| [`context/voice.tsx`](annotated/src/context/voice.tsx) | 87→98 | 10 | 语音状态 React 上下文（编译器产物）：Provider 与 useVoiceState/Set/Get 三件套 |
+| [`commands/rename/rename.ts`](annotated/src/commands/rename/rename.ts) | 87→97 | 10 | /rename 命令：队友禁改、无参自动起名、持久化、桥接远端同步 |
+| [`assistant/sessionHistory.ts`](annotated/src/assistant/sessionHistory.ts) | 87→97 | 10 | 会话历史分页拉取：鉴权上下文、通用 fetchPage、最新/更旧两页 |
+| [`constants/xml.ts`](annotated/src/constants/xml.ts) | 86→102 | 16 | 消息 XML 标签常量表：命令元数据、终端输出、任务通知、各类频道与 fork |
+| [`ink.ts`](annotated/src/ink.ts) | 85→95 | 10 | ink 渲染再导出层：withTheme 包裹、render/createRoot、一长串组件再导出 |
+| [`commands/mcp/mcp.tsx`](annotated/src/commands/mcp/mcp.tsx) | 84→95 | 10 | /mcp 命令（编译器产物）：开关切换组件、参数分流到设置/重连/切换 |
+| [`commands/install-github-app/ErrorStep.tsx`](annotated/src/commands/install-github-app/ErrorStep.tsx) | 84→92 | 8 | 安装 GitHub App 错误展示页（编译器产物）：错误/原因/修复步骤分层渲染 |
+
+要点：
+
+- **本批是「命令/技能入口」+「状态层/常量层」的收尾散件**：tokenBudget 是纯判定器，color/commit/export/memory/rename/mcp 是命令或技能，voice 是 React 状态上下文，xml 是标签常量表，loop/ink 是技能注册与渲染再导出，createDirectConnectSession/assistant 是服务端与会话历史原语。
+- **命令入口的两种形态**：color/rename/memory 是 LocalJSXCommand 的 call（交互式，靠 onDone 回显）；commit/loop/mcp 把「提示词或 skill 文案」交给模型或重定向到 UI，本身不跑核心逻辑——commit 还把 `!git ...` 指令真跑掉再注入白名单。
+- **编译器产物读法的延续**：export/memory/voice/mcp/ErrorStep 都是 React Compiler 编译结果（`_c(N)` 记忆化槽 + t0/t1… 临时变量 + `$[k]` 哨兵命中即复用）；批注只讲「这段在算什么」，不讲编译器细节。
+- **持久化与即时生效的两条路**：color/rename 既写 transcript 路径（跨会话）又改 AppState（即时界面），二者要一起做；rename 还额外把名字同步成 agent name 供提示栏显示。
+- **标签常量表的「分组 + 聚合」**：xml 把零散标签按用途分组（命令、终端、任务、规划、频道、fork），并用 TERMINAL_OUTPUT_TAGS 把六个终端标签聚成数组，判断「这是终端输出而非用户提示」时直接 includes。
+
+踩坑：
+
+- **模板字符串外移 2 处（commit）**：commit 的 (20)/(34) 两条锚点原本落在 getPromptContent 的模板字符串内部（含 git 安全协议那段），annotate 自动外移到模板收尾行 (54)，两条注释堆叠在提示词函数结束前，落点通顺——模板内是禁区，外移后恰好覆盖「提示词内容」与「git 安全协议」两块。
+- **多编译器产物 .tsx 的源映射行**：export/memory/voice/mcp/ErrorStep 都带 `# sourceMappingURL=` 超长 base64 行，annotate 自动换成一句中文说明（判据 2 标 OK*），批注行数已把「源映射行 → 说明」计入，无需手补。
+- **JSDoc 块内不落锚**：createDirectConnectSession 的函数头前有 `/** ... */` 块注释（8–25 行），两条锚点都落在块后的签名收尾 (39) 与代码语句行，未进块内。
+- **预检 144 锚点一次全过，零 `⟳` 零 `⚠`（除 commit 模板外移 2 处为 annotate 自动处置）**：其余锚点全部原位落点。
+
+流程账（第 167 批）：14 个数据文件逐一对齐源文件；预检 144 锚点全过（含 commit 模板外移 2 处）；annotate 十四次，commit 1 处良性 `⟳`（模板外移 20→54、34→54），零 `⚠`；check-fidelity 全仓 1698 份 0 失败（较上批 +14）；check-links 2566 源码链 + 735 内链 0 失效；全仓 1698/1902 文件、507,177/513,237 行、99%（按行数，本轮跨过 507,000 行）；`src/` 还剩 204 份 / 6,060 行（93 行档已清零，84 行以上全清零，下一档起点 83 行）。
+
+**下一批候选（<84 行档，单批约 13–15 份）**：`projectOnboardingState.ts`(83) · `commands/sandbox-toggle/sandbox-toggle.tsx`(83) · `bridge/pollConfigDefaults.ts`(82) · `vim/motions.ts`(82) · `skills/bundled/remember.ts`(82) · `tasks/pillLabel.ts`(82) · `commands/logout/logout.tsx`(82) · `bridge/inboundMessages.ts`(80) · `skills/bundled/stuck.ts`(79) · `skills/bundled/index.ts`(79) · `remote/remotePermissionBridge.ts`(78) · `constants/product.ts`(76) · `state/selectors.ts`(76) · `tasks/LocalShellTask/killShellTasks.ts`(76)（`src/` 还剩 204 份 / 6,060 行；93 行档已清零，84 行以上全清零，下一档起点 83 行）
