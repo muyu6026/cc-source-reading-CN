@@ -7407,3 +7407,24 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 **下一批候选（33→24 行档，单批约 15 份）**：`commands/exit/exit.tsx`(33) · `commands/plugin/PluginTrustWarning.tsx`(32) · `cli/ndjsonSafeStringify.ts`(32) · `commands/extra-usage/index.ts`(31) · `cli/exit.ts`(31) · `skills/bundled/verify.ts`(30) · `context/fpsMetrics.tsx`(30) · `commands/install-slack-app/install-slack-app.ts`(30) · `moreright/useMoreRight.tsx`(26) · `commands/feedback/index.ts`(26) · `commands/fast/index.ts`(26) · `commands/desktop/index.ts`(26) · `commands/bridge/index.ts`(26) · `commands/feedback/feedback.tsx`(25) · `constants/cyberRiskInstruction.ts`(24)（`src/` 还剩 111 份 / 约 1,929 行；43 行档已清零，33 行以上全清零，下一档起点 33 行）
 
+## 第 173 批（2026-11-06）：33→24 行档十五件套（退出语义 / NDJSON 安全序列化 / 插件信任警告 / CLI 退出 / 超额用量 / Slack 安装 / verify 技能 / 帧率指标 / 桌面端 / 反馈 / 多功能右键 / 桥接 / 快速 / 反馈组件 / 网络安全指令）
+
+本批是 `src/` 散件收尾的「小文件专场」——15 份全部 ≤33 行，主题横跨「进程退出语义 / 传输安全 / 插件信任 / 命令定义 / 技能注册 / 指标下发 / 外部占位 / 网络安全红线」，彼此独立但共同补齐主链路之外的那圈「入口与边界」积木：
+
+- **退出语义两份对照**：`commands/exit/exit.tsx` 是 REPL 的 `/exit` 入口——后台会话（`claude --bg` 的 tmux）只 detach 不 kill，REPL 继续跑、`claude attach` 可重连，而 `/exit`、`/quit`、`ctrl+c`、`ctrl+d` 全都汇到这里；前台无工作树则随机回一句告别语再优雅关机。`cli/exit.ts` 是把分散在 `claude mcp / plugin` 子命令里约 60 处「打印 + 关 lint + 退出」的复制粘贴收拢成 `cliError` / `cliOk` 两个集中出口，返回类型用 `never` 让 TypeScript 在调用处收窄控制流、不必再写 trailing return。
+- **传输安全一处**：`cli/ndjsonSafeStringify.ts` 专门解决 `JSON.stringify` 会原样输出 U+2028 / U+2029 的问题——按行切割 NDJSON 的接收方（遵循 ECMA-262 换行语义）会把一条 JSON 从字符串中间切断；改成转义序列后语义不变，但任何接收方都不再误判为换行。
+- **命令定义六份高度同质**：`desktop` / `feedback/index` / `bridge` / `fast` / `extra-usage/index` / `install-slack-app` 都是「一个 `const x = {...} satisfies Command` 对象」的结构，差异只在 `type`（local-jsx / local）、可用性门控、`aliases`、是否 `immediate`。其中 `fast` 与 `feedback` 用 `get description()` / `get isHidden()` 做动态文案与反向隐藏；`extra-usage` 还拆出交互 / 非交互两个变体。
+- **编译产物两份**：`PluginTrustWarning.tsx` 与 `fpsMetrics.tsx` 仍是 React Compiler 输出——`_c(3)` 缓存槽 + `$[n]` memo 槽；`fpsMetrics` 用 React Context 下发帧率 getter，`useFpsMetrics` 消费端 Hook 从中取出。锚点都落在函数收尾行与代码语句行，不进 JSX 子元素区。
+- **外部占位一处**：`moreright/useMoreRight.tsx` 是 external-stub——真实实现只在内部仓库，这里只给空壳，并把内部复杂的消息类型抹成 `any`（为此关掉 `no-explicit-any`），让外部类型检查能过。
+- **网络安全红线一处**：`constants/cyberRiskInstruction.ts` 是 Safeguards 团队拥有的「网络安全风险指令」常量的说明文档，顶部大注释明确「未经评审不得擅改」；批注严格只落在外面（块注释内不插中文），正文导出的是一条发给模型的系统级指令串，概括允许（授权测试 / CTF / 教学）与拒绝（破坏性 / DoS / 供应链攻击 / 恶意规避）的范围。
+
+踩坑：
+
+- **1 处良性 `⟳`（exit.tsx 的 (15,'after') 落到 15→17）**：第 15 行是 `call` 函数内多行 `//` 注释块（解释后台会话）的首行，annotate 自动挪到注释段末（第 17 行之后），未劈开英文，grep 确认落点通顺、语义连贯。其余 14 份零 `⟳` 零 `⚠`。
+- **.tsx 两块编译产物末尾 sourcemap 替换**：`PluginTrustWarning.tsx` / `fpsMetrics.tsx` 末尾 base64 sourcemap 被 annotate 换成中文说明行（标 `OK*`），中文批注行数比锚点数各多 1 属预期；其锚点均不进 JSX 子元素区（React Compiler 产物禁止 JSX 内插 `//`）。
+- **预检 69 锚点一次全过**（ast.parse、行界、重复、禁字符、slug↔源文件路径对应），零 `⟳`-外风险、零 `⚠`、块注释内零中文。
+
+流程账（第 173 批）：15 个数据文件逐一对齐源文件；预check 69 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 十五次，1 处良性 `⟳`（exit.tsx (15) 落多行 `//` 注释段中部自动挪到段边界 15→17），零 `⚠`；check-fidelity 全仓 1788 份 0 失败（较上批 +15）；check-links 2655 源码链 + 741 内链 0 失效；全仓 1788/1902 文件、511,927/513,237 行、99%（按行数）；`src/` 还剩 114 份 / 约 1,310 行（33 行档已清零，24 行以上全清零，下一档起点 24 行）。
+
+**下一批候选（24→17 行档，单批约 15 份）**：`commands/passes/passes.tsx`(24) · `commands/statusline.tsx`(24) · `commands/cost/cost.ts`(24) · `commands/context/index.ts`(24) · `replLauncher.tsx`(23) · `commands/terminalSetup/index.ts`(23) · `plugins/bundled/index.ts`(23) · `commands/cost/index.ts`(23) · `costHook.ts`(22) · `commands/version.ts`(22) · `migrations/migrateReplBridgeEnabledToRemoteControlAtStartup.ts`(22) · `commands/passes/index.ts`(22) · `commands/remote-setup/index.ts`(20) · `commands/voice/index.ts`(20) · `commands/files/files.ts`(19)（`src/` 还剩 114 份 / 约 1,310 行；33 行档已清零，24 行以上全清零，下一档起点 24 行）
+
