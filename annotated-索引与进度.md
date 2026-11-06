@@ -7128,3 +7128,43 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 165 批）：15 个数据文件逐一对齐源文件（12 份计划内 110–124 行档 + 3 份先前中断遗留 103–109 行档）；预检 165 锚点全过（含 migrate 块末修正与 3 份遗留补检）；annotate 十五次，batch.ts 1 处良性 `⟳`（模板外移），零 `⚠`；check-fidelity 全仓 1670 份 0 失败（较上批 +15）；check-links 2537 源码链 + 733 内链 0 失效；全仓 1670/1902 文件、504,571/513,237 行、98.3%（按行数，本轮跨过 504,000 行与 98.3%）；`src/` 还剩 232 份 / 8,666 行（103 行档仅余 2 份 parseArgs / ExistingWorkflowStep，124 行以上已清零）。
 
 **下一批候选（<103 行档，单批约 13–15 份）**：`commands/plugin/parseArgs.ts`(103) · `commands/install-github-app/ExistingWorkflowStep.tsx`(103) · `tasks/stopTask.ts`(100) · `memdir/teamMemPrompts.ts`(100) · `types/generated/events_mono/common/v1/auth.ts`(100) · `commands/plugin/ValidatePlugin.tsx`(98) · `outputStyles/loadOutputStylesDir.ts`(98) · `buddy/useBuddyNotification.tsx`(98) · `commands/review/UltrareviewOverageDialog.tsx`(96) · `commands/install-github-app/SuccessStep.tsx`(96) · `constants/system.ts`(95) · `constants/apiLimits.ts`(94) · `memdir/memoryScan.ts`(94) · `commands/install-github-app/InstallAppStep.tsx`(94)（`src/` 还剩 232 份 / 8,666 行；124 行以上已清零，103 行档仅余 2 份）
+
+### src batch 166: 94-103 line tier, 14 files (1369 src, 1579 annotated, 204 anchors)
+
+94–103 行档（接第 165 批下沿，清零 103 行档仅余的 2 份 parseArgs / ExistingWorkflowStep，并顺带吃掉 94–102 行档的 12 份散件）：插件参数解析、安装 GitHub App 多步向导（ExistingWorkflowStep / SuccessStep / InstallAppStep）、/plugin validate 校验、/buddy 预热通知、记忆目录扫描与合并提示词、输出样式目录加载、API 限额常量、系统提示前缀与归属头、超额用量确认对话框、任务停止共享逻辑、生成式鉴权消息类型。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/plugin/parseArgs.ts`](annotated/src/commands/plugin/parseArgs.ts) | 103→118 | 15 | 插件子命令参数解析：ParsedCommand 联合类型 + switch 分发 install/manage/uninstall/enable/disable/validate/marketplace |
+| [`commands/install-github-app/ExistingWorkflowStep.tsx`](annotated/src/commands/install-github-app/ExistingWorkflowStep.tsx) | 103→119 | 15 | 安装向导「已存在工作流」步骤（编译器产物）：更新/跳过/退出三选项、claude.yml 提示 |
+| [`tasks/stopTask.ts`](annotated/src/tasks/stopTask.ts) | 100→115 | 15 | 停止运行中任务的共享逻辑：查表、状态校验、kill、标记已通知（Shell 抑制 exit 137 噪声） |
+| [`types/generated/events_mono/common/v1/auth.ts`](annotated/src/types/generated/events_mono/common/v1/auth.ts) | 100→114 | 14 | 生成式鉴权消息类型（protoc 生成）：fromJSON/toJSON/create/fromPartial 与 DeepPartial/Exact 工具 |
+| [`memdir/teamMemPrompts.ts`](annotated/src/memdir/teamMemPrompts.ts) | 100→115 | 15 | 个人+团队记忆合并提示词：双目录说明、作用域、类型与禁忌、两步保存流程 |
+| [`buddy/useBuddyNotification.tsx`](annotated/src/buddy/useBuddyNotification.tsx) | 98→117 | 18 | /buddy 预热通知 Hook 与彩虹文本渲染（编译器产物）：窗口期判定、触发位置定位 |
+| [`commands/plugin/ValidatePlugin.tsx`](annotated/src/commands/plugin/ValidatePlugin.tsx) | 98→113 | 14 | /plugin validate 交互：清单校验、错误/警告逐条罗列、退出码 |
+| [`outputStyles/loadOutputStylesDir.ts`](annotated/src/outputStyles/loadOutputStylesDir.ts) | 98→111 | 13 | 输出样式目录加载：扫描 markdown、frontmatter 解析、缓存 memoize |
+| [`commands/install-github-app/SuccessStep.tsx`](annotated/src/commands/install-github-app/SuccessStep.tsx) | 96→110 | 13 | 安装向导「成功」步骤（编译器产物）：密钥状态、工作流创建/复用提示 |
+| [`commands/review/UltrareviewOverageDialog.tsx`](annotated/src/commands/review/UltrareviewOverageDialog.tsx) | 96→111 | 14 | 超额用量确认对话框（编译器产物）：AbortController 取消、继续/取消选项 |
+| [`constants/system.ts`](annotated/src/constants/system.ts) | 95→108 | 13 | 最底层系统常量（破循环依赖）：系统提示前缀、归属头、工作负载提示 |
+| [`constants/apiLimits.ts`](annotated/src/constants/apiLimits.ts) | 94→108 | 14 | Anthropic API 限额常量（零依赖）：图片/PDF/媒体各类上限 |
+| [`memdir/memoryScan.ts`](annotated/src/memdir/memoryScan.ts) | 94→109 | 15 | 记忆目录扫描原语：递归列 .md、读 frontmatter、按 mtime 倒序截断 |
+| [`commands/install-github-app/InstallAppStep.tsx`](annotated/src/commands/install-github-app/InstallAppStep.tsx) | 94→111 | 16 | 安装向导「安装 App」步骤（编译器产物）：打开浏览器、密钥与仓库提示 |
+
+要点：
+
+- **本批是「收尾散件」+「安装向导三连」**：parseArgs / ValidatePlugin / stopTask / memoryScan / teamMemPrompts / loadOutputStylesDir 是命令/工具/记忆层的轻量模块；ExistingWorkflowStep / SuccessStep / InstallAppStep 是安装 GitHub App 向导的三步（编译器产物，_c 记忆化 + t0/t1… 临时变量 + Symbol 哨兵）。
+- **编译器产物的读法是固定的**：React Compiler 把组件编译成 `const $ = _c(N)` 缓存槽 + 依赖变化时重建闭包（t1/t2…）的写法，每个 `if ($[k] === Symbol.for("react.memo_cache_sentinel"))` 是首次渲染初始化、否则读缓存；批注只讲「这段在算什么」，不讲编译器细节。
+- **限额常量的分层**：apiLimits 全部零依赖（防循环引用），图片 5MB base64 上限推导出 3.75MB 原始目标、PDF 20MB 目标留出 conversation 余量；system 的系统提示前缀与归属头也是零依赖抽出，归属头的 cch 占位符由 Bun HTTP 栈回填（同长替换避免 Content-Length 变化）。
+- **停止任务的两类噪声处理**：stopTask 对本地 shell 任务抑制 exit 137 通知（避免噪音），但 agent 任务保留——因为 agent 的 AbortError catch 会发带 partialResult 的通知（那是有效载荷不是噪音）；抑制 XML 通知时会直接补发 task_notified SDK 事件，保证消费者看到关闭。
+- **记忆两件套（memoryScan + teamMemPrompts）互补**：memoryScan 是纯扫描原语（拆出以打破 findRelevantMemories 的循环依赖），teamMemPrompts 是拼装合并提示词；两者都强调「单 pass 读-排-截」与「异常返回空列表不拖垮整体」。
+
+踩坑：
+
+- **多行赋值劈开 2 处（parseArgs / loadOutputStylesDir）**：parseArgs 原挂 (45) 落在 `const isMarketplace =` 多行赋值首行之后，loadOutputStylesDir 原挂 (42) 落在 `const description =` 之后——判据 5（不劈开未结束的多行表达式）直接报失败。处置：把两条锚点移到赋值收尾行之后（parseArgs 改到 (50)、loadOutputStylesDir 改到 (50)），其余同理把挂在线内 `//` 注释上的锚点（40/52/64）挪到真实代码行（41/62/65），重跑预检与 annotate 后 fidelity 全仓 0 失败。
+- **`//` 注释上的锚点无害但冗余**：teamMemPrompts / apiLimits / loadOutputStylesDir 里若干 `//` 注释行上的 `after` 锚点被 annotate 吸附到注释行尾，虽不报错但和原文注释重复；统一挪到紧邻代码行，落点更顺。
+- **生成文件（auth.ts）与编译器产物（6 个 .tsx）的源映射行**：auth.ts 是 protoc 生成，6 个 .tsx 带 `# sourceMappingURL=` 超长 base64 行，annotate 自动换成一句中文说明（判据 2 标 OK*），批注行数已把「源映射行 → 2 行说明」的 +1 计入。
+- **预检 204 锚点一次全过（除 1 处 TAIL 软警告）**：ValidatePlugin (70) 落在 `} catch (t3) {` 上，是 catch 块前的收尾说明，语义正确，非误报。
+
+流程账（第 166 批）：14 个数据文件逐一对齐源文件；预检 204 锚点全过（含 parseArgs/loadOutputStylesDir 多行赋值修正与 1 处 TAIL 软警告）；annotate 十四次，零 `⟳` 零 `⚠`；check-fidelity 全仓 1684 份 0 失败（较上批 +14）；check-links 2552 源码链 + 734 内链 0 失效；全仓 1684/1902 文件、505,940/513,237 行、98%（按行数，本轮跨过 505,000 行）；`src/` 还剩 218 份 / 7,297 行（103 行档已清零，94 行以上全清零，下一档起点 93 行）。
+
+**下一批候选（<94 行档，单批约 13–15 份）**：`query/tokenBudget.ts`(93) · `commands/color/color.ts`(93) · `skills/bundled/loop.ts`(92) · `commands/commit.ts`(92) · `commands/export/export.tsx`(91) · `commands/memory/memory.tsx`(90) · `server/createDirectConnectSession.ts`(88) · `context/voice.tsx`(88) · `assistant/sessionHistory.ts`(87) · `commands/rename/rename.ts`(87) · `constants/xml.ts`(86) · `commands/install-github-app/ErrorStep.tsx`(85) · `commands/mcp/mcp.tsx`(85) · `ink.ts`(85)（`src/` 还剩 218 份 / 7,297 行；103 行档已清零，94 行以上全清零，下一档起点 93 行）
