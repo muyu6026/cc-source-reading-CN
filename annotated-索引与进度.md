@@ -7208,3 +7208,42 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 167 批）：14 个数据文件逐一对齐源文件；预检 144 锚点全过（含 commit 模板外移 2 处）；annotate 十四次，commit 1 处良性 `⟳`（模板外移 20→54、34→54），零 `⚠`；check-fidelity 全仓 1698 份 0 失败（较上批 +14）；check-links 2566 源码链 + 735 内链 0 失效；全仓 1698/1902 文件、507,177/513,237 行、99%（按行数，本轮跨过 507,000 行）；`src/` 还剩 204 份 / 6,060 行（93 行档已清零，84 行以上全清零，下一档起点 83 行）。
 
 **下一批候选（<84 行档，单批约 13–15 份）**：`projectOnboardingState.ts`(83) · `commands/sandbox-toggle/sandbox-toggle.tsx`(83) · `bridge/pollConfigDefaults.ts`(82) · `vim/motions.ts`(82) · `skills/bundled/remember.ts`(82) · `tasks/pillLabel.ts`(82) · `commands/logout/logout.tsx`(82) · `bridge/inboundMessages.ts`(80) · `skills/bundled/stuck.ts`(79) · `skills/bundled/index.ts`(79) · `remote/remotePermissionBridge.ts`(78) · `constants/product.ts`(76) · `state/selectors.ts`(76) · `tasks/LocalShellTask/killShellTasks.ts`(76)（`src/` 还剩 204 份 / 6,060 行；93 行档已清零，84 行以上全清零，下一档起点 83 行）
+
+### src batch 168: 75-83 line tier, 15 files (1195 src, 1383 annotated, 186 anchors)
+
+75–83 行档（接第 167 批下沿，清零 83 行档仅余的 2 份 projectOnboardingState / sandbox-toggle，并顺吃 82–75 行档的 13 份散件）：新项目引导状态判定、/sandbox 沙箱开关、/logout 登出、后台任务胶囊标签、桥接轮询默认值、vim 光标动作、remember/stuck 两个内部技能、内置技能注册中心、claude-api 内容装配、远端权限桥接、AppState 选择器、LocalShellTask 终止助手、产品常量/URL、入站消息抽取。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`projectOnboardingState.ts`](annotated/src/projectOnboardingState.ts) | 83→98 | 15 | 新项目引导状态判定：两步引导、完成判定、缓存短路、展示计数 |
+| [`commands/sandbox-toggle/sandbox-toggle.tsx`](annotated/src/commands/sandbox-toggle/sandbox-toggle.tsx) | 83→99 | 15 | /sandbox 命令：平台/策略/依赖校验、exclude 子命令、交互菜单 |
+| [`commands/logout/logout.tsx`](annotated/src/commands/logout/logout.tsx) | 82→98 | 15 | /logout 命令（编译器产物）：先冲刷遥测再清凭据、各类缓存失效、优雅退出 |
+| [`tasks/pillLabel.ts`](annotated/src/tasks/pillLabel.ts) | 82→97 | 15 | 后台任务页脚胶囊标签：按类型措辞、ultraplan 菱形阶段 |
+| [`bridge/pollConfigDefaults.ts`](annotated/src/bridge/pollConfigDefaults.ts) | 82→93 | 11 | 桥接轮询间隔默认值：未达/已达容量、多会话档位、回收/保活 |
+| [`vim/motions.ts`](annotated/src/vim/motions.ts) | 82→96 | 14 | vim 动作纯函数：按键→光标位置、inclusive/linewise 判定 |
+| [`skills/bundled/remember.ts`](annotated/src/skills/bundled/remember.ts) | 82→94 | 12 | remember 内置技能：审查自动记忆并提议升级（仅内部 ant） |
+| [`bridge/inboundMessages.ts`](annotated/src/bridge/inboundMessages.ts) | 80→92 | 12 | 入站消息抽取：内容/uuid 抽取、图片块归一化（mediaType 兼容） |
+| [`skills/bundled/stuck.ts`](annotated/src/skills/bundled/stuck.ts) | 79→90 | 11 | stuck 内置技能：诊断卡死会话并报告（仅内部 ant） |
+| [`skills/bundled/index.ts`](annotated/src/skills/bundled/index.ts) | 79→91 | 12 | 内置技能注册中心：按 feature 开关按需 require 并注册各技能 |
+| [`remote/remotePermissionBridge.ts`](annotated/src/remote/remotePermissionBridge.ts) | 78→91 | 13 | 远端权限桥接：合成助理消息、未加载工具的桩 |
+| [`state/selectors.ts`](annotated/src/state/selectors.ts) | 76→87 | 11 | AppState 选择器：取查看中队友任务、输入路由判别联合 |
+| [`tasks/LocalShellTask/killShellTasks.ts`](annotated/src/tasks/LocalShellTask/killShellTasks.ts) | 76→87 | 11 | LocalShellTask 终止：杀单任务、按代理批量杀 bash |
+| [`constants/product.ts`](annotated/src/constants/product.ts) | 76→86 | 10 | 产品常量与远端会话环境判定/URL 构造 |
+| [`skills/bundled/claudeApiContent.ts`](annotated/src/skills/bundled/claudeApiContent.ts) | 75→84 | 9 | claude-api 技能内容装配：各语言文档内联、模型变量 |
+
+要点：
+
+- **本批是「工程脚手架收尾 + 技能注册/内容 + 远端桥接 + 状态选择」混合散件**，行数都在 75–83 之间，全部为纯函数、常量或命令/技能入口，无重依赖。
+- **两个命令走不同形态**：sandbox-toggle 先做平台/策略/依赖校验再渲染交互菜单或处理 `exclude` 子命令；logout 严格按「先冲刷遥测→清 API Key→删安全存储→清缓存→改全局配置→200ms 后优雅退出」顺序，防止组织数据随令牌泄露。
+- **内置技能体系收敛**：`index.ts` 是注册中心（按 `feature(...)` 开关 `require` 各技能）；`remember`/`stuck` 仅对内部 `USER_TYPE=ant` 开放；`claudeApiContent.ts` 把各语言 `.md` 文档在构建期内联为字符串并维护模型变量。
+- **纯函数工具簇**：`pillLabel`（任务标签）、`motions`（vim 光标）、`selectors`（AppState 派生）、`killShellTasks`（终止助手）、`pollConfigDefaults`（轮询常量）、`product`（环境/URL）、`remotePermissionBridge`（远端权限合成）、`inboundMessages`（入站消息抽取）都是无副作用或最小副作用、可独立测试的小单元。
+
+踩坑：
+
+- **保真度初跑 1713 份出现 5 处 split-expression 失败**（inboundMessages 2 处、pollConfigDefaults / product / selectors 各 1 处）：锚点落在多行表达式首行（行尾 `=` 或 `{`，如 `const uuid =`、`const X =`、`const { toCompatSessionId } =`、`export type X =`、`return {`）被劈开。全部改为移到表达式收尾行（值行/闭合 `}`/三元末行）后复跑通过——教训：跨行的 `const x =`（含三元/解构/对象字面量）首行绝不放 `after` 锚。
+- **2 处良性 `⟳`**（killShellTasks 71→74、claudeApiContent 31→35）：原锚点落在 `//` 注释段中部，annotate 自动挪到段边界，落点通顺（已 grep 确认各只出现一次、未劈开英文）。
+- **两个 .tsx（sandbox-toggle、logout）为 React Compiler 产物**：基址 base64 源映射行被 annotate 换成一句中文说明（判据 2 标 OK*），批注行数已把「源映射行→说明」计入，无需手补。
+
+流程账（第 168 批）：15 个数据文件逐一对齐源文件；预check 186 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，2 处良性 `⟳`（注释段边界自动挪移），初跑 fidelity 5 处 split-expression 失败→定位为 after 锚落在多行 `=`/`{` 首行→全部改到收尾行复跑通过；check-fidelity 全仓 1713 份 0 失败（较上批 +15）；check-links 2580 源码链 + 736 内链 0 失效；全仓 1713/1902 文件、508,372/513,237 行、99%（按行数）；`src/` 还剩 189 份 / 4,865 行（83 行档已清零，75 行以上全清零，下一档起点 74 行）。
+
+**下一批候选（<75 行档，单批约 15 份）**：`commands/install-github-app/WarningsStep.tsx`(73) · `bridge/flushGate.ts`(71) · `cli/handlers/agents.ts`(70) · `skills/bundled/simplify.ts`(69) · `constants/systemPromptSections.ts`(68) · `migrations/migrateSonnet45ToSonnet46.ts`(67) · `commands/rename/generateSessionName.ts`(67) · `commands/createMovedToPluginCommand.ts`(65) · `commands/install-github-app/CreatingStep.tsx`(65) · `commands/context/context.tsx`(64) · `context/QueuedMessageContext.tsx`(63) · `keybindings/shortcutFormat.ts`(63) · `entrypoints/sdk/coreTypes.ts`(62) · `migrations/migrateAutoUpdatesToSettings.ts`(61) · `commands/reload-plugins/reload-plugins.ts`(61)（`src/` 还剩 189 份 / 4,865 行；83 行档已清零，75 行以上全清零，下一档起点 74 行）
