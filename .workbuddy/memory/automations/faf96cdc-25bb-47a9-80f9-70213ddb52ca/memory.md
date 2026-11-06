@@ -1,5 +1,14 @@
 # 自动批注流水线 · 执行记忆
 
+## 第 170 批（2026-11-06）：src 散件收尾 38–59 行档 15 件套（842 源行 / 81 锚点）
+
+- 状态：完成并推送，commit `24dd937`（a57261f..24dd937）。
+- 内容：src 散件最小文件档——非 React 快捷键显示 Hook、远程评审命令、隐私设置对话框、模态上下文、主题命令、服务端类型、Opus 旧模型迁移、/review 双命令、CCR 会话 ID 兼容、容量唤醒原语、工具体积常量、语音开关、记忆年龄、/keybindings 命令、快捷键模板生成器。
+- 校验：预检 81 锚点全过（ast.parse、行界、重复、禁字符）；annotate 零 `⟳` 零 `⚠`；fidelity 1743 份 0 失败；links 2610+738 0 失效。
+- 坑（已修）：① capacityWake 一处 `after` 初落在 type 内部 `/**` 文档注释续行（行 22），触发 `⚠ 块注释内`，改到 type 收尾 `}`（行 26）；② 改后又与既有行 26 锚点重复，预检抓出，分离到工厂函数签名行（行 28）。③ 四个 `.tsx` 末尾 base64 sourcemap 被 annotate 换成 2 行中文说明（共 8 行），中文批注计数比锚点数多 8 属预期（标 OK*）。
+- 进度：全仓 1743/1902 文件、510,208/513,237 行、99%；src 剩 159 份 / 约 3,033 行。
+- 下批目标（51→43 行档）：`migrations/resetProToOpusDefault.ts`(51) · `migrations/resetAutoModeOptInForDefaultOffer.ts`(51) · `commands/pr_comments/index.ts`(50) · `commands/release-notes/release-notes.ts`(50) · `commands/sandbox-toggle/index.ts`(50) · `bridge/bridgeConfig.ts`(48) · `migrations/migrateSonnet1mToSonnet45.ts`(48) · `tasks/types.ts`(46) · `query/config.ts`(46) · `migrations/migrateFennecToOpus.ts`(45) · `constants/figures.ts`(45) · `cli/transports/transportUtils.ts`(45) · `skills/mcpSkillBuilders.ts`(44) · `types/ids.ts`(44) · `bridge/bridgePermissionCallbacks.ts`(43)。
+
 ## 第 146 批（2026-11-05）：commands/plugin/PluginSettings.tsx 巨兽（1,072 行，84 锚点）
 
 - 状态：完成并推送，commit `825bbaa`。
