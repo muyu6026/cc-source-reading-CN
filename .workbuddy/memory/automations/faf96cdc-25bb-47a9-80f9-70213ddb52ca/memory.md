@@ -1066,3 +1066,12 @@
 - 校验：预检 **174 锚点一次全过**；annotate 十二次 **零 `⟳` 零 `⚠`**（第二批整批无纠正）；三项专项扫描 **零输出**；fidelity **1655 份 0 失败**；links 2537 源链 + 733 内链 0 失效。全仓 **1655/1902 文件 / 502,849 行 / 98.0%**（跨过 502,000 行与 98%）；src 剩 247 份 / 10,388 行。
 - 口径：两处锚点落在 `/**` 起行（JSDoc 之前）是允许的，因为内部是禁区；`promptOverlayContext` 的 (2) 同理。
 - 下一批目标（110–124 行档，单批约 12 份）：skills/bundled/batch.ts(124) · commands/plugin/PluginErrors.tsx(124) · commands/plan/plan.tsx(122) · tasks/InProcessTeammateTask/types.ts(121) · keybindings/match.ts(120) · migrations/migrateEnableAllProjectMcpServersToSettings.ts(118) · commands/extra-usage/extra-usage-core.ts(118) · commands/plugin/pluginDetailsHelpers.tsx(117) · constants/tools.ts(112) · commands/add-dir/validation.ts(110) · cli/handlers/util.tsx(110) · bridge/pollConfig.ts(110)。
+
+
+## 第 172 批（2026-11-06）：src 散件 33–43 行档十五件套
+- 状态：完成并推送，commit `5977de5`（ae78e7c..5977de5）。
+- 本批 15 份（33–43 行档）：migrateOpusToOpus1m、/thinkback-play、bridgePermissionCallbacks、LocalShellTask/guards、query/deps、migrateBypassPermissionsAcceptedToSettings、tasks、mailbox.tsx、vim、upgrade.tsx、buddy/prompt、replBridgeHandle、state/store、claudeInChrome、constants/common。合计 576 源行 / 675 批注版 / 98 锚点。
+- 进度：全仓 1773/1902 文件、511,499/513,237 行、99%；src 剩 111 份。
+- 校验：预检 98 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次 1 处良性 ⟳（guards.ts 文件头 // 块中部自动挪移），零 ⚠；check-fidelity 1773 份 0 失败；check-links 2640 源码链 + 740 内链 0 失效。
+- 注：165–171 批已在之前运行并推送（git 可见），但本记忆文件上次只续写到 164，本次补记 172；数字以脚本实算为准。
+- 下一批候选（33→24 行档）：commands/exit/exit.tsx(33) · PluginTrustWarning.tsx(32) · ndjsonSafeStringify.ts(32) · extra-usage/index.ts(31) · cli/exit.ts(31) · verify.ts(30) · fpsMetrics.tsx(30) · install-slack-app.ts(30) · useMoreRight.tsx(26) · feedback/index.ts(26) · fast/index.ts(26) · desktop/index.ts(26) · bridge/index.ts(26) · feedback/feedback.tsx(25) · cyberRiskInstruction.ts(24)。
