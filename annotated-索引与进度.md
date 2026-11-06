@@ -7011,3 +7011,42 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 162 批）：10 个数据文件逐一对齐源文件；预检 139 锚点全过；annotate 十次 1 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1631 份 0 失败（较上批 +10）；check-links 2503 源码链 + 730 内链 0 失效；全仓 1631/1902 文件、499,537/513,237 行、97.3%（按行数）；`src/` 还剩 271 份。
 
 **下一批候选（134–157 行档，单批约 12 份）**：`tasks/DreamTask/DreamTask.ts`(157) · `entrypoints/sandboxTypes.ts`(156) · `constants/files.ts`(156) · `context/overlayContext.tsx`(151) · `commands/voice/voice.ts`(150) · `buddy/types.ts`(148) · `constants/github-app.ts`(144) · `state/teammateViewHelpers.ts`(141) · `memdir/findRelevantMemories.ts`(141) · `bridge/debugUtils.ts`(141) · `commands/session/session.tsx`(140) · `commands/plugin/PluginOptionsFlow.tsx`(135)（`src/` 还剩 271 份 / 13,700 行；176 行以上已清零）
+
+### src batch 163: 134-157 line tier, 12 files (1760 src, 1939 annotated, 176 anchors)
+
+134–157 行档（接第 162 批下沿，取剩余 134 行以上前 12 份，157 行档就此清零）：记忆整理后台任务、沙箱配置 schema、二进制后缀表、浮层登记、语音开关命令、伙伴类型与字符码物种表、GitHub 工作流模板、队友视图状态机、记忆相关性选择、桥接调试工具、会话二维码命令、插件配置向导。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`tasks/DreamTask/DreamTask.ts`](annotated/src/tasks/DreamTask/DreamTask.ts) | 157→171 | 14 | 记忆整理后台任务：三十轮展示窗口、改动路径去重、中止时回滚锁时间戳 |
+| [`entrypoints/sandboxTypes.ts`](annotated/src/entrypoints/sandboxTypes.ts) | 156→175 | 19 | 沙箱配置唯一真源：网络/文件系统/总开关三块 schema，托管策略与平台限制 |
+| [`constants/files.ts`](annotated/src/constants/files.ts) | 156→170 | 14 | 二进制后缀表与内容探测：后缀预筛、空字节判死、不可打印字符占比阈值 |
+| [`context/overlayContext.tsx`](annotated/src/context/overlayContext.tsx) | 151→164 | 12 | 浮层登记（React 编译器产物）：注册/注销副作用、模态判定、刷新帧 |
+| [`commands/voice/voice.ts`](annotated/src/commands/voice/voice.ts) | 150→168 | 18 | 语音开关命令：四项前置检查、分平台权限引导、语言提示计数 |
+| [`buddy/types.ts`](annotated/src/buddy/types.ts) | 148→160 | 12 | 伙伴类型：字符码物种表、确定性骨骼与可存储灵魂的切分、稀有度三张映射表 |
+| [`constants/github-app.ts`](annotated/src/constants/github-app.ts) | 144→149 | 5 | GitHub 集成模板：一份工作流、一份拉取请求正文、一份评审工作流 |
+| [`state/teammateViewHelpers.ts`](annotated/src/state/teammateViewHelpers.ts) | 141→160 | 19 | 队友视图状态机：进入/退出/中止三操作，保留与淘汰的互斥规则 |
+| [`memdir/findRelevantMemories.ts`](annotated/src/memdir/findRelevantMemories.ts) | 141→157 | 16 | 记忆相关性选择：清单筛选、旁路查询、文件名白名单、失败降级 |
+| [`bridge/debugUtils.ts`](annotated/src/bridge/debugUtils.ts) | 141→155 | 14 | 桥接调试工具：脱敏正则、截断、axios 错误的三段摘取、跳过事件上报 |
+| [`commands/session/session.tsx`](annotated/src/commands/session/session.tsx) | 140→157 | 16 | 会话二维码命令（React 编译器产物）：地址订阅、二维码生成、Esc 关闭 |
+| [`commands/plugin/PluginOptionsFlow.tsx`](annotated/src/commands/plugin/PluginOptionsFlow.tsx) | 135→153 | 17 | 插件配置向导：步骤表只建一次、顶层与频道两步合并、按步骤键重挂载 |
+
+要点：
+
+- **本批有三份是「编译产物」**：`overlayContext`、`session`、`PluginOptionsFlow` 里出现 `_c(n)` 槽位缓存、`$[n] !== dep` 比较条件、`Symbol.for(react.memo_cache_sentinel)` 常量标记，以及 `_temp*` 形式的模块级提取函数。读法与前几批一致：槽位比较条件就是依赖数组，临时变量是被提出的闭包。`PluginOptionsFlow` 是唯一手写 React 的一份，对比着看能看出编译器到底替你做了什么。
+- **状态机式文件的核心是「两个方向互斥」**：`teammateViewHelpers` 的保留与淘汰不能同时成立——进入视图要清 `evictAfter`，释放时要按是否终态重新给，中止时只发信号不改状态（状态由任务自己的收尾路径写）。三条路径各写各的，但共用同一个 `release`。
+- **两处「降级而不是失败」**：`findRelevantMemories` 的任何异常都返回空数组（记忆检索是增益功能），`DreamTask` 的空轮次直接返回原对象（同一引用即跳过重渲染）。两者都是把「没有变化 / 拿不到」做成正常路径。
+- **配置类文件的价值在边界理由**：`sandboxTypes` 里每个 `.describe()` 都在解释「为什么需要这个开关」——`allowManagedReadPathsOnly` 是唯一反向字段、`enableWeakerNetworkIsolation` 明写降低安全性、`passthrough` 是给未文档化的平台限制留的门。
+- **`buddy/types.ts` 的字符码物种表是有意为之**：构建产物里有一条排除字符串检查，某个物种名与模型代号撞了，所以十八个物种一律用 `String.fromCharCode` 拼出，不做例外（只藏一个反而更显眼）。
+- **模板为主体的文件只挂模板外节点**：`github-app.ts` 三份模板共 144 行，只在三个声明行与文档地址常量上挂锚点，共 5 条。
+
+踩坑：
+
+- **块末注脚第四次复现（`} catch` 前）**：`findRelevantMemories` 的 (131) 原挂 `} catch (e) {` 之前，讲的是 catch 里的事——站在 try 末尾描述下一段。处置是并进 catch 内第一条锚点，文本改成「失败降级 + 中止不记日志」两件事一句话。
+- **行尾 lint 指令不必动，但会触发扫描**：`buddy/types.ts` 的 `export type Species = ...` 行尾带 `// biome-ignore format: keep compact`。中文注释挂在它前一行不会隔断（指令在同一条语句行内），但专项扫描会报 ESLINT-AFTER。处置是把该锚点的内容并进上面物种列表那条，直接消掉这一行注释。
+- **模板字符串外移 4 处（`⟳`）**：`github-app.ts` 三条与 `findRelevantMemories.ts` 一条，外移后行号不变（6→6、58→58、100→100、18→18），落点都在声明行之上，读起来通顺。
+- **预检 178 锚点一次全过**，两处处置后为 176。
+
+流程账（第 163 批）：12 个数据文件逐一对齐源文件；预检首轮 178 锚点全过，合并两条后 176；annotate 十二次 4 处良性 `⟳`、零 `⚠`；三项专项扫描（JSX 子元素区、块末注脚、eslint 指令隔断）首轮 2 处命中并全部处置，复扫零输出；check-fidelity 全仓 1643 份 0 失败（较上批 +12）；check-links 2513 源码链 + 731 内链 0 失效；全仓 1643/1902 文件、501,297/513,237 行、97.7%（按行数）；`src/` 还剩 259 份 / 11,940 行。
+
+**下一批候选（124–135 行档，单批约 12 份）**：`bridge/bridgeDebug.ts`(135) · `native-ts/yoga-layout/enums.ts`(134) · `dialogLaunchers.tsx`(133) · `buddy/companion.ts`(133) · `cli/transports/WorkerStateUploader.ts`(131) · `commands/brief.ts`(130) · `keybindings/reservedShortcuts.ts`(127) · `bridge/workSecret.ts`(127) · `tasks/InProcessTeammateTask/InProcessTeammateTask.tsx`(126) · `commands/add-dir/add-dir.tsx`(126) · `context/promptOverlayContext.tsx`(125) · `Task.ts`(125)（`src/` 还剩 259 份 / 11,940 行；157 行以上已清零）
