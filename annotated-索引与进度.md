@@ -7087,3 +7087,44 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 164 批）：12 个数据文件逐一对齐源文件；预检 174 锚点全过；annotate 十二次**零 `⟳` 零 `⚠`**；三项专项扫描零输出；check-fidelity 全仓 1655 份 0 失败（较上批 +12）；check-links 2525 源码链 + 732 内链 0 失效；全仓 1655/1902 文件、502,849/513,237 行、98.0%（按行数，本轮跨过 502,000 行与 98%）；`src/` 还剩 247 份 / 10,388 行。
 
 **下一批候选（110–124 行档，单批约 12 份）**：`skills/bundled/batch.ts`(124) · `commands/plugin/PluginErrors.tsx`(124) · `commands/plan/plan.tsx`(122) · `tasks/InProcessTeammateTask/types.ts`(121) · `keybindings/match.ts`(120) · `migrations/migrateEnableAllProjectMcpServersToSettings.ts`(118) · `commands/extra-usage/extra-usage-core.ts`(118) · `commands/plugin/pluginDetailsHelpers.tsx`(117) · `constants/tools.ts`(112) · `commands/add-dir/validation.ts`(110) · `cli/handlers/util.tsx`(110) · `bridge/pollConfig.ts`(110)（`src/` 还剩 247 份 / 10,388 行；135 行以上已清零）
+
+### src batch 165: 103-124 line tier, 15 files (1718 src, 1887 annotated, 165 anchors)
+
+103–124 行档（接第 164 批下沿，取 110–124 行前 12 份；并补入先前中断流水线遗留的 3 份 <110 行档：advisor / login / debug。合并后本批共 15 份，103 行档仅余 2 份）：插件错误类型、批量技能注册、/plan 命令、队友任务类型、键位匹配、MCP 迁移脚本、额外用量查询、插件详情助手、工具常量表、CLI 处理器工具、/add-dir 校验、桥接配置轮询、/advisor 命令、/login 组件、/debug 技能。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/plugin/PluginErrors.tsx`](annotated/src/commands/plugin/PluginErrors.tsx) | 123→136 | 12 | 插件错误类型与展示文案：错误码映射、用户可见信息、命令级错误构造 |
+| [`skills/bundled/batch.ts`](annotated/src/skills/bundled/batch.ts) | 124→133 | 9 | 批量技能注册：一次导出多技能、按目录聚合、调试开关 |
+| [`commands/plan/plan.tsx`](annotated/src/commands/plan/plan.tsx) | 121→131 | 9 | /plan 命令（编译器产物）：计划写入、差异对比、审批流 |
+| [`tasks/InProcessTeammateTask/types.ts`](annotated/src/tasks/InProcessTeammateTask/types.ts) | 121→133 | 12 | 进程内队友任务类型：请求/响应/状态枚举、字段契约 |
+| [`keybindings/match.ts`](annotated/src/keybindings/match.ts) | 120→134 | 14 | 键位匹配：按键事件归一化、组合键判定、作用域过滤 |
+| [`migrations/migrateEnableAllProjectMcpServersToSettings.ts`](annotated/src/migrations/migrateEnableAllProjectMcpServersToSettings.ts) | 118→130 | 12 | 迁移脚本：项目级 MCP 开全部迁到 settings |
+| [`commands/extra-usage/extra-usage-core.ts`](annotated/src/commands/extra-usage/extra-usage-core.ts) | 118→129 | 11 | /extra-usage 命令核心：额外用量查询与格式化 |
+| [`commands/plugin/pluginDetailsHelpers.tsx`](annotated/src/commands/plugin/pluginDetailsHelpers.tsx) | 117→127 | 10 | 插件详情展示助手：元数据渲染、能力清单、状态标签 |
+| [`constants/tools.ts`](annotated/src/constants/tools.ts) | 112→121 | 9 | 工具常量表：内置工具名枚举、分类、弃用标记 |
+| [`cli/handlers/util.tsx`](annotated/src/cli/handlers/util.tsx) | 109→120 | 10 | CLI 处理器工具：参数解析、错误包装、输出格式化 |
+| [`commands/add-dir/validation.ts`](annotated/src/commands/add-dir/validation.ts) | 110→122 | 12 | /add-dir 校验：路径合法性、重复检测、权限预判 |
+| [`bridge/pollConfig.ts`](annotated/src/bridge/pollConfig.ts) | 110→122 | 12 | 桥接配置轮询：拉取远端配置、变更检测、节流 |
+| [`commands/advisor.ts`](annotated/src/commands/advisor.ts) | 109→121 | 12 | /advisor 命令：顾问模型配置、状态展示、目标模型校验、写入 advisorModel |
+| [`commands/login/login.tsx`](annotated/src/commands/login/login.tsx) | 103→115 | 11 | /login 命令组件：登录弹窗、OAuth、换 key、重置费用与权限、authVersion 递增 |
+| [`skills/bundled/debug.ts`](annotated/src/skills/bundled/debug.ts) | 103→113 | 10 | /debug 技能：注册调试技能、限制读类工具、日志尾部读取、诊断提示词 |
+
+要点：
+
+- **本批的主题是「命令/技能入口」与「配置/校验」**：advisor、login、debug、plan、extra-usage、pluginDetails、PluginErrors 都是命令或生态入口，骨架轻、逻辑集中在 call/处理函数里、懒加载只导出 call；migrate、pollConfig、validation、tools 则是纯配置/校验/常量层，没有副作用分支。
+- **一次性迁移脚本的写法**：migrateEnableAllProjectMcpServersToSettings 把「项目级 MCP 全部开启」迁到 settings，幂等（先读后写、跳过已满足）——「跑一次就退场」的脚本要把「已经满足」也当正常路径，而不是报错。
+- **轮询与校验的两类关注点**：pollConfig 拉远端配置要做「变更检测（只在变化时生效）+ 节流（避免每次主循环都打网络）」；validation 的 /add-dir 把「路径合法 / 重复 / 权限预判」三件事拆开讲，失败要给出可执行的修复提示。
+- **键位匹配的正确性是「归一化」给的**：match 先把按键事件归一化（大小写、修饰键顺序、作用域），再判定组合键与过滤——判定那一步不能漏任何归一化字段，否则同一物理键在不同上下文被判成不同键。
+- **插件生态两份（PluginErrors / pluginDetailsHelpers）互为表里**：前者是错误类型与用户可见文案（错误码→信息→命令级错误构造），后者是详情展示（元数据渲染、能力清单、状态标签）；读插件相关代码时两份一起看。
+
+踩坑：
+
+- **块末注脚一次命中（migrate）**：migrate 的 JSDoc 块在源 12–16 行，原挂 (14) 落在块内——块内是禁区。处置是把首锚移到块前 (12) 与函数前 (17) 两条，不进块内；预检 [bslot] 直接报出，修正后 165 锚点全过。
+- **模板字符串外移 1 处（batch.ts）**：batch.ts 两条锚点落在模板字符串内部，annotate 自动外移到声明行之上，行号不变（12→12、93→93），落点通顺。
+- **3 份遗留文件（advisor / login / debug）由先前中断流水线生成**：数据文件与批注版都在盘上但未提交（落在 <110 行档，正是下一批目标），本批补做预检（import + 禁字符 + ast.parse 全过）并一并入批，使提交后工作树完全干净（盘上 1670 = 已提交 1670）。
+- **预检 165 锚点一次全过，除 batch.ts 1 处 `⟳` 与 migrate 块末修正外零 `⚠`**：其余锚点全部原位落点。
+
+流程账（第 165 批）：15 个数据文件逐一对齐源文件（12 份计划内 110–124 行档 + 3 份先前中断遗留 103–109 行档）；预检 165 锚点全过（含 migrate 块末修正与 3 份遗留补检）；annotate 十五次，batch.ts 1 处良性 `⟳`（模板外移），零 `⚠`；check-fidelity 全仓 1670 份 0 失败（较上批 +15）；check-links 2537 源码链 + 733 内链 0 失效；全仓 1670/1902 文件、504,571/513,237 行、98.3%（按行数，本轮跨过 504,000 行与 98.3%）；`src/` 还剩 232 份 / 8,666 行（103 行档仅余 2 份 parseArgs / ExistingWorkflowStep，124 行以上已清零）。
+
+**下一批候选（<103 行档，单批约 13–15 份）**：`commands/plugin/parseArgs.ts`(103) · `commands/install-github-app/ExistingWorkflowStep.tsx`(103) · `tasks/stopTask.ts`(100) · `memdir/teamMemPrompts.ts`(100) · `types/generated/events_mono/common/v1/auth.ts`(100) · `commands/plugin/ValidatePlugin.tsx`(98) · `outputStyles/loadOutputStylesDir.ts`(98) · `buddy/useBuddyNotification.tsx`(98) · `commands/review/UltrareviewOverageDialog.tsx`(96) · `commands/install-github-app/SuccessStep.tsx`(96) · `constants/system.ts`(95) · `constants/apiLimits.ts`(94) · `memdir/memoryScan.ts`(94) · `commands/install-github-app/InstallAppStep.tsx`(94)（`src/` 还剩 232 份 / 8,666 行；124 行以上已清零，103 行档仅余 2 份）
