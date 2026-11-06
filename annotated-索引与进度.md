@@ -6940,3 +6940,38 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 160 批）：10 个数据文件逐一对齐源文件；预检 110 锚点全过；annotate 十次 3 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1611 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1611/1902 文件、495,983/513,237 行、96.6%（按行数）；`src/` 还剩 291 份。
 
 **下一批候选（182–196 行档，单批约 10 份）**：`keybindings/useKeybinding.ts`(196) · `entrypoints/mcp.ts`(196) · `skills/bundled/claudeApi.ts`(196) · `commands/install-github-app/CheckExistingSecretStep.tsx`(190) · `context.ts`(189) · `commands/remote-setup/remote-setup.tsx`(187) · `types/generated/google/protobuf/timestamp.ts`(187) · `vim/textObjects.ts`(186) · `commands/effort/effort.tsx`(183) · `commands/remote-setup/api.ts`(182)（`src/` 还剩 291 份；440 行以上已清零）
+
+### src batch 161: 182-196 line tier, 10 files (1892 src, 2028 annotated, 133 anchors)
+
+182–196 行档（接第 160 批下沿，取剩余 182 行以上前 10 份，181 行档就此清零）：键位 Hook 双件套、Claude API 内置技能、MCP 服务入口、GitHub App 安装检查步骤、系统/用户上下文注入、网页端远程安装向导、protobuf Timestamp 生成类型、vim 文本对象查找、/effort 命令、远程安装 API。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`keybindings/useKeybinding.ts`](annotated/src/keybindings/useKeybinding.ts) | 196→211 | 15 | 键位 Hook 双件套：单绑定 useKeybinding 与多绑定 useKeybindings；处理器留组件、键位来自配置，和弦状态机与冒泡拦截 |
+| [`skills/bundled/claudeApi.ts`](annotated/src/skills/bundled/claudeApi.ts) | 196→209 | 13 | 内置 claude-api 技能：语言特征检测、文档内联拼装、提示词工厂与运行时懒加载 |
+| [`entrypoints/mcp.ts`](annotated/src/entrypoints/mcp.ts) | 196→209 | 13 | MCP 服务入口：列工具/调工具两个处理器 + stdio 传输，zod→JSON schema 适配 |
+| [`commands/install-github-app/CheckExistingSecretStep.tsx`](annotated/src/commands/install-github-app/CheckExistingSecretStep.tsx) | 190→201 | 10 | GitHub App 安装的检查已有 secret 步骤（React 编译器产物，全套 `_c` 缓存槽） |
+| [`context.ts`](annotated/src/context.ts) | 189→203 | 14 | 系统/用户上下文注入：git 状态、缓存打断标记、CLAUDE.md 读取与缓存 |
+| [`commands/remote-setup/remote-setup.tsx`](annotated/src/commands/remote-setup/remote-setup.tsx) | 187→202 | 14 | 网页端远程安装向导 Web 组件：登录态检测、令牌导入、环境创建 |
+| [`types/generated/google/protobuf/timestamp.ts`](annotated/src/types/generated/google/protobuf/timestamp.ts) | 187→200 | 13 | protoc 生成的 Timestamp 类型与 MessageFns 四件套（fromJSON/toJSON/create/fromPartial） |
+| [`vim/textObjects.ts`](annotated/src/vim/textObjects.ts) | 186→199 | 13 | vim 文本对象查找：单词/引号/括号三类，按字形切分避免多字节劈开 |
+| [`commands/effort/effort.tsx`](annotated/src/commands/effort/effort.tsx) | 183→196 | 12 | /effort 命令：设置/展示/清除努力等级，环境变量覆盖与冲突提示 |
+| [`commands/remote-setup/api.ts`](annotated/src/commands/remote-setup/api.ts) | 182→198 | 16 | 远程安装 API：令牌脱敏封装、导入/建默认环境/isSignedIn/getCodeWebUrl |
+
+要点：
+
+- **键位与上下文注入两条主线**：`useKeybinding` 把「处理器在组件、键位在配置」的分工做实（和弦状态机 + 命中冒泡拦截）；`context.ts` 把系统/用户上下文预置进每次对话并整轮记忆化，CLAUDE.md 读盘让出事件循环、打断缓存只走 ant 专属调试态。
+- **三个外部系统对接文件同构**：`mcp.ts` / `remote-setup.tsx` / `api.ts` 都走「先取令牌再发请求、按状态码翻译结果」的套路；`api.ts` 的 `RedactedGithubToken` 把明文令牌包成只在 `reveal()` 时释放，任何字符串化都只显示脱敏占位。
+- **两份编译器产物**：`CheckExistingSecretStep` 与 `effort` 的 `ApplyEffortAndClose` 都是 React Compiler 的 `_c(N)` 记忆化缓存，缓存三件套（哨兵判断→算并存回→否则读缓存）贯穿组件；注释只挂函数签名与语句行，绝不进 JSX 内部。
+- **生成代码与纯函数自解释**：`timestamp.ts`（proto3 四件套）与 `textObjects.ts`（字形安全的文本对象）都靠类型/函数本身讲清约定，批注只点出设计取舍。
+- **claudeApi.ts 是「模板/数据即文档」典型**：247KB 提示词懒加载，内联阅读指南与 `<doc>` 块拼装，批注不进模板内部（否则污染生成给模型的提示词）。
+
+踩坑：
+
+- **`after` 落在 `//` 注释段中部被自动外移（3 处良性）**：`effort.tsx` 的 `(32)`、`(88)` 与 `api.ts` 的 `(131)` 原落在多行 `//` 注释中部，annotate 判为「// 注释段中部」自动外移到段边界（32→34、88→89、131→133）；grep 确认落点均在段尾、通顺，模板内零中文泄漏。
+- **其余七份零 `⟳` 零 `⚠`**：块注释内部零中文（`timestamp.ts` 的巨型 JSDoc 经 `(100,'before')` 落块后、各文件 `/* */` 全部绕开），由 check-fidelity「块内禁中文」硬判据兜底。
+- **预检 133 锚点一次全过**（`ast.parse`、slug 与源路径一一对应、无重复锚点、文本无英文双引号与反斜杠、行号升序）。
+
+流程账（第 161 批）：10 个数据文件逐一对齐源文件；预检 133 锚点全过；annotate 十次 3 处良性 `⟳`、零 `⚠`；check-fidelity 全仓 1621 份 0 失败（较上批 +10）；check-links 0 失效；全仓 1621/1902 文件、497,875/513,237 行、97.0%（按行数）；`src/` 还剩 281 份。
+
+**下一批候选（156–175 行档，单批约 10–14 份）**：`bridge/inboundAttachments.ts`(175) · `commands/plugin/usePagination.ts`(171) · `state/onChangeAppState.ts`(171) · `cli/handlers/autoMode.ts`(170) · `bridge/codeSessionApi.ts`(168) · `bridge/envLessBridgeConfig.ts`(165) · `bridge/bridgeStatusUtil.ts`(163) · `commands/plugin/AddMarketplace.tsx`(162) · `plugins/builtinPlugins.ts`(159) · `commands/commit-push-pr.ts`(158) · `tasks/DreamTask/DreamTask.ts`(157) · `constants/files.ts`(156) · `entrypoints/sandboxTypes.ts`(156)（`src/` 还剩 281 份；182 行以上已清零）
