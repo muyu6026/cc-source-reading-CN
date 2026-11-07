@@ -1,0 +1,10 @@
+import * as React from 'react';
+// `/usage` 命令的本地 JSX 渲染入口，复用设置组件并默认打开「用量」页签。
+import { Settings } from '../../components/Settings/Settings.js';
+import type { LocalJSXCommandCall } from '../../types/command.js';
+// 用 `LocalJSXCommandCall` 类型注解 `call`，约束其参数顺序与命令入口契约保持一致。
+export const call: LocalJSXCommandCall = async (onDone, context) => {
+  return <Settings onClose={onDone} context={context} defaultTab="Usage" />;
+};
+// 复用 `Settings` 组件，以 `defaultTab` 取值 `Usage` 直接定位用量页，`onClose` 接 `onDone` 关闭命令。
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIlNldHRpbmdzIiwiTG9jYWxKU1hDb21tYW5kQ2FsbCIsImNhbGwiLCJvbkRvbmUiLCJjb250ZXh0Il0sInNvdXJjZXMiOlsidXNhZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAqIGFzIFJlYWN0IGZyb20gJ3JlYWN0J1xuaW1wb3J0IHsgU2V0dGluZ3MgfSBmcm9tICcuLi8uLi9jb21wb25lbnRzL1NldHRpbmdzL1NldHRpbmdzLmpzJ1xuaW1wb3J0IHR5cGUgeyBMb2NhbEpTWENvbW1hbmRDYWxsIH0gZnJvbSAnLi4vLi4vdHlwZXMvY29tbWFuZC5qcydcblxuZXhwb3J0IGNvbnN0IGNhbGw6IExvY2FsSlNYQ29tbWFuZENhbGwgPSBhc3luYyAob25Eb25lLCBjb250ZXh0KSA9PiB7XG4gIHJldHVybiA8U2V0dGluZ3Mgb25DbG9zZT17b25Eb25lfSBjb250ZXh0PXtjb250ZXh0fSBkZWZhdWx0VGFiPVwiVXNhZ2VcIiAvPlxufVxuIl0sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEtBQUtBLEtBQUssTUFBTSxPQUFPO0FBQzlCLFNBQVNDLFFBQVEsUUFBUSx1Q0FBdUM7QUFDaEUsY0FBY0MsbUJBQW1CLFFBQVEsd0JBQXdCO0FBRWpFLE9BQU8sTUFBTUMsSUFBSSxFQUFFRCxtQkFBbUIsR0FBRyxNQUFBQyxDQUFPQyxNQUFNLEVBQUVDLE9BQU8sS0FBSztFQUNsRSxPQUFPLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxDQUFDRCxNQUFNLENBQUMsQ0FBQyxPQUFPLENBQUMsQ0FBQ0MsT0FBTyxDQUFDLENBQUMsVUFBVSxDQUFDLE9BQU8sR0FBRztBQUMzRSxDQUFDIiwiaWdub3JlTGlzdCI6W119
