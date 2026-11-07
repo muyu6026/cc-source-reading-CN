@@ -7675,4 +7675,30 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 180 批）：15 个数据文件逐一对齐源文件；precheck 26 锚点全过；annotate 十五次零 `⟳` 零 `⚠`；check-fidelity 全仓 1893 份 0 失败（较上批 +15）；check-links 2745 源码链 + 748 内链 0 失效；全仓 1893/1902 文件、513,228/513,237 行、99%（按行数）；`src/` 还剩 9 份 / 9 行（均为 1 行 `.js` 命令桩：`mock-limits`/`ctx_viz`/`bughunter`/`perf-issue`/`autofix-pr`/`teleport`/`oauth-refresh`/`share` 及最后一份，下一档起点 1 行）。
 
-**下一批候选（1 行档，单批约 9 份，即可清零）**：`commands/mock-limits/index.js`(1) · `commands/ctx_viz/index.js`(1) · `commands/bughunter/index.js`(1) · `commands/perf-issue/index.js`(1) · `commands/autofix-pr/index.js`(1) · `commands/teleport/index.js`(1) · `commands/oauth-refresh/index.js`(1) · `commands/share/index.js`(1)（`src/` 还剩 9 份 / 9 行；全为 1 行命令桩，下一批做完即全仓 100%）。
+## src batch 181: 1-line command stubs, final 9 files (9 src, 18 annotated, 9 anchors)
+
+本批是全仓 `src/` 散件的**收官零批**——把剩余 9 份 1 行命令桩一次性清零：`autofix-pr`/`oauth-refresh`/`mock-limits`/`ctx_viz`/`teleport`/`perf-issue`/`bughunter`/`share`/`good-claude`。九份内容完全一致，都是一行 `export default { isEnabled: () => false, isHidden: true, name: 'stub' }`，即「已禁用且隐藏」的占位命令壳——真实功能已迁移或下线，只保留桩避免旧入口调用时报错。
+
+| 文件 | 原文→批注版 | 锚点 | 讲什么 |
+| --- | --- | --- | --- |
+| [`commands/autofix-pr/index.js`](annotated/src/commands/autofix-pr/index.js) | 1→2 | 1 | autofix-pr 命令桩：isEnabled 恒 false 且 isHidden，已禁用隐藏 |
+| [`commands/oauth-refresh/index.js`](annotated/src/commands/oauth-refresh/index.js) | 1→2 | 1 | oauth-refresh 命令桩：已禁用隐藏 |
+| [`commands/mock-limits/index.js`](annotated/src/commands/mock-limits/index.js) | 1→2 | 1 | mock-limits 命令桩：已禁用隐藏 |
+| [`commands/ctx_viz/index.js`](annotated/src/commands/ctx_viz/index.js) | 1→2 | 1 | ctx_viz 命令桩：已禁用隐藏 |
+| [`commands/teleport/index.js`](annotated/src/commands/teleport/index.js) | 1→2 | 1 | teleport 命令桩：已禁用隐藏 |
+| [`commands/perf-issue/index.js`](annotated/src/commands/perf-issue/index.js) | 1→2 | 1 | perf-issue 命令桩：已禁用隐藏 |
+| [`commands/bughunter/index.js`](annotated/src/commands/bughunter/index.js) | 1→2 | 1 | bughunter 命令桩：已禁用隐藏 |
+| [`commands/share/index.js`](annotated/src/commands/share/index.js) | 1→2 | 1 | share 命令桩：已禁用隐藏 |
+| [`commands/good-claude/index.js`](annotated/src/commands/good-claude/index.js) | 1→2 | 1 | good-claude 命令桩：已禁用隐藏 |
+
+- **九份同构**：全部是 `export default { isEnabled: () => false, isHidden: true, name: 'stub' }` 的禁用占位命令——说明这些命令功能已下线或迁移，仅保留「禁用且隐藏」的桩以兼容旧入口调用，运行时不会出现在可用命令清单里。
+- **收官零结构性风险**：单行桩没有多行 `//` 注释、没有 `/* */` 头、没有模板字符串，锚点统一落在唯一语句行之后，fidelity 初跑即 0 失败、无需回修。
+
+踩坑：
+
+- **零 `⟳` 零 `⚠` 零块注释内中文**：9 份锚点全部落在唯一语句行（第 1 行）之后，未触发任何结构性保护（无 `/* */` 头、无模板字符串、无跨行表达式首行）。预检 9 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）。
+- **全仓清零**：本批做完后 `src/` 与全仓均达 100%，全仓 1902/1902 文件、513,237/513,237 行，自动批注流水线任务完结。
+
+流程账（第 181 批）：9 个数据文件逐一对齐源文件；precheck 9 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 九次零 `⟳` 零 `⚠`；check-fidelity 全仓 1902 份 0 失败（较上批 +9）；check-links 2760 源码链 + 749 内链 0 失效；全仓 1902/1902 文件、513,237/513,237 行、100%（按行数，本轮达成全仓 100%）；`src/` 还剩 0 份 / 0 行。
+
+**全仓已清零**：9 份 1 行命令桩全部批注完成，`src/` 与全仓均达 100%（1902/1902 文件、513,237/513,237 行）。自动批注流水线任务完结。
