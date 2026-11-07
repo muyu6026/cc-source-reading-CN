@@ -1,0 +1,10 @@
+import React from 'react';
+import { Doctor } from '../../screens/Doctor.js';
+// Doctor 是系统诊断屏，位于 screens 目录；命令本身只负责把它挂载出来。
+import type { LocalJSXCommandCall } from '../../types/command.js';
+export const call: LocalJSXCommandCall = (onDone, _context, _args) => {
+// 命令入口：第三个参数 _args 用下划线前缀，表示此处刻意忽略、暂不使用。
+  return Promise.resolve(<Doctor onDone={onDone} />);
+// 包成 Promise.resolve 是因为命令约定要求返回 Promise，这里同步渲染即可满足。
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIkRvY3RvciIsIkxvY2FsSlNYQ29tbWFuZENhbGwiLCJjYWxsIiwib25Eb25lIiwiX2NvbnRleHQiLCJfYXJncyIsIlByb21pc2UiLCJyZXNvbHZlIl0sInNvdXJjZXMiOlsiZG9jdG9yLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnXG5pbXBvcnQgeyBEb2N0b3IgfSBmcm9tICcuLi8uLi9zY3JlZW5zL0RvY3Rvci5qcydcbmltcG9ydCB0eXBlIHsgTG9jYWxKU1hDb21tYW5kQ2FsbCB9IGZyb20gJy4uLy4uL3R5cGVzL2NvbW1hbmQuanMnXG5cbmV4cG9ydCBjb25zdCBjYWxsOiBMb2NhbEpTWENvbW1hbmRDYWxsID0gKG9uRG9uZSwgX2NvbnRleHQsIF9hcmdzKSA9PiB7XG4gIHJldHVybiBQcm9taXNlLnJlc29sdmUoPERvY3RvciBvbkRvbmU9e29uRG9uZX0gLz4pXG59XG4iXSwibWFwcGluZ3MiOiJBQUFBLE9BQU9BLEtBQUssTUFBTSxPQUFPO0FBQ3pCLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsY0FBY0MsbUJBQW1CLFFBQVEsd0JBQXdCO0FBRWpFLE9BQU8sTUFBTUMsSUFBSSxFQUFFRCxtQkFBbUIsR0FBR0MsQ0FBQ0MsTUFBTSxFQUFFQyxRQUFRLEVBQUVDLEtBQUssS0FBSztFQUNwRSxPQUFPQyxPQUFPLENBQUNDLE9BQU8sQ0FBQyxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQ0osTUFBTSxDQUFDLEdBQUcsQ0FBQztBQUNwRCxDQUFDIiwiaWdub3JlTGlzdCI6W119

@@ -1118,3 +1118,21 @@
 - 主线：11 份命令全 `satisfies Command`（或 `: Command`）收口 + 懒加载；4 份 .tsx 是 `call` 渲染入口，末尾 base64 sourcemap >4000 被省略标 OK*；logout/usage 是仅有的两个门控差异点。
 - 踩坑：零块注释/模板串/跨行表达式首行 → 无结构性保护触发；diff.tsx `const {` 跨行解构与 desktop.tsx 跨行签名锚到收尾行规避。
 - 下一批目标（12→7 行档，单批约 15 份）：add-dir(12) · config(12) · export(12) · hooks/index(12) · ide(12) · mobile(12) · output-style(12) · plan(12) · vim(12) · keys(constants,12) · diff/index(9) · status/status.tsx(8) · tasks/tasks.tsx(8) · config/config.tsx(7) · doctor/doctor.tsx(7)（src 剩 39 份 / 234 行）。
+
+## 第 179 批（2026-11-07）：src 散件 15→7 行档十五件套（命令壳 + .tsx 渲染入口收尾）
+- 状态：完成并推送，commit `8e708e0`（d377212..8e708e0）。
+- 本批 15 份：9 份命令壳（export/config/vim/hooks/output-style/ide/plan/add-dir/mobile，均 `satisfies Command` + 懒加载 `import()`）+ 6 份 `.tsx` 渲染入口（tasks/status/diff/usage/remote-env/stats，`call` 渲染组件）。合计 144 源行 / 189 批注版 / 45 锚点。
+- 进度：全仓 **1878/1902 文件 / 513,176 行 / 99%**；src 剩 24 份 / 约 61 行（4 份 7 行 .tsx + 1 份 4 行 .js 桩 + keys.ts(11) + 18 份 1 行 .js 桩含 messages.ts）。
+- 校验：预检 45 锚点一次全过（ast.parse / 行界 / 重复 / 禁字符 / slug↔源路径）；annotate 十五次零 `⟳` 零 `⚠`；fidelity **1878 份 0 失败**；links 2730 源码链 + 747 内链 0 失效。
+- 主线：命令壳同构（local/local-jsx 差异在 aliases/immediate/isHidden/argumentHint）；渲染入口两种装配（复用 `Settings` 靠 `defaultTab` 定位页签 vs 专属对话框 `BackgroundTasksDialog`/`RemoteEnvironmentDialog`/`Stats`，统一 `onDone` 关闭回调）。
+- 踩坑：6 份 .tsx 的 base64 sourceMappingURL 均 <4000 字符被原样抄入（fidelity 标 `OK` 非 `OK*`），与 178 批 >4000 省略相反；整批无块注释/模板串/跨行表达式首行 → 无结构性保护触发。
+- 下一批目标（11→1 行档，单批约 15 份）：keys.ts(11) · config/config.tsx(7) · plugin/plugin.tsx(7) · doctor/doctor.tsx(7) · output-style/output-style.tsx(7) · reset-limits/index.js(4) · 9 份 1 行 .js 桩（ant-trace/perf-issue/summary/env/oauth-refresh/issue/autofix-pr/ctx_viz/backfill-sessions）。
+
+## 第 180 批（2026-11-07）：11→1 行档十五件套（GrowthBook 密钥 getter + /config /doctor /plugin 渲染入口 + /output-style 弃用命令 + reset-limits 桩 + 8 份 1 行禁用命令桩 + messages 常量）
+- 状态：完成并推送（本批 commit 见 git log，HEAD 在 8e708e0 之后）。
+- 本批 15 份：keys.ts(11→16,4) · config.tsx(7→10,3) · doctor.tsx(7→10,3) · output-style.tsx(7→9,2) · plugin.tsx(7→10,3) · reset-limits/index.js(4→6,2) · 8 份 1 行 .js 命令桩（onboarding/issue/summary/env/backfill-sessions/debug-tool-call/ant-trace/break-cache，各 1→2,1）· messages.ts(1→2,1)。合计 52 源行 / 89 批注版 / 26 锚点。
+- 进度：全仓 **1893/1902 文件 / 513,228 行 / 99%**；src 剩 9 份 / 9 行（全为 1 行 .js 命令桩：mock-limits/ctx_viz/bughunter/perf-issue/autofix-pr/teleport/oauth-refresh/share）。
+- 校验：预检 26 锚点一次全过（ast.parse / 行界 / 重复 / 禁字符 / slug↔源路径）；annotate 十五次零 `⟳` 零 `⚠`；fidelity **1893 份 0 失败**；links 2745 源码链 + 748 内链 0 失效。
+- 主线：① 命令壳收尾同构——config/doctor/plugin 是本地 JSX 入口（`call` 渲染组件、`onDone` 接关闭回调），output-style 是已废弃命令（只返回 system 弃用提示），reset-limits 是被禁用的双导出桩。② 9 份 1 行文件（8 命令桩 + messages 常量）全为 `{ isEnabled:()=>false, isHidden:true, name:'stub' }` 或单常量，表明相应命令功能已迁移/下线，仅保留禁用隐藏占位。
+- 踩坑：零块注释/模板串/跨行表达式首行 → 无结构性保护触发；整批锚点全落 import 行 / 函数签名行 / 语句行 / 组件 return 行 / 常量导出行。
+- 下一批目标（1 行档，单批约 9 份，即可清零）：mock-limits · ctx_viz · bughunter · perf-issue · autofix-pr · teleport · oauth-refresh · share（各 1 行 .js 桩）；做完即全仓 100%。

@@ -1,0 +1,10 @@
+import * as React from 'react';
+import { Settings } from '../../components/Settings/Settings.js';
+import type { LocalJSXCommandCall } from '../../types/command.js';
+// 声明 call 符合本地 JSX 命令调用约定：固定接收 onDone 关闭回调与 context 上下文两个参数。
+export const call: LocalJSXCommandCall = async (onDone, context) => {
+// 命令入口：直接渲染设置面板组件，并把关闭回调与上下文透传给它。
+  return <Settings onClose={onDone} context={context} defaultTab="Config" />;
+// 用 defaultTab 把设置面板定位到「Config」页签，用户进入命令就直接看到配置页。
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIlNldHRpbmdzIiwiTG9jYWxKU1hDb21tYW5kQ2FsbCIsImNhbGwiLCJvbkRvbmUiLCJjb250ZXh0Il0sInNvdXJjZXMiOlsiY29uZmlnLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBSZWFjdCBmcm9tICdyZWFjdCdcbmltcG9ydCB7IFNldHRpbmdzIH0gZnJvbSAnLi4vLi4vY29tcG9uZW50cy9TZXR0aW5ncy9TZXR0aW5ncy5qcydcbmltcG9ydCB0eXBlIHsgTG9jYWxKU1hDb21tYW5kQ2FsbCB9IGZyb20gJy4uLy4uL3R5cGVzL2NvbW1hbmQuanMnXG5cbmV4cG9ydCBjb25zdCBjYWxsOiBMb2NhbEpTWENvbW1hbmRDYWxsID0gYXN5bmMgKG9uRG9uZSwgY29udGV4dCkgPT4ge1xuICByZXR1cm4gPFNldHRpbmdzIG9uQ2xvc2U9e29uRG9uZX0gY29udGV4dD17Y29udGV4dH0gZGVmYXVsdFRhYj1cIkNvbmZpZ1wiIC8+XG59XG4iXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sS0FBS0EsS0FBSyxNQUFNLE9BQU87QUFDOUIsU0FBU0MsUUFBUSxRQUFRLHVDQUF1QztBQUNoRSxjQUFjQyxtQkFBbUIsUUFBUSx3QkFBd0I7QUFFakUsT0FBTyxNQUFNQyxJQUFJLEVBQUVELG1CQUFtQixHQUFHLE1BQUFDLENBQU9DLE1BQU0sRUFBRUMsT0FBTyxLQUFLO0VBQ2xFLE9BQU8sQ0FBQyxRQUFRLENBQUMsT0FBTyxDQUFDLENBQUNELE1BQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxDQUFDQyxPQUFPLENBQUMsQ0FBQyxVQUFVLENBQUMsUUFBUSxHQUFHO0FBQzVFLENBQUMiLCJpZ25vcmVMaXN0IjpbXX0=
