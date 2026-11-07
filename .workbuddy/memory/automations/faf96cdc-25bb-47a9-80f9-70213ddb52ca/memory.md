@@ -1109,3 +1109,12 @@
 - 主线：13 份命令全是 `satisfies Command` 收口 + 懒加载同构壳；agents/help 是两个本地 JSX 渲染入口（`call` 函数，取上下文渲染组件，末尾 base64 sourcemap >4000 被省略，标 OK*）；turnCompletionVerbs 是回合完成动词常量数组。
 - 踩坑：零块注释、零模板串、零跨行表达式首行 → 无结构性保护触发；锚点全落语句行 / 对象 `{` 起始 / 函数签名收尾 / 组件 return / 默认导出。
 - 下一批目标（11→8 行档，单批约 15 份）：add-dir(11) · tasks(11) · vim(11) · mobile(11) · stickers(11) · output-style(11) · export(11) · config(11) · ide(11) · hooks(11) · keys(constants,11) · plan(11) · release-notes(11) · agents/index(10) · logout(10)。
+
+## 第 178 批（2026-11-07）：src 散件 11→8 行档十五件套
+- 状态：完成并推送，commit `4b05882`（cf32dc8..4b05882）。
+- 本批 15 份（11→8 行档）：release-notes·stickers·tasks·logout·theme·memory·help·agents·stats·skills（10 份纯命令壳）+ usage + permissions.tsx·desktop.tsx·diff.tsx·skills.tsx（4 份 .tsx 渲染入口）。合计 148 源行 / 232 批注版 / 84 锚点；**11→8 行档清零**。
+- 进度：全仓 **1863/1902 文件 / 513,032 行 / 99%**；src 剩 39 份 / 234 行。
+- 校验：预检 84 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源路径对应）；annotate 十五次零 `⟳` 零 `⚠`；check-fidelity **1863 份 0 失败**；check-links 2715 源链 + 746 内链 0 失效。
+- 主线：11 份命令全 `satisfies Command`（或 `: Command`）收口 + 懒加载；4 份 .tsx 是 `call` 渲染入口，末尾 base64 sourcemap >4000 被省略标 OK*；logout/usage 是仅有的两个门控差异点。
+- 踩坑：零块注释/模板串/跨行表达式首行 → 无结构性保护触发；diff.tsx `const {` 跨行解构与 desktop.tsx 跨行签名锚到收尾行规避。
+- 下一批目标（12→7 行档，单批约 15 份）：add-dir(12) · config(12) · export(12) · hooks/index(12) · ide(12) · mobile(12) · output-style(12) · plan(12) · vim(12) · keys(constants,12) · diff/index(9) · status/status.tsx(8) · tasks/tasks.tsx(8) · config/config.tsx(7) · doctor/doctor.tsx(7)（src 剩 39 份 / 234 行）。
