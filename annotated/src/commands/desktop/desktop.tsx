@@ -1,0 +1,14 @@
+import React from 'react';
+// 默认导入 `React`，用于 JSX 与 `React.ReactNode` 类型标注。
+import type { CommandResultDisplay } from '../../commands.js';
+// `CommandResultDisplay` 描述命令结果如何展示（内联/侧栏等），取自命令类型模块。
+import { DesktopHandoff } from '../../components/DesktopHandoff.js';
+// 渲染组件是 `DesktopHandoff`，本文件只负责装配入口。
+export async function call(onDone: (result?: string, options?: {
+  display?: CommandResultDisplay;
+}) => void): Promise<React.ReactNode> {
+// `call` 异步返回 React 节点；`onDone` 回调携带结果与展示选项。
+  return <DesktopHandoff onDone={onDone} />;
+// 直接渲染 `DesktopHandoff` 并把 `onDone` 透传，自身不含业务逻辑。
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIkNvbW1hbmRSZXN1bHREaXNwbGF5IiwiRGVza3RvcEhhbmRvZmYiLCJjYWxsIiwib25Eb25lIiwicmVzdWx0Iiwib3B0aW9ucyIsImRpc3BsYXkiLCJQcm9taXNlIiwiUmVhY3ROb2RlIl0sInNvdXJjZXMiOlsiZGVza3RvcC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0J1xuaW1wb3J0IHR5cGUgeyBDb21tYW5kUmVzdWx0RGlzcGxheSB9IGZyb20gJy4uLy4uL2NvbW1hbmRzLmpzJ1xuaW1wb3J0IHsgRGVza3RvcEhhbmRvZmYgfSBmcm9tICcuLi8uLi9jb21wb25lbnRzL0Rlc2t0b3BIYW5kb2ZmLmpzJ1xuXG5leHBvcnQgYXN5bmMgZnVuY3Rpb24gY2FsbChcbiAgb25Eb25lOiAoXG4gICAgcmVzdWx0Pzogc3RyaW5nLFxuICAgIG9wdGlvbnM/OiB7IGRpc3BsYXk/OiBDb21tYW5kUmVzdWx0RGlzcGxheSB9LFxuICApID0+IHZvaWQsXG4pOiBQcm9taXNlPFJlYWN0LlJlYWN0Tm9kZT4ge1xuICByZXR1cm4gPERlc2t0b3BIYW5kb2ZmIG9uRG9uZT17b25Eb25lfSAvPlxufVxuIl0sIm1hcHBpbmdzIjoiQUFBQSxPQUFPQSxLQUFLLE1BQU0sT0FBTztBQUN6QixjQUFjQyxvQkFBb0IsUUFBUSxtQkFBbUI7QUFDN0QsU0FBU0MsY0FBYyxRQUFRLG9DQUFvQztBQUVuRSxPQUFPLGVBQWVDLElBQUlBLENBQ3hCQyxNQUFNLEVBQUUsQ0FDTkMsTUFBZSxDQUFSLEVBQUUsTUFBTSxFQUNmQyxPQUE0QyxDQUFwQyxFQUFFO0VBQUVDLE9BQU8sQ0FBQyxFQUFFTixvQkFBb0I7QUFBQyxDQUFDLEVBQzVDLEdBQUcsSUFBSSxDQUNWLEVBQUVPLE9BQU8sQ0FBQ1IsS0FBSyxDQUFDUyxTQUFTLENBQUMsQ0FBQztFQUMxQixPQUFPLENBQUMsY0FBYyxDQUFDLE1BQU0sQ0FBQyxDQUFDTCxNQUFNLENBQUMsR0FBRztBQUMzQyIsImlnbm9yZUxpc3QiOltdfQ==

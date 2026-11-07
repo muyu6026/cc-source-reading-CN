@@ -1,0 +1,18 @@
+import * as React from 'react';
+// `import * as React` 取全部命名，供 JSX 语法与 `React.ReactNode` 类型使用。
+import { PermissionRuleList } from '../../components/permissions/rules/PermissionRuleList.js';
+// 渲染主体是 `PermissionRuleList` 组件，命令本身只负责把它挂上屏。
+import type { LocalJSXCommandCall } from '../../types/command.js';
+// `LocalJSXCommandCall` 是本地 JSX 命令的调用签名类型，规定 `call` 形参。
+import { createPermissionRetryMessage } from '../../utils/messages.js';
+// 引入 `createPermissionRetryMessage`，用于在拒绝重试时生成提示消息。
+export const call: LocalJSXCommandCall = async (onDone, context) => {
+// `call` 是本地 JSX 命令的入口，接收 `onDone` 与 `context` 两个参数。
+  return <PermissionRuleList onExit={onDone} onRetryDenials={commands => {
+// 渲染权限规则列表：退出交给 `onDone`，拒绝重试走 `onRetryDenials`。
+    context.setMessages(prev => [...prev, createPermissionRetryMessage(commands)]);
+// 重试时把生成的提示消息追加进会话消息列表（保留历史消息）。
+  }} />;
+};
+// 函数收尾，返回 JSX 节点即命令的可交互界面。
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIlBlcm1pc3Npb25SdWxlTGlzdCIsIkxvY2FsSlNYQ29tbWFuZENhbGwiLCJjcmVhdGVQZXJtaXNzaW9uUmV0cnlNZXNzYWdlIiwiY2FsbCIsIm9uRG9uZSIsImNvbnRleHQiLCJjb21tYW5kcyIsInNldE1lc3NhZ2VzIiwicHJldiJdLCJzb3VyY2VzIjpbInBlcm1pc3Npb25zLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBSZWFjdCBmcm9tICdyZWFjdCdcbmltcG9ydCB7IFBlcm1pc3Npb25SdWxlTGlzdCB9IGZyb20gJy4uLy4uL2NvbXBvbmVudHMvcGVybWlzc2lvbnMvcnVsZXMvUGVybWlzc2lvblJ1bGVMaXN0LmpzJ1xuaW1wb3J0IHR5cGUgeyBMb2NhbEpTWENvbW1hbmRDYWxsIH0gZnJvbSAnLi4vLi4vdHlwZXMvY29tbWFuZC5qcydcbmltcG9ydCB7IGNyZWF0ZVBlcm1pc3Npb25SZXRyeU1lc3NhZ2UgfSBmcm9tICcuLi8uLi91dGlscy9tZXNzYWdlcy5qcydcblxuZXhwb3J0IGNvbnN0IGNhbGw6IExvY2FsSlNYQ29tbWFuZENhbGwgPSBhc3luYyAob25Eb25lLCBjb250ZXh0KSA9PiB7XG4gIHJldHVybiAoXG4gICAgPFBlcm1pc3Npb25SdWxlTGlzdFxuICAgICAgb25FeGl0PXtvbkRvbmV9XG4gICAgICBvblJldHJ5RGVuaWFscz17Y29tbWFuZHMgPT4ge1xuICAgICAgICBjb250ZXh0LnNldE1lc3NhZ2VzKHByZXYgPT4gW1xuICAgICAgICAgIC4uLnByZXYsXG4gICAgICAgICAgY3JlYXRlUGVybWlzc2lvblJldHJ5TWVzc2FnZShjb21tYW5kcyksXG4gICAgICAgIF0pXG4gICAgICB9fVxuICAgIC8+XG4gIClcbn1cbiJdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxLQUFLQSxLQUFLLE1BQU0sT0FBTztBQUM5QixTQUFTQyxrQkFBa0IsUUFBUSwwREFBMEQ7QUFDN0YsY0FBY0MsbUJBQW1CLFFBQVEsd0JBQXdCO0FBQ2pFLFNBQVNDLDRCQUE0QixRQUFRLHlCQUF5QjtBQUV0RSxPQUFPLE1BQU1DLElBQUksRUFBRUYsbUJBQW1CLEdBQUcsTUFBQUUsQ0FBT0MsTUFBTSxFQUFFQyxPQUFPLEtBQUs7RUFDbEUsT0FDRSxDQUFDLGtCQUFrQixDQUNqQixNQUFNLENBQUMsQ0FBQ0QsTUFBTSxDQUFDLENBQ2YsY0FBYyxDQUFDLENBQUNFLFFBQVEsSUFBSTtJQUMxQkQsT0FBTyxDQUFDRSxXQUFXLENBQUNDLElBQUksSUFBSSxDQUMxQixHQUFHQSxJQUFJLEVBQ1BOLDRCQUE0QixDQUFDSSxRQUFRLENBQUMsQ0FDdkMsQ0FBQztFQUNKLENBQUMsQ0FBQyxHQUNGO0FBRU4sQ0FBQyIsImlnbm9yZUxpc3QiOltdfQ==

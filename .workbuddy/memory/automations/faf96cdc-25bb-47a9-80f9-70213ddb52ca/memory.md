@@ -1101,3 +1101,11 @@
 - 校验：预检 58 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源路径对应）；annotate 十五次零 `⟳` 零 `⚠`；check-fidelity **1818 份 0 失败**；check-links 2670 源链 + 743 内链 0 失效。
 - 主线：15 份全是命令元数据壳同构模式——`satisfies Command` 收口 + 懒加载实现；`/extra-usage` 是交互/非交互双入口（与早前 `/cost`、`/passes`、`/context` 同构）；`color` 与 `copy` 的文件头 JSDoc 用 `(1,'after')` 自动落块外；`errorIds.ts` 为混淆编号常量表（Next ID 346）。
 - 下一批目标（15→13 行档，单批约 15 份）：CheckGitHubStep(15) · login/index(14) · ultrareviewEnabled(14) · branch/index(14) · privacy-settings(14) · keybindings/index(13) · install-github-app/index(13) · effort(13) · rewind/rewind(13) · hooks/hooks.tsx(13) · rewind/index(13) · verifyContent(13) · thinkback/index(13) · chrome/index(13) · btw(13)。
+
+## 第 177 批（2026-11-07）：12→11 行档十五件套
+- 本批 15 份（12→11 行档）：exit、rename、mcp、tag、status、doctor、turnCompletionVerbs(constants)、heapdump、files、install-slack-app、agents(tsx 渲染入口)、resume、permissions、plugin(tsx)、help(tsx 渲染入口)。合计 177 源行 / 274 批注版 / 71 锚点；**12→11 行档清零**。
+- 进度：全仓 **1848/1902 文件 / 512,884 行 / 99%**；src 剩 54 份 / 353 行。
+- 校验：预检 71 锚点一次全过（ast.parse、行界、重复、禁字符、slug↔源路径对应）；annotate 十五次零 `⟳` 零 `⚠`；check-fidelity **1848 份 0 失败**；check-links 2700 源链 + 745 内链 0 失效。
+- 主线：13 份命令全是 `satisfies Command` 收口 + 懒加载同构壳；agents/help 是两个本地 JSX 渲染入口（`call` 函数，取上下文渲染组件，末尾 base64 sourcemap >4000 被省略，标 OK*）；turnCompletionVerbs 是回合完成动词常量数组。
+- 踩坑：零块注释、零模板串、零跨行表达式首行 → 无结构性保护触发；锚点全落语句行 / 对象 `{` 起始 / 函数签名收尾 / 组件 return / 默认导出。
+- 下一批目标（11→8 行档，单批约 15 份）：add-dir(11) · tasks(11) · vim(11) · mobile(11) · stickers(11) · output-style(11) · export(11) · config(11) · ide(11) · hooks(11) · keys(constants,11) · plan(11) · release-notes(11) · agents/index(10) · logout(10)。
