@@ -1,81 +1,69 @@
 # Claude Code 源码学习手册（中文注释版）
 
-> **分析对象**：`github.com/hangsman/claude-code-source` 的 `src/` 目录  
-> **版本**：`2.1.88`（`package.json` 中声明）  
-> **源码位置**：本目录下的 `source/`（已完整克隆，`src/` 共 1902 个文件）  
-> **写给谁**：想通过读源码学架构、但不太熟悉英文的同学  
-> **本手册做什么**：给出分析方案 + 标注源码位置与片段 + 文件夹/术语/英文注释中英文对照
-> **当前进度**：`annotated/` 已批注 **1902 个源码文件 / 513,237 行**（`source/src` 共 1,902 文件 / 513,237 行，按行数覆盖 **100%**）；**src 第 181 批：1 行档九件套收官（autofix-pr / oauth-refresh / mock-limits / ctx_viz / teleport / perf-issue / bughunter / share / good-claude 禁用命令桩，9 源行 / 18 批注版 / 9 锚点）** 见 [src 第 181 批](annotated-索引与进度.md#src-batch-181-1-line-command-stubs-final-9-files-9-src-18-annotated-9-anchors)；**src 第 180 批：11→1 行档十五件套（keys GrowthBook 密钥 getter / /config / /doctor / /plugin 渲染入口 / /output-style 弃用命令 / reset-limits 桩 + 8 份 1 行禁用命令桩 + messages 常量，52 源行 / 89 批注版 / 26 锚点）** 见 [src 第 180 批](annotated-索引与进度.md#src-batch-180-11-1-line-tier-15-files-52-src-89-annotated-26-anchors)；**src 第 179 批：15→7 行档十五件套（/export /config /vim /hooks /output-style /ide /plan /add-dir /mobile 命令壳 + /tasks /status /diff /usage /remote-env /stats 渲染入口，144 源行 / 189 批注版 / 45 锚点）** 见 [src 第 179 批](annotated-索引与进度.md#src-batch-179-15-7-line-tier-15-files-144-src-189-annotated-45-anchors)；**src 第 176 批：15→13 行档十五件套（GitHub App 安装向导状态步 / /login 动态描述壳 / /ultrareview 运行期开关 / /privacy-settings 订阅门控 / /branch 条件别名 / /keybindings / /btw 旁支提问 / /rewind 回滚 / /think-back 年度回顾 / /hooks 配置入口 / /effort 档位 / /install-github-app 壳 / 验证技能内联文案 / /chrome Beta 设置，201 源行 / 265 批注版 / 64 锚点）** 见 [src 第 176 批](annotated-索引与进度.md#src-batch-176-15-13-line-tier-15-files-201-src-265-annotated-64-anchors)；**src 第 178 批：11→8 行档十五件套（/release-notes 查看发版说明 / /stickers 订购贴纸 / /tasks 后台任务管理 / /logout 登出 Anthropic 账号 / /theme 切换主题 / /memory 编辑记忆 / /help 帮助与命令列表 / /agents 管理 agent 配置 / /stats 使用统计 / /skills 列出技能 / /usage 套餐用量 / /permissions 权限规则界面 / /desktop 桌面交接 / /diff 差异对话框 / /skills 技能菜单，148 源行 / 232 批注版 / 84 锚点）** 见 [src 第 178 批](annotated-索引与进度.md#src-batch-178-11-8-line-tier-15-files-148-src-232-annotated-84-anchors)；**src 第 177 批：12→11 行档十五件套（/exit 退出 / /rename 重命名 / /mcp 服务器管理 / /tag 会话标签 / /status 运行状态 / /doctor 安装自检 / 回合完成动词常量 / /heapdump 堆转储 / /files 文件清单 / /install-slack-app 装 Slack / /agents 菜单渲染 / /resume 恢复会话 / /permissions 权限规则 / /plugin 插件渲染 / /help 帮助渲染，177 源行 / 274 批注版 / 71 锚点）** 见 [src 第 177 批](annotated-索引与进度.md#src-batch-177-12-11-line-tier-15-files-177-src-274-annotated-71-anchors)；**src 第 172 批：33–43 行档十五件套（Opus 合并迁移、/thinkback-play、桥接权限回调、本地 shell 任务守卫、query 依赖注入、危险模式提示迁移、任务注册表、Mailbox 上下文、/vim、/upgrade、伙伴文案、REPL 桥接句柄、状态仓库、claude-in-chrome 技能、通用日期工具，576 源行 / 675 批注版 / 98 锚点）** 见 [src 第 172 批](annotated-索引与进度.md#src-batch-172-33-43-line-tier-15-files-576-src-675-annotated-98-anchors)；**src 第 173 批：33→24 行档十五件套（退出语义 / NDJSON 安全序列化 / 插件信任警告 / CLI 退出 / 超额用量 / Slack 安装 / verify 技能 / 帧率指标 / 桌面端 / 反馈 / 多功能右键 / 桥接 / 快速 / 反馈组件 / 网络安全指令，428 源行 / 497 批注版 / 69 锚点）** 见 [src 第 173 批](annotated-索引与进度.md#src-batch-173-33-24-line-tier-15-files-428-src-497-annotated-69-anchors)；**src 第 175 批：19→15 行档十五件套（/rate-limit-options 限流选项隐藏菜单 / /reload-plugins 三层刷新 / /heapdump 堆转储 / /extra-usage 用量统计双入口 / /thinkback-play 动画 / /stickers 贴纸 / /color 设色 / /session 远程会话 / /model 模型 / /upgrade 升级 / /compact 压缩 / /copy 复制 / /remote-env 远端环境 / 错误标识常量表，244 源行 / 302 批注版 / 58 锚点）** 见 [src 第 175 批](annotated-索引与进度.md#src-batch-175-19-15-line-tier-15-files-244-src-302-annotated-58-anchors)；**src 第 174 批：24→19 行档十五件套（/passes 双件 / /cost 双件 / /context 双入口 / /statusline / /terminal-setup / /version / /voice / /web-setup / /files / REPL 启动器 / 成本 Hook / 内置插件脚手架 / 配置键迁移，335 源行 / 386 批注版 / 51 锚点）** 见 [src 第 174 批](annotated-索引与进度.md#src-batch-174-24-19-line-tier-15-files-335-src-386-annotated-51-anchors)；**src 第 171 批：44–52 行档十五件套（beta 头常量清单、四类一次性迁移脚本、/release-notes 与 /pr_comments 命令、/sandbox 命令外壳、bridge 鉴权/URL 集中层、任务状态联合类型与后台守卫、query 配置快照、终端符号常量表、传输层选择、MCP 技能注册表、会话/智能体 ID 品牌类型，715 源行 / 893 批注版 / 178 锚点）** 见 [src 第 171 批](annotated-索引与进度.md#src-batch-171-44-52-line-tier-15-files-715-src-893-annotated-178-anchors)；**src 第 169 批：61–73 行档十五件套（GitHub App 安装向导两步、刷写闸门、agents 子命令、simplify 技能、系统提示段落、Sonnet 4.5→4.6 迁移、会话名生成、迁移到插件命令、/context 命令、非 React 快捷键显示、排队消息上下文、SDK 核心类型、自动更新迁移、/reload-plugins，989 源行 / 1148 批注版 / 155 锚点）** 见 [src 第 169 批](annotated-索引与进度.md#src-batch-169-61-73-line-tier-15-files-989-src-1148-annotated-155-anchors)；**src 第 170 批：38–59 行档十五件套（非 React 快捷键显示 Hook、远程评审命令、隐私设置对话框、模态上下文、主题选择器命令、服务端类型、Opus 旧模型迁移、/review 命令、CCR 会话 ID 兼容、容量唤醒原语、工具结果体积常量、语音模式开关、记忆年龄、/keybindings 命令、快捷键模板生成器，842 源行 / 926 批注版 / 81 锚点）** 见 [src 第 170 批](annotated-索引与进度.md#src-batch-170-38-59-line-tier-15-files-842-src-926-annotated-81-anchors)；**src 第 168 批：75–83 行档十五件套（新项目引导判定、/sandbox 沙箱开关、/logout 登出、后台任务胶囊标签、桥接轮询默认值、vim 光标动作、remember/stuck 内部技能、内置技能注册中心、claude-api 内容装配、远端权限桥接、AppState 选择器、LocalShellTask 终止助手、产品常量/URL、入站消息抽取，1195 源行 / 1383 批注版 / 186 锚点）** 见 [src 第 168 批](annotated-索引与进度.md#src-batch-168-75-83-line-tier-15-files-1195-src-1383-annotated-186-anchors)；**src 第 167 批：84–93 行档十四件套（token 预算判定器、/color 设色、/loop 循环技能、/commit 提交、/export 导出、/memory 记忆编辑、直连会话创建、语音状态上下文、/rename 改名、会话历史分页、消息 XML 标签表、ink 渲染再导出、/mcp 开关、安装 GitHub App 错误页，1237 源行 / 1385 批注版 / 144 锚点）** 见 [src 第 167 批](annotated-索引与进度.md#src-batch-167-84-93-line-tier-14-files-1237-src-1385-annotated-144-anchors)；**src 第 166 批：94–103 行档十四件套（插件参数解析、安装 GitHub App 向导三连、/plugin validate 校验、/buddy 预热通知、记忆目录扫描与合并提示词、输出样式目录加载、API 限额常量、系统提示前缀与归属头、超额用量确认对话框、任务停止共享逻辑、生成式鉴权消息类型，1369 源行 / 1579 批注版 / 204 锚点）** 见 [src 第 166 批](annotated-索引与进度.md#src-batch-166-94-103-line-tier-14-files-1369-src-1579-annotated-204-anchors)；**src 第 165 批：103–124 行档十五件套（插件错误类型、批量技能注册、/plan 命令、队友任务类型、键位匹配、MCP 迁移脚本、额外用量查询、插件详情助手、工具常量表、CLI 处理器工具、/add-dir 校验、桥接配置轮询、/advisor 命令、/login 组件、/debug 技能，1718 源行 / 1887 批注版 / 165 锚点）** 见 [src 第 165 批](annotated-索引与进度.md#src-batch-165-103-124-line-tier-15-files-1718-src-1887-annotated-165-anchors)；**src 第 164 批：124–135 行档十二件套（桥接故障注入、Yoga 枚举、对话框启动器、伙伴抽取、状态上报器、brief 命令、保留快捷键表、工作凭据、进程内队友任务、/add-dir 命令、浮层传送门、任务基类型，1552 源行 / 1730 批注版 / 174 锚点）** 见 [src 第 164 批](annotated-索引与进度.md#src-batch-164-124-135-line-tier-12-files-1552-src-1730-annotated-174-anchors)；**src 第 163 批：134–157 行档十二件套（记忆整理后台任务、沙箱配置 schema、二进制后缀表、浮层登记、语音开关命令、伙伴类型与物种表、GitHub 集成模板、队友视图状态机、记忆相关性选择、桥接调试工具、会话二维码命令、插件配置向导，1760 源行 / 1939 批注版 / 176 锚点）** 见 [src 第 163 批](annotated-索引与进度.md#src-batch-163-134-157-line-tier-12-files-1760-src-1939-annotated-176-anchors)；**src 第 162 批：172–175 行档十件套（桥接入站附件、应用状态变更钩子、插件列表分页、auto-mode 子命令、代码会话接口、免环境桥接配置、桥接状态文案、加市场界面、内置插件注册表、提交推送建单命令，1662 源行 / 1802 批注版 / 139 锚点）** 见 [src 第 162 批](annotated-索引与进度.md#src-batch-162-172-175-line-tier-10-files-1662-src-1802-annotated-139-anchors)；**src 第 161 批：182–196 行档十件套（键位 Hook 双件套、Claude API 内置技能、MCP 服务入口、GitHub App 安装检查步骤、系统/用户上下文注入、网页端远程安装向导、protobuf Timestamp 生成类型、vim 文本对象查找、/effort 命令、远程安装 API，1892 源行 / 2028 批注版 / 133 锚点）** 见 [src 第 161 批](annotated-索引与进度.md#src-batch-161-182-196-line-tier-10-files-1892-src-2028-annotated-133-anchors)；**src 第 160 批：197–210 行档十件套（限流选项菜单、桥接可信设备令牌、崩溃恢复指针、旋转动词词表、键位解析器、桥接资格检查、应用状态容器、桥接故障注入、vim 状态机类型、skillify 技能模板，2035 源行 / 2147 批注版 / 110 锚点）** 见 [src 第 160 批](annotated-索引与进度.md#src-batch-160-197-210-line-tier-10-files-2035-src-2147-annotated-110-anchors)；**src 第 159 批：211–231 行档十件套（GitHub App 安装向导两步、GrowthBook 实验事件 protobuf、hook 的 Zod schema 聚合、React 统计存储、打包技能注册中心、输出风格总表、命令系统类型全集、/tag 命令界面、直连会话管理器，2187 源行 / 2298 批注版 / 107 锚点）** 见 [src 第 159 批](annotated-索引与进度.md#src-batch-159-211-231-line-tier-10-files-2187-src-2298-annotated-107-anchors)；**src 第 158 批：234–256 行档十件套（JWT 编解码与校验、/init 项目初始化向导、CLI 远程 IO 适配层、键位解析器、/security-review 安全评审、键位上下文 Provider、/btw 侧栏提示、全局通知上下文、键位 schema、OAuth 常量集，2447 源行 / 2556 批注版 / 107 锚点）** 见 [src 第 158 批](annotated-索引与进度.md#src-batch-158-234-256-line-tier-10-files-2447-src-2556-annotated-107-anchors)；**src 第 157 批：262–278 行档十件套（自动记忆路径安全校验、OAuth 安装步骤、批量事件上传器、会话恢复、移动端二维码、记忆类型分类、快速模式开关、XAA IdP 连接、verifier 生成器、桥接协议类型，2708 源行 / 2867 批注版 / 155 锚点）** 见 [src 第 157 批](annotated-索引与进度.md#src-batch-157-262-278-line-tier-10-files-2708-src-2867-annotated-155-anchors)；**src 第 156 批：280–297 行档十件套（模型切换命令 UI、会话分叉命令、团队记忆路径安全校验、钩子类型与 schema、压缩命令、上游代理接线、Chrome 扩展菜单、填充文本技能、混合传输、MCP add 子命令，2876 源行 / 2973 批注版 / 95 锚点）** 见 [src 第 156 批](annotated-索引与进度.md#src-batch-156-280-297-line-tier-10-files-2876-src-2973-annotated-95-anchors)；**src 第 155 批：300–366 行档十件套（交互式启动外壳、会话记录类型全集、认证命令处理器、GitHub Actions 安装、/context 取数渲染、计费追踪、远程评审、键位装配、SDK 消息适配、安装命令，3225 源行 / 3561 批注版 / 333 锚点）** 见 [src 第 155 批](annotated-索引与进度.md#src-batch-155-300-366-line-tier-10-files-3225-src-3561-annotated-333-anchors)；**src 第 154 批：370–441 行档十件套（权限系统纯类型层、update 命令主流程、CCR 会话 WebSocket 客户端、恢复会话界面、文本输入框类型、桥接会话创建、/copy 命令、陪伴精灵渲染、桥接 v1/v2 传输适配、纯 TS 模糊文件搜索，3916 源行 / 4136 批注版 / 217 锚点）** 见 [src 第 154 批](annotated-索引与进度.md#src-batch-154-370-441-line-tier-10-files-3916-src-4136-annotated-217-anchors)；**src 第 153 批：339–363 行档七件套（插件类型契约、mcp 子命令处理器、插件选项对话框、远端会话管理器、入口初始化、默认键位大表、内置键位技能，2444 源行 / 2653 批注版 / 207 锚点）** 见 [src 第 153 批](annotated-索引与进度.md#src-batch-153-339-363-line-tier-7-files-2444-src-2653-annotated-207-anchors)；**src 第 152 批：370–475 行档七件套（键位热重载、超计划命令、历史存储、桥接消息层、上游代理隧道、定时远端代理技能、SDK 类型门面，3213 源行 / 3511 批注版 / 297 锚点）** 见 [src 第 152 批](annotated-索引与进度.md#src-batch-152-370-475-line-tier-7-files-3213-src-3511-annotated-297-anchors)；**src 第 151 批：470–510 行档七件套（远程控制命令、记忆目录提示词、键位校验、vim 状态机、后台主会话任务、配置技能、停止钩子流水线，3431 源行 / 3674 批注版 / 242 锚点）** 见 [src 第 151 批](annotated-索引与进度.md#src-batch-151-470-510-line-tier-7-files-3431-src-3674-annotated-242-anchors)；**src 第 150 批：500–560 行档七件套（桥接接口层/会话生成器/终端状态区、年度回顾插件、键位安装器、后台命令任务、精灵表，3741 源行 / 4116 批注版 / 375 锚点）** 见 [src 第 150 批](annotated-索引与进度.md#src-batch-150-500-560-line-tier-7-files-3741-src-4116-annotated-375-anchors)；**src 第 149 批：500–650 行档七件套（桥接接线层、应用状态总表、vim 操作符族、两处编译产物界面、GitHub 安装向导、诊断屏，4067 源行 / 4383 批注版 / 316 锚点）** 见 [src 第 149 批](annotated-索引与进度.md#src-batch-149-500-650-line-tier-7-files-4067-src-4383-annotated-316-anchors)；**src 第 148 批：800 行档六件套（WS/SSE 传输、控制协议 schema、斜杠命令总表、后台代理任务、插件发现，4392 源行 / 4678 批注版 / 284 锚点）** 见 [src 第 148 批](annotated-索引与进度.md#src-batch-148-800-line-tier-6-files-4392-src-4678-annotated-284-anchors)；**src 第 147 批：1000 行档收尾五件套（4645 源行 / 4936 批注版 / 289 锚点）** 见 [src 第 147 批](annotated-索引与进度.md#src-batch-147-1000-line-tier-finale-5-files-4645-src-4936-annotated-289-anchors)；**src 第 146 批：commands/plugin/PluginSettings.tsx（/plugin 外壳与错误页，1072 源行 / 1157 批注版 / 84 锚点）** 见 [src 第 146 批](annotated-索引与进度.md#src-batch-146-commandspluginpluginsettingstsx-1072-src--1157-annotated--84-anchors)；**src 第 145 批：skills/loadSkillsDir.ts（技能装载器，1086 源行 / 1188 批注版 / 102 锚点）** 见 [src 第 145 批](annotated-索引与进度.md#src-batch-145-skillsloadskillsdirts-1086-src--1188-annotated--102-anchors)；**src 第 144 批：bootstrap/state.ts（全局状态单例，1758 源行 / 1868 批注版 / 110 锚点）** 见 [src 第 144 批](annotated-索引与进度.md#src-batch-144-bootstrapstatets-1758-src--1868-annotated--110-anchors)；**src 第 143 批：entrypoints/sdk/coreSchemas.ts（SDK 类型单一真相源，1889 源行 / 2040 批注版 / 151 锚点）** 见 [src 第 143 批](annotated-索引与进度.md#src-batch-143-entrypointssdkcoreschemasts-1889-src--2040-annotated--151-anchors)；**src 第 142 批：commands/plugin/ManagePlugins.tsx（插件管理主界面，2215 源行 / 2300 批注版 / 84 锚点）** 见 [src 第 142 批](annotated-索引与进度.md#src-batch-142-commandspluginmanagepluginstsx-2215-src--2300-annotated--84-anchors)；**src 第 141 批：bridge/replBridge.ts（REPL 远程控制桥，2406 源行 / 2576 批注版 / 170 锚点）** 见 [src 第 141 批](annotated-索引与进度.md#src-batch-141-bridgereplbridgets-2406-src--2576-annotated--170-anchors)；**src 第 140 批：native-ts/yoga-layout/index.ts（yoga 布局引擎 TS 移植，2578 源行 / 2742 批注版 / 164 锚点）** 见 [src 第 140 批](annotated-索引与进度.md#src-batch-140-native-tsyoga-layoutindexts-2578-src--2742-annotated--164-anchors)；**src 第 139 批：bridge/bridgeMain.ts（2999 源行 / 3083 批注版 / 84 锚点）** 见 [src 第 139 批](annotated-索引与进度.md#src-batch-139-bridgemaints-2999-src--3083-annotated--84-anchors)；**src 第 138 批：commands/insights.ts（3200 源行 / 3264 批注版 / 64 锚点）** 见 [src 第 138 批](annotated-索引与进度.md#src-batch-138-commandsinsightsts-3200-src--3264-annotated--64-anchors)；**src 第 137 批：main.tsx（CLI 入口，4684 源行，136 锚点）** 见 [src 第 137 批](annotated-索引与进度.md#src-batch-137-main-tsx-4684-lines-136-anchors)；**screens 第 136 批：REPL.tsx（CLI 终端 UI 根组件，5005 源行，155 锚点）** 见 [screens 第 136 批](annotated-索引与进度.md#src-batch-136-screens-repl-tsx-5005-lines-155-anchors)；**components 目录已清零（389/389）**；**components 第 119 批：权限请求家族、智能体与任务详情、MCP 工具可视化、选择器与向导（15 文件 3,281 行，167 锚点）** 见 [components 第 119 批](annotated-索引与进度.md#components-第-119-批权限请求家族智能体与任务详情mcp-工具可视化选择器与向导15-文件-3281-行167-锚点)；**components 第 120 批：压缩后问卷、权限对话框、桌面交接、MCP 导入、自动更新、高亮渲染、Teleport 错误（15 文件 2,927 行，85 锚点）** 见 [components 第 120 批](annotated-索引与进度.md#components-第-120-批压缩后问卷权限对话框桌面交接mcp-导入自动更新高亮渲染teleport-错误15-文件-2927-行85-锚点)；**components 第 121 批：帮助 / 通行证 / 文件编辑 / 权限 / MCP / 反馈 / 桌面推广（15 文件 2,677 行，255 锚点）** 见 [components 第 121 批](annotated-索引与进度.md#components-第-121-批帮助-通行证-文件编辑-权限-mcp-反馈-桌面推广15-文件-2677-行-255-锚点)；**components 第 124 批：终端输入 / 传送进度 / 标签栏 / 对话框 / 权限录入 / 设置 / 外部导入 / 智能体进度 / MCP 多选 / 向导提示 / 工作流多选 / 导出 / 事件选择 / 主题文字（15 文件 2,009 行，215 锚点）** 见 [components 第 124 批](annotated-索引与进度.md#components-batch-124-15-files-2009-lines-215-anchors)；**utils 剩余小文件十五件套（18→14 行档，31 锚点）** 见 [utils 第 100 批](annotated-索引与进度.md#utils-第-100-批剩余小文件十五件套18-14-行档31-锚点)；**utils 剩余小文件十五件套（14→8 行档，39 锚点）** 见 [utils 第 101 批](annotated-索引与进度.md#utils-第-101-批剩余小文件十五件套14-8-行档39-锚点)；**utils 小文件十件套（22→18 行档，33 锚点）** 见 [utils 第 99 批](annotated-索引与进度.md#utils-第-99-批小文件十件套22-18-行档33-锚点)。数字由 `python scripts/check-coverage.py src` 实算，不手数；**utils 小文件十五件套（119→104 行档，100 锚点）** 见 [utils 第 81 批](annotated-索引与进度.md#utils-第-81-批小文件十五件套119-104-行档100-锚点)；**utils 小文件十件套（103→99 行档，56 锚点）** 见 [utils 第 82 批](annotated-索引与进度.md#utils-第-82-批小文件十件套103-99-行档56-锚点)；**utils 小文件十件套（99→94 行档，78 锚点）** 见 [utils 第 83 批](annotated-索引与进度.md#utils-第-83-批小文件十件套99-94-行档78-锚点)；**utils 小文件十件套（94→88 行档，88 锚点）** 见 [utils 第 84 批](annotated-索引与进度.md#utils-第-84-批小文件十件套94-88-行档88-锚点)；**utils 小文件十件套（88→84 行档，81 锚点）** 见 [utils 第 85 批](annotated-索引与进度.md#utils-第-85-批小文件十件套88-84-行档81-锚点)；**utils 小文件十件套（83→79 行档，52 锚点）** 见 [utils 第 86 批](annotated-索引与进度.md#utils-第-86-批小文件十件套83-79-行档52-锚点)；**utils 小文件十件套（74→71 行档，60 锚点）** 见 [utils 第 88 批](annotated-索引与进度.md#utils-第-88-批小文件十件套74-71-行档60-锚点)；**utils 小文件十件套（79→75 行档，57 锚点）** 见 [utils 第 87 批](annotated-索引与进度.md#utils-第-87-批小文件十件套79-75-行档57-锚点)；**utils 小文件十件套（130→127 行档，128 锚点）** 见 [utils 第 79 批](annotated-索引与进度.md#utils-第-79-批小文件十件套130-127-行档128-锚点)；**utils 小文件十五件套（127→120 行档，134 锚点）** 见 [utils 第 80 批](annotated-索引与进度.md#utils-第-80-批小文件十五件套127-120-行档134-锚点)；**utils 小文件十件套（162→155 行档，89 锚点）** 见 [utils 第 76 批](annotated-索引与进度.md#utils-第-76-批小文件十件套162155-行档89-锚点)；**utils 小文件十五件套（183→170 行档，168 锚点）** 见 [utils 第 74 批](annotated-索引与进度.md#utils-第-74-批小文件十五件套183-170-行档168-锚点)；**utils 小文件十一件套（170→164 行档，113 锚点）** 见 [utils 第 75 批](annotated-索引与进度.md#utils-第-75-批小文件十一件套170164-行档113-锚点)；**utils 小文件十件套（263→245 行档，97 锚点）** 见 [utils 第 67 批](annotated-索引与进度.md#utils-第-67-批小文件十件套263-245-行档97-锚点)；**utils 小文件十件套（242→234 行档，116 锚点）** 见 [utils 第 68 批](annotated-索引与进度.md#utils-第-68-批小文件十件套242-234-行档116-锚点)；**utils 小文件十件套（233→221 行档，111 锚点）** 见 [utils 第 69 批](annotated-索引与进度.md#utils-第-69-批小文件十件套233-221-行档111-锚点)；**utils 小文件十件套（221→204 行档，118 锚点）** 见 [utils 第 70 批](annotated-索引与进度.md#utils-第-70-批小文件十件套221-204-行档118-锚点)；**utils 小文件十件套（204→198 行档，123 锚点）** 见 [utils 第 71 批](annotated-索引与进度.md#utils-第-71-批小文件十件套204-198-行档123-锚点)；**utils 小文件十件套（196→191 行档，123 锚点）** 见 [utils 第 72 批](annotated-索引与进度.md#utils-第-72-批小文件十件套196-191-行档123-锚点)；**utils 小文件十件套（191→183 行档，108 锚点）** 见 [utils 第 73 批](annotated-索引与进度.md#utils-第-73-批小文件十件套191-183-行档108-锚点)；**utils 小文件十件套（155→145 行档，76 锚点）** 见 [utils 第 77 批](annotated-索引与进度.md#utils-第-77-批小文件十件套155-145-行档76-锚点)；**utils 小文件十五件套（142→131 行档，117 锚点）** 见 [utils 第 78 批](annotated-索引与进度.md#utils-第-78-批小文件十五件套142-131-行档117-锚点)；`src/services/`（130/130，已全目录完成）的细账见[索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)；**`src/tools/` 已 184/184 全目录完成**（50,863 行），文件类的四份细账见[索引与进度 · FileEditTool 与 FileWriteTool](annotated-索引与进度.md#fileedittool-与-filewritetool) 与 [FileReadTool](annotated-索引与进度.md#filereadtool读的那一端)，搜索两件见 [GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)，技能机制见 [SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)，交互与杂项五工具见 [AskUserQuestion / REPL / McpAuth / NotebookEdit / Brief](annotated-索引与进度.md#交互与杂项五工具askuserquestion--repl--mcpauth--notebookedit--brief)，联网两件见 [WebFetch / WebSearch](annotated-索引与进度.md#网络两件套webfetch--websearch)，MCP 工具模板见 [MCPTool](annotated-索引与进度.md#mcptool模板工具与折叠名单)，代码智能见 [LSPTool](annotated-索引与进度.md#lsptool编辑器级代码智能的-cli-移植)，PowerShell 外围九件见 [PowerShellTool 上](annotated-索引与进度.md#powershelltool上外围机制九件)，安全核心五文件见 [PowerShellTool 下](annotated-索引与进度.md#powershelltool-下安全核心五文件目录-1414-清零)，计划模式与待办见 [EnterPlanMode / ExitPlanMode / TodoWrite](annotated-索引与进度.md#计划模式与待办三件套三个目录-1111-全清)，协作与调度见 [SendMessage / Cron 三件套 / ToolSearch](annotated-索引与进度.md#协作与调度三件套三个目录-1212-全清tools-破百)，隔离与协作六件套见 [worktree / MCP 资源 / team](annotated-索引与进度.md#隔离与协作六件套worktree--mcp-资源--team六个目录-2222-全清)，管理面四件见 [Config / TaskOutput / TaskUpdate / RemoteTrigger](annotated-索引与进度.md#配置--任务输出--任务更新--远程触发四个目录-1313-全清)，任务管理四件套见 [TaskCreate / TaskGet / TaskList / TaskStop](annotated-索引与进度.md#任务管理四件套--杂项五份八个目录-1616-全清tools-到-151184)，队友 spawn 与 git 埋点见 [shared/ 两份](annotated-索引与进度.md#队友-spawn-共享模块--git-埋点shared-22-全清tools-到-153184)，BashTool 安全核心与渲染见 [BashTool 下](annotated-索引与进度.md#bashtool-下半安全核心与渲染bashtool-1818-全清tools-到-167184)，agent 全机制见 [AgentTool 下半](annotated-索引与进度.md#agenttool-下半跑起来的-agent-全机制agenttool-2020-全清tools-184184-全清)，权限交互五方竞速见 [toolPermission](annotated-索引与进度.md#toolpermission权限交互的五方竞速第-34-批5-份-1386-行)，输入与补全八件套见 [输入补全第一批](annotated-索引与进度.md#输入与补全八件套第-35-批8-份-4060-行)，通信与远程五件套见 [通信与远程五件套](annotated-索引与进度.md#通信与远程五件套第-36-批5-份-4118-行)，交互与插件管理六件套见 [交互插件第六批](annotated-索引与进度.md#交互与插件管理六件套第-37-批6-份-2374-行)。任务管理与远程缝合十件套见 [hooks 第五批](annotated-索引与进度.md#任务管理与远程缝合十件套第-38-批10-份-2302-行)。通知系统全目录见 [notifs 全清](annotated-索引与进度.md#通知系统全目录第-39-批notifs-16-份-1355-行)。根目录输入/会话/选区等十件套见 [hooks 第六批](annotated-索引与进度.md#根目录输入会话选区等十件套第-40-批10-份-1372-行)。根目录快捷键/退出/剪贴板等十件套见 [hooks 第七批](annotated-索引与进度.md#根目录快捷键退出剪贴板等十件套第-41-批10-份-944-行)。根目录 @提及/队列/队友视图等十件套见 [hooks 第八批](annotated-索引与进度.md#根目录提及队列队友视图等十件套第-42-批10-份-638-行)。hooks 根目录收尾 24 件见 [hooks 第九批](annotated-索引与进度.md#hooks-根目录收尾-24-件第-43-批24-份-683-行)。utils 根目录两个巨兽见 [utils 第一批](annotated-索引与进度.md#utils-根目录两个巨兽messages-与-sessionstorage第-44-批2-份-10617-行226-锚点)。utils 巨兽第二梯队见 [utils 第二批](annotated-索引与进度.md#utils-巨兽第二梯队hooks-与-bashparser第-45-批2-份-9458-行307-锚点)。utils 附件与插件装载线见 [utils 第三批](annotated-索引与进度.md#utils-第五梯队attachments-与-pluginloader第-46-批2-份-7299-行326-锚点)。utils 语法树与凭证层见 [utils 第四批](annotated-索引与进度.md#utils-第六梯队astmarketplacemanager-与-auth第-47-批3-份-7324-行321-锚点)。utils 白名单·配置·另一种 shell 见 [utils 第五批](annotated-索引与进度.md#utils-第七梯队只读命令白名单配置层与-powershell-解析第-48-批3-份-5514-行173-锚点)；utils 路径判据·安装器·插件 schema 见 [utils 第六批](annotated-索引与进度.md#utils-第八梯队路径权限判据原生安装器与插件-schema第-49-批3-份-5166-行170-锚点)；utils 进程内队友运行器·权限初始化·终端光标·worktree·YOLO 分类器见 [utils 第七批](annotated-索引与进度.md#utils-第九梯队进程内队友运行器权限初始化终端光标worktree-与-yolo-分类器第-50-批5-份-7628-行336-锚点)。utils 的四个环境入口（IDE 发现·权限主流水线·CLAUDE.md 装载·上下文用量）见 [utils 第八批](annotated-索引与进度.md#utils-第十梯队ide-集成权限主流水线claudemd-装载与上下文分析第-51-批4-份-5841-行188-锚点)。utils 的设置·沙箱·插件与 git 基础工具十份见 [utils 第九批](annotated-索引与进度.md#utils-第-52-批设置沙箱插件与-git-基础工具第-52-批10-份-9481-行280-锚点)；utils 巨兽第三梯队与遥测/图像/队友工具十三份见 [utils 第十批](annotated-索引与进度.md#utils-第-53-批巨兽第三梯队与遥测图像队友工具第-53-批13-份-14175-行529-锚点)；utils 800 行档余下巨兽与分叉团队搜索计算机操控底座十二份见 [utils 第 54 批](annotated-索引与进度.md#utils-第-54-批800-行档余下巨兽-分叉团队搜索计算机操控底座第-54-批12-份-8742-行347-锚点)；utils 600 到 640 行档收口十份见 [utils 第 55 批](annotated-索引与进度.md#utils-第-55-批600-到-640-行档收口第-55-批10-份-6125-行170-锚点)；**utils 小文件十件套（71→69 行档，76 锚点）** 见 [utils 第 89 批](annotated-索引与进度.md#utils-第-89-批小文件十件套71-69-行档76-锚点)；**utils 小文件十件套（68→60 行档，56 锚点）** 见 [utils 第 90 批](annotated-索引与进度.md#utils-第-90-批小文件十件套68-60-行档56-锚点)；**utils 小文件十件套（60→54 行档，52 锚点）** 见 [utils 第 91 批](annotated-索引与进度.md#utils-第-91-批小文件十件套60-54-行档52-锚点)；**utils 小文件十件套（54→51 行档，61 锚点）** 见 [utils 第 92 批](annotated-索引与进度.md#utils-第-92-批小文件十件套54-51-行档61-锚点)。 **utils 小文件十件套（51→45 行档，49 锚点）** 见 [utils 第 93 批](annotated-索引与进度.md#utils-第-93-批小文件十件套51-45-行档49-锚点)； **utils 小文件十件套（44→39 行档，51 锚点）** 见 [utils 第 94 批](annotated-索引与进度.md#utils-第-94-批小文件十件套44-39-行档51-锚点)； **utils 小文件十件套（39→35 行档，34 锚点）** 见 [utils 第 95 批](annotated-索引与进度.md#utils-第-95-批小文件十件套39-35-行档34-锚点)； **utils 小文件十件套（34→29 行档，26 锚点）** 见 [utils 第 96 批](annotated-索引与进度.md#utils-第-96-批小文件十件套34-29-行档26-锚点)； · **utils 第 97 批小文件十件套（29→26 行档，37 锚点）** 见 [utils 第 97 批](annotated-索引与进度.md#utils-第-97-批小文件十件套29-26-行档37-锚点)； · **utils 第 98 批小文件十件套（26→22 行档，46 锚点）** 见 [utils 第 98 批](annotated-索引与进度.md#utils-第-98-批小文件十件套26-22-行档46-锚点)。 · **utils 第 102 批：收尾清零（3 份 8 行小文件，6 锚点）** 见 [utils 第 102 批](annotated-索引与进度.md#utils-第-102-批收尾清零3-份-8-行小文件6-锚点) · **components 第 103 批：设置面板与历史选择器（3,397 行，73 锚点）** 见 [components 第 103 批](annotated-索引与进度.md#components-第-103-批设置面板与历史选择器1822--1575-行73-锚点) · **components 第 104 批：统计面板、权限规则、MCP 询问（3,573 行，112 锚点）** 见 [components 第 104 批](annotated-索引与进度.md#components-第-104-批统计面板权限规则mcp-询问3573-行112-锚点) · **components 第 105 批：虚拟列表、滚动总控、远程会话详情（2,995 行，118 锚点）** 见 [components 第 105 批](annotated-索引与进度.md#components-第-105-批虚拟列表滚动总控远程会话详情2995-行118-锚点) · **components 第 106 批：消息选择器、智能体菜单、退出计划权限、团队对话框（3,114 行，99 锚点）** 见 [components 第 106 批](annotated-索引与进度.md#components-第-106-批消息选择器智能体菜单退出计划权限团队对话框3114-行99-锚点)。 · **components 第 107 批：选择组件、后台任务总管、MCP 远程服务器菜单（2,644 行，93 锚点）** 见 [components 第 107 批](annotated-索引与进度.md#components-第-107-批选择组件后台任务总管mcp-远程服务器菜单2644-行93-锚点)。 · **components 第 108 批：权限请求表单、全屏布局壳、OAuth 登录流程、反馈上报（2,505 行，126 锚点）** 见 [components 第 108 批](annotated-索引与进度.md#components-第-108-批权限请求表单全屏布局壳oauth-登录流程反馈上报2505-行126-锚点)。 · **components 第 109 批：hooks 配置浏览器、工具白名单选择器、转圈器家族、启动欢迎屏（2,245 行，121 锚点）** 见 [components 第 109 批](annotated-索引与进度.md#components-第-109-批hooks-配置浏览器工具白名单选择器转圈器家族启动欢迎屏2245-行121-锚点)。 · **components 第 110 批：MCP 服务器管理面板、上下文用量可视化、输入型选项、词级 diff 回退（1,968 行，109 锚点）** 见 [components 第 110 批](annotated-索引与进度.md#components-第-110-批mcp-服务器管理面板上下文用量可视化输入型选项词级-diff-回退1968-行109-锚点)。 · **components 第 111 批：Bash 权限弹窗、单题提问视图、条款确认弹窗、权限决策调试信息（1,870 行，122 锚点）** 见 [components 第 111 批](annotated-索引与进度.md#components-第-111-批bash-权限弹窗单题提问视图条款确认弹窗权限决策调试信息1870-行122-锚点)。 · **components 第 112 批：模型选择器、电脑操作授权、子代理清单、记忆文件选择器（1,767 行，118 锚点）** 见 [components 第 112 批](annotated-索引与进度.md#components-第-112-批模型选择器电脑操作授权子代理清单记忆文件选择器1767-行118-锚点)。 · **components 第 113 批：启动横幅、后台任务状态条、多选状态机、Shell 任务详情（1,680 行，121 锚点）** 见 [components 第 113 批](annotated-索引与进度.md#components-第-113-批启动横幅后台任务状态条多选状态机shell-任务详情1680-行121-锚点)。 · **components 第 114 批：远程控制弹窗、MCP 设置视图机、树形选择器、Diff 查看弹窗（1,579 行，117 锚点）** 见 [components 第 114 批](annotated-索引与进度.md#components-第-114-批远程控制弹窗mcp-设置视图机树形选择器diff-查看弹窗1579-行117-锚点)。 · **components 第 115 批：新建代理确认步、任务列表 V2、用量页、技能权限请求、后台任务行、全局搜索弹窗、Tabs 设计系统、添加工作区目录、远程环境弹窗、通用权限提示（3,536 行，167 锚点）** 见 [components 第 115 批](annotated-索引与进度.md#components-第-115-批新建代理确认步任务列表-v2用量页技能权限请求后台任务行全局搜索弹窗tabs-设计系统添加工作区目录远程环境弹窗通用权限提示3536-行167-锚点)。 · **components 第 116 批：主题选择器、兜底权限弹窗、带预览提问视图、微光消息、状态栏、Markdown 表格、模糊选择器、评分问卷触发、沙箱设置、Diff 文件清单（3,164 行，211 锚点）** 见 [components 第 116 批](annotated-索引与进度.md#components-第-116-批主题选择器兜底权限弹窗带预览提问视图微光消息状态栏markdown-表格模糊选择器评分问卷触发沙箱设置diff-文件清单3164-行211-锚点)。 · **components 第 117 批：信任对话框、自定义选择器输入、Diff 详情视图、协调者任务面板、子代理文件读写工具、权限解释、队友旋转树、恢复会话列表、频道通知、进行中队友详情对话框、旋转动画行、投入度标注、WebFetch 权限请求、梦境详情对话框、信任对话框设置探测（4,019 行，219 锚点）** 见 [components 第 117 批](annotated-索引与进度.md#components-第-117-批信任对话框自定义选择器输入diff-详情视图协调者任务面板子代理文件读写工具权限解释队友旋转树恢复会话列表频道通知进行中队友详情对话框旋转动画行投入度标注webfetch-权限请求梦境详情对话框信任对话框设置探测4019-行219-锚点)。 · **components 第 118 批：首次启动引导、快速打开对话框、列表项基元、远程会话进度行、状态命令渲染、吉祥物字符画、技能菜单、Markdown 渲染、Notebook diff、PowerShell 权限（2,399 行，175 锚点）** 见 [components 第 118 批](annotated-索引与进度.md#components-第-118-批首次启动引导快速打开对话框列表项基元远程会话进度行状态命令渲染吉祥物字符画技能菜单markdown-渲染notebook-diffpowershell-权限2399-行175-锚点)；**components 第 122 批：设计系统、IDE 登入与连接对话框、MCP 重连、权限请求家族、LogoV2 与 CustomSelect 选择器（15 文件 2,446 行，201 锚点）** 见 [components 第 122 批](annotated-索引与进度.md#components-第-122-批设计系统ide-登入与连接对话框mcp-重连权限请求家族logov2-与-customselect-选择器15-文件-2446-行201-锚点)；**components 第 123 批：思考模式开关、技能改进问卷、Shell 进度面板、工作目录/托管安全/自动模式确认、Bash 权限选项、问题提交审阅、匹配器与代理向导/MCP 工具列表（15 文件 2,204 行，139 锚点）** 见 [components 第 123 批](annotated-索引与进度.md#components-第-123-批思考模式开关技能改进问卷shell-进度面板工作目录托管安全自动模式确认bash-权限选项问题提交审阅匹配器与代理向导mcp-工具列表15-文件-2204-行139-锚点)；**components 第 124 批：Vim 输入/传送进度/标签栏/对话框/权限录入/设置/外部导入/智能体进度/MCP 多选/向导提示/工作流多选/导出/事件选择/主题文字（15 文件 2,009 行，215 锚点）** 见 [components 第 124 批](annotated-索引与进度.md#components-batch-124-15-files-2009-lines-215-anchors)；**components 第 125 批：编辑消息摘要/语音波形输入/吉祥物动画/API key 审批/向导描述/计划模式弹窗/Chrome 引导/权限解释/沙箱体检/压缩占位（10 文件 1,220 行，125 锚点）** 见 [components batch 125](annotated-索引与进度.md#components-batch-125-10-files-1220-lines-125-anchors)；**components 第 126 批：历史搜索/空闲返回/Shell 输出行/工具错误兜底/Teleport stash/MCP 审批/文件权限分流/向导记忆步/输出风格/代理颜色（10 文件 1,153 行，99 锚点）** 见 [components batch 126](annotated-索引与进度.md#components-batch-126-10-files-1153-lines-99-anchors)；**components 第 127 批：反馈问卷闭环/钩子只读菜单/事件流 Feed/收权确认/代理验证/双击后台/任务状态/开发渠道/等待授权/更新检查/仓库校正/类型步/渠道降级（15 文件 1,601 行，116 锚点）** 见 [components batch 127](annotated-索引与进度.md#components-batch-127-15-files-1601-lines-116-anchors)；**components 第 128 批：沙箱违规展开视图/PR 徽章/代理向导组装器/诊断展示/状态图标与加载态/Notebook 拒绝提示/Feed 工厂/更新器分派/权限选项工厂/钩子询问/设置错误弹窗/写入 diff/转录分享/LSP 推荐（15 文件 1,387 行，133 锚点）** 见 [components batch 128](annotated-索引与进度.md#components-batch-128-15-files-1387-lines-133-anchors)；**components 第 129 批：任务状态与 shell 进度/危险模式确认/进度条/语言选择器/spinner 工具/向导颜色步/数字防抖 hook/队友页头/命令清单/AWS 认证框/快捷键提示/团队页脚/高度棘轮/向导方式与位置步（15 文件 1,245 行，133 锚点）** 见 [components batch 129](annotated-索引与进度.md#components-batch-129-15-files-1245-lines-133-anchors)；**components 第 130 批：spinner 单帧/消息响应前缀/插件推荐/Pane 壳/Byline/权限规则描述/卡顿渐红 hook/远程提示/shell 时间/向导确认落盘/图片引用/权限弹窗骨架/搜索框/有序列表/通行证推广（15 文件 1,124 行，136 锚点）** 见 [components batch 130](annotated-索引与进度.md#components-batch-130-15-files-1124-lines-136-anchors)；**components 第 131 批：语音模式提示/下拉选项/模型选择/权限标题/向导外壳/时间戳/闪烁字符/MCP 能力区/选工具步/信息流列/IDE 状态/紧急提示/快捷键/顶层 Provider/Bash 进度（15 文件 925 行，42 锚点）** 见 [components batch 131](annotated-索引与进度.md#components-batch-131-15-files-925-lines-42-anchors)。；**components batch 132: 15 files, 752 src / 863 annotated lines, 103 anchors** 见 [components batch 132](annotated-索引与进度.md#components-batch-132-15-files-752-lines-103-anchors)；**components batch 133: components 目录清零（34 文件 953 行 130 锚点）** 见 [components batch 133](annotated-索引与进度.md#components-batch-133-34-files-953-lines-130-anchors)；**src batch 134: src 散件四巨兽（4 文件 3457 行 165 锚点）** 见 [src batch 134](annotated-索引与进度.md#src-batch-134-4-files-3457-lines-165-anchors)。；**src batch 135: cli/print.ts 巨文件（5594 行 130 锚点）** 见 [src batch 135](annotated-索引与进度.md#src-batch-135-cli-print-ts-5594-lines-130-anchors)。
+> **这是什么**：一份把 [`github.com/hangsman/claude-code-source`](https://github.com/hangsman/claude-code-source) 的 `src/` 目录**逐行加中文注释**的源码阅读手册。
+> **分析版本**：`2.1.88`（`package.json` 中声明）
+> **规模**：`source/src` 共 **1,902 个文件 / 513,237 行**，已全部批注（按行数覆盖 **100%**）；配套 `src/services` 等 **130 份**也已批注。
+> **写给谁**：想通过读源码学架构、但不太熟悉英文的同学。
+> **怎么用**：本手册给出「分析方案 + 中文批注版源码 + 文件夹/术语/英文注释中英文对照」。读的时候看 `annotated/` 里的批注版，对照 `source/` 里的原文。
+> **完整进度与逐批记录**：见 [索引与进度](annotated-索引与进度.md)。
 
 ---
 
-## 一分钟看懂这个项目
+## 三分钟看懂这个项目
 
-> **学习路线已重构（零基础版）**：旧的「七步」按模块切（一步 = 半天 = 几千行），0 基础读不动。现在改成 **六层 · 一单元 30 分钟 · 2–150 行**，每单元带三个问题和一个验证动作——见 [零基础学习路线](docs/00-零基础学习路线.md) 与 [TypeScript 地基](docs/00a-TypeScript地基.md)。
->
-> **最新一批（第 60 批）**：utils 450 行档十五件套——`listSessionsImpl`(454) / `task/diskOutput`(451) / `hooks/sessionHooks`(447) / `plugins/officialMarketplaceStartupCheck`(439) / `betas`(434) / `statsCache`(434) / `nativeInstaller/pidLock`(433) / `tmuxSocket`(427) / `proxy`(426) / `imagePaste`(416) / `plugins/zipCache`(406) / `claudeInChrome/setup`(400) / `hooks/hooksConfigManager`(400) / `plugins/pluginOptionsStorage`(400) / `plans`(397)，15 份 6,364 源行、610 锚点；校验 check-fidelity 702 份 0 失败、check-links 966+129 0 失效。详见 [索引与进度 · 第 60 批](annotated-索引与进度.md#utils-第-60-批450-行档十五件套第-60-批15-份-6364-行610-锚点)。
-> **最新一批（第 61 批）**：utils 390 行档十五件套——`attribution`(393) / `task/TaskOutput`(390) / `permissions/PermissionUpdate`(389) / `plugins/lspPluginIntegration`(387) / `readFileInRange`(383) / `markdown`(381) / `swarm/It2SetupPrompt`(379) / `plugins/lspRecommendation`(374) / `swarm/backends/ITermBackend`(370) / `frontmatterParser`(370) / `shell/prefix`(367) / `log`(362) / `status`(361) / `releaseNotes`(360) / `swarm/backends/PaneBackendExecutor`(354)，15 份 5,620 源行、493 锚点；校验 check-fidelity 717 份 0 失败、check-links 981+129 0 失效。详见 [索引与进度 · 第 61 批](annotated-索引与进度.md#utils-第-61-批390-行档十五件套第-61-批15-份-5620-行493-锚点)。
-> **最新一批（第 62 批）**：utils 350 行档十五件套——`logoV2Utils`(350) / `ultraplan/ccrSession`(349) / `deepLink/registerProtocol`(348) / `plugins/loadPluginAgents`(348) / `env`(347) / `plugins/pluginStartupCheck`(341) / `swarm/backends/InProcessBackend`(339) / `hooks/execAgentHook`(339) / `nativeInstaller/packageManagers`(336) / `computerUse/wrapper`(336) / `mcp/elicitationValidation`(336) / `ansiToPng`(334) / `effort`(329) / `swarm/spawnInProcess`(328) / `bash/ParsedCommand`(318)，15 份 5,078 源行、123 锚点；校验 check-fidelity 732 份 0 失败、check-links 996+130 0 失效。详见 [索引与进度 · 第 62 批](annotated-索引与进度.md#utils-第-62-批350-行档十五件套第-62-批15-份-5078-行123-锚点)。
-> **最新一批（第 63 批）**：utils 300 行档十件套——`powershell/staticPrefix`(316) / `settings/mdm/settings`(316) / `skills/skillChangeDetector`(311) / `swarm/backends/types`(311) / `hooks/AsyncHookRegistry`(309) / `format`(308) / `cron`(308) / `task/framework`(308) / `agenticSessionSearch`(307) / `plugins/dependencyResolver`(305)，10 份 3,099 源行、98 锚点；校验 check-fidelity 742 份 0 失败、check-links 1011+131 0 失效。详见 [索引与进度 · 第 63 批](annotated-索引与进度.md#utils-第-63-批300-行档十件套第-63-批10-份-3099-行98-锚点)。
-> **最新一批（第 64 批）**：utils 300 行档下沿十件套——`bash/shellQuote`(304) / `heapDumpService`(303) / `queryProfiler`(301) / `pdf`(300) / `permissions/permissionsLoader`(296) / `hooks/ssrfGuard`(294) / `bash/bashPipeCommand`(294) / `claudeInChrome/mcpServer`(293) / `teammate`(292) / `teleport/gitBundle`(292)，10 份 2,969 源行、105 锚点；校验 check-fidelity 752 份 0 失败、check-links 1021+132 0 失效。详见 [索引与进度 · 第 64 批](annotated-索引与进度.md#utils-第-64-批300-行档下沿十件套第-64-批10-份-2969-行105-锚点)。
-> **最新一批（第 66 批）**：utils 272 行档十件套——`contextAnalysis`(272) / `ansiToSvg`(272) / `hooks/hooksSettings`(271) / `memoize`(269) / `debug`(268) / `hooks/skillImprovement`(267) / `settings/validation`(265) / `model/bedrock`(265) / `plugins/reconciler`(265) / `doctorContextWarnings`(265)，10 份 2,679 源行、91 锚点；校验 check-fidelity 772 份 0 失败、check-links 1348+456 0 失效。详见 [索引与进度 · 第 66 批](annotated-索引与进度.md#utils-第-66-批272-行档十件套第-66-批10-份-2679-行91-锚点)。
-
-`Claude Code` 是 Anthropic 出品的**终端里运行的 AI 编程智能体**（agentic coding tool）。它不是普通聊天框，而是能**读你的代码库、改文件、跑终端命令**的"会动手的 AI"。
+`Claude Code` 是 Anthropic 出品的**终端里运行的 AI 编程智能体**（agentic coding tool）。它不是普通聊天框，而是能**读你的代码库、改文件、跑终端命令**的「会动手的 AI」。
 
 一句话概括它的运行方式：
 
 ```
 你输入一句话  →  主循环把消息 + 工具清单发给 Claude  →  模型说"我要调某个工具"
-      ↑                                                          ↓
-      └──────── 工具结果塞回对话，继续下一轮  ←──────── 权限检查 → 执行工具
+     ↑                                                          ↓
+     └──────── 工具结果塞回对话，继续下一轮  ←──────── 权限检查 → 执行工具
 ```
 
-代码层面，所谓"AI 智能体"就是一个 `while(true)` 循环 + "调用模型 → 执行工具 → 回灌结果"。本手册第 06 篇会把这个循环本体育给你看。
+代码层面，所谓「AI 智能体」就是一个 `while(true)` 循环 + 「调用模型 → 执行工具 → 回灌结果」。本手册第 06 篇会把这个循环本体育给你看。
 
 ---
 
 ## ⚠️ 开始前必须知道的两件事
 
-**1. 这是打包版，不能直接运行。**  
-`package.json` 的 `dependencies` 是空的（`{}`），依赖在构建时被 Bun 内联了。`npm install` 后并跑不起来——请把它当**源码阅读对象**，不要试图直接运行。
+**1. 这是打包版，不能直接运行。**
+`package.json` 的 `dependencies` 是空的（`{}`），依赖在构建时被 Bun 内联了。`npm install` 后也跑不起来——请把它当**源码阅读对象**，不要试图直接运行。
 
-**2. 满屏的 `feature('XXX')` 是构建期开关。**  
+**2. 满屏的 `feature('XXX')` 是构建期开关。**
 这是 Bun 的**死代码消除（dead code elimination）**：只有开关打开的分支才会被打进最终包，没开的整段被删。所以你看到的 `feature('KAIROS')`、`feature('COORDINATOR_MODE')` 等分支，在你手上的版本里**可能根本不存在**。读代码时别被它绕晕。
 
 ---
 
-## 文档目录（按顺序读，或按需跳）
+## 文档目录（专题分析，按顺序读或按需跳）
 
-| 序号                          | 章节         | 一句话内容                                                               | 适合什么时候读                 |
-| --------------------------- | ---------- | ------------------------------------------------------------------- | ----------------------- |
-| [00](docs/00-零基础学习路线.md)    | **零基础学习路线** | 六层关卡、每单元 20–30 分钟、2–150 行、三个问题 + 一个验证动作                            | **0 基础从这里开始，别跳**        |
-| [00a](docs/00a-TypeScript地基.md) | **TypeScript 地基** | 只讲本仓库真实出现的语法；每个符号配「中文怎么念」                                        | 读 L0 时随时查，卡住就回来看        |
-| [01](docs/01-项目总览与架构.md)    | 项目总览与架构    | 技术栈、整体架构图、数据流                                                       | 走完 L1 之后，建立全局印象         |
-| [02](docs/02-目录结构中英对照.md)   | 目录结构中英对照   | `src/` 每个目录的英文 / 文件数 / 中文含义                                         | 想找"某个功能在哪个目录"时查         |
-| [03](docs/03-启动流程.md)       | 启动流程       | `cli.tsx` → `main()` → `setup()` 三棒接力                               | 想懂"程序怎么起来的"             |
-| [04](docs/04-工具系统.md)       | 工具系统       | 工具注册中心 `tools.ts` + 工具执行流水线                                         | **重点**：AI 的"双手"         |
-| [05](docs/05-提示词与命令.md)     | 提示词与命令     | 系统提示词怎么拼、斜杠命令怎么写                                                    | 想学 prompt 工程 / 加命令      |
-| [06](docs/06-对话主循环与模型调用.md) | 对话主循环与模型调用 | `while(true)` 循环 + 调 API + 重试                                       | **最重要**：AI Agent 的心脏    |
-| [07](docs/07-服务层详解.md)      | 服务层详解      | `services/` 130 个文件逐模块讲                                             | 想搞懂 MCP / 埋点 / LSP / 登录 |
-| [08](docs/08-权限与安全.md)      | 权限与安全      | allow / ask / deny 三态判定、6 种模式                                       | 想学"AI 怎么安全地动手"          |
-| [09](docs/09-配置系统.md)       | 配置系统       | 全局 / 项目 / 企业托管三层配置                                                  | 想知道"设置存在哪"              |
-| [10](docs/10-子智能体与计划模式.md)  | 子智能体与计划模式  | 让 AI 派 AI 干活、先规划后执行                                                 | 想学多智能体 / Plan 模式        |
-| [11](docs/11-上下文压缩.md)      | 上下文压缩      | 长对话怎么不爆窗口（compact）                                                  | 想懂"为什么能聊很久"             |
-| [12](docs/12-UI与多智能体.md)    | UI 与多智能体   | React + Ink 终端渲染、协调器模式                                              | 对界面 / 多智能体感兴趣           |
-| [13](docs/13-中英文术语对照.md)    | 中英文术语对照    | 架构术语、英文 prompt、缩写全表                                                 | 随时查词                    |
-| [14](docs/14-底层运行时与基础设施.md) | 底层运行时与基础设施 | cli / bridge / remote / server / tasks / state / vim / migrations 等 | 想搞懂"程序怎么跑起来"            |
-| [15](docs/15-常量·技能与伙伴系统.md) | 常量·技能·伙伴系统 | constants 全表、多智能体权限矩阵、skills、buddy 宠物                               | 想懂工具/Agent 的权限边界        |
+| 序号 | 章节 | 一句话内容 | 适合什么时候读 |
+| --- | --- | --- | --- |
+| [00](docs/00-零基础学习路线.md) | **零基础学习路线** | 六层关卡、每单元 20–30 分钟、2–150 行、三个问题 + 一个验证动作 | **0 基础从这里开始，别跳** |
+| [00a](docs/00a-TypeScript地基.md) | **TypeScript 地基** | 只讲本仓库真实出现的语法；每个符号配「中文怎么念」 | 读 L0 时随时查，卡住就回来看 |
+| [01](docs/01-项目总览与架构.md) | 项目总览与架构 | 技术栈、整体架构图、数据流 | 走完 L1 之后，建立全局印象 |
+| [02](docs/02-目录结构中英对照.md) | 目录结构中英对照 | `src/` 每个目录的英文 / 文件数 / 中文含义 | 想找「某个功能在哪个目录」时查 |
+| [03](docs/03-启动流程.md) | 启动流程 | `cli.tsx` → `main()` → `setup()` 三棒接力 | 想懂「程序怎么起来的」 |
+| [04](docs/04-工具系统.md) | 工具系统 | 工具注册中心 `tools.ts` + 工具执行流水线 | **重点**：AI 的「双手」 |
+| [05](docs/05-提示词与命令.md) | 提示词与命令 | 系统提示词怎么拼、斜杠命令怎么写 | 想学 prompt 工程 / 加命令 |
+| [06](docs/06-对话主循环与模型调用.md) | 对话主循环与模型调用 | `while(true)` 循环 + 调 API + 重试 | **最重要**：AI Agent 的心脏 |
+| [07](docs/07-服务层详解.md) | 服务层详解 | `services/` 逐模块讲 | 想搞懂 MCP / 埋点 / LSP / 登录 |
+| [08](docs/08-权限与安全.md) | 权限与安全 | allow / ask / deny 三态判定、6 种模式 | 想学「AI 怎么安全地动手」 |
+| [09](docs/09-配置系统.md) | 配置系统 | 全局 / 项目 / 企业托管三层配置 | 想知道「设置存在哪」 |
+| [10](docs/10-子智能体与计划模式.md) | 子智能体与计划模式 | 让 AI 派 AI 干活、先规划后执行 | 想学多智能体 / Plan 模式 |
+| [11](docs/11-上下文压缩.md) | 上下文压缩 | 长对话怎么不爆窗口（compact） | 想懂「为什么能聊很久」 |
+| [12](docs/12-UI与多智能体.md) | UI 与多智能体 | React + Ink 终端渲染、协调器模式 | 对界面 / 多智能体感兴趣 |
+| [13](docs/13-中英文术语对照.md) | 中英文术语对照 | 架构术语、英文 prompt、缩写全表 | 随时查词 |
+| [14](docs/14-底层运行时与基础设施.md) | 底层运行时与基础设施 | cli / bridge / remote / server / tasks / state / vim / migrations 等 | 想搞懂「程序怎么跑起来」 |
+| [15](docs/15-常量·技能与伙伴系统.md) | 常量·技能·伙伴系统 | constants 全表、多智能体权限矩阵、skills、buddy 宠物 | 想懂工具/Agent 的权限边界 |
 
-> **精读化已完成（2026-10-29）**：`01`–`15` 共 15 章全部重写为精读版（每章 278–650 行，结论带文件+行号出处、验证命令、常见误读、合书自测），加上 `L0`–`L5` 41 份课时精读文档，课程文档合计约 19,500 行。
->
-> 学习路线分两份：**00 篇是「按什么顺序读」（零基础用），下面的进阶路线是「有基础之后查哪」（模块速查用）。**
+> **两条路线**：`00` 篇决定「按什么顺序读」（零基础用），下面的「进阶路线」是「有基础之后查哪」（模块速查用）。
 
 ---
 
 ## 学习路线（零基础，先读这份）
 
 > **如果你没写过 TypeScript、没读过上千行的文件** —— 直接打开 [`docs/00-零基础学习路线.md`](docs/00-零基础学习路线.md)，别从下面那七步开始。
->
 > 原因很实在：旧路线第 1 步是「读 `cli.tsx` 前 120 行」，而这 120 行里同时出现了动态 `import()`、`feature()` 构建期开关、`process.argv`、`.js` 后缀——**四个从没解释过的概念**。不是你不适合读，是顺序不对。
 
 ### 六层总览（详细卡片见 [00 篇](docs/00-零基础学习路线.md)）
@@ -89,7 +77,7 @@
 | **L4** 子系统 | 工具系统 / 主循环 / 权限，各拆 3–5 个聚焦单元 | 12 | 约 3 天 | 默写 Agent 主循环伪代码 |
 | **L5** 全链路 | 跟一次真实请求从键盘走到屏幕 | 2 | 各半天 | 每一跳都能指到文件和函数 |
 
-**合计约 7 天**（每天 2–3 小时）。旧路线标「1 天读主循环」，0 基础实际要两周还读不懂——因为 L0–L3 被全省了。
+**合计约 7 天**（每天 2–3 小时）。
 
 ### 每个单元长什么样
 
@@ -104,8 +92,6 @@
 | **读完自测** | **合上文件**再答，开着文件答等于抄 |
 | **验证** | 跑那条命令，用输出确认「我以为的」和「代码里的」一致 |
 
-> 旧路线没有被删掉，它在下面改叫「进阶路线」：**00 篇决定顺序，下面七步决定查哪。** 比如旧第 2 步的 `clear` 模块，在 00 篇里被拆成 L1-5 / L1-6 / L3-1；旧第 4 步的工具系统（7,537 行）被拆成 4 个聚焦单元。
-
 ---
 
 ## 进阶路线（七步，按模块读）
@@ -114,14 +100,11 @@
 
 ### 第 1 步：先认门面（约 30 分钟）
 
-> 📁 本节源码：[`src/entrypoints/cli.tsx`](source/src/entrypoints/cli.tsx)  
-> ✍️ 中文批注版：[`package.json`](annotated/package.json.annotated.md) · [仓库 README](annotated/README.annotated.md) · [`cli.tsx`](annotated/src/entrypoints/cli.tsx)
-
-| 读什么                                                                 | 学什么                    |
-| ------------------------------------------------------------------- | ---------------------- |
-| `package.json`                                                      | 技术栈是什么；知道"这是打包版，不能直接跑" |
-| `README.md`                                                         | 它到底是干嘛的                |
-| [`src/entrypoints/cli.tsx`](source/src/entrypoints/cli.tsx) 前 120 行 | "快速路径 + 动态 import"的套路  |
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| `package.json` | 技术栈是什么；知道「这是打包版，不能直接跑」 | [✅](annotated/package.json.annotated.md) |
+| 仓库 `README.md` | 它到底是干嘛的 | [✅](annotated/README.annotated.md) |
+| [`src/entrypoints/cli.tsx`](source/src/entrypoints/cli.tsx) 前 120 行 | 「快速路径 + 动态 import」的套路 | [✅](annotated/src/entrypoints/cli.tsx) |
 
 **目标**：不再对这个项目感到陌生。
 
@@ -129,16 +112,10 @@
 
 ### 第 2 步：读一个最小模块（约 1 小时）
 
-> 📁 本节源码：
->
-> - [`src/commands/clear/index.ts`](source/src/commands/clear/index.ts)
-> - [`src/tools/BashTool/commandSemantics.ts`](source/src/tools/BashTool/commandSemantics.ts)  
->   ✍️ 中文批注版：[`clear/index.ts`](annotated/src/commands/clear/index.ts) · [`commandSemantics.ts`](annotated/src/tools/BashTool/commandSemantics.ts)
-
-| 读什么                                                                                       | 为什么选它                |
-| ----------------------------------------------------------------------------------------- | -------------------- |
-| [`src/commands/clear/index.ts`](source/src/commands/clear/index.ts)                       | 19 行，命令模板的极简范例       |
-| [`src/tools/BashTool/commandSemantics.ts`](source/src/tools/BashTool/commandSemantics.ts) | 3.8 KB，讲"退出码语义"，逻辑独立 |
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/commands/clear/index.ts`](source/src/commands/clear/index.ts) | 19 行，命令模板的极简范例 | [✅](annotated/src/commands/clear/index.ts) |
+| [`src/tools/BashTool/commandSemantics.ts`](source/src/tools/BashTool/commandSemantics.ts) | 3.8 KB，讲「退出码语义」，逻辑独立 | [✅](annotated/src/tools/BashTool/commandSemantics.ts) |
 
 **目标**：建立信心。这两个文件小、注释全，是**英语 + 架构双语入门**的最佳材料。
 
@@ -146,164 +123,78 @@
 
 ### 第 3 步：读初始化流程（约 2 小时）
 
-> 📁 本节源码：[`src/setup.ts`](source/src/setup.ts)  
-> ✍️ 中文批注版：[`setup.ts`](annotated/src/setup.ts)（477 行全文件，按「顺序即知识」逐段讲）
-
-| 读什么                                      | 学什么             |
-| ---------------------------------------- | --------------- |
-| [`src/setup.ts`](source/src/setup.ts) 通读 | 一个会话"出生"要经过哪些步骤 |
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/setup.ts`](source/src/setup.ts) 通读 | 一个会话「出生」要经过哪些步骤 | [✅](annotated/src/setup.ts)（477 行全文件，按「顺序即知识」逐段讲） |
 
 **做法**：把每段英文注释翻译成中文对照（这正是本手册 [03 篇](docs/03-启动流程.md)做的事）。
 
-**目标**：理解"程序怎么起来的"。
+**目标**：理解「程序怎么起来的」。
 
 ---
 
 ### 第 4 步：读工具系统（重点，约半天）
 
-> 📁 本节源码：
->
-> - [`src/tools.ts`](source/src/tools.ts)
-> - [`src/tools/BashTool/bashSecurity.ts`](source/src/tools/BashTool/bashSecurity.ts)
-> - [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts)
-> - [`src/Tool.ts`](source/src/Tool.ts)
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/tools.ts`](source/src/tools.ts) | 工具户口本（`getAllBaseTools`） | [✅](annotated/src/tools.ts) |
+| [`src/Tool.ts`](source/src/Tool.ts) | 工具的类型 / 基类定义 | [✅](annotated/src/Tool.ts) |
+| [`src/tools/BashTool/bashSecurity.ts`](source/src/tools/BashTool/bashSecurity.ts) | AI 怎么安全执行命令（危险命令识别） | [✅](annotated/src/tools/BashTool/bashSecurity.ts) |
+| [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) | 权限判定 | [✅](annotated/src/tools/BashTool/bashPermissions.ts) |
+| `src/services/tools/` | 工具执行流水线（并发 / 钩子 / 编排） | 全部已批注 |
 
-| 读什么                                                                                     | 学什么                      |
-| --------------------------------------------------------------------------------------- | ------------------------ |
-| [`src/tools.ts`](source/src/tools.ts)                                                   | 工具户口本（`getAllBaseTools`） |
-| [`src/Tool.ts`](source/src/Tool.ts)                                                     | 工具的类型 / 基类定义             |
-| [`src/tools/BashTool/bashSecurity.ts`](source/src/tools/BashTool/bashSecurity.ts)       | AI 怎么安全执行命令（危险命令识别）      |
-| [`src/tools/BashTool/bashPermissions.ts`](source/src/tools/BashTool/bashPermissions.ts) | 权限判定                     |
-| `src/services/tools/`                                                                   | 工具执行流水线（并发 / 钩子 / 编排）    |
-
-> ✍️ 中文批注版：[`Tool.ts`](annotated/src/Tool.ts)（792 → 2,013 行，按「一个工具的一生」十二步逐字段讲）· [`tools.ts`](annotated/src/tools.ts)（389 → 647 行，工具户口本）· [`BashTool.tsx`](annotated/src/tools/BashTool/BashTool.tsx)（1,143 → 1,757 行，最复杂的工具实现）· [`bashSecurity.ts`](annotated/src/tools/BashTool/bashSecurity.ts)（2,592 → 3,658 行，22 个 validator 的编排）· [`bashPermissions.ts`](annotated/src/tools/BashTool/bashPermissions.ts)（2,621 → 3,906 行，895 行主函数的权限裁决）  
-> **文件编辑三件套也做完了**（`FileEditTool/` 全 6 份 + `FileWriteTool/` 全 3 份，2,668 → 2,735 行，65 处锚点）：[`FileEditTool/utils.ts`](annotated/src/tools/FileEditTool/utils.ts)（775 → 790 行，弯引号双向翻译 / 反斜引用转义 `$&` / 先读后写）· [`FileEditTool/FileEditTool.ts`](annotated/src/tools/FileEditTool/FileEditTool.ts)（625 → 643 行，十个 errorCode 的校验链 / UNC 路径安全短路 / 临界区不许 await）· [`FileWriteTool/FileWriteTool.ts`](annotated/src/tools/FileWriteTool/FileWriteTool.ts)（434 → 445 行，整文覆盖不改写行尾 / 懒 mkdir 会造出假故障遥测）。
-> **读的那一端也做完了**（`FileReadTool/` 全 5 份，1,602 → 1,655 行，48 处锚点）：[`FileReadTool/FileReadTool.ts`](annotated/src/tools/FileReadTool/FileReadTool.ts)（1,183 → 1,211 行，五道零 I/O 校验 / 去重桩省下 18% 的重复读取 / 六型输出映射 / 三级图片压缩）· [`limits.ts`](annotated/src/tools/FileReadTool/limits.ts)（92 → 97 行，字节上限与 token 上限是两道不同的闸）· [`prompt.ts`](annotated/src/tools/FileReadTool/prompt.ts)（49 → 54 行，「必须先 Read」规矩的出处）· [`imageProcessor.ts`](annotated/src/tools/FileReadTool/imageProcessor.ts)（94 → 98 行，napi/sharp 双实现）· [`UI.tsx`](annotated/src/tools/FileReadTool/UI.tsx)（185 → 192 行，只渲染摘要不渲染内容）。
->
-> **只读三件套收尾**（`GlobTool/` 全 3 份 + `GrepTool/` 全 3 份，1,064 → 1,124 行，60 处锚点）：[`GrepTool/GrepTool.ts`](annotated/src/tools/GrepTool/GrepTool.ts)（577 → 612 行，rg 封装全貌：旗标同名参数 / 三模式输出 / 分页协议 / 超时责任交给 rg 自己而非 AbortController）· [`GlobTool/GlobTool.ts`](annotated/src/tools/GlobTool/GlobTool.ts)（198 → 212 行，按名字搜索、复用 Grep 的渲染与排序语义）。两工具对外统一叫「Search」，UNC 短路与 ENOENT 补救逐字对应；细节见[索引与进度 · GlobTool 与 GrepTool](annotated-索引与进度.md#globtool-与-greptool搜索的两端)。
->
-> **技能机制也做完了**（`SkillTool/` 全 4 份，1,477 → 1,525 行，47 处锚点）：[`SkillTool/SkillTool.ts`](annotated/src/tools/SkillTool/SkillTool.ts)（1,108 → 1,140 行，inline 展开 vs fork 子代理两条执行模型 / deny→allow→白名单→ask 的权限链 / 双通道遥测 / 远端技能条件 require 防 tree-shaking 泄漏）· [`prompt.ts`](annotated/src/tools/SkillTool/prompt.ts)（241 → 250 行，技能清单占窗口 1% 预算、两级降级）。细节见[索引与进度 · SkillTool](annotated-索引与进度.md#skilltool技能--可调用的斜杠命令)。
+> 读写文件、搜索、技能等工具（`FileEdit` / `FileWrite` / `FileRead` / `Glob` / `Grep` / `Skill` 等）也已逐份批注完成。
 
 **对应章节**：[04 工具系统](docs/04-工具系统.md)、[08 权限与安全](docs/08-权限与安全.md)
 
-**目标**：理解 AI 的"双手"和"安全护栏"。
+**目标**：理解 AI 的「双手」和「安全护栏」。
 
 ---
 
-### 第 5 步：读"AI 大脑接线"（最重要，约 1 天）
+### 第 5 步：读「AI 大脑接线」（最重要，约 1 天）
 
-> 📁 本节源码：
->
-> - [`src/constants/prompts.ts`](source/src/constants/prompts.ts)
-> - [`src/query.ts`](source/src/query.ts)
-> - [`src/QueryEngine.ts`](source/src/QueryEngine.ts)
-> - [`src/services/api/claude.ts`](source/src/services/api/claude.ts)
-> - [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts)
-
-| 读什么                                                                     | 学什么                               | 批注版                                                       |
-| ----------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
-| [`src/constants/prompts.ts`](source/src/constants/prompts.ts)           | 系统提示词怎么拼                          | [✅ 914 → 2,042 行](annotated/src/constants/prompts.ts)     |
-| [`src/query.ts`](source/src/query.ts)                                   | 对话主循环的真身 `while(true)`            | [✅ 1,729 → 3,305 行](annotated/src/query.ts)               |
-| [`src/QueryEngine.ts`](source/src/QueryEngine.ts)                       | 查询引擎（流程编排）                        | [✅ 1,295 → 2,572 行](annotated/src/QueryEngine.ts)         |
-| [`src/services/api/claude.ts`](source/src/services/api/claude.ts)       | 真正调 API 的地方（SSE 解析 + 缓存打点 + 三级降级） | [✅ 3,419 → 4,656 行](annotated/src/services/api/claude.ts) |
-| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 限流                      | ⬜ 待批注（归入第 6 步）                                            |
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/constants/prompts.ts`](source/src/constants/prompts.ts) | 系统提示词怎么拼 | [✅](annotated/src/constants/prompts.ts) |
+| [`src/query.ts`](source/src/query.ts) | 对话主循环的真身 `while(true)` | [✅](annotated/src/query.ts) |
+| [`src/QueryEngine.ts`](source/src/QueryEngine.ts) | 查询引擎（流程编排） | [✅](annotated/src/QueryEngine.ts) |
+| [`src/services/api/claude.ts`](source/src/services/api/claude.ts) | 真正调 API 的地方（SSE 解析 + 缓存打点 + 三级降级） | [✅](annotated/src/services/api/claude.ts) |
+| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts) | 重试 / 退避 / 限流 | [✅](annotated/src/services/api/withRetry.ts) |
 
 **对应章节**：[05 提示词与命令](docs/05-提示词与命令.md)、[06 对话主循环与模型调用](docs/06-对话主循环与模型调用.md)
 
-**目标**：彻底理解"AI Agent 怎么工作"。**这是整条路线的核心，值得多花时间。**
+**目标**：彻底理解「AI Agent 怎么工作」。**这是整条路线的核心，值得多花时间。**
 
 ---
 
 ### 第 6 步：读服务层（按需，约半天）
 
-> 📁 本节源码：
->
-> - [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts)
-> - [`src/services/mcp/auth.ts`](source/src/services/mcp/auth.ts)
-> - [`src/services/mcp/xaa.ts`](source/src/services/mcp/xaa.ts)
-> - [`src/services/mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)
-> - [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts)
-> - [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts)
-> - [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts)
+`src/services/` 是整个项目的「功能后端」，共 **130 个文件 / 53,683 行，已全部批注**。下面按子目录挑代表文件读，需要哪个查哪个：
 
-| 读什么                                                                                                   | 学什么                                           | 批注版                                                                        |
-| ----------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------- |
-| [`src/services/api/withRetry.ts`](source/src/services/api/withRetry.ts)                               | 重试 / 退避 / 529 白名单 / 无限重试                      | [✅ 822 → 1,419 行](annotated/src/services/api/withRetry.ts)                 |
-| [`src/services/compact/apiMicrocompact.ts`](source/src/services/compact/apiMicrocompact.ts)           | 发给 API 的 `context_management` 指令              | [✅ 153 → 329 行](annotated/src/services/compact/apiMicrocompact.ts)         |
-| [`src/services/compact/autoCompact.ts`](source/src/services/compact/autoCompact.ts)                   | 什么时候压、四道抑制闸门、熔断                               | [✅ 351 → 668 行](annotated/src/services/compact/autoCompact.ts)             |
-| [`src/services/compact/compact.ts`](source/src/services/compact/compact.ts)                           | 摘要压缩本体、PTL 逃生舱、七类附件重建                         | [✅ 1,705 → 3,629 行](annotated/src/services/compact/compact.ts)             |
-| [`src/services/compact/microCompact.ts`](source/src/services/compact/microCompact.ts)                 | 三条微压缩路径、缓存编辑、时间触发                             | [✅ 530 → 1,353 行](annotated/src/services/compact/microCompact.ts)          |
-| [`src/services/compact/sessionMemoryCompact.ts`](source/src/services/compact/sessionMemoryCompact.ts) | 零调用压缩、索引对齐、两种恢复场景                             | [✅ 630 → 1,518 行](annotated/src/services/compact/sessionMemoryCompact.ts)  |
-| [`src/services/mcp/client.ts`](source/src/services/mcp/client.ts)                                     | 七种 transport、错误桥接、MCP 工具封装                    | [✅ 3,348 → 4,776 行](annotated/src/services/mcp/client.ts)                  |
-| [`src/services/compact/prompt.ts`](source/src/services/compact/prompt.ts)                             | 压缩提示词本体：三套模板的差异与理由                            | [✅ 374 → 723 行](annotated/src/services/compact/prompt.ts)                  |
-| [`src/services/compact/grouping.ts`](source/src/services/compact/grouping.ts)                         | 按 API 轮次切刀口，为什么只有一个判据                         | [✅ 63 → 202 行](annotated/src/services/compact/grouping.ts)                 |
-| [`src/services/compact/postCompactCleanup.ts`](source/src/services/compact/postCompactCleanup.ts)     | 压缩后清什么、清哪一层、什么故意不清                            | [✅ 77 → 339 行](annotated/src/services/compact/postCompactCleanup.ts)       |
-| [`src/services/compact/timeBasedMCConfig.ts`](source/src/services/compact/timeBasedMCConfig.ts)       | 缓存注定要 miss 时顺手整理上下文                           | [✅ 43 → 228 行](annotated/src/services/compact/timeBasedMCConfig.ts)        |
-| [`src/services/compact/compactWarning*.ts`](source/src/services/compact/compactWarningState.ts)       | 一个布尔量的时序、以及 React 隔离                          | [✅ 34 → 176 行](annotated/src/services/compact/compactWarningState.ts)      |
-| [`src/services/mcp/config.ts`](source/src/services/mcp/config.ts)                                     | 六种配置来源、优先级、去重、白黑名单策略                          | [✅ 1,578 → 3,077 行](annotated/src/services/mcp/config.ts)                  |
-| [`src/services/mcp/auth.ts`](source/src/services/mcp/auth.ts)                                         | OAuth 全流程、XAA/SSO、step-up 补丁、跨进程刷新锁           | [✅ 2,465 → 4,356 行](annotated/src/services/mcp/auth.ts)                    |
-| [`src/services/mcp/xaa.ts`](source/src/services/mcp/xaa.ts)                                           | 两跳换票（id_token → ID-JAG → access_token）、三道防混淆闸 | [✅ 511 → 812 行](annotated/src/services/mcp/xaa.ts)                         |
-| [`src/services/mcp/xaaIdpLogin.ts`](source/src/services/mcp/xaaIdpLogin.ts)                           | 一次浏览器弹窗、id_token 按 issuer 缓存、OIDC 发现的两个 URL 坑 | [✅ 487 → 709 行](annotated/src/services/mcp/xaaIdpLogin.ts)                 |
-| [`src/services/mcp/useManageMCPConnections.ts`](source/src/services/mcp/useManageMCPConnections.ts)   | 异步事件 → AppState 的适配层、16ms 批处理、stale 清理三条引线    | [✅ 1,141 → 1,631 行](annotated/src/services/mcp/useManageMCPConnections.ts) |
-| [`src/services/api/errors.ts`](source/src/services/api/errors.ts) | **错误怎么变成一条 assistant 消息**、`NO_RESPONSE_REQUESTED` 哨兵 | [✅ 1,207 → 1,467 行](annotated/src/services/api/errors.ts) |
-| [`src/services/api/client.ts`](source/src/services/api/client.ts) | 四级 region 优先级、SDK logger 全走 stderr、凭据不出本机 | [✅ 389 → 583 行](annotated/src/services/api/client.ts) |
-| [`src/services/api/logging.ts`](source/src/services/api/logging.ts) | 七个 AI 网关靠响应头前缀识别、`_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` | [✅ 788 → 988 行](annotated/src/services/api/logging.ts) |
-| [`src/services/api/filesApi.ts`](source/src/services/api/filesApi.ts) | 把「该不该重试」变成返回值、`normalize` 后判 `..` 防穿越 | [✅ 748 → 889 行](annotated/src/services/api/filesApi.ts) |
-| [`src/services/api/promptCacheBreakDetection.ts`](source/src/services/api/promptCacheBreakDetection.ts) | 缓存为什么碎、只追 5 个前缀、MCP 名脱敏 | [✅ 727 → 925 行](annotated/src/services/api/promptCacheBreakDetection.ts) |
-| [`src/services/api/sessionIngress.ts`](source/src/services/api/sessionIngress.ts) | 链式追加 + 乐观并发 + **409 和解** | [✅ 514 → 618 行](annotated/src/services/api/sessionIngress.ts) |
-| [`src/services/tools/toolExecution.ts`](source/src/services/tools/toolExecution.ts) | 一次工具调用的九道关、两个 `felt stuck` 阈值 | [✅ 1,745 → 1,905 行](annotated/src/services/tools/toolExecution.ts) |
-| [`src/services/tools/toolHooks.ts`](source/src/services/tools/toolHooks.ts) | **钩子 `allow` 不绕过 `settings.json` 的 deny** | [✅ 650 → 751 行](annotated/src/services/tools/toolHooks.ts) |
-| [`src/services/tools/StreamingToolExecutor.ts`](source/src/services/tools/StreamingToolExecutor.ts) | 并发 = 多个交错 pass，`status='executing'` 当互斥量 | [✅ 530 → 649 行](annotated/src/services/tools/StreamingToolExecutor.ts) |
-| [`src/services/tools/toolOrchestration.ts`](source/src/services/tools/toolOrchestration.ts) | 并发批怎么分批、`contextModifier` 为什么必须按序回放 | [✅ 188 → 284 行](annotated/src/services/tools/toolOrchestration.ts) |
-| [`src/services/lsp/LSPClient.ts`](source/src/services/lsp/LSPClient.ts) | **`spawn()` 返回 ≠ 启动成功**（ENOENT 是异步事件） | [✅ 447 → 653 行](annotated/src/services/lsp/LSPClient.ts) |
-| [`src/services/lsp/LSPServerManager.ts`](source/src/services/lsp/LSPServerManager.ts) | 三张 Map 对应三种问题；声明不支持、server 照样发请求 | [✅ 420 → 583 行](annotated/src/services/lsp/LSPServerManager.ts) |
-| [`src/services/lsp/LSPServerInstance.ts`](source/src/services/lsp/LSPServerInstance.ts) | `-32801 ContentModified` 可重试、僵尸状态、129KB 延迟加载 | [✅ 511 → 672 行](annotated/src/services/lsp/LSPServerInstance.ts) |
-| [`src/services/lsp/LSPDiagnosticRegistry.ts`](source/src/services/lsp/LSPDiagnosticRegistry.ts) | 跨轮去重靠 LRU(500)；「先标记再删」必须放在可能失败的步骤之后 | [✅ 386 → 521 行](annotated/src/services/lsp/LSPDiagnosticRegistry.ts) |
-| [`src/services/lsp/passiveFeedback.ts`](source/src/services/lsp/passiveFeedback.ts) | 缺失 severity 默认 `Error`（漏报比误报贵） | [✅ 328 → 465 行](annotated/src/services/lsp/passiveFeedback.ts) |
-| [`src/services/lsp/manager.ts`](source/src/services/lsp/manager.ts) | 四态 + generation counter；issue #15521：memoize + 早期调用 + 缺刷新路径 | [✅ 289 → 417 行](annotated/src/services/lsp/manager.ts) |
-| [`src/services/lsp/config.ts`](source/src/services/lsp/config.ts) | 「LSP 只能通过插件配置」= 安全边界 | [✅ 79 → 140 行](annotated/src/services/lsp/config.ts) |
-| [`src/services/SessionMemory/sessionMemory.ts`](source/src/services/SessionMemory/sessionMemory.ts) | 后台子代理记笔记；**读文件必须发生在隔离 context** | [✅ 495 → 747 行](annotated/src/services/SessionMemory/sessionMemory.ts) |
-| [`src/services/SessionMemory/prompts.ts`](source/src/services/SessionMemory/prompts.ts) | 模板斜体行是给模型看的字段说明；「不许改」说三遍 | [✅ 324 → 482 行](annotated/src/services/SessionMemory/prompts.ts) |
-| [`src/services/SessionMemory/sessionMemoryUtils.ts`](source/src/services/SessionMemory/sessionMemoryUtils.ts) | 15s 等待上限 / 60s 判僵死；阈值用增量而非绝对值 | [✅ 207 → 319 行](annotated/src/services/SessionMemory/sessionMemoryUtils.ts) |
-| [`src/services/oauth/client.ts`](source/src/services/oauth/client.ts) | 刷新与 5 分钟缓冲、**一次「省 7M 请求/天」的优化差点让订阅类型永久丢失** | [✅ 566 → 744 行](annotated/src/services/oauth/client.ts) |
-| [`src/services/oauth/auth-code-listener.ts`](source/src/services/oauth/auth-code-listener.ts) | 延迟响应（攥着 `res` 等 token 换完）、判路径防 favicon 打断 | [✅ 211 → 315 行](annotated/src/services/oauth/auth-code-listener.ts) |
-| [`src/services/oauth/index.ts`](source/src/services/oauth/index.ts) | 浏览器内/外两条路径赛跑收敛成一个 Promise | [✅ 198 → 323 行](annotated/src/services/oauth/index.ts) |
-| [`src/services/oauth/crypto.ts`](source/src/services/oauth/crypto.ts) | PKCE 三块拼图，base64URL 三次替换 | [✅ 23 → 86 行](annotated/src/services/oauth/crypto.ts) |
-| [`src/services/mcp/MCPConnectionManager.tsx`](source/src/services/mcp/MCPConnectionManager.tsx) | **React Compiler 编译产物怎么读**：`_c(6)` 缓存槽、`t0` 临时名 | [✅ 73 → 236 行](annotated/src/services/mcp/MCPConnectionManager.tsx) |
-| [`src/services/analytics/growthbook.ts`](source/src/services/analytics/growthbook.ts) | **引擎**：`processRemoteEvalPayload` 的 `{}` 真值判据（漏检查会让所有开关集体黑屏）；`syncRemoteEvalToDisk` 只在成功路径调用（超时投毒结构上不可能）；`checkGate_CACHED_OR_BLOCKING` 的 stale-while-false-blocking；整文件 `@deprecated` 记录从 Statsig 迁到 GrowthBook | [✅ 1,155 → 1,240 行](annotated/src/services/analytics/growthbook.ts) |
-| [`src/services/analytics/metadata.ts`](source/src/services/analytics/metadata.ts) | 所有遥测字段的单一事实来源；`to1PEventFormat` 用 proto 生成类型让「漏字段」从运行时 bug 变编译错误；`account_id` 故意省略只填 UUID | [✅ 973 → 1,045 行](annotated/src/services/analytics/metadata.ts) |
-| [`src/services/analytics/firstPartyEventLoggingExporter.ts`](source/src/services/analytics/firstPartyEventLoggingExporter.ts) | 跨进程重启的失败事件恢复（BATCH_UUID+sessionId 隔离）；二次方退避（base*attempts²）；401 退化为无 auth 重试；`_PROTO_*` hoist 到 proto 字段后再防御性 strip | [✅ 806 → 880 行](annotated/src/services/analytics/firstPartyEventLoggingExporter.ts) |
-| [`src/services/analytics/firstPartyEventLogger.ts`](source/src/services/analytics/firstPartyEventLogger.ts) | OTel logs SDK；自建独立 LoggerProvider 不与客户遥测混；`reinitialize` 三步走（null→forceFlush→swap）的事件丢失安全 | [✅ 449 → 512 行](annotated/src/services/analytics/firstPartyEventLogger.ts) |
-| [`src/services/analytics/datadog.ts`](source/src/services/analytics/datadog.ts) | pub 公开 token 写死在客户端（只写不读）；44 事件白名单 + 二次基数归一（mcp→mcp / 罕见模型→other）；`getUserBucket` 用 sha256 mod 30 代替真实 user id 计数 | [✅ 307 → 364 行](annotated/src/services/analytics/datadog.ts) |
-| [`src/services/analytics/index.ts`](source/src/services/analytics/index.ts) | 零依赖防循环；`AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS` 用命名做 lint；`eventQueue` + `queueMicrotask` 先消费后连接，不阻塞启动 | [✅ 173 → 210 行](annotated/src/services/analytics/index.ts) |
-| [`src/services/analytics/sink.ts`](source/src/services/analytics/sink.ts) | 路由中枢；`shouldTrackDatadog` 三层回退（killswitch→模块态→跨 session 磁盘缓存）；`stripProtoFields` 只在非 1P 后端前调一次守 PII 边界 | [✅ 114 → 146 行](annotated/src/services/analytics/sink.ts) |
-| [`src/services/analytics/config.ts`](source/src/services/analytics/config.ts) | `isAnalyticsDisabled` 五条件一刀切；`isFeedbackSurveyDisabled` 故意不挡 3P 云（本地 UI 弹窗无 transcript） | [✅ 38 → 59 行](annotated/src/services/analytics/config.ts) |
-| [`src/services/analytics/sinkKillswitch.ts`](source/src/services/analytics/sinkKillswitch.ts) | `tengu_frond_boric` 熔断；fail-open；绝不能从 `is1PEventLoggingEnabled` 内调用（会递归爆栈） | [✅ 25 → 42 行](annotated/src/services/analytics/sinkKillswitch.ts) |
-
-> **`src/services/` 做到哪了**：全目录 **130 个文件 / 53,683 行，已 100% 批注完成**。
-> `api/`（20/20）、`compact/`（11/11）、`mcp/`（23/23）、`lsp/`（7/7）、`oauth/`（5/5）、
-> `tools/`（4/4）、`SessionMemory/`（3/3）、`analytics/`（9/9）、`teamMemorySync/`（5/5）、`PromptSuggestion/`（2/2）、`plugins/`（3/3）、`remoteManagedSettings/`（5/5）、`extractMemories/`（2/2）、`tips/`（3/3）、`settingsSync/`（2/2）、`autoDream/`（4/4）、`MagicDocs/`（2/2）、`policyLimits/`（2/2）、`AgentSummary/`（1/1）、`toolUseSummary/`（1/1）**二十个子目录全部清零**，根目录 **6 份散件**（`voice*.ts` 3 份、`vcr.ts`、`diagnosticTracking.ts`、`rateLimitMessages.ts`、`rateLimitMocking.ts`、`preventSleep.ts`、`notifier.ts`、`awaySummary.ts`、`internalLogging.ts`、`mcpServerApproval.tsx`、`claudeAiLimitsHook.ts`）也已完成。
-> 逐份清单与「接下来读什么」见
-> [索引与进度 · 第 6 步](annotated-索引与进度.md#第-6-步服务层做到哪了全目录清零-130130)。
-> `services/` 清零**不等于全仓完成**——`src/` 还有 1,594 份没动（按行数 19%）。
+| 子目录 | 读什么（代表） | 学什么 |
+| --- | --- | --- |
+| `mcp/` | [`client.ts`](source/src/services/mcp/client.ts) · [`config.ts`](source/src/services/mcp/config.ts) · [`auth.ts`](source/src/services/mcp/auth.ts) | 七种 transport、配置优先级、OAuth / XAA 流程 |
+| `compact/` | [`autoCompact.ts`](source/src/services/compact/autoCompact.ts) · [`compact.ts`](source/src/services/compact/compact.ts) | 长对话怎么压缩、四道抑制闸门 |
+| `lsp/` | [`LSPClient.ts`](source/src/services/lsp/LSPClient.ts) · [`manager.ts`](source/src/services/lsp/manager.ts) | 语言服务器协议接入 |
+| `oauth/` | [`client.ts`](source/src/services/oauth/client.ts) · [`index.ts`](source/src/services/oauth/index.ts) | 登录与令牌刷新 |
+| `analytics/` | [`growthbook.ts`](source/src/services/analytics/growthbook.ts) · [`metadata.ts`](source/src/services/analytics/metadata.ts) | 开关引擎、遥测字段单一事实来源 |
+| `SessionMemory/` | [`sessionMemory.ts`](source/src/services/SessionMemory/sessionMemory.ts) | 后台子代理记笔记 |
+| 根目录散件 | `voice*.ts` · `vcr.ts` · `notifier.ts` 等 | 各类独立能力 |
 
 **对应章节**：[07 服务层详解](docs/07-服务层详解.md)、[11 上下文压缩](docs/11-上下文压缩.md)
 
-**目标**：知道"功能后端"都有哪些能力，需要哪个查哪个。
+**目标**：知道「功能后端」都有哪些能力，需要哪个查哪个。
 
 ---
 
 ### 第 7 步：UI 与多智能体（可选）
 
-> 📁 本节源码：[`src/commands/agents/agents.tsx`](source/src/commands/agents/agents.tsx)
-
-| 读什么                                                                                 | 学什么                  | 批注版                                                              |
-| ----------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------- |
-| [`src/coordinator/coordinatorMode.ts`](source/src/coordinator/coordinatorMode.ts)   | 多智能体编排的模式开关 + 协调者提示词 | [369 → 632 行](annotated/src/coordinator/coordinatorMode.ts) ✅    |
-| [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx)     | 派活的十道检查、两套执行路径       | [1,397 → 2,793 行](annotated/src/tools/AgentTool/AgentTool.tsx) ✅ |
-| [`src/tools/AgentTool/prompt.ts`](source/src/tools/AgentTool/prompt.ts)             | agent 清单注入策略、简报写法    | [287 → 601 行](annotated/src/tools/AgentTool/prompt.ts) ✅         |
-| [`src/tools/AgentTool/forkSubagent.ts`](source/src/tools/AgentTool/forkSubagent.ts) | fork：共享缓存的自我复制       | [210 → 559 行](annotated/src/tools/AgentTool/forkSubagent.ts) ✅   |
-| [`src/ink/`](source/src/ink/) 渲染内核                                                  | 终端界面怎么画（见第 8 步）      | ✅ 全部 96 份                                                        |
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/coordinator/coordinatorMode.ts`](source/src/coordinator/coordinatorMode.ts) | 多智能体编排的模式开关 + 协调者提示词 | [✅](annotated/src/coordinator/coordinatorMode.ts) |
+| [`src/tools/AgentTool/AgentTool.tsx`](source/src/tools/AgentTool/AgentTool.tsx) | 派活的十道检查、两套执行路径 | [✅](annotated/src/tools/AgentTool/AgentTool.tsx) |
+| [`src/tools/AgentTool/prompt.ts`](source/src/tools/AgentTool/prompt.ts) | agent 清单注入策略、简报写法 | [✅](annotated/src/tools/AgentTool/prompt.ts) |
+| [`src/tools/AgentTool/forkSubagent.ts`](source/src/tools/AgentTool/forkSubagent.ts) | fork：共享缓存的自我复制 | [✅](annotated/src/tools/AgentTool/forkSubagent.ts) |
 
 **对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)、[10 子智能体与计划模式](docs/10-子智能体与计划模式.md)
 
@@ -313,7 +204,37 @@
 
 1. **理解不可外包** —— 协调者提示词里最硬的一条是禁止写「based on your findings」。因为多智能体的失败模式几乎全是「协调者偷懒」：把思考推给下属、把判断推给时间、把结果推给想象。
 2. **缓存的判据是字节，不是语义** —— fork 之所以便宜，是因为它的请求前缀和父进程逐字节相同。所以它宁可继承一份「教自己 fork」的错误提示词，也不肯换掉系统提示词（换了就全废）。
-3. **动态内容一律往后放** —— agent 清单原本内联在工具描述里，成了全公司缓存创建开销的 10.2%。挪到消息流末尾之后归零。同一个手法在 `prompts.ts`（动态边界标记）和 `claude.ts`（deferred_tools_delta）里各出现一次。
+3. **动态内容一律往后放** —— agent 清单原本内联在工具描述里，成了全公司缓存创建开销的 10.2%。挪到消息流末尾之后归零。
+
+---
+
+### 第 8 步：终端渲染器（进阶，可选）
+
+`src/ink/` 是**自己实现**的 Ink（不是官方 npm 包）：把 React 组件树画到终端格子上的整套内核，1.98 万行。**全部 96 个文件已批注完成**。它是这个仓库里唯一一处「和业务无关、纯基础设施」的代码，也是最能学到东西的一处——因为终端是一个比浏览器苛刻得多的渲染目标：没有 DOM、没有排版引擎、没有像素，只有一张 `rows × cols` 的字符格子，以及一串带状态的转义序列。
+
+| 读什么 | 学什么 | 批注版 |
+| --- | --- | --- |
+| [`src/ink/reconciler.ts`](source/src/ink/reconciler.ts) | React 19 自定义 renderer：host config 把 mutation 语义翻译成树操作 | [✅](annotated/src/ink/reconciler.ts) |
+| [`src/ink/dom.ts`](source/src/ink/dom.ts) | 七个元素名的极简 DOM、yoga 桥、文本测量、脏标记冒泡 | [✅](annotated/src/ink/dom.ts) |
+| [`src/ink/ink.tsx`](source/src/ink/ink.tsx) | 帧循环九阶段、双缓冲、diff 与优化、光标定位、终端模式、退出清理 | [✅](annotated/src/ink/ink.tsx) |
+| [`src/ink/screen.ts`](source/src/ink/screen.ts) | 打包格子（2 个 int 装一格）、样式池、宽字符四态、blit/shift/clear | [✅](annotated/src/ink/screen.ts) |
+| [`src/ink/render-node-to-output.ts`](source/src/ink/render-node-to-output.ts) | 沿树做 blit / 清空 / 重画三选一；ScrollBox 三遍渲染 | [✅](annotated/src/ink/render-node-to-output.ts) |
+| [`src/ink/output.ts`](source/src/ink/output.ts) | 一帧的操作队列：七种操作、Clip 栈、grapheme 聚类 | [✅](annotated/src/ink/output.ts) |
+| [`src/ink/styles.ts`](source/src/ink/styles.ts) | 两套类型（字 / 盒子）与九个 apply | [✅](annotated/src/ink/styles.ts) |
+| [`src/ink/termio/`](source/src/ink/termio/) | 终端转义序列解析（ansi / csi / dec / esc / sgr / tokenize / parser / osc） | 全部已批注 |
+
+**对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)
+
+**目标**：理解「终端 UI 为什么能像 GUI 一样增量更新」，以及那些看起来古怪的代码（`?1049h`、`unref()`、`writeSync`）各自在防什么。
+
+**二十一份核心读完之后，最值得带走的六条**：
+
+1. **终端里没有排版引擎，文字尺寸得自己算。** yoga 只管盒子，不识字宽，所以 `<Text>` 挂了一个 measure 回调（`dom.ts`），yoga 布局时问它「给这么宽你要多高」。这一个回调决定了为什么 `<Text>` 里不能放 `<Box>`、为什么裸字符串必须包在 `<Text>` 里。
+2. **终端的 diff 是「两份屏幕缓冲之间的最小写入序列」。** 每帧画出一整屏格子，和上一帧逐格比较，只写变化的格子。这套机制的前提是「我们对屏幕状态的认知与物理终端一致」——而外部世界一直在破坏这个前提（tmux 重画、睡眠、SSH 断线），所以 `ink.tsx` 里一半的复杂度都是在把失步拉回来。
+3. **一个格子只用 8 字节，而且「空」就是全 0。** `screen.ts` 把所有格子放进一条 `Int32Array`（每格两个 int），`ArrayBuffer` 分配即零填充，于是「没写过」天然等于「空格 + 无样式 + 窄 + 无链接」。
+4. **性能优化全在「凭什么敢跳过」上。** 每处跳过都是一个断言，而断言总会被打破。读这个目录的正确姿势不是「它做了什么」，而是「它在什么条件下允许自己什么都不做」。
+5. **同一个语义在不同终端上要发不同的字节。** `colorize.ts` 只 232 行，但承载了两个真实世界的适配：VS Code 系降级到 6×6×6 色立方（Claude 橙变肉粉）、tmux 转发时默认丢背景色。
+6. **退出路径比正常路径更难写对。** `unmount()` 里那一串 `writeSync` 不是保守，是必需：`process.exit()` 会丢弃异步写，漏掉一条复位序列的后果是用户回到 shell 后打字看不见。
 
 ---
 
@@ -332,18 +253,22 @@
    ↓
 第6步 服务层      mcp / compact / lsp / oauth            [半天]
    ↓
-第7步 多智能体    coordinator / AgentTool / fork         [可选] ✅ 已批注
+第7步 多智能体    coordinator / AgentTool / fork         [可选]
+   ↓
+第8步 终端渲染    ink/ 渲染内核                          [可选]
 ```
 
 ---
 
+## 阅读技巧
+
 ### 三个高效阅读习惯
 
-| 习惯                       | 做法                                    | 为什么有效                 |
-| ------------------------ | ------------------------------------- | --------------------- |
-| **先看 import**            | 每个文件先扫头部 import                       | 一眼看出它依赖谁、属于哪一层        |
-| **先找 "source of truth"** | 找注释里的 these are all / source of truth | 大项目都有"唯一真相来源"，抓住它就不迷路 |
-| **跳过埋点**                 | 看到 `tengu_`、`logEvent` 直接跳            | 那是内部监控，和理解逻辑无关        |
+| 习惯 | 做法 | 为什么有效 |
+| --- | --- | --- |
+| **先看 import** | 每个文件先扫头部 import | 一眼看出它依赖谁、属于哪一层 |
+| **先找 "source of truth"** | 找注释里的 these are all / source of truth | 大项目都有「唯一真相来源」，抓住它就不迷路 |
+| **跳过埋点** | 看到 `tengu_`、`logEvent` 直接跳 | 那是内部监控，和理解逻辑无关 |
 
 ### 看不懂时的排查顺序
 
@@ -351,30 +276,24 @@
 2. **是不是内部专用代码？** —— 看到 `USER_TYPE === 'ant'` 就是 Anthropic 内部员工专用，跳过。
 3. **是不是埋点 / 遥测？** —— `tengu_` 开头的事件名，跳过。
 4. **是不是类型体操？** —— 超长的类型名（如 `AnalyticsMetadata_I_VERIFIED_...`）是安全标记，不是逻辑。
-5. **回到入口重走一遍** —— 从 `tools.ts` / `commands.ts` / `query.ts` 这三个"总闸"重新出发。
+5. **回到入口重走一遍** —— 从 `tools.ts` / `commands.ts` / `query.ts` 这三个「总闸」重新出发。
 
 ### 常用全局搜索（在 `source/` 里搜）
 
-> 📁 本节源码：[`src/commands.ts`](source/src/commands.ts)
-
-| 想找什么    | 搜什么                                               |
-| ------- | ------------------------------------------------- |
-| 所有工具    | `getAllBaseTools`                                 |
-| 所有命令    | [`src/commands.ts`](source/src/commands.ts) 里的注册表 |
-| 构建期开关   | `feature(`                                        |
-| 系统提示词片段 | `systemPromptSection`                             |
-| 内部埋点    | `tengu_`                                          |
-| 权限判定    | `hasPermissionsToUseTool`                         |
-| 主循环     | `while (true)` / `queryLoop`                      |
-| MCP 连接  | `StdioClientTransport`                            |
+| 想找什么 | 搜什么 |
+| --- | --- |
+| 所有工具 | `getAllBaseTools` |
+| 所有命令 | [`src/commands.ts`](source/src/commands.ts) 里的注册表 |
+| 构建期开关 | `feature(` |
+| 系统提示词片段 | `systemPromptSection` |
+| 内部埋点 | `tengu_` |
+| 权限判定 | `hasPermissionsToUseTool` |
+| 主循环 | `while (true)` / `queryLoop` |
+| MCP 连接 | `StdioClientTransport` |
 
 ### 如果你只想学一件事
 
-> 📁 本节源码：[`src/query.ts`](source/src/query.ts)
-
-如果你时间有限，只想学"AI Agent 到底怎么工作"，那么：
-
-> **只读 [`src/query.ts`](source/src/query.ts) 的 `queryLoop()` 里那个 `while(true)`。**
+> 如果你时间有限，只想学「AI Agent 到底怎么工作」，那么：**只读 [`src/query.ts`](source/src/query.ts) 的 `queryLoop()` 里那个 `while(true)`。**
 
 它是所有 Agent 框架（LangChain、AutoGPT、Claude Code、Cursor）的共同本质：
 
@@ -396,40 +315,18 @@ while (true) {
 ```
 D:\CC泄露源码分析\
 ├── README.md                  ← 你正在看的这份：主索引 + 学习路线
-├── docs\                      ← 15 篇专题分析（本手册正文）
-│   ├── 01-项目总览与架构.md
-│   ├── 02-目录结构中英对照.md
-│   ├── 03-启动流程.md
-│   ├── 04-工具系统.md
-│   ├── 05-提示词与命令.md
-│   ├── 06-对话主循环与模型调用.md
-│   ├── 07-服务层详解.md
-│   ├── 08-权限与安全.md
-│   ├── 09-配置系统.md
-│   ├── 10-子智能体与计划模式.md
-│   ├── 11-上下文压缩.md
-│   ├── 12-UI与多智能体.md
-│   ├── 13-中英文术语对照.md
-│   ├── 14-底层运行时与基础设施.md
-│   └── 15-常量·技能与伙伴系统.md
+├── docs\                      ← 专题分析（本手册正文，00–15 篇）
 ├── annotated\                 ← 中文批注版代码（学习时读这份）
 │   ├── README.annotated.md
 │   ├── package.json.annotated.md
-│   └── src\
-│       ├── commands\clear\index.ts
-│       ├── entrypoints\cli.tsx
-│       ├── setup.ts
-│       ├── Tool.ts
-│       ├── tools.ts
-│       └── tools\BashTool\  BashTool.tsx · bashSecurity.ts · bashPermissions.ts · commandSemantics.ts
-├── annotated-索引与进度.md      ← 批注约定 + 进度表 + 自测题
-├── scripts\
+│   └── src\                   ← 与 source/src 同路径的批注镜像
+├── annotated-索引与进度.md      ← 批注约定 + 进度表 + 自测题（详细进度看这里）
+├── scripts\                   ← 批注注入与校验工具
 │   ├── annotate.py            ← 按行号注入批注，生成 annotated/ 镜像
 │   ├── check-fidelity.py      ← 校验批注版没改动原文任何一行
 │   └── check-links.py         ← 校验所有链接是否有效
 ├── source\                    ← 克隆的完整源码（仓库根）
 │   ├── package.json           ← 分析对象之一（根目录共 7 个文件）
-│   ├── cli.js  bun.lock  LICENSE.md  README.md  cli.js.map  sdk-tools.d.ts
 │   ├── node_modules\ · vendor\ ← 依赖与第三方代码（不分析）
 │   └── src\                   ← 分析对象主体，1902 个文件
 └── .backup\                   ← 大改造前的备份（可删）
@@ -443,23 +340,6 @@ D:\CC泄露源码分析\
 
 原版源码的英文注释没有中文，读起来费劲。所以另做了一套**批注版**：英文注释一字不删，每段下方紧跟中文对照。
 
-```
-annotated/                        ← 只放与 source/ 同路径的文件
-├── README.annotated.md           ← 仓库自带 README 的中英对照
-├── package.json.annotated.md     ← JSON 不能写注释，改用逐条讲解
-└── src/
-    ├── entrypoints/cli.tsx       ← 全 302 行，逐段「译 / 注」
-    ├── setup.ts                  ← 全 477 行，启动编排的完整批注
-    ├── Tool.ts                   ← 全 792 行，工具契约的逐字段批注
-    ├── tools.ts                  ← 全 389 行，工具户口本（45 个工具 + 两套条件加载）
-    ├── commands/clear/index.ts   ← 19 行，斜杠命令的最小模板
-    └── tools/BashTool/
-        ├── BashTool.tsx          ← 全 1,143 行，最复杂的工具实现
-        ├── bashSecurity.ts       ← 全 2,592 行，22 个危险检测的编排
-        ├── bashPermissions.ts    ← 全 2,621 行，权限裁决（895 行主函数）
-        └── commandSemantics.ts   ← 退出码语义判定表
-```
-
 **路径规则只有一条**：把路径第一段的 `source` 换成 `annotated`，其余一字不动。
 
 ```
@@ -470,87 +350,22 @@ source/README.md                    →  annotated/README.annotated.md
 
 只有两个例外，都带 `.annotated.md` 后缀：`package.json` 是因为 JSON 写不了注释；`README.md` 是为了不和本文件（手册主索引）同名不同物。导航类文件（[`annotated-索引与进度.md`](annotated-索引与进度.md)）和校验脚本都放在 `annotated/` 外面，所以 `annotated/` 里看到的每个文件都能在 `source/` 里找到同名对应物。
 
-另外要清楚：**`annotated/` 不是 `source/` 的全量副本**。`source/src` 有 1902 个文件，这里只批注学习路线走到的那些，其余仍在 `source/` 里按原样读。
+> 注意：**`annotated/` 不是 `source/` 的全量副本**。`source/src` 有 1902 个文件，这里只批注学习路线走到的那些，其余仍在 `source/` 里按原样读。
 
 标注方式只有四种，一眼能分清：
 
-| 标记                | 含义            |
-| ----------------- | ------------- |
-| 原文                | 英文原注释，一个字都没删  |
-| `// 译：`           | 紧跟英文之后，直译     |
-| `// 注：`           | 额外补充的解释（原文没有） |
-| `// ── N. xxx ──` | 段落分隔，方便定位     |
+| 标记 | 含义 |
+| --- | --- |
+| 原文 | 英文原注释，一个字都没删 |
+| `// 译：` | 紧跟英文之后，直译 |
+| `// 注：` | 额外补充的解释（原文没有） |
+| `// ── N. xxx ──` | 段落分隔，方便定位 |
 
-**为什么另开目录而不直接改 `source/`**：插中文行会让后面所有行号下移，正文里 225 处链接、48 个精确行号锚点就全废了。所以 `source/` 永远是行号基准，`annotated/` 才是学习时读的那份。
+**为什么另开目录而不直接改 `source/`**：插中文行会让后面所有行号下移，正文里大量链接、精确行号锚点就全废了。所以 `source/` 永远是行号基准，`annotated/` 才是学习时读的那份。
 
 **行号口径**：批注正文里出现的「第 N 行」一律指 **`source/` 里的原始行号**。想核对就在 `source/` 下打开对应文件；批注版里的实际位置会靠后（因为前面插了注释），但批注就贴在它解释的那段代码上方，不需要靠行号导航。
 
-**怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有三条结构判据：块注释内部不许有中文、多行模板字符串内部不许有中文（否则中文会变成字符串内容，直接进提示词）、批注不许插在未结束的多行表达式中间。还有一类更隐蔽的破坏由 `annotate.py` 结构性拦截：`//` 连续注释也成段，锚点落在段中部会把一句英文从中间剪断（语法合法、注释一行不少，只是读起来断了）—— 现在 `before` 自动挪段首、`after` 自动挪段尾。
-
-判定「哪里在模板字符串内部」靠两个脚本各一份的**状态栈词法扫描器**（code / tpl / expr / block 四态）。它取代了最早的单个布尔量，因为那个版本会被两种写法骗过去：`${cond ? '...(with a \`subagent_type\`)...' : ''}`（模板表达式里的字符串含反引号）和块注释里的 `` `)` ``（`bashSecurity.ts\` 第 472 行）。前者会**误报**（一段正常批注被判成模板内部），后者会**漏报**（真插进模板的批注被放过）—— 两种错误都让校验失去意义，所以扫描器本身也得写对。
-
----
-
-
-### 第 8 步：终端渲染器（进阶，可选）
-
-`src/ink/` 是**自己实现**的 Ink（不是官方 npm 包）：把 React 组件树画到终端格子上的整套内核，1.98 万行。它是这个仓库里唯一一处「和业务无关、纯基础设施」的代码，也是最能学到东西的一处 —— 因为终端是一个比浏览器苛刻得多的渲染目标：没有 DOM、没有排版引擎、没有像素，只有一张 `rows × cols` 的字符格子，以及一串带状态的转义序列。
-
-| 读什么                                                                           | 学什么                                                                    | 批注版                                                             |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [`src/ink/reconciler.ts`](source/src/ink/reconciler.ts)                       | React 19 自定义 renderer：host config 把 React 的 mutation 语义翻译成树操作          | [✅ 512 → 727 行](annotated/src/ink/reconciler.ts)                |
-| [`src/ink/dom.ts`](source/src/ink/dom.ts)                                     | 七个元素名的极简 DOM、yoga 桥、文本测量、脏标记冒泡                                         | [✅ 484 → 685 行](annotated/src/ink/dom.ts)                       |
-| [`src/ink/ink.tsx`](source/src/ink/ink.tsx)                                   | 帧循环九阶段、双缓冲、diff 与优化、光标定位、终端模式、退出清理                                     | [✅ 1,722 → 2,470 行](annotated/src/ink/ink.tsx)                  |
-| [`src/ink/screen.ts`](source/src/ink/screen.ts)                               | 打包格子（2 个 int 装一格）、样式池用 ID 最低位当标签、宽字符四态、blit/shift/clear、两帧 diff        | [✅ 1,486 → 2,167 行](annotated/src/ink/screen.ts)                |
-| [`src/ink/render-node-to-output.ts`](source/src/ink/render-node-to-output.ts) | 沿树走一遍做 blit / 清空 / 重画三选一；ScrollBox 的三遍渲染与 DECSTBM 快路径                  | [✅ 1,462 → 2,180 行](annotated/src/ink/render-node-to-output.ts) |
-| [`src/ink/log-update.ts`](source/src/ink/log-update.ts)                       | 两帧之间到底发什么字节：全量重置的四种触发、逐格补丁、虚拟光标模型                                      | [✅ 773 → 1,193 行](annotated/src/ink/log-update.ts)              |
-| [`src/ink/output.ts`](source/src/ink/output.ts)                               | 一帧的**操作队列**：七种操作、Clip 栈的现场求交、grapheme 聚类、单行写入与控制字符跳过                   | [✅ 798 → 1,151 行](annotated/src/ink/output.ts)                  |
-| [`src/ink/styles.ts`](source/src/ink/styles.ts)                               | 两套类型（字 / 盒子）与九个 apply：CSS 属性怎么落到 yoga setter，`'x' in style` 与 diff 的语义 | [✅ 772 → 967 行](annotated/src/ink/styles.ts)                    |
-| [`src/ink/colorize.ts`](source/src/ink/colorize.ts)                           | 真彩色的两次降级：VS Code 自报家门不被认识、tmux 转发按别的终端声明做决定                            | [✅ 232 → 372 行](annotated/src/ink/colorize.ts)                  |
-| [`src/ink/stringWidth.ts`](source/src/ink/stringWidth.ts)                     | 整台渲染器的尺子：四级快路径、零宽字符表、emoji 宽度、Bun 与 JS 实现的 1 vs 2                      | [✅ 223 → 413 行](annotated/src/ink/stringWidth.ts)               |
-| [`src/ink/Ansi.tsx`](source/src/ink/Ansi.tsx)                                 | **React Compiler 的编译产物**该怎么读，以及 ANSI 字符串 → 组件树的语义降维                    | [✅ 292 → 504 行](annotated/src/ink/Ansi.tsx)                     |
-| [`src/ink/termio/ansi.ts`](source/src/ink/termio/ansi.ts)                     | 整层的字母表：C0 表为什么写全 32 个、ESC 尾字节范围为什么比 CSI 宽                              | [✅ 76 → 150 行](annotated/src/ink/termio/ansi.ts)                |
-| [`src/ink/termio/csi.ts`](source/src/ink/termio/csi.ts)                       | 三个字节区间（中间/参数/尾）就是 CSI 的完整语法；`csi()` 的单参数与多参数两副面孔                       | [✅ 320 → 493 行](annotated/src/ink/termio/csi.ts)                |
-| [`src/ink/termio/dec.ts`](source/src/ink/termio/dec.ts)                       | 47 与 1049 的区别、四个鼠标模式为什么一起开、关的时候为什么逆序                                   | [✅ 61 → 119 行](annotated/src/ink/termio/dec.ts)                 |
-| [`src/ink/termio/esc.ts`](source/src/ink/termio/esc.ts)                       | 两字符序列；`null`（已处理无事发生）与 `unknown`（没认出来）两种「空」的差别                         | [✅ 68 → 128 行](annotated/src/ink/termio/esc.ts)                 |
-| [`src/ink/termio/types.ts`](source/src/ink/termio/types.ts)                   | 语义类型；`Grapheme.width` 算了却没人读；页签状态的三态设计（absent / null / 值）              | [✅ 237 → 424 行](annotated/src/ink/termio/types.ts)              |
-| [`src/ink/termio/sgr.ts`](source/src/ink/termio/sgr.ts)                       | 分号与冒号两套语法、`38:2:cs:R:G:B` 的 `off` 偏移、`22` 为什么一对二                       | [✅ 309 → 541 行](annotated/src/ink/termio/sgr.ts)                |
-| [`src/ink/termio/tokenize.ts`](source/src/ink/termio/tokenize.ts)             | 词法层：八个状态、`escape` 分支的判定顺序为什么不能重排、降级时不前移游标                              | [✅ 320 → 564 行](annotated/src/ink/termio/tokenize.ts)           |
-| [`src/ink/termio/parser.ts`](source/src/ink/termio/parser.ts)                 | 语义层：SGR 被拦下来不进 action 流、`?? 1` 与 `?? 0` 两个默认值、只处理第一个模式                 | [✅ 395 → 671 行](annotated/src/ink/termio/parser.ts)             |
-| [`src/ink/termio/osc.ts`](source/src/ink/termio/osc.ts)                       | OSC 全家族：DCS 透传的两套约定、剪贴板三条路、内层为什么选 BEL 而不是 ST                           | [✅ 494 → 879 行](annotated/src/ink/termio/osc.ts)                |
-| [`src/ink/termio.ts`](source/src/ink/termio.ts)                               | 桶文件只导出「读」的一侧，生成函数走深路径                                                  | [✅ 43 → 83 行](annotated/src/ink/termio.ts)                      |
-
-上面这张表是二十一份核心。目录里另外七十五份（`layout/` 四个、`ink/` 根目录其余小件、`events/` 十个、`hooks/` 十二个、`components/` 十八个）也都批注完了 —— 其中 `components/App.tsx`（658 行，stdin 的唯一拥有者）、`ScrollBox.tsx`（237 行，绕过 React 的命令式滚动）、`events/dispatcher.ts`（234 行，捕获/冒泡两阶段）最值得看。**`src/ink/` 96 个文件、19,842 行，一份不剩。**
-
-**三上三下，五个旁支，外加一组解析器**：前六份是一条直线（React 元素 → 布局树 → 屏幕缓冲 → 终端字节），分界线是 `screen.ts` 里的 `Screen` 类型 —— 往上都是「节点和坐标」，往下都是「格子和转义序列」。后五份不在主线上，但每一步都用到：`output.ts` 是 `render-node-to-output` 与 `screen` 之间的操作队列，`styles.ts` 管盒子、`colorize.ts` 管字，`stringWidth.ts` 是整条链的尺子，`Ansi.tsx` 走反方向。
-
-最后十份 `termio/` 是**反方向的那条路**：`Ansi.tsx` 收进来一段带转义序列的字符串，`termio/` 把它拆成结构化事件。读的顺序是 `ansi`（字节表）→ `csi`/`dec`/`esc`（三族序列的常量与生成）→ `tokenize`（切边界）→ `sgr`（样式参数）→ `parser`（拼成 action）→ `osc`（唯一带自由文本负载的一族）。前四个是字典，后四个才是逻辑。
-
-**对应章节**：[12 UI 与多智能体](docs/12-UI与多智能体.md)
-
-**目标**：理解「终端 UI 为什么能像 GUI 一样增量更新」，以及那些看起来古怪的代码（`?1049h`、`unref()`、`writeSync`）各自在防什么。
-
-**二十一份读完之后，最值得带走的六条**：
-
-① **终端里没有排版引擎，文字尺寸得自己算。** yoga 只管盒子，不识字宽。所以 `<Text>` 挂了一个 measure 回调（`dom.ts` 332 行），yoga 布局时问它「给这么宽你要多高」。这一个回调决定了：为什么 `<Text>` 里不能放 `<Box>`（展不平就没法量）、为什么裸字符串必须包在 `<Text>` 里（没有父级就不知道该继承什么样式）、为什么宽字符和 emoji 要单独处理。
-
-而宽度本身在 `stringWidth.ts` 里 —— 这是全仓库调用最频繁的函数（约 10 万次/帧）。它在 Bun 下用 `Bun.stringWidth`、否则退到纯 JS 实现，两者在复杂印度语合字上差了 1 列（1 vs 2）。选 Bun 的理由不只是快，是它的宽度语义与终端的格子分配一致 —— 光标定位要对的不是 Unicode 语义，是终端的格子。
-
-② **终端的 diff 是「两份屏幕缓冲之间的最小写入序列」。** 每帧画出一整屏格子，和上一帧逐格比较，只写变化的格子。这套机制的前提是「我们对屏幕状态的认知与物理终端一致」—— 而外部世界一直在破坏这个前提：tmux 重画状态栏、用户按 Cmd+K、SSH 断线重连、笔记本睡眠。所以 `ink.tsx` 里一半的复杂度（`prevFrameContaminated`、`forceRedraw`、`reassertTerminalModes`、每帧 CSI H 锚定）都是在**把失步拉回来**。
-
-③ **一个格子只用 8 字节，而且「空」就是全 0。** `screen.ts` 把所有格子放进一条 `Int32Array`（每格两个 int），`ArrayBuffer` 分配即零填充，于是「没写过」天然等于「空格 + 无样式 + 窄 + 无链接」—— 前提是 `StylePool.none === 0`、`CharPool` 的第 0 项是空格、`HyperlinkPool` 的第 0 项是「无链接」。三条约定凑齐，`diffEach` 才能拿整数直接比较，不做任何归一化。宽字符不是「渲染时才发现要占两列」，而是**显式写一个占位格**，这样「一格 = 一列」成为可以无条件依赖的不变量。
-
-④ **性能优化全在「凭什么敢跳过」上。** 每处跳过都是一个断言，而断言总会被打破：脏兄弟的溢出会毒化后面所有兄弟的 blit 资格、`display:none` 的子孙 cache 会让内容在取消隐藏后消失、硬件滚动会把绝对定位浮层的像素一起挪走、被裁剪的子节点重进视口时会对着别人的位置发 clear。读这个目录的正确姿势不是「它做了什么」，而是「它在什么条件下允许自己什么都不做」。
-
-⑤ **同一个语义在不同终端上要发不同的字节。** `colorize.ts` 只有 232 行，但承载了两个真实世界的适配：VS Code 系（xterm.js）从 2017 年就支持真彩色，可 `supports-color` 不认识 `TERM_PROGRAM=vscode`，于是降级到 6×6×6 色立方 —— Claude 橙变成发白的肉粉色；tmux 解析真彩色完全正确，但转发时只在外层终端声明 `Tc` 时才重发，默认配置下背景色直接丢掉。两段补丁一个向上提、一个向下压，都不是能力查询，是「环境变量粗判 + 已知失败模式」。
-
-⑥ **退出路径比正常路径更难写对。** `unmount()` 里那一串 `writeSync` 不是保守，是必需：`process.exit()` 会丢弃异步写，而漏掉一条复位序列的后果是用户回到 shell 后打字看不见、Ctrl+C 漏成转义序列。这也是为什么 `detachForShutdown()` 要提前把 `isUnmounted` 置真 —— 宁可少做，也不要重复做（重复发 `?1049l` 会把 resume 提示冲掉）。
-
----
-
-进度：**第 1～3 步已完成**（`package.json` + 仓库 README + `cli.tsx`；`clear/index.ts` + `commandSemantics.ts`；`setup.ts` 全 477 行）；**第 4 步全部完成**（`Tool.ts` 792 + `tools.ts` 389 + `BashTool.tsx` 1,143 + `bashSecurity.ts` 2,592 + `bashPermissions.ts` 2,621，合计 7,537 行原文全批注）；**第 5 步全部完成**（`prompts.ts` 914 + `query.ts` 1,729 + `QueryEngine.ts` 1,295 + `claude.ts` 3,419，合计 7,357 行原文，564 处批注锚点）；**第 6 步完成**（`withRetry.ts` 822 + `src/services/compact/` **全部 11 个文件** 4,864 + `mcp/client.ts` 3,348 + `mcp/config.ts` 1,578 + `mcp/auth.ts` 2,465 + `mcp/xaa.ts` 511 + `mcp/xaaIdpLogin.ts` 487 + `useManageMCPConnections.ts` 1,141 = 15,216 行原文、704 处锚点）；**第 7 步多智能体主线完成**（`coordinatorMode.ts` 369 + `AgentTool.tsx` 1,397 + `prompt.ts` 287 + `forkSubagent.ts` 210，合计 2,263 行原文、133 处锚点）；**第 8 步终端渲染器完成**（`reconciler.ts` 512 + `dom.ts` 484 + `ink.tsx` 1,722 + `screen.ts` 1,486 + `render-node-to-output.ts` 1,462 + `log-update.ts` 773 + `output.ts` 798 + `styles.ts` 772 + `colorize.ts` 232 + `stringWidth.ts` 223 + `Ansi.tsx` 292 + `termio/` 十个文件 2,323 = 11,079 行原文、553 处锚点；**输入侧四份**：`parse-keypress.ts` 802 + `selection.ts` 918 + `hit-test.ts` 131 + `render-border.ts` 232 = 2,083 行原文、117 处锚点；**`mcp/` 其余 16 个小件** 2,708 行原文、80 处锚点；**`ink/` 其余 31 个小件**（根目录 27 个 + `layout/` 四个）2,997 行原文、224 处锚点；**`ink/` 最后 40 个交互原语**（`events/` 10 + `hooks/` 12 + `components/` 18）3,717 行原文、177 处锚点；**第 9 步开了头**：`Messages.tsx` 834 + `MessageRow.tsx` 383 + `Message.tsx` 627 + `messageActions.tsx` 450 = 2,294 行原文、119 处锚点；**输入框整个子目录**：`components/PromptInput/` 全 21 份 5,161 行原文（`PromptInput.tsx` 2,338 + `PromptInputFooterLeftSide.tsx` 516 + `PromptInputHelpMenu.tsx` 357 + `Notifications.tsx` 331 + `PromptInputFooterSuggestions.tsx` 292 + 其余 16 份，含 `IssueFlagBanner.tsx` 这个被构建工具删空的组件）= 235 处锚点；**消息体整个子目录**：`components/messages/` 全 41 份 6,055 行原文（`SystemTextMessage.tsx` 827 + `AttachmentMessage.tsx` 536 + `CollapsedReadSearchContent.tsx` 484 + `AssistantToolUseMessage.tsx` 368 + 其余 37 份，含 `UserToolResultMessage/` 子目录 8 份）= 274 处锚点）。**第 1～8 步主线全部走完，输入输出两个方向闭合，`src/ink/` 清零**：213 个文件、68,501 行原文（批注版 112,528 行）、3,503 处锚点 —— 压缩管线、MCP 四段（配置 → 连接 → 认证 → 企业 SSO）加 UI 接缝、多智能体两条路径、终端渲染的「React 侧 + 绘制侧 + 样式/颜色/宽度 + 转义序列解析」、反方向的「按键/拖选 → 结构化事件 → 同一块屏幕缓冲」、以及 MCP「连接之外的一切」（名字归一化 / 通道六道闸 / 手机审批中继 / elicitation / 动态 header）都闭合了。`src/ink/` 整个目录（96 个文件、19,842 行）到此一份不剩。界面层（`src/components/`，**实测 8.2 万行、389 个文件**）已批注 66 份：消息渲染主链四份 —— `Messages` 管「显示哪些」、`MessageRow` 管「还会不会变」、`Message` 管「怎么画」，三层各有一个 memo、各有一个不变量；消息体整个 `messages/` 子目录 41 份 —— 那些「怎么画」的落点（`UserTextMessage` 十七个 if 顺序即协议、`AssistantTextMessage` 拿文案当判别键、`SystemTextMessage` 十种 subtype 挤一条 if 链、`AttachmentMessage` 四十多个 case），共 274 处锚点；反方向的输入链整个 `PromptInput/` 子目录 —— 按键进 `onChange`、九个高亮触发器按 priority 覆盖、`onSubmit` 是总闸（建议接受 / 推测注入 / @名字走 mailbox / 路由给正在看的 agent / 才到主循环）。剩下的 323 个文件按需再做。
-
-👉 入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
+**怎么保证批注不过界**：`scripts/check-fidelity.py` 会把批注版拆成「代码行 / 注释行 / 批注行」，要求代码行与原文**逐行完全相等**、原文注释**一字不差按序保留**。另外还有结构判据（块注释内部、多行模板字符串内部不许有中文）由 `annotate.py` 结构性拦截，避免中文被误插进代码或提示词字符串。
 
 ---
 
@@ -560,17 +375,15 @@ source/README.md                    →  annotated/README.annotated.md
 
 > 📁 本节源码：[`src/tools.ts`](source/src/tools.ts)
 
-这一行就是该节的"源码索引"：告诉你在读的这段讲解对应哪个文件；有具体片段的，直接给到行号（如 `src/query.ts:263`），点一下打开文件。
-
-全手册共 **225 处**这样的源码链接（跑 `scripts/check-links.py` 可复算），覆盖 **78 个文件**，其中 **48 处精确到行**。有些节涉及同一文件的多个片段，会写成「文件名 — `52-55` · `170-178`」，两个区间分别可点。
+这一行就是该节的「源码索引」：告诉你在读的这段讲解对应哪个文件；有具体片段的，直接给到行号（如 `src/query.ts:263`），点一下打开文件。
 
 跳到**具体行**取决于你用什么打开：
 
-| 打开方式                               | 点链接   | 到具体行             |
-| ---------------------------------- | ----- | ---------------- |
-| VSCode 内置 Markdown 预览              | 打开该文件 | `Ctrl+G` 输行号     |
+| 打开方式 | 点链接 | 到具体行 |
+| --- | --- | --- |
+| VSCode 内置 Markdown 预览 | 打开该文件 | `Ctrl+G` 输行号 |
 | Typora / Markdown Preview Enhanced | 打开该文件 | 直接跳到 `#L362` 那一行 |
-| GitHub 网页                          | 打开该文件 | 直接跳行             |
+| GitHub 网页 | 打开该文件 | 直接跳行 |
 
 最快的定位办法是 **`Ctrl+P` 输路径 → `Ctrl+G` 输行号**：
 
@@ -588,13 +401,17 @@ Ctrl+P → source/src/Tool.ts → 回车 → Ctrl+G → 362 → 回车
 vscode://file/D:/CC泄露源码分析/source/src/Tool.ts:362
 ```
 
-> 代码块的首行注释也标了同一个位置（如 `// src/Tool.ts:362-416`），照抄就能在源码里搜到。少数代码块是"结构简化示意"而非逐行原文，注释里会写明，例如 `permissions.ts:473-956（结构简化示意，真实函数 484 行）`。
+> 代码块的首行注释也标了同一个位置（如 `// src/Tool.ts:362-416`），照抄就能在源码里搜到。少数代码块是「结构简化示意」而非逐行原文，注释里会写明。
 
 ---
 
 ## 完整性说明
 
-- `src/` 下 **1902 个文件**已与 GitHub 官方文件树（`git/trees/main?recursive=1`）**逐条比对，零缺失**。
-- `src/services/` 下 **130 个文件**同样逐条核对，**无缺失、无空壳**（0 行文件数为 0）。
-- 目录文件数统计均来自本地实际克隆，不是估算。
+- `src/` 下 **1,902 个文件**已与 GitHub 官方文件树（`git/trees/main?recursive=1`）**逐条比对，零缺失**。
+- `src/services/` 下 **130 个文件**同样逐条核对，**无缺失、无空壳**。
+- `source/src` 按行数覆盖 **100%** 批注；目录文件数统计均来自本地实际克隆，不是估算。
 - 改了文档后跑 `python scripts/check-links.py` 可复验所有链接（当前：失效 0）。
+
+---
+
+👉 完整进度、批注约定、自测题入口：[`annotated-索引与进度.md`](annotated-索引与进度.md)
