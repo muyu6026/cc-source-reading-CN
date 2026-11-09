@@ -4969,7 +4969,7 @@ yoga 测量叶子节点是**两趟**：`AtMost` 趟问「你至少要多宽」�
 | 派发    | `events/dispatcher.ts` / `emitter.ts`                                                                                    | 一趟收两个方向；React 优先级从哪读        |
 | 事件类   | `input-event.ts` / `keyboard-event.ts` / `click-event.ts` / `focus-event.ts` / `terminal-focus-event.ts`                 | 按键怎么翻译；点击为什么不算 DOM 事件       |
 | 事件表   | `events/event-handlers.ts`                                                                                               | prop 名与事件类型的双向映射（含两处缺口）     |
-| 输入    | `components/App.tsx`（658 行）                                                                                              | stdin 的唯一拥有者：模式宣示、批处理、鼠标状态机 |
+| 输入    | [`components/App.tsx`](annotated/src/components/App.tsx)（658 行）                                                                                              | stdin 的唯一拥有者：模式宣示、批处理、鼠标状态机 |
 | 组件    | `Box.tsx` / `Text.tsx` / `ScrollBox.tsx` / `AlternateScreen.tsx` / `Button.tsx`                                          | 布局容器、文本叶子、命令式滚动、全屏、交互原语     |
 | hooks | `use-input` / `use-selection` / `use-declared-cursor` / `use-terminal-viewport` / `use-animation-frame` / `use-interval` | 订阅的时机、槽位的稳定性、可见性判定          |
 | 杂项    | `Link` / `NoSelect` / `RawAnsi` / `Newline` / `Spacer` / 五个 context                                                      | 各自一个终端特有的坑                  |
@@ -7365,7 +7365,7 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 171 批）：15 个数据文件逐一对齐源文件（52 行档 betas.ts 补入 + 51–44 行档 14 份散件）；预check 178 锚点全过（ast.parse、行界、重复、禁字符、升序、bslot、split、TAIL——修完 7 处 after 落 `=` 首行的 split 后零错零警）；annotate 十五次，3 处良性 `⟳`（注释段边界自动挪移），零 `⚠`；check-fidelity 全仓 1758 份 0 失败（较上批 +15）；check-links 2625 源码链 + 739 内链 0 失效；全仓 1758/1902 文件、510,923/513,237 行、99%（按行数）；`src/` 还剩 144 份 / 约 2,314 行（52 行档已清零，44 行以上全清零，下一档起点 43 行）。
 
-**下一批候选（43→33 行档，单批约 15 份）**：`bridge/bridgePermissionCallbacks.ts`(43) · `migrations/migrateOpusToOpus1m.ts`(43) · `commands/thinkback-play/thinkback-play.ts`(43) · `tasks/LocalShellTask/guards.ts`(41) · `query/deps.ts`(40) · `migrations/migrateBypassPermissionsAcceptedToSettings.ts`(40) · `tasks.ts`(39) · `commands/vim/vim.ts`(38) · `context/mailbox.tsx`(38) · `commands/upgrade/upgrade.tsx`(38) · `buddy/prompt.ts`(36) · `bridge/replBridgeHandle.ts`(36) · `skills/bundled/claudeInChrome.ts`(34) · `state/store.ts`(34) · `commands/exit/exit.tsx`(33)（`src/` 还剩 144 份 / 约 2,314 行；52 行档已清零，44 行以上全清零，下一档起点 43 行）
+**下一批候选（43→33 行档，单批约 15 份）**：`bridge/bridgePermissionCallbacks.ts`(43) · `migrations/migrateOpusToOpus1m.ts`(43) · `commands/thinkback-play/thinkback-play.ts`(43) · `tasks/LocalShellTask/guards.ts`(41) · `query/deps.ts`(40) · `migrations/migrateBypassPermissionsAcceptedToSettings.ts`(40) · `tasks.ts`(39) · `commands/vim/vim.ts`(38) · `context/mailbox.tsx`(38) · `commands/upgrade/upgrade.tsx`(38) · `buddy/prompt.ts`(36) · `bridge/replBridgeHandle.ts`(36) · `skills/bundled/claudeInChrome.ts`(34) · `state/store.ts`(34) · [`commands/exit/exit.tsx`](annotated/src/commands/exit/exit.tsx)(33)（`src/` 还剩 144 份 / 约 2,314 行；52 行档已清零，44 行以上全清零，下一档起点 43 行）
 
 ### src batch 172: 33-43 line tier, 15 files (576 src, 675 annotated, 98 anchors)
 
@@ -7405,18 +7405,18 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 
 流程账（第 172 批）：15 个数据文件逐一对齐源文件；预check 98 锚点全过（ast.parse、行界、重复、禁字符）；annotate 十五次，1 处良性 `⟳`（guards.ts 文件头 `//` 块中部自动挪移到块边界），零 `⚠`；check-fidelity 全仓 1773 份 0 失败（较上批 +15）；check-links 2640 源码链 + 740 内链 0 失效；全仓 1773/1902 文件、511,499/513,237 行、99%（按行数）；`src/` 还剩 111 份 / 约 1,929 行（43 行档已清零，33 行以上全清零，下一档起点 33 行）。
 
-**下一批候选（33→24 行档，单批约 15 份）**：`commands/exit/exit.tsx`(33) · `commands/plugin/PluginTrustWarning.tsx`(32) · `cli/ndjsonSafeStringify.ts`(32) · `commands/extra-usage/index.ts`(31) · `cli/exit.ts`(31) · `skills/bundled/verify.ts`(30) · `context/fpsMetrics.tsx`(30) · `commands/install-slack-app/install-slack-app.ts`(30) · `moreright/useMoreRight.tsx`(26) · `commands/feedback/index.ts`(26) · `commands/fast/index.ts`(26) · `commands/desktop/index.ts`(26) · `commands/bridge/index.ts`(26) · `commands/feedback/feedback.tsx`(25) · `constants/cyberRiskInstruction.ts`(24)（`src/` 还剩 111 份 / 约 1,929 行；43 行档已清零，33 行以上全清零，下一档起点 33 行）
+**下一批候选（33→24 行档，单批约 15 份）**：[`commands/exit/exit.tsx`](annotated/src/commands/exit/exit.tsx)(33) · [`commands/plugin/PluginTrustWarning.tsx`](annotated/src/commands/plugin/PluginTrustWarning.tsx)(32) · [`cli/ndjsonSafeStringify.ts`](annotated/src/cli/ndjsonSafeStringify.ts)(32) · [`commands/extra-usage/index.ts`](annotated/src/commands/extra-usage/index.ts)(31) · [`cli/exit.ts`](annotated/src/cli/exit.ts)(31) · [`skills/bundled/verify.ts`](annotated/src/skills/bundled/verify.ts)(30) · [`context/fpsMetrics.tsx`](annotated/src/context/fpsMetrics.tsx)(30) · [`commands/install-slack-app/install-slack-app.ts`](annotated/src/commands/install-slack-app/install-slack-app.ts)(30) · [`moreright/useMoreRight.tsx`](annotated/src/moreright/useMoreRight.tsx)(26) · [`commands/feedback/index.ts`](annotated/src/commands/feedback/index.ts)(26) · [`commands/fast/index.ts`](annotated/src/commands/fast/index.ts)(26) · [`commands/desktop/index.ts`](annotated/src/commands/desktop/index.ts)(26) · [`commands/bridge/index.ts`](annotated/src/commands/bridge/index.ts)(26) · [`commands/feedback/feedback.tsx`](annotated/src/commands/feedback/feedback.tsx)(25) · [`constants/cyberRiskInstruction.ts`](annotated/src/constants/cyberRiskInstruction.ts)(24)（`src/` 还剩 111 份 / 约 1,929 行；43 行档已清零，33 行以上全清零，下一档起点 33 行）
 
 ## 第 173 批（2026-11-06）：33→24 行档十五件套（退出语义 / NDJSON 安全序列化 / 插件信任警告 / CLI 退出 / 超额用量 / Slack 安装 / verify 技能 / 帧率指标 / 桌面端 / 反馈 / 多功能右键 / 桥接 / 快速 / 反馈组件 / 网络安全指令）
 
 本批是 `src/` 散件收尾的「小文件专场」——15 份全部 ≤33 行，主题横跨「进程退出语义 / 传输安全 / 插件信任 / 命令定义 / 技能注册 / 指标下发 / 外部占位 / 网络安全红线」，彼此独立但共同补齐主链路之外的那圈「入口与边界」积木：
 
-- **退出语义两份对照**：`commands/exit/exit.tsx` 是 REPL 的 `/exit` 入口——后台会话（`claude --bg` 的 tmux）只 detach 不 kill，REPL 继续跑、`claude attach` 可重连，而 `/exit`、`/quit`、`ctrl+c`、`ctrl+d` 全都汇到这里；前台无工作树则随机回一句告别语再优雅关机。`cli/exit.ts` 是把分散在 `claude mcp / plugin` 子命令里约 60 处「打印 + 关 lint + 退出」的复制粘贴收拢成 `cliError` / `cliOk` 两个集中出口，返回类型用 `never` 让 TypeScript 在调用处收窄控制流、不必再写 trailing return。
-- **传输安全一处**：`cli/ndjsonSafeStringify.ts` 专门解决 `JSON.stringify` 会原样输出 U+2028 / U+2029 的问题——按行切割 NDJSON 的接收方（遵循 ECMA-262 换行语义）会把一条 JSON 从字符串中间切断；改成转义序列后语义不变，但任何接收方都不再误判为换行。
+- **退出语义两份对照**：[`commands/exit/exit.tsx`](annotated/src/commands/exit/exit.tsx) 是 REPL 的 `/exit` 入口——后台会话（`claude --bg` 的 tmux）只 detach 不 kill，REPL 继续跑、`claude attach` 可重连，而 `/exit`、`/quit`、`ctrl+c`、`ctrl+d` 全都汇到这里；前台无工作树则随机回一句告别语再优雅关机。[`cli/exit.ts`](annotated/src/cli/exit.ts) 是把分散在 `claude mcp / plugin` 子命令里约 60 处「打印 + 关 lint + 退出」的复制粘贴收拢成 `cliError` / `cliOk` 两个集中出口，返回类型用 `never` 让 TypeScript 在调用处收窄控制流、不必再写 trailing return。
+- **传输安全一处**：[`cli/ndjsonSafeStringify.ts`](annotated/src/cli/ndjsonSafeStringify.ts) 专门解决 `JSON.stringify` 会原样输出 U+2028 / U+2029 的问题——按行切割 NDJSON 的接收方（遵循 ECMA-262 换行语义）会把一条 JSON 从字符串中间切断；改成转义序列后语义不变，但任何接收方都不再误判为换行。
 - **命令定义六份高度同质**：`desktop` / `feedback/index` / `bridge` / `fast` / `extra-usage/index` / `install-slack-app` 都是「一个 `const x = {...} satisfies Command` 对象」的结构，差异只在 `type`（local-jsx / local）、可用性门控、`aliases`、是否 `immediate`。其中 `fast` 与 `feedback` 用 `get description()` / `get isHidden()` 做动态文案与反向隐藏；`extra-usage` 还拆出交互 / 非交互两个变体。
 - **编译产物两份**：`PluginTrustWarning.tsx` 与 `fpsMetrics.tsx` 仍是 React Compiler 输出——`_c(3)` 缓存槽 + `$[n]` memo 槽；`fpsMetrics` 用 React Context 下发帧率 getter，`useFpsMetrics` 消费端 Hook 从中取出。锚点都落在函数收尾行与代码语句行，不进 JSX 子元素区。
-- **外部占位一处**：`moreright/useMoreRight.tsx` 是 external-stub——真实实现只在内部仓库，这里只给空壳，并把内部复杂的消息类型抹成 `any`（为此关掉 `no-explicit-any`），让外部类型检查能过。
-- **网络安全红线一处**：`constants/cyberRiskInstruction.ts` 是 Safeguards 团队拥有的「网络安全风险指令」常量的说明文档，顶部大注释明确「未经评审不得擅改」；批注严格只落在外面（块注释内不插中文），正文导出的是一条发给模型的系统级指令串，概括允许（授权测试 / CTF / 教学）与拒绝（破坏性 / DoS / 供应链攻击 / 恶意规避）的范围。
+- **外部占位一处**：[`moreright/useMoreRight.tsx`](annotated/src/moreright/useMoreRight.tsx) 是 external-stub——真实实现只在内部仓库，这里只给空壳，并把内部复杂的消息类型抹成 `any`（为此关掉 `no-explicit-any`），让外部类型检查能过。
+- **网络安全红线一处**：[`constants/cyberRiskInstruction.ts`](annotated/src/constants/cyberRiskInstruction.ts) 是 Safeguards 团队拥有的「网络安全风险指令」常量的说明文档，顶部大注释明确「未经评审不得擅改」；批注严格只落在外面（块注释内不插中文），正文导出的是一条发给模型的系统级指令串，概括允许（授权测试 / CTF / 教学）与拒绝（破坏性 / DoS / 供应链攻击 / 恶意规避）的范围。
 
 踩坑：
 
@@ -7702,3 +7702,95 @@ ${forkEnabled ? 'When spawning a fresh agent (with a `subagent_type`), ...' : ''
 流程账（第 181 批）：9 个数据文件逐一对齐源文件；precheck 9 锚点全过（ast.parse、行界、重复、禁字符、slug↔源文件路径对应）；annotate 九次零 `⟳` 零 `⚠`；check-fidelity 全仓 1902 份 0 失败（较上批 +9）；check-links 2760 源码链 + 749 内链 0 失效；全仓 1902/1902 文件、513,237/513,237 行、100%（按行数，本轮达成全仓 100%）；`src/` 还剩 0 份 / 0 行。
 
 **全仓已清零**：9 份 1 行命令桩全部批注完成，`src/` 与全仓均达 100%（1902/1902 文件、513,237/513,237 行）。自动批注流水线任务完结。
+
+---
+
+## 索引补链补丁（目录级链接，覆盖未单独编目的 364 份）
+
+> 下列目录在正文批次小节里仅以纯文本文件名出现、或完全未编目；此处补建目录级 `annotated/...` 链接，点击即可进入该目录查看全部批注文件。本小节为自动补丁，覆盖缺失文件共 **364 份**。
+
+### `components/`（244 份，按子目录）
+
+- [`components/`](annotated/src/components/)（88 份）
+- [`design-system/`](annotated/src/components/design-system/)（14 份）
+- [`LogoV2/`](annotated/src/components/LogoV2/)（12 份）
+- [`agents/new-agent-creation/wizard-steps/`](annotated/src/components/agents/new-agent-creation/wizard-steps/)（11 份）
+- [`permissions/`](annotated/src/components/permissions/)（11 份）
+- [`Spinner/`](annotated/src/components/Spinner/)（9 份）
+- [`agents/`](annotated/src/components/agents/)（9 份）
+- [`FeedbackSurvey/`](annotated/src/components/FeedbackSurvey/)（8 份）
+- [`mcp/`](annotated/src/components/mcp/)（8 份）
+- [`permissions/rules/`](annotated/src/components/permissions/rules/)（6 份）
+- [`CustomSelect/`](annotated/src/components/CustomSelect/)（5 份）
+- [`hooks/`](annotated/src/components/hooks/)（5 份）
+- [`permissions/FilePermissionDialog/`](annotated/src/components/permissions/FilePermissionDialog/)（5 份）
+- [`tasks/`](annotated/src/components/tasks/)（5 份）
+- [`wizard/`](annotated/src/components/wizard/)（5 份）
+- [`permissions/AskUserQuestionPermissionRequest/`](annotated/src/components/permissions/AskUserQuestionPermissionRequest/)（4 份）
+- [`sandbox/`](annotated/src/components/sandbox/)（4 份）
+- [`shell/`](annotated/src/components/shell/)（4 份）
+- [`HelpV2/`](annotated/src/components/HelpV2/)（3 份）
+- [`ManagedSettingsSecurityDialog/`](annotated/src/components/ManagedSettingsSecurityDialog/)（2 份）
+- [`Settings/`](annotated/src/components/Settings/)（2 份）
+- [`permissions/FileWritePermissionRequest/`](annotated/src/components/permissions/FileWritePermissionRequest/)（2 份）
+- [`permissions/NotebookEditPermissionRequest/`](annotated/src/components/permissions/NotebookEditPermissionRequest/)（2 份）
+- [`permissions/PowerShellPermissionRequest/`](annotated/src/components/permissions/PowerShellPermissionRequest/)（2 份）
+- [`ui/`](annotated/src/components/ui/)（2 份）
+- [`ClaudeCodeHint/`](annotated/src/components/ClaudeCodeHint/)（1 份）
+- [`DesktopUpsell/`](annotated/src/components/DesktopUpsell/)（1 份）
+- [`HighlightedCode/`](annotated/src/components/HighlightedCode/)（1 份）
+- [`LspRecommendation/`](annotated/src/components/LspRecommendation/)（1 份）
+- [`Passes/`](annotated/src/components/Passes/)（1 份）
+- [`StructuredDiff/`](annotated/src/components/StructuredDiff/)（1 份）
+- [`agents/new-agent-creation/`](annotated/src/components/agents/new-agent-creation/)（1 份）
+- [`mcp/utils/`](annotated/src/components/mcp/utils/)（1 份）
+- [`memory/`](annotated/src/components/memory/)（1 份）
+- [`permissions/BashPermissionRequest/`](annotated/src/components/permissions/BashPermissionRequest/)（1 份）
+- [`permissions/EnterPlanModePermissionRequest/`](annotated/src/components/permissions/EnterPlanModePermissionRequest/)（1 份）
+- [`permissions/FileEditPermissionRequest/`](annotated/src/components/permissions/FileEditPermissionRequest/)（1 份）
+- [`permissions/FilesystemPermissionRequest/`](annotated/src/components/permissions/FilesystemPermissionRequest/)（1 份）
+- [`permissions/SedEditPermissionRequest/`](annotated/src/components/permissions/SedEditPermissionRequest/)（1 份）
+- [`skills/`](annotated/src/components/skills/)（1 份）
+- [`teams/`](annotated/src/components/teams/)（1 份）
+
+### `hooks/`（104 份，按子目录）
+
+- [`hooks/`](annotated/src/hooks/)（83 份）
+- [`notifs/`](annotated/src/hooks/notifs/)（16 份）
+- [`toolPermission/handlers/`](annotated/src/hooks/toolPermission/handlers/)（3 份）
+- [`toolPermission/`](annotated/src/hooks/toolPermission/)（2 份）
+
+### `commands/`（9 份，按子目录）
+
+- [`feedback/`](annotated/src/commands/feedback/)（2 份）
+- [`bridge/`](annotated/src/commands/bridge/)（1 份）
+- [`desktop/`](annotated/src/commands/desktop/)（1 份）
+- [`exit/`](annotated/src/commands/exit/)（1 份）
+- [`extra-usage/`](annotated/src/commands/extra-usage/)（1 份）
+- [`fast/`](annotated/src/commands/fast/)（1 份）
+- [`install-slack-app/`](annotated/src/commands/install-slack-app/)（1 份）
+- [`plugin/`](annotated/src/commands/plugin/)（1 份）
+
+### `cli/`（2 份，按子目录）
+
+- [`cli/`](annotated/src/cli/)（2 份）
+
+### `constants/`（1 份，按子目录）
+
+- [`constants/`](annotated/src/constants/)（1 份）
+
+### `context/`（1 份，按子目录）
+
+- [`context/`](annotated/src/context/)（1 份）
+
+### `moreright/`（1 份，按子目录）
+
+- [`moreright/`](annotated/src/moreright/)（1 份）
+
+### `services/`（1 份，按子目录）
+
+- [`services/`](annotated/src/services/)（1 份）
+
+### `skills/`（1 份，按子目录）
+
+- [`bundled/`](annotated/src/skills/bundled/)（1 份）
